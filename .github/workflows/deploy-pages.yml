@@ -25,8 +25,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:pages
-      - name: Add SPA deep-link fallback
-        run: cp dist/index.html dist/404.html
+      - name: Add route entry points and SPA fallback
+        run: |
+          routes=(about electrical-installations lighting appliances projects contact explore admin)
+          for route in "${routes[@]}"; do
+            mkdir -p "dist/$route"
+            cp dist/index.html "dist/$route/index.html"
+          done
+          cp dist/index.html dist/404.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
