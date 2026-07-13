@@ -1,0 +1,179 @@
+import {useState, type FormEvent} from 'react';
+import {Link, useParams, useSearchParams} from 'react-router-dom';
+import {AnimatePresence, motion} from 'framer-motion';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Check,
+  ChevronDown,
+  CircleDot,
+  ExternalLink,
+  FileText,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  Wrench,
+  Zap,
+} from 'lucide-react';
+import {team} from '../content';
+import {useContent} from '../context/ContentContext';
+import type {Product} from '../types';
+import {publicAsset} from '../utils/assets';
+
+export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
+  return <section className="page-intro section"><div><span className="eyebrow">{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div><p>{body}</p></section>;
+}
+
+export function AboutPage() {
+  const {content} = useContent();
+  return <>
+    <PageIntro eyebrow="The people behind every installation" title={content.aboutTitle} body={content.aboutBody}/>
+    <section className="story-visual section">
+      <div className="story-image"><img src={publicAsset('assets/generated/team-craft.webp')} alt="Electrical designer studying a warmly lit interior"/><span>Family-founded · electrically focused</span></div>
+      <div className="story-copy">
+        <p className="dropcap">NK Electrical has specialised in electrical installations for private residences, stores, showrooms, restaurants and public spaces since 1985.</p>
+        <p>From the store at 72 Makedonitissis in Strovolos, engineers, lighting designers, product specialists and electricians coordinate power, lighting, appliances, smart homes, security, sound and vision.</p>
+        <div className="timeline"><div><b>1985</b><span>Ntinos and Eliana establish NK Electrical.</span></div><div><b>Today</b><span>Specialists plan, supply, install, test and support each system.</span></div><div><b>Next</b><span>More connected, energy-aware electrical spaces for Cyprus.</span></div></div>
+      </div>
+    </section>
+    <section className="org-section section">
+      <div className="org-heading"><span className="eyebrow">The complete team</span><h2>Different expertise.<br/><em>One electrical standard.</em></h2><p>Every employee is visible here. The front-facing characters are deliberately faceless 3D illustrations, with distinct hair, clothing and environments reflecting each person’s position and work area.</p></div>
+      <div className="team-all-grid">
+        {team.map(person => <article className="person-card" key={person.name}>
+          <div className="person-portrait"><img src={person.image} alt={`Front-facing faceless illustrated character for ${person.role}`}/><span>Faceless role character</span></div>
+          <div className="person-content"><small>{person.branch}</small><h3>{person.name}</h3><p className="person-role">{person.role}</p><p className="person-area">{person.workArea}</p>{person.credential && <span className="person-credential">{person.credential}</span>}<ul>{person.characteristics.map(item => <li key={item}>{item}</li>)}</ul><div className="person-links">{person.email && <a aria-label={`Email ${person.name}`} href={`mailto:${person.email}`}><Mail/></a>}{person.linkedin && <a aria-label={`${person.name} on LinkedIn`} target="_blank" rel="noreferrer" href={person.linkedin}><ExternalLink/></a>}</div></div>
+        </article>)}
+      </div>
+    </section>
+  </>;
+}
+
+const projectCards = [
+  {
+    id: 'boardroom-installation',
+    name: 'Boardroom Electrical & Lighting Installation',
+    image: publicAsset('assets/projects/boardroom-installation.webp'),
+    type: 'Interior electrical installation · architectural lighting',
+    text: 'A completed workplace installation coordinating room power with recessed spotlights and a shaped ceiling-light feature.',
+    systems: ['Electrical distribution for the room', 'Recessed ceiling lighting', 'Decorative ceiling-light integration', 'Final fitting coordination'],
+  },
+  {
+    id: 'residential-exterior',
+    name: 'Private Residence Exterior & Pool Lighting',
+    image: publicAsset('assets/projects/residential-exterior.webp'),
+    type: 'Exterior electrical installation · landscape and façade lighting',
+    text: 'A completed residential exterior where pool, façade and landscape lighting are coordinated as one installation.',
+    systems: ['Exterior power distribution', 'Poolside lighting', 'Façade illumination', 'Landscape and pathway lighting'],
+  },
+];
+
+export function ProjectsPage() {
+  const [openProject, setOpenProject] = useState<string | null>(projectCards[0].id);
+  return <>
+    <PageIntro eyebrow="Installed project archive" title="Electrical work," italic="shown on site." body="Completed installations currently documented in NK Electrical’s project archive—presented as actual work, not stock imagery."/>
+    <section className="project-list section">{projectCards.map(project => {
+      const open = openProject === project.id;
+      return <article className="project-row" key={project.id}>
+        <div className="project-photo"><img src={project.image} alt={project.name}/><span>{project.type}</span></div>
+        <div className="project-copy"><span className="project-status"><CircleDot/> Completed installation</span><h2>{project.name}</h2><p>{project.text}</p><div className="project-actions"><button className="text-link" aria-expanded={open} onClick={() => setOpenProject(open ? null : project.id)}>{open ? 'Close project details' : 'View project details'} <ChevronDown/></button><Link className="text-link" to={`/contact?project=${encodeURIComponent(project.name)}`}>Discuss this project <ArrowUpRight/></Link></div><AnimatePresence>{open && <motion.div className="project-detail" initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}}><b>Installed scope</b><ul>{project.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul></motion.div>}</AnimatePresence></div>
+      </article>;
+    })}</section>
+    <section className="project-principle section"><span className="eyebrow light">The electrical method</span><blockquote>“Plan the circuits, coordinate the fittings, test every connection.”</blockquote><div><span>Survey the site</span><ArrowRight/><span>Install the system</span><ArrowRight/><span>Test and support</span></div></section>
+  </>;
+}
+
+const solutions = [
+  {id: 'plan', icon: Zap, title: 'Electrical planning', body: 'Coordinated load, circuit and equipment planning for homes, retail, hospitality and public spaces.', points: ['Load and circuit planning', 'Distribution-board specification', 'Project and trade coordination']},
+  {id: 'install', icon: Wrench, title: 'Electrical installations', body: 'Complete electrical installation for private residences, stores, showrooms, restaurants and public spaces.', points: ['Containment, cabling and wiring', 'Distribution and final connections', 'Inspection, testing and handover']},
+  {id: 'support', icon: ShieldCheck, title: 'Maintenance & emergency support', body: 'Fault-finding, repairs and ongoing maintenance, including 24-hour electrical emergency assistance.', points: ['Electrical fault diagnosis', 'Planned maintenance', '24-hour emergency response']},
+  {id: 'smart', icon: SlidersHorizontal, title: 'Smart home & low-voltage systems', body: 'KNX smart-home control, security, sound and vision integrated with the electrical installation.', points: ['Lighting and shutter control', 'Security and remote access', 'Sound, vision and system integration']},
+];
+
+export function ElectricalInstallationsPage() {
+  const [active, setActive] = useState('plan');
+  return <>
+    <PageIntro eyebrow="Electrical installations" title="Planned correctly." italic="Installed safely." body="Electrical planning, wiring, distribution, testing, maintenance and 24-hour emergency support—kept distinct from lighting selection and appliances."/>
+    <section className="solutions-stack section">{solutions.map(solution => { const Icon = solution.icon; return <article id={solution.id} className={`solution-row ${active === solution.id ? 'open' : ''}`} key={solution.id}><button aria-expanded={active === solution.id} onClick={() => setActive(active === solution.id ? '' : solution.id)}><Icon/><h2>{solution.title}</h2><ChevronDown/></button><AnimatePresence>{active === solution.id && <motion.div initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}} className="solution-detail"><p>{solution.body}</p><ul>{solution.points.map(point => <li key={point}><Check/>{point}</li>)}</ul><Link to="/contact">Discuss this installation <ArrowUpRight/></Link></motion.div>}</AnimatePresence></article>;})}</section>
+    <section className="process section"><div><span className="eyebrow">From survey to final electrical test</span><h2>A controlled route to<br/><em>safe switch-on.</em></h2></div><div className="process-map">{['Survey & load', 'Plan & specify', 'Install & coordinate', 'Test & support'].map((step, index) => <div key={step}><CircleDot/><i/><b>{step}</b><small>{['Understand the building, demand and constraints.', 'Define circuits, protection, equipment and interfaces.', 'Complete clean site work with every trade coordinated.', 'Inspect, commission, document and support the system.'][index]}</small></div>)}</div></section>
+  </>;
+}
+
+const filterValues = {
+  category: ['All', 'Lighting', 'Coffee', 'Kitchen', 'Cooling', 'Cleaning'],
+  season: ['All', 'All year', 'Summer', 'Winter', 'Christmas'],
+  space: ['All', 'Living', 'Kitchen', 'Outdoor', 'Bedroom', 'Workspace'],
+};
+
+function ProductCard({item}: {item: Product}) {
+  return <Link to={`/product/${item.id}`} className="product-card"><div className="product-image"><img src={item.image} alt={item.name}/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small>{item.category} · {item.season}</small><h3>{item.name}</h3><p>{item.note}</p></div></Link>;
+}
+
+export function ExplorePage() {
+  const {content} = useContent();
+  const [params, setParams] = useSearchParams();
+  const category = params.get('category') || 'All';
+  const season = params.get('season') || 'All';
+  const space = params.get('space') || 'All';
+  const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
+  const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
+  return <>
+    <PageIntro eyebrow="Lighting and appliance discovery" title="Filter by purpose," italic="season and room." body="A structured way to explore products without throwing every item into one endless library."/>
+    <section className="filter-shell section"><div className="filter-top"><div><SlidersHorizontal/><b>Refine the collection</b></div><span>{filtered.length} considered matches</span></div>{Object.entries(filterValues).map(([key, values]) => <div className="filter-row" key={key}><b>{key}</b><div>{values.map(value => <button className={(key === 'category' ? category : key === 'season' ? season : space) === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div></div>)}</section>
+    <section className="product-grid section">{filtered.map(product => <ProductCard item={product} key={product.id}/>)}</section>
+    {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({})}>Clear filters</button></div>}
+  </>;
+}
+
+export function ProductPage() {
+  const {id} = useParams();
+  const {content} = useContent();
+  const item = content.products.find(product => product.id === id);
+  if (!item) return <section className="not-found"><span>Not found</span><h1>That product has moved.</h1><Link to="/explore">Return to the collection</Link></section>;
+  return <section className="product-detail section"><Link className="back-link" to="/explore">← Back to explore</Link><div className="product-detail-image"><img src={item.image} alt={item.name}/></div><div className="product-detail-copy"><span className="eyebrow">{item.category} · {item.space}</span><h1>{item.name}</h1><p>{item.note}</p><dl><div><dt>Best considered for</dt><dd>{item.space}</dd></div><div><dt>Seasonal edit</dt><dd>{item.season}</dd></div><div><dt>Available through</dt><dd>NK Electrical, Strovolos</dd></div></dl><a className="button copper" href={`mailto:info@nk-electrical.com?subject=${encodeURIComponent(`Product enquiry: ${item.name}`)}`}>Ask about this product <ArrowUpRight/></a></div></section>;
+}
+
+export function LightingPage() {
+  const {content} = useContent();
+  const [brand, setBrand] = useState('All');
+  const [focus, setFocus] = useState('All');
+  const shown = content.catalogues.filter(catalogue => (brand === 'All' || catalogue.brand === brand) && (focus === 'All' || catalogue.focus === focus));
+  return <>
+    <PageIntro eyebrow="Dedicated lighting department" title="Lighting has its own" italic="specification process." body="Browse original catalogues by brand and lighting purpose. Lighting selection stays separate from electrical installation work and appliance sales."/>
+    <section className="catalogue-controls section"><div><b>Brand</b>{['All', 'ACA', 'Nova Luce', 'VIOKEF'].map(value => <button className={brand === value ? 'active' : ''} onClick={() => setBrand(value)} key={value}>{value}</button>)}</div><div><b>Focus</b>{['All', 'Decorative', 'Architectural', 'Kids', 'Natural', 'Fans'].map(value => <button className={focus === value ? 'active' : ''} onClick={() => setFocus(value)} key={value}>{value}</button>)}</div></section>
+    <section className="catalogue-grid section">{shown.map((catalogue, index) => <a className={`catalogue-card tone-${index % 4}`} target="_blank" rel="noreferrer" href={catalogue.url} key={catalogue.url}><div className="catalogue-cover"><span>NK / LIGHTING</span><b>{catalogue.brand}</b><strong>{catalogue.year}</strong><i/><small>{catalogue.focus}</small></div><div><FileText/><h3>{catalogue.name}</h3><span>Open original catalogue <ArrowUpRight/></span></div></a>)}</section>
+    <section className="catalogue-help section"><div><BookOpen/><h2>Found a fitting?</h2></div><p>Email the catalogue name, product code and quantity. Add your name and phone number so the lighting team can respond with the right context.</p><a className="button copper" href="mailto:thelma@nk-electrical.com?subject=Lighting%20catalogue%20enquiry">Email the lighting team <ArrowUpRight/></a></section>
+  </>;
+}
+
+export function AppliancesPage() {
+  const {content} = useContent();
+  const [season, setSeason] = useState('All');
+  const appliances = content.products.filter(product => product.category !== 'Lighting' && (season === 'All' || product.season === season));
+  return <>
+    <PageIntro eyebrow="Electrical appliances" title="Practical products," italic="grouped around real use." body="Coffee, kitchen and cooling appliances presented separately from lighting and electrical installation services."/>
+    <section className="appliance-controls section"><div><SlidersHorizontal/><b>Choose a season or occasion</b></div><div>{['All', 'All year', 'Summer', 'Winter', 'Christmas'].map(value => <button className={season === value ? 'active' : ''} onClick={() => setSeason(value)} key={value}>{value}</button>)}</div><span>{appliances.length} appliances</span></section>
+    <section className="product-grid section">{appliances.map(product => <ProductCard item={product} key={product.id}/>)}</section>
+  </>;
+}
+
+export function ContactPage() {
+  const {content} = useContent();
+  const [params] = useSearchParams();
+  const project = params.get('project');
+  const [sent, setSent] = useState(false);
+  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const data = new FormData(event.currentTarget); const subject = encodeURIComponent(`${data.get('subject')} — ${data.get('name')}`); const body = encodeURIComponent(`Name: ${data.get('name')}\nPhone: ${data.get('phone')}\n\n${data.get('message')}`); window.location.href = `mailto:info@nk-electrical.com?subject=${subject}&body=${body}`; setSent(true); };
+  const defaultMessage = project ? `I would like to discuss the ${project} project and a related electrical requirement.\n\nProject or property details:` : '';
+  return <>
+    <PageIntro eyebrow="Electrical enquiry" title="Your enquiry," italic="sent to the right specialist." body={content.contactNote}/>
+    <section className="contact-layout section"><div className="contact-details"><div><MapPin/><span><b>Visit the store</b>72 Makedonitissis Str.<br/>Strovolos 2057, Cyprus<a target="_blank" rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus">Open in maps <ArrowUpRight/></a></span></div><div><Phone/><span><b>Call</b><a href="tel:+35722494145">+357 22 494145</a><small>24-hour electrical emergency support</small></span></div><div><Mail/><span><b>Write</b><a href="mailto:info@nk-electrical.com">info@nk-electrical.com</a></span></div><div className="hours"><b>Store hours</b><p><span>Mon · Tue · Thu · Fri</span>09:00–18:00</p><p><span>Wednesday · Saturday</span>09:00–14:00</p><p><span>Sunday</span>Closed</p></div></div>
+      <form className="contact-form" onSubmit={submit}><div className="form-intro"><span>{project ? 'Project discussion' : 'Electrical enquiry'}</span><h2>What needs powering,<br/>installing or controlling?</h2></div><label>Your name<input required name="name" autoComplete="name"/></label><label>Phone<input required name="phone" autoComplete="tel"/></label><label>Starting point<select name="subject" defaultValue={project ? 'Project discussion' : 'New electrical project'}>{project && <option>Project discussion</option>}<option>New electrical project</option><option>Electrical installation</option><option>Lighting selection</option><option>Appliance enquiry</option><option>Smart home system</option><option>Electrical support</option></select></label><label>Tell us about the work<textarea required name="message" rows={6} defaultValue={defaultMessage}/></label><button className="button copper" type="submit">Prepare email <ArrowUpRight/></button>{sent && <p className="form-note"><Check/> Your email app should now be open with the details prepared.</p>}</form></section>
+  </>;
+}
+
+export function NotFound() {
+  return <section className="not-found"><span>Not found</span><h1>This circuit ends here.</h1><p>The page may have moved, but the useful paths are still close.</p><Link className="button copper" to="/">Return home <ArrowUpRight/></Link></section>;
+}

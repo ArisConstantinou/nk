@@ -1,0 +1,28 @@
+{
+  "name": "nk-electrical-experience",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5191 --strictPort",
+    "build": "tsc -b && vite build",
+    "build:pages": "tsc -b && vite build --mode github-pages",
+    "preview": "vite preview --host 127.0.0.1 --port 5191 --strictPort"
+  },
+  "dependencies": {
+    "@remotion/player": "^4.0.357",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.1",
+    "remotion": "^4.0.357"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.3",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.5"
+  }
+}
