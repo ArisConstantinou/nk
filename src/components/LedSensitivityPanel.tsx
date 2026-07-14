@@ -145,7 +145,7 @@ export function LedSensitivityPanel() {
       <div className="rgb-remote-stage">
         <div className="rgb-remote-stage-label"><Palette/> NK RGB REMOTE <span>{power ? 'LINK ACTIVE' : 'OUTPUT OFF'}</span></div>
         <div className={`rgb-remote-shell${power ? '' : ' is-off'}`}>
-          <img src={publicAsset('assets/generated/nk-rgb-remote-shell.webp')} alt="NK architectural RGB LED remote"/>
+          <img src={publicAsset('assets/generated/nk-rgb-remote-shell-transparent.webp')} alt="NK architectural RGB LED remote"/>
           <button
             className="rgb-remote-power"
             type="button"
