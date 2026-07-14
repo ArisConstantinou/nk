@@ -22,14 +22,15 @@ export function Layout({children}: {children: ReactNode}) {
 
   return <div className="site-shell">
     <header className="topbar">
-      <Link className="brand" to="/" aria-label="NK Electrical home">
+      <Link className="brand" to="/" aria-label="NK Electrical Ltd. home">
         <span className="brand-mark"><img src={publicAsset('assets/logo.jpg')} alt="NK Electrical" /></span>
+        <span className="brand-wordmark"><strong>Electrical</strong><small>Ltd.</small></span>
       </Link>
       <nav className="desktop-nav" aria-label="Primary navigation">
         {nav.map(([label, href]) => <NavLink key={href} to={href}>{label}</NavLink>)}
       </nav>
       <Link className="header-cta" to="/contact">Start a conversation <ArrowUpRight size={16}/></Link>
-      <button className="menu-button" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X/> : <Menu/>}</button>
+      <button className="menu-button" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X/> : <Menu/>}</button>
     </header>
     {open && <nav className="mobile-nav" aria-label="Mobile navigation">
       {nav.map(([label, href], i) => <NavLink style={{'--i': i} as React.CSSProperties} key={href} to={href}>{label}<ArrowUpRight/></NavLink>)}
