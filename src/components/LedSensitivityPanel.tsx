@@ -172,6 +172,8 @@ export function LedSensitivityPanel() {
             {scenes.map((scene, index) => <button
               type="button"
               className={activeScene === scene.id ? 'active' : ''}
+              data-scene={scene.id}
+              style={{'--scene-color': scene.color} as CSSProperties}
               aria-pressed={activeScene === scene.id}
               onClick={() => selectScene(scene)}
               key={scene.id}
