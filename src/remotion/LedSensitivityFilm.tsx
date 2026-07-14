@@ -25,16 +25,16 @@ const spots = [
   {left: 72.1, top: 26.5},
 ];
 
-// Each wash follows the room's perspective from its visible ceiling fixture
-// down to the surface it illuminates. The far-right fixture is closest to the
-// camera, so its cone is both longer and wider than the fixtures deeper inside.
+// Measured from the six visible wall-wash fixtures in the source image. Each
+// cone begins immediately below its own light instead of following an evenly
+// spaced decorative pattern.
 const wallWashes = [
-  {left: 68.5, top: 39.2, bottom: 70.5, width: 2.7},
-  {left: 74.4, top: 36.0, bottom: 73.0, width: 3.1},
-  {left: 80.3, top: 32.7, bottom: 75.5, width: 3.5},
-  {left: 86.2, top: 29.0, bottom: 78.0, width: 3.9},
-  {left: 92.1, top: 25.2, bottom: 80.0, width: 4.3},
-  {left: 97.2, top: 21.5, bottom: 82.0, width: 4.8},
+  {left: 69.1, top: 45.9, bottom: 70.5, width: 2.1},
+  {left: 74.7, top: 39.5, bottom: 73.0, width: 2.6},
+  {left: 78.4, top: 36.1, bottom: 75.5, width: 3.0},
+  {left: 82.9, top: 31.9, bottom: 78.0, width: 3.5},
+  {left: 88.3, top: 27.0, bottom: 80.0, width: 4.1},
+  {left: 95.1, top: 21.0, bottom: 82.0, width: 4.8},
 ];
 const deploymentBase = import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '');
 const ledRoomAsset = staticFile(`${deploymentBase ? `${deploymentBase}/` : ''}assets/generated/led-sensitivity-room.webp`);
