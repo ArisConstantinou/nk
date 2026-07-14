@@ -50,14 +50,14 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     <aside className="electrical-rail">
       <Link className="electrical-rail-brand" to="/" aria-label="NK Electrical Ltd. systems home">
         <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
-        <span>NK</span>
+        <span className="electrical-rail-wordmark"><strong>Electrical</strong><small>Ltd.</small></span>
       </Link>
       <nav className="electrical-rail-nav" aria-label="Electrical systems navigation">
         {electricalNav.map(({label, route, code, Icon}) => <NavLink to={route} key={route} aria-label={label} data-label={label} end={route === '/'}>
-          <small>{code}</small><Icon/><i/>
+          <small>{code}</small><Icon/><span>{label}</span><i/>
         </NavLink>)}
       </nav>
-      <div className="electrical-rail-tools"><ThemeControls className="theme-controls--rail"/><span>230V<br/>50Hz</span></div>
+      <div className="electrical-rail-tools"><ThemeControls className="theme-controls--rail"/><span><b>Grid ready</b>230V / 50Hz</span></div>
     </aside>
 
     <div className="electrical-stage">
