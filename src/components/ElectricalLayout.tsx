@@ -62,6 +62,10 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
 
     <div className="electrical-stage">
       <header className="electrical-commandbar">
+        <Link className="electrical-command-brand" to="/" aria-label="NK Electrical Ltd. home">
+          <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
+          <span><strong>Electrical</strong><small>Ltd.</small></span>
+        </Link>
         <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(open => !open)}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
         <div className="electrical-command-location"><span><i/>System online</span><strong>NK / {section}</strong></div>
         <div className="electrical-command-flow"><span>Survey</span><i/><span>Plan</span><i/><span>Install</span><i/><span>Test</span></div>
