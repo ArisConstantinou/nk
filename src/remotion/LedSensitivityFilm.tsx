@@ -16,6 +16,8 @@ export type LedSensitivityFilmProps = {
 
 const spots = [25.5, 31, 36.5, 67, 73.5, 80];
 const wallWashes = [68.5, 74.4, 80.3, 86.2, 92.1, 97.2];
+const deploymentBase = import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '');
+const ledRoomAsset = staticFile(`${deploymentBase ? `${deploymentBase}/` : ''}assets/generated/led-sensitivity-room.webp`);
 
 export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
   const frame = useCurrentFrame();
@@ -46,7 +48,7 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
 
   return <AbsoluteFill style={{overflow: 'hidden', backgroundColor: '#020611', color: '#f4f9ff'}}>
     <Img
-      src={staticFile('assets/generated/led-sensitivity-room.webp')}
+      src={ledRoomAsset}
       style={{
         position: 'absolute',
         inset: 0,
