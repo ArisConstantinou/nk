@@ -65,12 +65,12 @@ const spots = [
 // Measured directly on the six vertical wall luminaires in the source image.
 // These are narrow fixture glows, not artificial projected cones.
 const wallFixtures = [
-  {left: 69.1, top: 45.9, bottom: 70.5, width: 2.1},
-  {left: 74.7, top: 39.5, bottom: 73.0, width: 2.6},
-  {left: 78.4, top: 36.1, bottom: 75.5, width: 3.0},
-  {left: 82.9, top: 31.9, bottom: 78.0, width: 3.5},
-  {left: 88.3, top: 27.0, bottom: 80.0, width: 4.1},
-  {left: 95.1, top: 21.0, bottom: 82.0, width: 4.8},
+  {left: 69.588, top: 45.9, bottom: 70.5, width: 2.1},
+  {left: 75.37, top: 39.5, bottom: 73.0, width: 2.6},
+  {left: 79.094, top: 36.1, bottom: 75.5, width: 3.0},
+  {left: 83.75, top: 31.9, bottom: 78.0, width: 3.5},
+  {left: 89.199, top: 27.0, bottom: 80.0, width: 4.1},
+  {left: 96.223, top: 21.0, bottom: 82.0, width: 4.8},
 ];
 const deploymentBase = import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '');
 const ledRoomAsset = staticFile(`${deploymentBase ? `${deploymentBase}/` : ''}assets/generated/led-sensitivity-room.webp`);
