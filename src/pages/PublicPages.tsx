@@ -103,6 +103,8 @@ const projectCards = archivedProjectNames.map((name, index) => ({
 
 export function ProjectsPage() {
   const [selectedProject, setSelectedProject] = useState<(typeof projectCards)[number] | null>(null);
+  const [discussionOpen, setDiscussionOpen] = useState(false);
+  const [discussionPrepared, setDiscussionPrepared] = useState(false);
 
   const moveProject = (direction: -1 | 1) => {
     setSelectedProject(current => {
@@ -134,9 +136,29 @@ export function ProjectsPage() {
     };
   }, [selectedProject]);
 
+  useEffect(() => {
+    setDiscussionOpen(false);
+    setDiscussionPrepared(false);
+  }, [selectedProject?.id]);
+
+  useEffect(() => {
+    if (!discussionOpen) return;
+    document.getElementById('project-discussion-panel')?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }, [discussionOpen]);
+
   const selectedIndex = selectedProject ? projectCards.findIndex(project => project.id === selectedProject.id) : -1;
   const previousProject = selectedIndex >= 0 ? projectCards[(selectedIndex - 1 + projectCards.length) % projectCards.length] : null;
   const nextProject = selectedIndex >= 0 ? projectCards[(selectedIndex + 1) % projectCards.length] : null;
+
+  const prepareProjectDiscussion = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedProject) return;
+    const data = new FormData(event.currentTarget);
+    const subject = encodeURIComponent(`Project discussion: ${selectedProject.name} · Project ${selectedProject.number}`);
+    const body = encodeURIComponent(`Project: ${selectedProject.name} · Project ${selectedProject.number}\nWork type: ${selectedProject.type}\n\nName: ${data.get('name')}\nPhone: ${data.get('phone')}\n\nDiscussion notes:\n${data.get('message')}`);
+    window.location.href = `mailto:info@nk-electrical.com?subject=${subject}&body=${body}`;
+    setDiscussionPrepared(true);
+  };
 
   return <>
     <PageIntro eyebrow="Complete installed project archive" title="Electrical work," italic="shown on site." body="Every completed installation published in NK Electrical’s original project archive, now organised as a clear, clickable two-column collection."/>
@@ -157,7 +179,21 @@ export function ProjectsPage() {
             <button className="project-modal-nav previous" type="button" aria-label={`Previous project: ${previousProject?.name}`} onClick={() => moveProject(-1)}><ChevronLeft/></button>
             <button className="project-modal-nav next" type="button" aria-label={`Next project: ${nextProject?.name}`} onClick={() => moveProject(1)}><ChevronRight/></button>
           </div>
-          <div className="project-modal-copy"><p>{selectedProject.text}</p><b>Installed scope</b><ul>{selectedProject.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul><Link className="button copper" to={`/contact?project=${encodeURIComponent(`${selectedProject.name} · Project ${selectedProject.number}`)}`}>Discuss a similar project <ArrowUpRight/></Link></div>
+          <div className="project-modal-copy">
+            <p>{selectedProject.text}</p><b>Installed scope</b><ul>{selectedProject.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul>
+            <button className={`button copper project-discussion-toggle ${discussionOpen ? 'open' : ''}`} type="button" aria-expanded={discussionOpen} aria-controls="project-discussion-panel" onClick={() => { setDiscussionOpen(open => !open); setDiscussionPrepared(false); }}><span>{discussionOpen ? 'Close discussion' : 'Discuss a similar project'}</span><ChevronDown/></button>
+            <AnimatePresence initial={false}>{discussionOpen &&
+              <motion.form id="project-discussion-panel" className="project-discussion-panel" onSubmit={prepareProjectDiscussion} initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}}>
+                <div className="project-discussion-heading"><div><small>Project {selectedProject.number}</small><strong>Start the discussion</strong></div><button type="button" aria-label="Close discussion panel" onClick={() => setDiscussionOpen(false)}><X/></button></div>
+                <p>Leave the essentials here and NK Electrical can continue with the right project context.</p>
+                <label>Your name<input required name="name" autoComplete="name"/></label>
+                <label>Phone<input required name="phone" autoComplete="tel" inputMode="tel"/></label>
+                <label>What would you like to discuss?<textarea required name="message" rows={4}/></label>
+                <button className="button cream" type="submit">Prepare discussion email <ArrowUpRight/></button>
+                {discussionPrepared && <p className="project-discussion-note"><Check/> Your email app should now be open with this project attached.</p>}
+              </motion.form>
+            }</AnimatePresence>
+          </div>
         </motion.article>
       </motion.div>
     }</AnimatePresence>
