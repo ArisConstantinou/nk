@@ -18,7 +18,7 @@ export type TeamMember = {
   email?: string;
   image: string;
   linkedin?: string;
-  branch: 'Leadership' | 'Engineering' | 'Design & retail' | 'Delivery';
+  branch: 'Leadership' | 'Engineering' | 'Design & retail' | 'Electrical installations' | 'Cameras & security' | 'Reception & sales';
 };
 
 export type Catalogue = {

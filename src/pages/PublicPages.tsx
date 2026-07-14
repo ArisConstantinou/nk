@@ -29,7 +29,7 @@ import type {Product} from '../types';
 import {publicAsset} from '../utils/assets';
 
 const pageFocusByEyebrow: Record<string, [string, string, string]> = {
-  'The people behind every installation': ['Engineering', 'Design', 'Delivery'],
+  'The people behind every installation': ['Engineering', 'Design', 'Installations'],
   'Complete installed project archive': ['Planned', 'Installed', 'Documented'],
   'Electrical installations': ['Load study', 'Protection', 'Certification'],
   'Lighting and appliance discovery': ['Purpose', 'Season', 'Room'],
@@ -63,7 +63,7 @@ export function AboutPage() {
       </div>
     </section>
     <section className="org-section section">
-      <div className="org-heading"><span className="eyebrow">The complete team</span><h2>Different expertise.<br/><em>One electrical standard.</em></h2><p>The team is ordered by responsibility, with every card showing the person’s work area, qualifications and contribution to project delivery.</p></div>
+      <div className="org-heading"><span className="eyebrow">The complete team</span><h2>Different expertise.<br/><em>One electrical standard.</em></h2><p>The team is ordered by responsibility. The electrical installations team is the company’s backbone, and every card shows how each person contributes to the work.</p></div>
       <div className="team-all-grid">
         {team.map((person, index) => <article className="person-card" key={person.name}>
           <div className="person-portrait"><img src={person.image} alt={`Illustrated role portrait for ${person.name}, ${person.role}`}/><span><b>{String(index + 1).padStart(2, '0')}</b>{person.responsibility}</span></div>

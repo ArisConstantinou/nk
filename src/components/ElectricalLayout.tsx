@@ -34,7 +34,7 @@ const workflowByRoute: Record<string, [string, string, string, string]> = {
   '/lighting': ['Layer', 'Specify', 'Aim', 'Commission'],
   '/appliances': ['Select', 'Supply', 'Connect', 'Support'],
   '/projects': ['Scope', 'Coordinate', 'Install', 'Handover'],
-  '/about': ['Experience', 'Design', 'Deliver', 'Support'],
+  '/about': ['Experience', 'Coordinate', 'Install', 'Support'],
   '/contact': ['Describe', 'Route', 'Review', 'Respond'],
 };
 
