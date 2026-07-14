@@ -1,6 +1,6 @@
 import {useEffect, useState, type ReactNode} from 'react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
-import {ArrowUpRight, Facebook, Instagram, Linkedin, Menu, X} from 'lucide-react';
+import {ArrowUpRight, CircuitBoard, Facebook, Instagram, Linkedin, Menu, Moon, Sun, X} from 'lucide-react';
 import {publicAsset} from '../utils/assets';
 
 const nav = [
@@ -12,9 +12,37 @@ const nav = [
   ['Contact', '/contact'],
 ];
 
+function initialDarkTheme() {
+  const savedTheme = window.localStorage.getItem('nk-color-theme');
+  if (savedTheme === 'dark') return true;
+  if (savedTheme === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function initialElectricalTheme() {
+  const savedTheme = window.localStorage.getItem('nk-experience-theme');
+  if (savedTheme) return savedTheme === 'tech';
+  return true;
+}
+
 export function Layout({children}: {children: ReactNode}) {
   const [open, setOpen] = useState(false);
+  const [darkTheme, setDarkTheme] = useState(initialDarkTheme);
+  const [electricalTheme, setElectricalTheme] = useState(initialElectricalTheme);
   const location = useLocation();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.theme = darkTheme ? 'dark' : 'light';
+    root.style.colorScheme = darkTheme ? 'dark' : 'light';
+    window.localStorage.setItem('nk-color-theme', darkTheme ? 'dark' : 'light');
+  }, [darkTheme]);
+
+  useEffect(() => {
+    document.documentElement.dataset.experience = electricalTheme ? 'tech' : 'studio';
+    window.localStorage.setItem('nk-experience-theme', electricalTheme ? 'tech' : 'studio');
+  }, [electricalTheme]);
+
   useEffect(() => {
     setOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
@@ -29,8 +57,32 @@ export function Layout({children}: {children: ReactNode}) {
       <nav className="desktop-nav" aria-label="Primary navigation">
         {nav.map(([label, href]) => <NavLink key={href} to={href}>{label}</NavLink>)}
       </nav>
-      <Link className="header-cta" to="/contact">Start a conversation <ArrowUpRight size={16}/></Link>
-      <button className="menu-button" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X/> : <Menu/>}</button>
+      <div className="header-tools">
+        <div className="theme-controls" role="group" aria-label="Website appearance">
+          <button
+            className="theme-control"
+            type="button"
+            aria-label={darkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
+            aria-pressed={darkTheme}
+            data-tooltip={darkTheme ? 'Light mode' : 'Dark mode'}
+            onClick={() => setDarkTheme((current) => !current)}
+          >
+            {darkTheme ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
+          </button>
+          <button
+            className="theme-control theme-control--electrical"
+            type="button"
+            aria-label={electricalTheme ? 'Switch to studio theme' : 'Switch to electrical tech theme'}
+            aria-pressed={electricalTheme}
+            data-tooltip={electricalTheme ? 'Studio theme' : 'Electrical theme'}
+            onClick={() => setElectricalTheme((current) => !current)}
+          >
+            <CircuitBoard aria-hidden="true"/>
+          </button>
+        </div>
+        <Link className="header-cta" to="/contact">Start a conversation <ArrowUpRight size={16}/></Link>
+        <button className="menu-button" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X/> : <Menu/>}</button>
+      </div>
     </header>
     {open && <nav className="mobile-nav" aria-label="Mobile navigation">
       {nav.map(([label, href], i) => <NavLink style={{'--i': i} as React.CSSProperties} key={href} to={href}>{label}<ArrowUpRight/></NavLink>)}
