@@ -71,7 +71,7 @@ export default function ElectricalHome() {
   return <div className="power-home">
     <section className="power-hero">
       <div className="power-hero-copy">
-        <div className="power-kicker"><span>NK / ELECTRICAL OPERATIONS</span><i>ONLINE</i></div>
+        <div className="power-kicker"><span>NK / ELECTRICAL OPERATIONS</span></div>
         <motion.h1 initial={{opacity: 0, y: 28}} animate={{opacity: 1, y: 0}} transition={{duration: .75}}>
           <span>Power planned.</span>
           <strong>Systems connected.</strong>

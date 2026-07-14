@@ -57,7 +57,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <small>{code}</small><Icon/><span>{label}</span><i/>
         </NavLink>)}
       </nav>
-      <div className="electrical-rail-tools"><ThemeControls className="theme-controls--rail"/><span><b>Grid ready</b>230V / 50Hz</span></div>
+      <div className="electrical-rail-tools"><ThemeControls className="theme-controls--rail"/></div>
     </aside>
 
     <div className="electrical-stage">
@@ -67,7 +67,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <span><strong>Electrical</strong><small>Ltd.</small></span>
         </Link>
         <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(open => !open)}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
-        <div className="electrical-command-location"><span><i/>System online</span><strong>NK / {section}</strong></div>
+        <div className="electrical-command-location"><strong>NK / {section}</strong></div>
         <div className="electrical-command-flow"><span>Survey</span><i/><span>Plan</span><i/><span>Install</span><i/><span>Test</span></div>
         <ThemeControls className="theme-controls--command"/>
         <Link className="electrical-command-contact" to="/contact"><span>Route an enquiry</span><ArrowRight/></Link>
