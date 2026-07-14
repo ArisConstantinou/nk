@@ -14,8 +14,28 @@ export type LedSensitivityFilmProps = {
   mode: LedSensitivityMode;
 };
 
-const spots = [25.5, 31, 36.5, 67, 73.5, 80];
-const wallWashes = [68.5, 74.4, 80.3, 86.2, 92.1, 97.2];
+const spots = [
+  {left: 25.8, top: 9.8},
+  {left: 30.4, top: 18.3},
+  {left: 33.6, top: 24.4},
+  {left: 35.8, top: 28.6},
+  {left: 83.5, top: 9.3},
+  {left: 77.6, top: 17.7},
+  {left: 73.8, top: 24.5},
+  {left: 72.1, top: 26.5},
+];
+
+// Each wash follows the room's perspective from its visible ceiling fixture
+// down to the surface it illuminates. The far-right fixture is closest to the
+// camera, so its cone is both longer and wider than the fixtures deeper inside.
+const wallWashes = [
+  {left: 68.5, top: 39.2, bottom: 70.5, width: 2.7},
+  {left: 74.4, top: 36.0, bottom: 73.0, width: 3.1},
+  {left: 80.3, top: 32.7, bottom: 75.5, width: 3.5},
+  {left: 86.2, top: 29.0, bottom: 78.0, width: 3.9},
+  {left: 92.1, top: 25.2, bottom: 80.0, width: 4.3},
+  {left: 97.2, top: 21.5, bottom: 82.0, width: 4.8},
+];
 const deploymentBase = import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '');
 const ledRoomAsset = staticFile(`${deploymentBase ? `${deploymentBase}/` : ''}assets/generated/led-sensitivity-room.webp`);
 
@@ -73,10 +93,10 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       opacity: glowOpacity * .55,
     }}/>
 
-    {spots.map((left, index) => <div key={`spot-${left}`} style={{
+    {spots.map((spot) => <div key={`spot-${spot.left}`} style={{
       position: 'absolute',
-      left: `${left}%`,
-      top: `${9 + (index % 3) * 7}%`,
+      left: `${spot.left}%`,
+      top: `${spot.top}%`,
       width: 11,
       height: 11,
       borderRadius: '50%',
@@ -88,24 +108,24 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
 
     <div style={{
       position: 'absolute',
-      left: '47.5%',
-      top: '40.5%',
-      width: '9.5%',
-      height: '5.2%',
+      left: '47.7%',
+      top: '43.4%',
+      width: '9.1%',
+      height: '3.5%',
       border: `${2 + intensity * 4}px solid rgba(236,252,255,${.38 + intensity * .62})`,
       borderRadius: '50%',
       filter: `drop-shadow(0 0 ${8 + intensity * 24}px rgba(59,232,255,${glowOpacity}))`,
       opacity: .35 + intensity * .65,
     }}/>
 
-    {wallWashes.map((left, index) => <div key={`wash-${left}`} style={{
+    {wallWashes.map((wash, index) => <div key={`wash-${wash.left}`} style={{
       position: 'absolute',
-      left: `${left}%`,
-      top: `${20 + (index % 2) * 1.5}%`,
-      width: '4.8%',
-      height: '61%',
+      left: `${wash.left}%`,
+      top: `${wash.top}%`,
+      width: `${wash.width}%`,
+      height: `${wash.bottom - wash.top}%`,
       background: 'linear-gradient(180deg, rgba(228,250,255,.86), rgba(59,232,255,.35) 42%, transparent 92%)',
-      clipPath: 'polygon(47% 0, 100% 100%, 0 100%)',
+      clipPath: 'polygon(49% 0, 82% 100%, 18% 100%)',
       filter: `blur(${8 + intensity * 12}px)`,
       mixBlendMode: 'screen',
       opacity: glowOpacity * (.72 + (index % 2) * .14),
