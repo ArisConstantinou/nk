@@ -8,7 +8,7 @@ import {
   type PointerEvent,
 } from 'react';
 import {Player, type PlayerRef} from '@remotion/player';
-import {Activity, Gauge, Lightbulb, Palette, Power, SlidersHorizontal, SunDim} from 'lucide-react';
+import {Power, SlidersHorizontal} from 'lucide-react';
 import {LedSensitivityFilm, type LedRgbEffect} from '../remotion/LedSensitivityFilm';
 import {publicAsset} from '../utils/assets';
 
@@ -137,13 +137,10 @@ export function LedSensitivityPanel() {
   >
     <div className="led-rgb-console">
       <div className="led-lab-heading">
-        <div><span>LIVE / RGB LIGHTING CONTROL</span><i><Activity/> REMOTE LINKED</i></div>
         <h2 id="led-lab-title">Set the colour.<br/><em>See the room respond.</em></h2>
-        <p>The remote and installed LED layers now work as one live control desk. Adjust colour, brightness or movement and see the complete room react beside it.</p>
       </div>
 
       <div className="rgb-remote-stage">
-        <div className="rgb-remote-stage-label"><Palette/> NK RGB REMOTE <span>{power ? 'LINK ACTIVE' : 'OUTPUT OFF'}</span></div>
         <div className={`rgb-remote-shell${power ? '' : ' is-off'}`}>
           <img src={publicAsset('assets/generated/nk-rgb-remote-shell-transparent.webp')} alt="NK architectural RGB LED remote"/>
           <button
@@ -203,17 +200,11 @@ export function LedSensitivityPanel() {
           acknowledgeRemotionLicense
           style={{width: '100%', height: '100%'}}
         />
-        <div className="led-lab-fixtures" aria-label="RGB LED layers shown">
-          <span><SunDim/> RGB cove</span>
-          <span><Lightbulb/> Colour-tuned spots</span>
-          <span><Gauge/> Wall-light fixtures</span>
-        </div>
       </div>
 
       <div className="rgb-control-panel">
         <div className="rgb-control-intro">
           <span className="rgb-control-kicker"><SlidersHorizontal/> LIVE OUTPUT CONTROL</span>
-          <p>Cove, recessed spots, ring and wall-light fixtures inherit the same live colour and output.</p>
         </div>
 
         <div className="rgb-live-readout">

@@ -243,23 +243,5 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
       </div>
     </div>
 
-    <div style={{
-      position: 'absolute',
-      right: '7%',
-      bottom: '8%',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 12,
-      padding: '13px 16px',
-      background: 'rgba(2,6,17,.76)',
-      border: `1px solid ${rgba(selectedColor, .35)}`,
-      fontFamily: 'Courier New, monospace',
-      fontSize: 16,
-      letterSpacing: '.13em',
-      textTransform: 'uppercase',
-    }}>
-      <i style={{width: 8, height: 8, borderRadius: '50%', background: rgb(selectedColor), boxShadow: `0 0 ${8 + intensity * 16}px ${rgb(selectedColor)}`}}/>
-      {!power ? 'RGB output off' : effect === 'spectrum' ? 'Spectrum cycle' : `${effect} · ${color}`}
-    </div>
   </AbsoluteFill>;
 }
