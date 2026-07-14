@@ -26,7 +26,20 @@ const electricalNav = [
   {label: 'Contact', route: '/contact', code: '06', Icon: Contact},
 ];
 
-const routeName = (pathname: string) => electricalNav.find(item => item.route !== '/' && pathname.startsWith(item.route))?.label || (pathname === '/' ? 'Main distribution' : 'System detail');
+const contextByRoute: Record<string, string> = {
+  '/': 'Electrical operations',
+  '/electrical-installations': 'Power installations',
+  '/lighting': 'Lighting design & supply',
+  '/appliances': 'Appliance selection',
+  '/projects': 'Completed installations',
+  '/about': 'People & responsibilities',
+  '/contact': 'Enquiry routing',
+};
+
+const routeContext = (pathname: string) => {
+  const route = Object.keys(contextByRoute).find(item => item !== '/' && pathname.startsWith(item));
+  return contextByRoute[route || '/'] || 'Project information';
+};
 
 const workflowByRoute: Record<string, [string, string, string, string]> = {
   '/': ['Survey', 'Engineer', 'Install', 'Maintain'],
@@ -48,7 +61,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [enquiryPrepared, setEnquiryPrepared] = useState(false);
   const location = useLocation();
-  const section = routeName(location.pathname);
+  const section = routeContext(location.pathname);
   const workflow = routeWorkflow(location.pathname);
 
   useEffect(() => {
@@ -105,7 +118,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <span><strong>Electrical</strong><small>Ltd.</small></span>
         </Link>
         <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => { setMenuOpen(open => !open); setEnquiryOpen(false); }}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
-        <div className="electrical-command-location"><strong>NK / {section}</strong></div>
+        <div className="electrical-command-location"><strong>{section}</strong></div>
         <div className="electrical-command-flow" aria-label={`${section} workflow`}><span>{workflow[0]}</span><i/><span>{workflow[1]}</span><i/><span>{workflow[2]}</span><i/><span>{workflow[3]}</span></div>
         <ThemeControls className="theme-controls--command"/>
         <button

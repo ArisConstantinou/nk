@@ -38,13 +38,52 @@ const pageFocusByEyebrow: Record<string, [string, string, string]> = {
   'Electrical enquiry': ['Describe', 'Direct', 'Respond'],
 };
 
+const pageContextByEyebrow: Record<string, {index: string; status: string; brief: string}> = {
+  'The people behind every installation': {
+    index: 'COMPANY / PEOPLE & RESPONSIBILITIES',
+    status: 'FAMILY-FOUNDED SINCE 1985',
+    brief: 'Company overview',
+  },
+  'Complete installed project archive': {
+    index: 'PROJECTS / COMPLETED INSTALLATIONS',
+    status: '25 PROJECTS DOCUMENTED',
+    brief: 'Archive overview',
+  },
+  'Electrical installations': {
+    index: 'INSTALLATIONS / POWER & PROTECTION',
+    status: '24-HOUR SUPPORT',
+    brief: 'Installation scope',
+  },
+  'Lighting and appliance discovery': {
+    index: 'DISCOVERY / LIGHTING & APPLIANCES',
+    status: 'FILTERED BY REAL USE',
+    brief: 'How to browse',
+  },
+  'Dedicated lighting department': {
+    index: 'LIGHTING / DESIGN & SUPPLY',
+    status: 'DEDICATED DEPARTMENT',
+    brief: 'Lighting scope',
+  },
+  'Electrical appliances': {
+    index: 'APPLIANCES / SELECT & CONNECT',
+    status: 'PRACTICAL PRODUCT SUPPORT',
+    brief: 'Product scope',
+  },
+  'Electrical enquiry': {
+    index: 'CONTACT / DIRECT TO SPECIALIST',
+    status: 'STROVOLOS / CYPRUS',
+    brief: 'Enquiry routing',
+  },
+};
+
 export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
   const {electricalTheme} = useTheme();
   const focus = pageFocusByEyebrow[eyebrow];
+  const context = pageContextByEyebrow[eyebrow];
   if (electricalTheme) return <section className="system-page-intro">
-    <div className="system-page-index"><span>NK / SYSTEM BRIEF</span><i>LIVE SCOPE</i></div>
+    <div className="system-page-index"><span>{context.index}</span><i>{context.status}</i></div>
     <div className="system-page-title"><span>{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div>
-    <aside className="system-page-brief"><small>Project context</small><p>{body}</p><div aria-label={`${eyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
+    <aside className="system-page-brief"><small>{context.brief}</small><p>{body}</p><div aria-label={`${eyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
     <div className="system-page-trace" aria-hidden="true"><i/><i/><i/><b/></div>
   </section>;
   return <section className="page-intro section"><div><span className="eyebrow">{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div><p>{body}</p></section>;
