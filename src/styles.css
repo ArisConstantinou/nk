@@ -453,3 +453,9 @@ html[data-experience='tech'] .electrical-shell{
   .power-system-readout p{font-size:13px}
   .led-lab-controls button strong{font-size:18px}
 }
+
+@media(max-width:720px){
+  .electrical-main .person-card.person-card--group{display:block}
+  .electrical-main .person-card.person-card--group>div.person-portrait{aspect-ratio:1.2;height:auto;min-height:0}
+  .electrical-main .person-card.person-card--group .person-portrait>span{display:flex}
+}
