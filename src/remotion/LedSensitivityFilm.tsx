@@ -51,14 +51,15 @@ const rgb = ({r, g, b}: Rgb) => `rgb(${r}, ${g}, ${b})`;
 const rgba = ({r, g, b}: Rgb, alpha: number) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
 const spots = [
-  {left: 25.8, top: 9.8},
-  {left: 30.4, top: 18.3},
-  {left: 33.6, top: 24.4},
-  {left: 35.8, top: 28.6},
-  {left: 83.5, top: 9.3},
-  {left: 77.6, top: 17.7},
-  {left: 73.8, top: 24.5},
-  {left: 72.1, top: 26.5},
+  {left: 24.915, top: 9.989, width: 19, height: 6},
+  {left: 29.892, top: 18.827, width: 15, height: 4},
+  {left: 33.016, top: 24.758, width: 12, height: 4},
+  {left: 34.366, top: 27.287, width: 10, height: 4},
+  {left: 35.468, top: 29.429, width: 8, height: 3},
+  {left: 84.392, top: 9.451, width: 19, height: 6},
+  {left: 78.434, top: 18.482, width: 15, height: 4},
+  {left: 74.383, top: 24.489, width: 12, height: 4},
+  {left: 72.869, top: 27.083, width: 11, height: 3},
 ];
 
 // Measured directly on the six vertical wall luminaires in the source image.
@@ -140,10 +141,10 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
       }}
     >
       <path
-        d="M 152 0 L 525 240 L 1190 240 L 1540 0"
+        d="M 210.5 0 L 519.5 271.3 L 1189 271.3 L 1551.3 0"
         fill="none"
         stroke={rgb(selectedColor)}
-        strokeWidth={4 + intensity * 8}
+        strokeWidth={3 + intensity * 5}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -165,24 +166,24 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
       position: 'absolute',
       left: `${spot.left}%`,
       top: `${spot.top}%`,
-      width: 11,
-      height: 11,
-      borderRadius: '50%',
+      width: spot.width,
+      height: spot.height,
+      borderRadius: 999,
       background: power ? rgb(selectedColor) : '#26303b',
-      boxShadow: `0 0 ${18 + intensity * 42}px ${5 + intensity * 12}px ${rgba(selectedColor, glowOpacity)}`,
+      boxShadow: `0 0 ${10 + intensity * 22}px ${2 + intensity * 5}px ${rgba(selectedColor, glowOpacity)}`,
       opacity: .25 + intensity * .75,
       transform: 'translate(-50%, -50%)',
     }}/>) }
 
     <div style={{
       position: 'absolute',
-      left: '47.7%',
-      top: '43.4%',
-      width: '9.1%',
-      height: '3.5%',
-      border: `${2 + intensity * 4}px solid ${rgba(selectedColor, power ? .38 + intensity * .62 : .1)}`,
+      left: '47.851%',
+      top: '45.856%',
+      width: '9.021%',
+      height: '1.937%',
+      border: `${1.5 + intensity * 2.5}px solid ${rgba(selectedColor, power ? .38 + intensity * .62 : .1)}`,
       borderRadius: '50%',
-      filter: `drop-shadow(0 0 ${8 + intensity * 24}px ${rgba(selectedColor, glowOpacity)})`,
+      filter: `drop-shadow(0 0 ${6 + intensity * 16}px ${rgba(selectedColor, glowOpacity)})`,
       opacity: .35 + intensity * .65,
     }}/>
 
