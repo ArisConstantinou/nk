@@ -28,12 +28,23 @@ import {useTheme} from '../context/ThemeContext';
 import type {Product} from '../types';
 import {publicAsset} from '../utils/assets';
 
+const pageFocusByEyebrow: Record<string, [string, string, string]> = {
+  'The people behind every installation': ['Engineering', 'Design', 'Delivery'],
+  'Complete installed project archive': ['Planned', 'Installed', 'Documented'],
+  'Electrical installations': ['Load study', 'Protection', 'Certification'],
+  'Lighting and appliance discovery': ['Purpose', 'Season', 'Room'],
+  'Dedicated lighting department': ['Ambience', 'Specification', 'Supply'],
+  'Electrical appliances': ['Select', 'Connect', 'Support'],
+  'Electrical enquiry': ['Describe', 'Direct', 'Respond'],
+};
+
 export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
   const {electricalTheme} = useTheme();
+  const focus = pageFocusByEyebrow[eyebrow];
   if (electricalTheme) return <section className="system-page-intro">
     <div className="system-page-index"><span>NK / SYSTEM BRIEF</span><i>LIVE SCOPE</i></div>
     <div className="system-page-title"><span>{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div>
-    <aside className="system-page-brief"><small>Project context</small><p>{body}</p><div><span>Survey</span><i/><span>Install</span><i/><span>Test</span></div></aside>
+    <aside className="system-page-brief"><small>Project context</small><p>{body}</p><div aria-label={`${eyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
     <div className="system-page-trace" aria-hidden="true"><i/><i/><i/><b/></div>
   </section>;
   return <section className="page-intro section"><div><span className="eyebrow">{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div><p>{body}</p></section>;
