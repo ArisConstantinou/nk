@@ -416,3 +416,39 @@ html[data-experience='tech']:not([data-theme='dark']) .system-page-brief>div{col
   .electrical-rail-tools>span{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
   .electrical-rail-tools>span b{font-weight:400;color:var(--system-live);text-transform:uppercase}
 }
+
+/* Electrical theme readability scale: technical type should remain readable, never ornamental noise. */
+html[data-experience='tech'] .electrical-shell{
+  --system-type-micro:clamp(11px,.72vw,13px);
+  --system-type-small:clamp(13px,.9vw,15px);
+  --system-type-body:clamp(16px,1.05vw,18px);
+}
+.electrical-command-location span,.electrical-command-flow,.electrical-menu-trigger,.electrical-menu-heading>span,.electrical-menu-panel>nav a small,.electrical-menu-meta{font-size:var(--system-type-micro)}
+.electrical-command-location strong,.electrical-command-contact{font-size:var(--system-type-small)}
+.electrical-rail-nav a small,.electrical-rail-tools>span{font-size:11px}
+.power-kicker,.power-action,.power-routing>header>span,.power-section-id,.power-assurance-title>span,.power-route-index,.power-route-copy small,.power-route-state{font-size:var(--system-type-micro)}
+.power-hero-copy>p,.power-routing header p,.power-project-lead p,.led-lab-heading>p{font-size:var(--system-type-body)}
+.power-hero-facts dt,.power-field-coordinate,.power-system-readout>span,.power-system-readout small,.power-system-readout a,.power-node-switcher button span,.power-node-switcher button small{font-size:var(--system-type-micro)}
+.power-hero-facts dd{font-size:var(--system-type-small)}
+.power-system-readout p,.power-route-copy p{font-size:var(--system-type-small)}
+.led-lab-heading>div,.led-lab-fixtures span,.led-lab-controls button small,.led-lab-controls button span{font-size:var(--system-type-micro)}
+.power-project-lead a,.power-project>small,.power-project>div span,.power-assurance-grid span{font-size:var(--system-type-micro)}
+.system-page-index,.system-page-title>span,.system-page-brief small,.system-page-brief>div{font-size:var(--system-type-micro)}
+.system-page-brief p{font-size:var(--system-type-body)}
+.electrical-main .button,.electrical-main .story-image>span,.electrical-main .person-card li,.electrical-footer-signal,.electrical-footer-title small,.electrical-footer-title a,.electrical-footer-grid>div{font-size:var(--system-type-micro)}
+.electrical-main p,.electrical-main .story-copy p,.electrical-main .solution-detail p,.electrical-main .contact-details p{font-size:var(--system-type-body)}
+.electrical-main .contact-details b,.electrical-main .contact-form label,.electrical-main .filter-row>b,.electrical-main .filter-row button,.electrical-main .catalogue-controls button,.electrical-main .appliance-controls button,.electrical-main .product-info small,.electrical-main .project-archive-copy small,.electrical-main .project-archive-copy>span{font-size:var(--system-type-small)}
+.electrical-main .contact-form input,.electrical-main .contact-form select,.electrical-main .contact-form textarea{font-size:16px}
+.electrical-main .person-card small,.electrical-main .person-card p,.electrical-main .person-card span{font-size:var(--system-type-small)}
+.electrical-mobile-dock a,.electrical-mobile-dock button{font-size:10px}
+
+@media(min-width:1181px){
+  .electrical-rail-nav a>span{font-size:16px}
+  .electrical-rail-wordmark small{font-size:9px}
+}
+
+@media(max-width:480px){
+  .electrical-command-brand small{font-size:8px}
+  .power-system-readout p{font-size:13px}
+  .led-lab-controls button strong{font-size:18px}
+}

@@ -132,15 +132,15 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       fontFamily: 'Courier New, monospace',
       boxShadow: '0 18px 50px rgba(0,0,0,.34)',
     }}>
-      <div style={{fontSize: 12, letterSpacing: '.17em', color: '#3be8ff'}}>DAYLIGHT SENSOR / LIVE</div>
+      <div style={{fontSize: 18, letterSpacing: '.14em', color: '#3be8ff'}}>DAYLIGHT SENSOR / LIVE</div>
       <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 18}}>
         <strong style={{fontSize: 62, lineHeight: .8, letterSpacing: '-.07em'}}>{lux}</strong>
-        <span style={{fontSize: 13, letterSpacing: '.14em', color: '#9aa9c2'}}>LUX</span>
+        <span style={{fontSize: 18, letterSpacing: '.12em', color: '#9aa9c2'}}>LUX</span>
       </div>
       <div style={{height: 5, marginTop: 22, background: 'rgba(255,255,255,.14)'}}>
         <span style={{display: 'block', width: `${percentage}%`, height: '100%', background: 'linear-gradient(90deg,#3be8ff,#8064ff)'}}/>
       </div>
-      <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 10, letterSpacing: '.1em', color: '#9aa9c2'}}>
+      <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 12, fontSize: 15, letterSpacing: '.08em', color: '#9aa9c2'}}>
         <span>LOW</span><span>LED OUTPUT {percentage}%</span><span>HIGH</span>
       </div>
     </div>
@@ -156,7 +156,7 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       background: 'rgba(2,6,17,.76)',
       border: '1px solid rgba(59,232,255,.28)',
       fontFamily: 'Courier New, monospace',
-      fontSize: 11,
+      fontSize: 16,
       letterSpacing: '.13em',
       textTransform: 'uppercase',
     }}>
