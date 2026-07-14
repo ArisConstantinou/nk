@@ -14,6 +14,7 @@ export function ThemeControls({className = ''}: {className?: string}) {
       onClick={toggleDarkTheme}
     >
       {darkTheme ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
+      <span className="theme-control-label">{darkTheme ? 'Light mode' : 'Dark mode'}</span>
     </button>
     <button
       className="theme-control theme-control--electrical"
@@ -24,6 +25,7 @@ export function ThemeControls({className = ''}: {className?: string}) {
       onClick={toggleElectricalTheme}
     >
       <CircuitBoard aria-hidden="true"/>
+      <span className="theme-control-label">{electricalTheme ? 'Studio theme' : 'Electrical systems'}</span>
     </button>
   </div>;
 }
