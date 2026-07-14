@@ -65,7 +65,7 @@ const spots = [
 // Measured directly on the six vertical wall luminaires in the source image.
 // These are narrow fixture glows, not artificial projected cones.
 const wallFixtures = [
-  {left: 37.565, top: 35.0, bottom: 71.5, width: 2.4},
+  {left: 37.565, top: 36.5, bottom: 64.5, width: 2.4, softEnds: true},
   {left: 69.588, top: 45.9, bottom: 70.5, width: 2.1},
   {left: 72.19, top: 42.5, bottom: 71.7, width: 2.35},
   {left: 75.37, top: 39.5, bottom: 73.0, width: 2.6},
@@ -197,9 +197,14 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
       top: `${fixture.top}%`,
       width: `${Math.max(.16, fixture.width * .08)}%`,
       height: `${fixture.bottom - fixture.top}%`,
-      background: `linear-gradient(180deg, ${rgba(selectedColor, .88)}, ${rgba(selectedColor, .62)} 70%, ${rgba(selectedColor, .18)})`,
-      boxShadow: `0 0 ${5 + intensity * 14}px ${1 + intensity * 3}px ${rgba(selectedColor, .48)}`,
-      filter: 'blur(1.2px)',
+      background: fixture.softEnds
+        ? `linear-gradient(180deg, transparent, ${rgba(selectedColor, .88)} 8%, ${rgba(selectedColor, .62)} 88%, transparent)`
+        : `linear-gradient(180deg, ${rgba(selectedColor, .88)}, ${rgba(selectedColor, .62)} 70%, ${rgba(selectedColor, .18)})`,
+      boxShadow: fixture.softEnds ? 'none' : `0 0 ${5 + intensity * 14}px ${1 + intensity * 3}px ${rgba(selectedColor, .48)}`,
+      filter: fixture.softEnds
+        ? `blur(1.1px) drop-shadow(0 0 ${4 + intensity * 10}px ${rgba(selectedColor, .48)})`
+        : 'blur(1.2px)',
+      borderRadius: '999px',
       mixBlendMode: 'screen',
       opacity: power ? .12 + intensity * .75 : 0,
       transform: 'translateX(-50%)',
