@@ -234,6 +234,7 @@ html[data-experience='tech'] .electrical-main{min-height:70vh;overflow:hidden}
 .power-action{min-height:62px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-left:1px solid rgba(255,255,255,.18);transition:.25s}
 .power-action:first-child{border-left:0}.power-action svg{width:18px}.power-action:hover{color:var(--system-live);background:rgba(255,255,255,.055)}
 .power-action--live{background:var(--system-live);color:var(--system-accent-ink)}.power-action--live:hover{background:var(--system-red);color:var(--system-accent-ink)}
+.power-action--led{grid-column:1/-1;border-left:0;border-top:1px solid rgba(255,255,255,.18);color:var(--system-live);background:linear-gradient(90deg,rgba(59,232,255,.09),rgba(128,100,255,.12))}.power-action--led:hover{color:var(--system-white);background:linear-gradient(90deg,rgba(59,232,255,.18),rgba(128,100,255,.24))}.power-action--led svg{filter:drop-shadow(0 0 7px var(--system-live))}
 .power-hero-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin:auto -1px -34px;background:rgba(255,255,255,.14)}
 .power-hero-facts>div{min-height:82px;padding:17px 14px;background:var(--system-panel);display:flex;flex-direction:column;justify-content:space-between}
 .power-hero-facts dt{font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:#71839f}

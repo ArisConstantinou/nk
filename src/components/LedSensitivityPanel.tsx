@@ -18,9 +18,9 @@ export function LedSensitivityPanel() {
     return () => window.clearTimeout(playTimer);
   }, [mode]);
 
-  return <section className="led-lab" aria-labelledby="led-lab-title">
+  return <section className="led-lab" id="led-lab" aria-labelledby="led-lab-title">
     <div className="led-lab-heading">
-      <div><span>02 / RESPONSIVE LIGHTING</span><i><Activity/> SENSOR ACTIVE</i></div>
+      <div><span>LIVE / RESPONSIVE LIGHTING</span><i><Activity/> SENSOR ACTIVE</i></div>
       <h2 id="led-lab-title">LED light that<br/><em>reads the room.</em></h2>
       <p>See the same installation move from restrained ambient light to full working output. Every change is mapped to the fixture, the surface and the space around it.</p>
     </div>

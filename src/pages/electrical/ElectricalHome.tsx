@@ -81,6 +81,7 @@ export default function ElectricalHome() {
         <div className="power-primary-actions">
           <Link className="power-action power-action--live" to="/electrical-installations"><span>Plan an installation</span><ArrowDownRight/></Link>
           <Link className="power-action" to="/projects"><span>Inspect completed work</span><ArrowRight/></Link>
+          <a className="power-action power-action--led" href="#led-lab"><span>Watch the live LED response</span><Lightbulb/></a>
         </div>
         <dl className="power-hero-facts">
           <div><dt>Operating since</dt><dd>1985</dd></div>
@@ -117,6 +118,8 @@ export default function ElectricalHome() {
       </div>
     </section>
 
+    <LedSensitivityPanel/>
+
     <section className="power-routing">
       <header><span>01 / CAPABILITY ROUTING</span><h2>One project.<br/>Four connected layers.</h2><p>Each discipline has its own specialist path. The paths meet before anything reaches the site.</p></header>
       <div className="power-routing-map">
@@ -129,8 +132,6 @@ export default function ElectricalHome() {
         </Link>)}
       </div>
     </section>
-
-    <LedSensitivityPanel/>
 
     <section className="power-project-feed">
       <div className="power-section-id"><span>03 / INSTALLED EVIDENCE</span><b>25 projects in archive</b></div>
