@@ -28,10 +28,26 @@ const electricalNav = [
 
 const routeName = (pathname: string) => electricalNav.find(item => item.route !== '/' && pathname.startsWith(item.route))?.label || (pathname === '/' ? 'Main distribution' : 'System detail');
 
+const workflowByRoute: Record<string, [string, string, string, string]> = {
+  '/': ['Survey', 'Engineer', 'Install', 'Maintain'],
+  '/electrical-installations': ['Load', 'Protect', 'Wire', 'Certify'],
+  '/lighting': ['Layer', 'Specify', 'Aim', 'Commission'],
+  '/appliances': ['Select', 'Supply', 'Connect', 'Support'],
+  '/projects': ['Scope', 'Coordinate', 'Install', 'Handover'],
+  '/about': ['Experience', 'Design', 'Deliver', 'Support'],
+  '/contact': ['Describe', 'Route', 'Review', 'Respond'],
+};
+
+const routeWorkflow = (pathname: string) => {
+  const route = Object.keys(workflowByRoute).find(item => item !== '/' && pathname.startsWith(item));
+  return workflowByRoute[route || '/'];
+};
+
 export function ElectricalLayout({children}: {children: ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const section = routeName(location.pathname);
+  const workflow = routeWorkflow(location.pathname);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -68,7 +84,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         </Link>
         <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(open => !open)}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
         <div className="electrical-command-location"><strong>NK / {section}</strong></div>
-        <div className="electrical-command-flow"><span>Survey</span><i/><span>Plan</span><i/><span>Install</span><i/><span>Test</span></div>
+        <div className="electrical-command-flow" aria-label={`${section} workflow`}><span>{workflow[0]}</span><i/><span>{workflow[1]}</span><i/><span>{workflow[2]}</span><i/><span>{workflow[3]}</span></div>
         <ThemeControls className="theme-controls--command"/>
         <Link className="electrical-command-contact" to="/contact"><span>Route an enquiry</span><ArrowRight/></Link>
       </header>
