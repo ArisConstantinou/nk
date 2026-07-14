@@ -23,7 +23,7 @@ export function Layout({children}: {children: ReactNode}) {
   return <div className="site-shell">
     <header className="topbar">
       <Link className="brand" to="/" aria-label="NK Electrical Ltd. home">
-        <span className="brand-mark"><img src={publicAsset('assets/logo.jpg')} alt="NK Electrical" /></span>
+        <span className="brand-mark"><img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical" /></span>
         <span className="brand-wordmark"><strong>Electrical</strong><small>Ltd.</small></span>
       </Link>
       <nav className="desktop-nav" aria-label="Primary navigation">
