@@ -11,6 +11,7 @@ export type Product = {
 export type TeamMember = {
   name: string;
   role: string;
+  responsibility: string;
   workArea: string;
   characteristics: string[];
   credential?: string;

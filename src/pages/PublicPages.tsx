@@ -63,10 +63,10 @@ export function AboutPage() {
       </div>
     </section>
     <section className="org-section section">
-      <div className="org-heading"><span className="eyebrow">The complete team</span><h2>Different expertise.<br/><em>One electrical standard.</em></h2><p>Every employee is visible here. The front-facing characters are deliberately faceless 3D illustrations, with distinct hair, clothing and environments reflecting each person’s position and work area.</p></div>
+      <div className="org-heading"><span className="eyebrow">The complete team</span><h2>Different expertise.<br/><em>One electrical standard.</em></h2><p>The team is ordered by responsibility, with every card showing the person’s work area, qualifications and contribution to project delivery.</p></div>
       <div className="team-all-grid">
-        {team.map(person => <article className="person-card" key={person.name}>
-          <div className="person-portrait"><img src={person.image} alt={`Front-facing faceless illustrated character for ${person.role}`}/><span>Faceless role character</span></div>
+        {team.map((person, index) => <article className="person-card" key={person.name}>
+          <div className="person-portrait"><img src={person.image} alt={`Illustrated role portrait for ${person.name}, ${person.role}`}/><span><b>{String(index + 1).padStart(2, '0')}</b>{person.responsibility}</span></div>
           <div className="person-content"><small>{person.branch}</small><h3>{person.name}</h3><p className="person-role">{person.role}</p><p className="person-area">{person.workArea}</p>{person.credential && <span className="person-credential">{person.credential}</span>}<ul>{person.characteristics.map(item => <li key={item}>{item}</li>)}</ul><div className="person-links">{person.email && <a aria-label={`Email ${person.name}`} href={`mailto:${person.email}`}><Mail/></a>}{person.linkedin && <a aria-label={`${person.name} on LinkedIn`} target="_blank" rel="noreferrer" href={person.linkedin}><ExternalLink/></a>}</div></div>
         </article>)}
       </div>
