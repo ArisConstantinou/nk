@@ -1,4 +1,4 @@
-import {useEffect, useState, type ReactNode} from 'react';
+import {useEffect, useState, type FormEvent, type ReactNode} from 'react';
 import {
   ArrowRight,
   CircuitBoard,
@@ -45,22 +45,44 @@ const routeWorkflow = (pathname: string) => {
 
 export function ElectricalLayout({children}: {children: ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [enquiryPrepared, setEnquiryPrepared] = useState(false);
   const location = useLocation();
   const section = routeName(location.pathname);
   const workflow = routeWorkflow(location.pathname);
 
   useEffect(() => {
     setMenuOpen(false);
+    setEnquiryOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
   }, [location.pathname]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        setEnquiryOpen(false);
+      }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, []);
+
+  const prepareEnquiry = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const subject = encodeURIComponent(`${data.get('workType')} enquiry from ${data.get('name')}`);
+    const body = encodeURIComponent([
+      `Name: ${data.get('name')}`,
+      `Phone: ${data.get('phone')}`,
+      `Work area: ${data.get('workType')}`,
+      '',
+      String(data.get('message')),
+    ].join('\n'));
+
+    setEnquiryPrepared(true);
+    window.location.href = `mailto:info@nk-electrical.com?subject=${subject}&body=${body}`;
+  };
 
   return <div className="electrical-shell">
     <aside className="electrical-rail">
@@ -82,12 +104,49 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
           <span><strong>Electrical</strong><small>Ltd.</small></span>
         </Link>
-        <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(open => !open)}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
+        <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => { setMenuOpen(open => !open); setEnquiryOpen(false); }}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
         <div className="electrical-command-location"><strong>NK / {section}</strong></div>
         <div className="electrical-command-flow" aria-label={`${section} workflow`}><span>{workflow[0]}</span><i/><span>{workflow[1]}</span><i/><span>{workflow[2]}</span><i/><span>{workflow[3]}</span></div>
         <ThemeControls className="theme-controls--command"/>
-        <Link className="electrical-command-contact" to="/contact"><span>Route an enquiry</span><ArrowRight/></Link>
+        <button
+          className={`electrical-command-contact${enquiryOpen ? ' open' : ''}`}
+          type="button"
+          aria-expanded={enquiryOpen}
+          aria-controls="desktop-enquiry-panel"
+          onClick={() => {
+            setEnquiryOpen(open => !open);
+            setEnquiryPrepared(false);
+            setMenuOpen(false);
+          }}
+        >
+          <span>{enquiryOpen ? 'Close enquiry' : 'Route an enquiry'}</span>
+          {enquiryOpen ? <X/> : <ArrowRight/>}
+        </button>
       </header>
+
+      {enquiryOpen && <aside id="desktop-enquiry-panel" className="electrical-enquiry-panel" aria-label="Route an enquiry">
+        <form onSubmit={prepareEnquiry}>
+          <div className="electrical-enquiry-heading">
+            <div><small>NK / ENQUIRY ROUTER</small><strong>Tell us where the work begins.</strong></div>
+            <button type="button" aria-label="Close enquiry panel" onClick={() => setEnquiryOpen(false)}><X/></button>
+          </div>
+          <p>Give the team a concise starting point. We will direct it to the right work area.</p>
+          <div className="electrical-enquiry-fields">
+            <label>Your name<input required name="name" autoComplete="name"/></label>
+            <label>Phone<input required name="phone" type="tel" autoComplete="tel"/></label>
+            <label className="wide">Work area<select required name="workType" defaultValue="Electrical installation">
+              <option>Electrical installation</option>
+              <option>Lighting selection and supply</option>
+              <option>Appliance selection and supply</option>
+              <option>CCTV and security systems</option>
+              <option>Electrical maintenance and support</option>
+            </select></label>
+            <label className="wide">Work summary<textarea required name="message" rows={3} placeholder="Property type, location and what needs to be done"/></label>
+          </div>
+          <button className="electrical-enquiry-submit" type="submit"><span>Prepare enquiry email</span><ArrowRight/></button>
+          {enquiryPrepared && <p className="electrical-enquiry-note">Your email application is ready with these project details.</p>}
+        </form>
+      </aside>}
 
       {menuOpen && <div className="electrical-menu-panel" role="dialog" aria-modal="true" aria-label="Electrical systems menu">
         <div className="electrical-menu-heading"><span>NK / SYSTEM DIRECTORY</span><h2>Where does the<br/>work begin?</h2><p>Choose the discipline. Every route remains connected to the same project team.</p></div>
