@@ -65,10 +65,14 @@ const spots = [
 // Measured directly on the six vertical wall luminaires in the source image.
 // These are narrow fixture glows, not artificial projected cones.
 const wallFixtures = [
+  {left: 37.565, top: 35.0, bottom: 71.5, width: 2.4},
   {left: 69.588, top: 45.9, bottom: 70.5, width: 2.1},
+  {left: 72.19, top: 42.5, bottom: 71.7, width: 2.35},
   {left: 75.37, top: 39.5, bottom: 73.0, width: 2.6},
   // The console and foreground chair occlude the lower end of this fixture.
   {left: 79.094, top: 36.1, bottom: 65.0, width: 3.0},
+  // This fixture is visible above the artwork, then disappears behind it.
+  {left: 83.75, top: 31.9, bottom: 45.0, width: 3.5},
   {left: 89.199, top: 27.0, bottom: 80.0, width: 4.1},
   {left: 96.223, top: 21.0, bottom: 82.0, width: 4.8},
 ];
