@@ -8,11 +8,47 @@ import {
   useVideoConfig,
 } from 'remotion';
 
-export type LedSensitivityMode = 'auto' | 'low' | 'high';
+export type LedRgbEffect = 'static' | 'breathe' | 'spectrum';
 
 export type LedSensitivityFilmProps = {
-  mode: LedSensitivityMode;
+  color: string;
+  brightness: number;
+  power: boolean;
+  effect: LedRgbEffect;
 };
+
+type Rgb = {r: number; g: number; b: number};
+
+const hexToRgb = (hex: string): Rgb => {
+  const value = hex.replace('#', '');
+  const normalized = value.length === 3 ? value.split('').map(character => `${character}${character}`).join('') : value;
+  return {
+    r: Number.parseInt(normalized.slice(0, 2), 16) || 0,
+    g: Number.parseInt(normalized.slice(2, 4), 16) || 0,
+    b: Number.parseInt(normalized.slice(4, 6), 16) || 0,
+  };
+};
+
+const hslToRgb = (hue: number, saturation: number, lightness: number): Rgb => {
+  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const sector = hue / 60;
+  const second = chroma * (1 - Math.abs((sector % 2) - 1));
+  const [red, green, blue] = sector < 1 ? [chroma, second, 0]
+    : sector < 2 ? [second, chroma, 0]
+      : sector < 3 ? [0, chroma, second]
+        : sector < 4 ? [0, second, chroma]
+          : sector < 5 ? [second, 0, chroma]
+            : [chroma, 0, second];
+  const match = lightness - chroma / 2;
+  return {
+    r: Math.round((red + match) * 255),
+    g: Math.round((green + match) * 255),
+    b: Math.round((blue + match) * 255),
+  };
+};
+
+const rgb = ({r, g, b}: Rgb) => `rgb(${r}, ${g}, ${b})`;
+const rgba = ({r, g, b}: Rgb, alpha: number) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
 const spots = [
   {left: 25.8, top: 9.8},
@@ -39,28 +75,35 @@ const wallWashes = [
 const deploymentBase = import.meta.env.BASE_URL.replace(/^\/+|\/+$/g, '');
 const ledRoomAsset = staticFile(`${deploymentBase ? `${deploymentBase}/` : ''}assets/generated/led-sensitivity-room.webp`);
 
-export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
+export function LedSensitivityFilm({color, brightness, power, effect}: LedSensitivityFilmProps) {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const loopFrame = frame % (12 * fps);
-  const automaticIntensity = interpolate(
-    loopFrame,
-    [0, 2 * fps, 5 * fps, 7 * fps, 10 * fps, 12 * fps],
-    [.16, .16, .96, .96, .16, .16],
+  const breatheFrame = frame % (6 * fps);
+  const breatheLevel = interpolate(
+    breatheFrame,
+    [0, 3 * fps, 6 * fps],
+    [.58, 1, .58],
     {
       easing: Easing.bezier(.45, 0, .55, 1),
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
     },
   );
-  const intensity = mode === 'auto' ? automaticIntensity : mode === 'low' ? .18 : .96;
-  const lux = Math.round(interpolate(intensity, [.16, .96], [42, 420], {
+  const spectrumHue = interpolate(loopFrame, [0, 12 * fps], [0, 360], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const selectedColor = effect === 'spectrum' ? hslToRgb(spectrumHue, .92, .58) : hexToRgb(color);
+  const requestedIntensity = Math.min(1, Math.max(0, brightness / 100));
+  const intensity = power ? requestedIntensity * (effect === 'breathe' ? breatheLevel : 1) : 0;
+  const lux = Math.round(interpolate(intensity, [0, 1], [0, 480], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   }));
-  const percentage = Math.round(intensity * 100);
-  const glowOpacity = interpolate(intensity, [.16, .96], [.08, .76]);
-  const surfaceBrightness = interpolate(intensity, [.16, .96], [.57, 1.08]);
+  const percentage = power ? Math.round(intensity * 100) : 0;
+  const glowOpacity = power ? interpolate(intensity, [0, 1], [.03, .82]) : 0;
+  const surfaceBrightness = interpolate(intensity, [0, 1], [.38, 1.08]);
   const sensorSweep = interpolate(loopFrame, [0, 12 * fps], [5, 95], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -75,11 +118,15 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
         width: '100%',
         height: '100%',
         objectFit: 'cover',
-        filter: `brightness(${surfaceBrightness}) saturate(${.72 + intensity * .38}) contrast(1.08)`,
+        filter: `brightness(${surfaceBrightness}) saturate(${.58 + intensity * .55}) contrast(1.08)`,
       }}
     />
 
-    <AbsoluteFill style={{background: `rgba(2, 6, 17, ${interpolate(intensity, [.16, .96], [.42, .04])})`}}/>
+    <AbsoluteFill style={{background: `rgba(2, 6, 17, ${interpolate(intensity, [0, 1], [.58, .04])})`}}/>
+    <AbsoluteFill style={{
+      background: rgba(selectedColor, power ? .08 + intensity * .24 : 0),
+      mixBlendMode: 'color',
+    }}/>
 
     <div style={{
       position: 'absolute',
@@ -87,7 +134,7 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       right: '2%',
       top: '-4%',
       height: '40%',
-      background: 'linear-gradient(180deg, rgba(59,232,255,.72), rgba(128,100,255,.28) 34%, transparent 76%)',
+      background: `linear-gradient(180deg, ${rgba(selectedColor, .78)}, ${rgba(selectedColor, .3)} 34%, transparent 76%)`,
       filter: 'blur(38px)',
       mixBlendMode: 'screen',
       opacity: glowOpacity * .55,
@@ -100,8 +147,8 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       width: 11,
       height: 11,
       borderRadius: '50%',
-      background: '#e9fbff',
-      boxShadow: `0 0 ${18 + intensity * 42}px ${5 + intensity * 12}px rgba(59,232,255,${glowOpacity})`,
+      background: power ? rgb(selectedColor) : '#26303b',
+      boxShadow: `0 0 ${18 + intensity * 42}px ${5 + intensity * 12}px ${rgba(selectedColor, glowOpacity)}`,
       opacity: .25 + intensity * .75,
       transform: 'translate(-50%, -50%)',
     }}/>) }
@@ -112,9 +159,9 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       top: '43.4%',
       width: '9.1%',
       height: '3.5%',
-      border: `${2 + intensity * 4}px solid rgba(236,252,255,${.38 + intensity * .62})`,
+      border: `${2 + intensity * 4}px solid ${rgba(selectedColor, power ? .38 + intensity * .62 : .1)}`,
       borderRadius: '50%',
-      filter: `drop-shadow(0 0 ${8 + intensity * 24}px rgba(59,232,255,${glowOpacity}))`,
+      filter: `drop-shadow(0 0 ${8 + intensity * 24}px ${rgba(selectedColor, glowOpacity)})`,
       opacity: .35 + intensity * .65,
     }}/>
 
@@ -124,7 +171,7 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       top: `${wash.top}%`,
       width: `${wash.width}%`,
       height: `${wash.bottom - wash.top}%`,
-      background: 'linear-gradient(180deg, rgba(228,250,255,.86), rgba(59,232,255,.35) 42%, transparent 92%)',
+      background: `linear-gradient(180deg, ${rgba(selectedColor, .92)}, ${rgba(selectedColor, .42)} 42%, transparent 92%)`,
       clipPath: 'polygon(49% 0, 82% 100%, 18% 100%)',
       filter: `blur(${8 + intensity * 12}px)`,
       mixBlendMode: 'screen',
@@ -135,10 +182,10 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
     <div style={{
       position: 'absolute',
       inset: '5%',
-      border: '1px solid rgba(59,232,255,.24)',
+      border: `1px solid ${rgba(selectedColor, .28)}`,
       pointerEvents: 'none',
     }}>
-      <span style={{position: 'absolute', left: `${sensorSweep}%`, top: -1, width: 42, height: 1, background: '#3be8ff', boxShadow: '0 0 14px #3be8ff'}}/>
+      <span style={{position: 'absolute', left: `${sensorSweep}%`, top: -1, width: 42, height: 1, background: rgb(selectedColor), boxShadow: `0 0 14px ${rgb(selectedColor)}`}}/>
     </div>
 
     <div style={{
@@ -148,17 +195,17 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       width: 250,
       padding: '22px 24px',
       background: 'rgba(2,6,17,.82)',
-      borderLeft: '5px solid #3be8ff',
+      borderLeft: `5px solid ${rgb(selectedColor)}`,
       fontFamily: 'Courier New, monospace',
       boxShadow: '0 18px 50px rgba(0,0,0,.34)',
     }}>
-      <div style={{fontSize: 18, letterSpacing: '.14em', color: '#3be8ff'}}>DAYLIGHT SENSOR / LIVE</div>
+      <div style={{fontSize: 18, letterSpacing: '.14em', color: rgb(selectedColor)}}>RGB REMOTE / LIVE</div>
       <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 18}}>
         <strong style={{fontSize: 62, lineHeight: .8, letterSpacing: '-.07em'}}>{lux}</strong>
         <span style={{fontSize: 18, letterSpacing: '.12em', color: '#9aa9c2'}}>LUX</span>
       </div>
       <div style={{height: 5, marginTop: 22, background: 'rgba(255,255,255,.14)'}}>
-        <span style={{display: 'block', width: `${percentage}%`, height: '100%', background: 'linear-gradient(90deg,#3be8ff,#8064ff)'}}/>
+        <span style={{display: 'block', width: `${percentage}%`, height: '100%', background: `linear-gradient(90deg,${rgb(selectedColor)},#ffffff)`}}/>
       </div>
       <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 12, fontSize: 15, letterSpacing: '.08em', color: '#9aa9c2'}}>
         <span>LOW</span><span>LED OUTPUT {percentage}%</span><span>HIGH</span>
@@ -174,14 +221,14 @@ export function LedSensitivityFilm({mode}: LedSensitivityFilmProps) {
       gap: 12,
       padding: '13px 16px',
       background: 'rgba(2,6,17,.76)',
-      border: '1px solid rgba(59,232,255,.28)',
+      border: `1px solid ${rgba(selectedColor, .35)}`,
       fontFamily: 'Courier New, monospace',
       fontSize: 16,
       letterSpacing: '.13em',
       textTransform: 'uppercase',
     }}>
-      <i style={{width: 8, height: 8, borderRadius: '50%', background: '#3be8ff', boxShadow: `0 0 ${8 + intensity * 16}px #3be8ff`}}/>
-      {mode === 'auto' ? 'Adaptive cycle' : `${mode} output locked`}
+      <i style={{width: 8, height: 8, borderRadius: '50%', background: rgb(selectedColor), boxShadow: `0 0 ${8 + intensity * 16}px ${rgb(selectedColor)}`}}/>
+      {!power ? 'RGB output off' : effect === 'spectrum' ? 'Spectrum cycle' : `${effect} · ${color}`}
     </div>
   </AbsoluteFill>;
 }
