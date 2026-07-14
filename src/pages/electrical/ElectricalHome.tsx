@@ -86,7 +86,7 @@ export default function ElectricalHome() {
         <dl className="power-hero-facts">
           <div><dt>Operating since</dt><dd>1985</dd></div>
           <div><dt>Project coverage</dt><dd>Plan → support</dd></div>
-          <div><dt>Emergency response</dt><dd>24h</dd></div>
+          <div><dt>Handover standard</dt><dd>Tested</dd></div>
         </dl>
       </div>
 
@@ -150,7 +150,7 @@ export default function ElectricalHome() {
       <div className="power-assurance-grid">
         <div><Gauge/><b>40</b><span>Years of electrical experience</span></div>
         <div><Box/><b>50+</b><span>Projects coordinated each year</span></div>
-        <div><ShieldCheck/><b>24h</b><span>Electrical emergency support</span></div>
+        <div><ShieldCheck/><b>4</b><span>Electrical disciplines coordinated</span></div>
         <div><Waves/><b>1</b><span>Team from survey to support</span></div>
       </div>
     </section>

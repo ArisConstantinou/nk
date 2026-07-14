@@ -37,7 +37,7 @@ export default function DesktopHome() {
     </section>
 
     <section className="discipline-grid section">
-      <Link to="/electrical-installations" className="discipline-card dark"><PlugZap/><div><h3>Electrical installations</h3><p>Planning, wiring, distribution, maintenance and 24-hour emergency support.</p></div><ArrowUpRight className="corner"/></Link>
+      <Link to="/electrical-installations" className="discipline-card dark"><PlugZap/><div><h3>Electrical installations</h3><p>Planning, wiring, distribution, testing and maintenance.</p></div><ArrowUpRight className="corner"/></Link>
       <Link to="/lighting" className="discipline-card image"><img src={publicAsset('assets/generated/material-light.webp')} alt="Warm architectural light across textured material"/><Lightbulb/><div><h3>Lighting</h3><p>Interior, exterior, decorative and professional lighting with dedicated catalogues.</p></div><ArrowUpRight className="corner"/></Link>
       <Link to="/appliances" className="discipline-card paper"><Refrigerator/><div><h3>Appliances</h3><p>Home and kitchen appliances selected with installation support.</p></div><ArrowUpRight className="corner"/></Link>
       <Link to="/electrical-installations#smart" className="discipline-card acid"><CircuitBoard/><div><h3>Smart systems</h3><p>KNX control, security, sound and vision designed around the property.</p></div><ArrowUpRight className="corner"/></Link>
@@ -55,7 +55,7 @@ export default function DesktopHome() {
     <section className="proof section">
       <div className="proof-number"><b>40</b><span>years of<br/>electrical experience</span></div>
       <div className="proof-number"><b>50+</b><span>projects<br/>each year</span></div>
-      <div className="proof-number"><b>24h</b><span>electrical<br/>emergency support</span></div>
+      <div className="proof-number"><b>4</b><span>connected<br/>specialist services</span></div>
       <div className="proof-line"><span style={{width:'92%'}}/><p>From private homes to stores, restaurants and public spaces.</p></div>
     </section>
   </>;

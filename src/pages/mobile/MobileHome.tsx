@@ -22,6 +22,6 @@ export default function MobileHome() {
       <Link to="/explore?season=Christmas" style={{backgroundImage:`url(${publicAsset('assets/generated/season-christmas.webp')})`}}><b>Christmas</b><span>Dining lights · coffee · food preparation</span></Link>
       <Link to="/explore?season=Winter" style={{backgroundImage:`url(${publicAsset('assets/generated/season-winter.webp')})`}}><b>Winter</b><span>Interior lighting · coffee · air comfort</span></Link>
     </div><Link className="button cream" to="/explore">Explore products <ArrowUpRight/></Link></section>
-    <section className="mobile-proof"><div><b>40</b><span>Years</span></div><div><b>50+</b><span>Projects / year</span></div><div><b>24h</b><span>Support</span></div></section>
+    <section className="mobile-proof"><div><b>40</b><span>Years</span></div><div><b>50+</b><span>Projects / year</span></div><div><b>4</b><span>Specialist services</span></div></section>
   </>;
 }

@@ -50,7 +50,7 @@ const pageContextByEyebrow: Record<string, {index: string; status: string; brief
   },
   'Electrical installations': {
     index: 'INSTALLATIONS / POWER & PROTECTION',
-    status: '24-HOUR SUPPORT',
+    status: 'PLANNING · WIRING · TESTING · MAINTENANCE',
     brief: 'Installation scope',
   },
   'Lighting and appliance discovery': {
@@ -260,7 +260,7 @@ export function ProjectsPage() {
 const solutions = [
   {id: 'plan', icon: Zap, title: 'Electrical planning', body: 'Coordinated load, circuit and equipment planning for homes, retail, hospitality and public spaces.', points: ['Load and circuit planning', 'Distribution-board specification', 'Project and trade coordination']},
   {id: 'install', icon: Wrench, title: 'Electrical installations', body: 'Complete electrical installation for private residences, stores, showrooms, restaurants and public spaces.', points: ['Containment, cabling and wiring', 'Distribution and final connections', 'Inspection, testing and handover']},
-  {id: 'support', icon: ShieldCheck, title: 'Maintenance & emergency support', body: 'Fault-finding, repairs and ongoing maintenance, including 24-hour electrical emergency assistance.', points: ['Electrical fault diagnosis', 'Planned maintenance', '24-hour emergency response']},
+  {id: 'support', icon: ShieldCheck, title: 'Maintenance & fault support', body: 'Electrical fault-finding, repairs and planned maintenance for completed residential and commercial installations.', points: ['Electrical fault diagnosis', 'Planned maintenance', 'Repair and corrective work']},
   {id: 'smart', icon: SlidersHorizontal, title: 'Smart home & low-voltage systems', body: 'KNX smart-home control, security, sound and vision integrated with the electrical installation.', points: ['Lighting and shutter control', 'Security and remote access', 'Sound, vision and system integration']},
 ];
 
@@ -268,7 +268,7 @@ const installationDelivery = [
   {icon: Zap, title: 'Installed to the plan', body: 'Containment, cabling, distribution boards and final connections completed as one coordinated installation.'},
   {icon: ShieldCheck, title: 'Protection verified', body: 'Circuits, protective devices and loads checked before the electrical system is energised.'},
   {icon: FileText, title: 'Tested before handover', body: 'Final inspection and functional testing confirm that the installation is ready for everyday use.'},
-  {icon: Wrench, title: 'Supported afterwards', body: 'Planned maintenance, fault diagnosis and 24-hour emergency electrical assistance remain available.'},
+  {icon: Wrench, title: 'Supported afterwards', body: 'Planned maintenance, fault diagnosis and corrective electrical work remain available after handover.'},
 ];
 
 export function ElectricalInstallationsPage() {
@@ -276,7 +276,7 @@ export function ElectricalInstallationsPage() {
   const activeSolution = solutions.find(solution => solution.id === active);
   const ActiveIcon = activeSolution?.icon;
   return <>
-    <PageIntro eyebrow="Electrical installations" title="Planned correctly." italic="Installed safely." body="Electrical planning, wiring, distribution, testing, maintenance and 24-hour emergency support—kept distinct from lighting selection and appliances."/>
+    <PageIntro eyebrow="Electrical installations" title="Planned correctly." italic="Installed safely." body="Electrical planning, wiring, distribution, testing, maintenance and fault support—kept distinct from lighting selection and appliances."/>
     <section className="solutions-stack section">
       {solutions.map(solution => {
         const Icon = solution.icon;
@@ -369,7 +369,7 @@ export function ContactPage() {
   const defaultMessage = project ? `I would like to discuss the ${project} project and a related electrical requirement.\n\nProject or property details:` : '';
   return <>
     <PageIntro eyebrow="Electrical enquiry" title="Your enquiry," italic="sent to the right specialist." body={content.contactNote}/>
-    <section className="contact-layout section"><div className="contact-details"><div><MapPin/><span><b>Visit the store</b>72 Makedonitissis Str.<br/>Strovolos 2057, Cyprus<a target="_blank" rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus">Open in maps <ArrowUpRight/></a></span></div><div><Phone/><span><b>Call</b><a href="tel:+35722494145">+357 22 494145</a><small>24-hour electrical emergency support</small></span></div><div><Mail/><span><b>Write</b><a href="mailto:info@nk-electrical.com">info@nk-electrical.com</a></span></div><div className="hours"><b>Store hours</b><p><span>Mon · Tue · Thu · Fri</span>09:00–18:00</p><p><span>Wednesday · Saturday</span>09:00–14:00</p><p><span>Sunday</span>Closed</p></div></div>
+    <section className="contact-layout section"><div className="contact-details"><div><MapPin/><span><b>Visit the store</b>72 Makedonitissis Str.<br/>Strovolos 2057, Cyprus<a target="_blank" rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus">Open in maps <ArrowUpRight/></a></span></div><div><Phone/><span><b>Call</b><a href="tel:+35722494145">+357 22 494145</a><small>Electrical installation, fault and maintenance enquiries</small></span></div><div><Mail/><span><b>Write</b><a href="mailto:info@nk-electrical.com">info@nk-electrical.com</a></span></div><div className="hours"><b>Store hours</b><p><span>Mon · Tue · Thu · Fri</span>09:00–18:00</p><p><span>Wednesday · Saturday</span>09:00–14:00</p><p><span>Sunday</span>Closed</p></div></div>
       <form className="contact-form" onSubmit={submit}><div className="form-intro"><span>{project ? 'Project discussion' : 'Electrical enquiry'}</span><h2>What needs powering,<br/>installing or controlling?</h2></div><label>Your name<input required name="name" autoComplete="name"/></label><label>Phone<input required name="phone" autoComplete="tel"/></label><label>Starting point<select name="subject" defaultValue={project ? 'Project discussion' : 'New electrical project'}>{project && <option>Project discussion</option>}<option>New electrical project</option><option>Electrical installation</option><option>Lighting selection</option><option>Appliance enquiry</option><option>Smart home system</option><option>Electrical support</option></select></label><label>Tell us about the work<textarea required name="message" rows={6} defaultValue={defaultMessage}/></label><button className="button copper" type="submit">Prepare email <ArrowUpRight/></button>{sent && <p className="form-note"><Check/> Your email app should now be open with the details prepared.</p>}</form></section>
   </>;
 }
