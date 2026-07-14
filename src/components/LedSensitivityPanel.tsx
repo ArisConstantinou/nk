@@ -204,14 +204,14 @@ export function LedSensitivityPanel() {
         <div className="led-lab-fixtures" aria-label="RGB LED layers shown">
           <span><SunDim/> RGB cove</span>
           <span><Lightbulb/> Colour-tuned spots</span>
-          <span><Gauge/> Mapped wall washes</span>
+          <span><Gauge/> Wall-light fixtures</span>
         </div>
       </div>
 
       <div className="rgb-control-panel">
         <div className="rgb-control-intro">
           <span className="rgb-control-kicker"><SlidersHorizontal/> LIVE OUTPUT CONTROL</span>
-          <p>Cove, recessed spots, ring and wall washes inherit the same live colour and output.</p>
+          <p>Cove, recessed spots, ring and wall-light fixtures inherit the same live colour and output.</p>
         </div>
 
         <div className="rgb-live-readout">

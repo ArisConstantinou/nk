@@ -61,10 +61,9 @@ const spots = [
   {left: 72.1, top: 26.5},
 ];
 
-// Measured from the six visible wall-wash fixtures in the source image. Each
-// cone begins immediately below its own light instead of following an evenly
-// spaced decorative pattern.
-const wallWashes = [
+// Measured directly on the six vertical wall luminaires in the source image.
+// These are narrow fixture glows, not artificial projected cones.
+const wallFixtures = [
   {left: 69.1, top: 45.9, bottom: 70.5, width: 2.1},
   {left: 74.7, top: 39.5, bottom: 73.0, width: 2.6},
   {left: 78.4, top: 36.1, bottom: 75.5, width: 3.0},
@@ -103,7 +102,8 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
   }));
   const percentage = power ? Math.round(intensity * 100) : 0;
   const glowOpacity = power ? interpolate(intensity, [0, 1], [.03, .82]) : 0;
-  const surfaceBrightness = interpolate(intensity, [0, 1], [.38, 1.08]);
+  const surfaceBrightness = interpolate(intensity, [0, 1], [.7, .92]);
+  const ambientShade = interpolate(intensity, [0, 1], [.25, .08]);
   const sensorSweep = interpolate(loopFrame, [0, 12 * fps], [5, 95], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -118,26 +118,47 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
         width: '100%',
         height: '100%',
         objectFit: 'cover',
-        filter: `brightness(${surfaceBrightness}) saturate(${.58 + intensity * .55}) contrast(1.08)`,
+        filter: `brightness(${surfaceBrightness}) saturate(.82) contrast(1.06)`,
       }}
     />
 
-    <AbsoluteFill style={{background: `rgba(2, 6, 17, ${interpolate(intensity, [0, 1], [.58, .04])})`}}/>
-    <AbsoluteFill style={{
-      background: rgba(selectedColor, power ? .08 + intensity * .24 : 0),
-      mixBlendMode: 'color',
-    }}/>
+    <AbsoluteFill style={{background: `rgba(2, 6, 17, ${ambientShade})`}}/>
+
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="none"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        overflow: 'visible',
+        mixBlendMode: 'screen',
+        opacity: power ? .18 + intensity * .72 : 0,
+        filter: `drop-shadow(0 0 ${6 + intensity * 15}px ${rgba(selectedColor, .7)})`,
+      }}
+    >
+      <path
+        d="M 152 0 L 525 240 L 1190 240 L 1540 0"
+        fill="none"
+        stroke={rgb(selectedColor)}
+        strokeWidth={4 + intensity * 8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
 
     <div style={{
       position: 'absolute',
-      left: '2%',
-      right: '2%',
-      top: '-4%',
-      height: '40%',
-      background: `linear-gradient(180deg, ${rgba(selectedColor, .78)}, ${rgba(selectedColor, .3)} 34%, transparent 76%)`,
-      filter: 'blur(38px)',
+      left: '24%',
+      right: '23%',
+      top: '4%',
+      height: '31%',
+      background: `radial-gradient(ellipse at 50% 32%, ${rgba(selectedColor, .18)}, transparent 70%)`,
+      filter: 'blur(28px)',
       mixBlendMode: 'screen',
-      opacity: glowOpacity * .55,
+      opacity: glowOpacity * .35,
     }}/>
 
     {spots.map((spot) => <div key={`spot-${spot.left}`} style={{
@@ -165,17 +186,17 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
       opacity: .35 + intensity * .65,
     }}/>
 
-    {wallWashes.map((wash, index) => <div key={`wash-${wash.left}`} style={{
+    {wallFixtures.map((fixture) => <div key={`fixture-${fixture.left}`} style={{
       position: 'absolute',
-      left: `${wash.left}%`,
-      top: `${wash.top}%`,
-      width: `${wash.width}%`,
-      height: `${wash.bottom - wash.top}%`,
-      background: `linear-gradient(180deg, ${rgba(selectedColor, .92)}, ${rgba(selectedColor, .42)} 42%, transparent 92%)`,
-      clipPath: 'polygon(49% 0, 82% 100%, 18% 100%)',
-      filter: `blur(${8 + intensity * 12}px)`,
+      left: `${fixture.left}%`,
+      top: `${fixture.top}%`,
+      width: `${Math.max(.16, fixture.width * .08)}%`,
+      height: `${fixture.bottom - fixture.top}%`,
+      background: `linear-gradient(180deg, ${rgba(selectedColor, .88)}, ${rgba(selectedColor, .62)} 70%, ${rgba(selectedColor, .18)})`,
+      boxShadow: `0 0 ${5 + intensity * 14}px ${1 + intensity * 3}px ${rgba(selectedColor, .48)}`,
+      filter: 'blur(1.2px)',
       mixBlendMode: 'screen',
-      opacity: glowOpacity * (.72 + (index % 2) * .14),
+      opacity: power ? .12 + intensity * .75 : 0,
       transform: 'translateX(-50%)',
     }}/>) }
 
