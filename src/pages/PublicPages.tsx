@@ -1,4 +1,4 @@
-import {useState, type FormEvent} from 'react';
+import {useEffect, useState, type FormEvent} from 'react';
 import {Link, useParams, useSearchParams} from 'react-router-dom';
 import {AnimatePresence, motion} from 'framer-motion';
 import {
@@ -17,6 +17,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Wrench,
+  X,
   Zap,
 } from 'lucide-react';
 import {team} from '../content';
@@ -52,37 +53,85 @@ export function AboutPage() {
   </>;
 }
 
-const projectCards = [
-  {
-    id: 'boardroom-installation',
-    name: 'Boardroom Electrical & Lighting Installation',
-    image: publicAsset('assets/projects/boardroom-installation.webp'),
-    type: 'Interior electrical installation · architectural lighting',
-    text: 'A completed workplace installation coordinating room power with recessed spotlights and a shaped ceiling-light feature.',
-    systems: ['Electrical distribution for the room', 'Recessed ceiling lighting', 'Decorative ceiling-light integration', 'Final fitting coordination'],
-  },
-  {
-    id: 'residential-exterior',
-    name: 'Private Residence Exterior & Pool Lighting',
-    image: publicAsset('assets/projects/residential-exterior.webp'),
-    type: 'Exterior electrical installation · landscape and façade lighting',
-    text: 'A completed residential exterior where pool, façade and landscape lighting are coordinated as one installation.',
-    systems: ['Exterior power distribution', 'Poolside lighting', 'Façade illumination', 'Landscape and pathway lighting'],
-  },
+const archivedProjectNames = [
+  'Bank of Cyprus Head Offices',
+  'Private Residence',
+  'Building Residence + Offices + Stores',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Building Residence',
+  'Private Residence',
+  'Athienitis Supermarket, Pallouriotissa',
+  'Building Residence',
+  'Building Residence',
+  'Private Residence',
+  'Building Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Private Residence',
+  'Building Residence',
 ];
 
+const projectType = (name: string) => {
+  if (name.includes('Bank of Cyprus')) return 'Commercial offices · electrical & LED lighting';
+  if (name.includes('Supermarket')) return 'Retail · electrical & LED lighting';
+  if (name.includes('Offices + Stores')) return 'Mixed use · residential, offices & retail';
+  if (name === 'Building Residence') return 'Residential building · electrical & LED lighting';
+  return 'Private residence · electrical & LED lighting';
+};
+
+const projectCards = archivedProjectNames.map((name, index) => ({
+  id: `archive-${String(index + 1).padStart(2, '0')}`,
+  number: String(index + 1).padStart(2, '0'),
+  name,
+  image: publicAsset(`assets/projects/archive/project-${String(index + 1).padStart(2, '0')}.jpg`),
+  type: projectType(name),
+  text: 'Electrical and LED lighting installation, with lighting selected through the NK Electrical store.',
+  systems: ['Electrical installation', 'LED lighting installation', 'Lighting selection and supply'],
+}));
+
 export function ProjectsPage() {
-  const [openProject, setOpenProject] = useState<string | null>(projectCards[0].id);
+  const [selectedProject, setSelectedProject] = useState<(typeof projectCards)[number] | null>(null);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && setSelectedProject(null);
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [selectedProject]);
+
   return <>
-    <PageIntro eyebrow="Installed project archive" title="Electrical work," italic="shown on site." body="Completed installations currently documented in NK Electrical’s project archive—presented as actual work, not stock imagery."/>
-    <section className="project-list section">{projectCards.map(project => {
-      const open = openProject === project.id;
-      return <article className="project-row" key={project.id}>
-        <div className="project-photo"><img src={project.image} alt={project.name}/><span>{project.type}</span></div>
-        <div className="project-copy"><span className="project-status"><CircleDot/> Completed installation</span><h2>{project.name}</h2><p>{project.text}</p><div className="project-actions"><button className="text-link" aria-expanded={open} onClick={() => setOpenProject(open ? null : project.id)}>{open ? 'Close project details' : 'View project details'} <ChevronDown/></button><Link className="text-link" to={`/contact?project=${encodeURIComponent(project.name)}`}>Discuss this project <ArrowUpRight/></Link></div><AnimatePresence>{open && <motion.div className="project-detail" initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}}><b>Installed scope</b><ul>{project.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul></motion.div>}</AnimatePresence></div>
-      </article>;
-    })}</section>
+    <PageIntro eyebrow="Complete installed project archive" title="Electrical work," italic="shown on site." body="Every completed installation published in NK Electrical’s original project archive, now organised as a clear, clickable two-column collection."/>
+    <section className="project-archive-grid section" aria-label="NK Electrical completed projects">{projectCards.map(project =>
+      <button className="project-archive-card" type="button" aria-haspopup="dialog" onClick={() => setSelectedProject(project)} key={project.id}>
+        <span className="project-archive-image"><img src={project.image} alt={`${project.name} completed installation ${project.number}`} loading="lazy"/><span>View project <ArrowUpRight/></span></span>
+        <span className="project-archive-copy"><small>Project {project.number}</small><strong>{project.name}</strong><span>{project.type}</span></span>
+      </button>
+    )}</section>
     <section className="project-principle section"><span className="eyebrow light">The electrical method</span><blockquote>“Plan the circuits, coordinate the fittings, test every connection.”</blockquote><div><span>Survey the site</span><ArrowRight/><span>Install the system</span><ArrowRight/><span>Test and support</span></div></section>
+    <AnimatePresence>{selectedProject &&
+      <motion.div className="project-modal-backdrop" role="presentation" onMouseDown={() => setSelectedProject(null)} initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
+        <motion.article className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onMouseDown={event => event.stopPropagation()} initial={{opacity: 0, y: 30, scale: .98}} animate={{opacity: 1, y: 0, scale: 1}} exit={{opacity: 0, y: 20, scale: .98}}>
+          <button className="project-modal-close" type="button" aria-label="Close project details" onClick={() => setSelectedProject(null)}><X/></button>
+          <div className="project-modal-image"><img src={selectedProject.image} alt={`${selectedProject.name} completed installation ${selectedProject.number}`}/></div>
+          <div className="project-modal-copy"><small>Installed project · {selectedProject.number} of {projectCards.length}</small><h2 id="project-modal-title">{selectedProject.name}</h2><p>{selectedProject.text}</p><span>{selectedProject.type}</span><b>Installed scope</b><ul>{selectedProject.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul><Link className="button copper" to={`/contact?project=${encodeURIComponent(`${selectedProject.name} · Project ${selectedProject.number}`)}`}>Discuss a similar project <ArrowUpRight/></Link></div>
+        </motion.article>
+      </motion.div>
+    }</AnimatePresence>
   </>;
 }
 
