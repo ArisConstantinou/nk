@@ -7,6 +7,8 @@ import {
   BookOpen,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleDot,
   ExternalLink,
   FileText,
@@ -102,17 +104,39 @@ const projectCards = archivedProjectNames.map((name, index) => ({
 export function ProjectsPage() {
   const [selectedProject, setSelectedProject] = useState<(typeof projectCards)[number] | null>(null);
 
+  const moveProject = (direction: -1 | 1) => {
+    setSelectedProject(current => {
+      if (!current) return null;
+      const currentIndex = projectCards.findIndex(project => project.id === current.id);
+      return projectCards[(currentIndex + direction + projectCards.length) % projectCards.length];
+    });
+  };
+
   useEffect(() => {
     if (!selectedProject) return;
     const previousOverflow = document.body.style.overflow;
-    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && setSelectedProject(null);
+    const handleProjectKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedProject(null);
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        moveProject(-1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        moveProject(1);
+      }
+    };
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', closeOnEscape);
+    window.addEventListener('keydown', handleProjectKeys);
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('keydown', handleProjectKeys);
     };
   }, [selectedProject]);
+
+  const selectedIndex = selectedProject ? projectCards.findIndex(project => project.id === selectedProject.id) : -1;
+  const previousProject = selectedIndex >= 0 ? projectCards[(selectedIndex - 1 + projectCards.length) % projectCards.length] : null;
+  const nextProject = selectedIndex >= 0 ? projectCards[(selectedIndex + 1) % projectCards.length] : null;
 
   return <>
     <PageIntro eyebrow="Complete installed project archive" title="Electrical work," italic="shown on site." body="Every completed installation published in NK Electrical’s original project archive, now organised as a clear, clickable two-column collection."/>
@@ -127,8 +151,13 @@ export function ProjectsPage() {
       <motion.div className="project-modal-backdrop" role="presentation" onMouseDown={() => setSelectedProject(null)} initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
         <motion.article className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onMouseDown={event => event.stopPropagation()} initial={{opacity: 0, y: 30, scale: .98}} animate={{opacity: 1, y: 0, scale: 1}} exit={{opacity: 0, y: 20, scale: .98}}>
           <button className="project-modal-close" type="button" aria-label="Close project details" onClick={() => setSelectedProject(null)}><X/></button>
-          <div className="project-modal-image"><img src={selectedProject.image} alt={`${selectedProject.name} completed installation ${selectedProject.number}`}/></div>
-          <div className="project-modal-copy"><small>Installed project · {selectedProject.number} of {projectCards.length}</small><h2 id="project-modal-title">{selectedProject.name}</h2><p>{selectedProject.text}</p><span>{selectedProject.type}</span><b>Installed scope</b><ul>{selectedProject.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul><Link className="button copper" to={`/contact?project=${encodeURIComponent(`${selectedProject.name} · Project ${selectedProject.number}`)}`}>Discuss a similar project <ArrowUpRight/></Link></div>
+          <div className="project-modal-image">
+            <img key={selectedProject.id} src={selectedProject.image} alt={`${selectedProject.name} completed installation ${selectedProject.number}`}/>
+            <div className="project-modal-identity" aria-live="polite"><small>Installed project · {selectedProject.number} of {projectCards.length}</small><h2 id="project-modal-title">{selectedProject.name}</h2><span>{selectedProject.type}</span></div>
+            <button className="project-modal-nav previous" type="button" aria-label={`Previous project: ${previousProject?.name}`} onClick={() => moveProject(-1)}><ChevronLeft/></button>
+            <button className="project-modal-nav next" type="button" aria-label={`Next project: ${nextProject?.name}`} onClick={() => moveProject(1)}><ChevronRight/></button>
+          </div>
+          <div className="project-modal-copy"><p>{selectedProject.text}</p><b>Installed scope</b><ul>{selectedProject.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul><Link className="button copper" to={`/contact?project=${encodeURIComponent(`${selectedProject.name} · Project ${selectedProject.number}`)}`}>Discuss a similar project <ArrowUpRight/></Link></div>
         </motion.article>
       </motion.div>
     }</AnimatePresence>
