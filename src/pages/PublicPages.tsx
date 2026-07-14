@@ -267,9 +267,26 @@ const solutions = [
 
 export function ElectricalInstallationsPage() {
   const [active, setActive] = useState('plan');
+  const activeSolution = solutions.find(solution => solution.id === active);
+  const ActiveIcon = activeSolution?.icon;
   return <>
     <PageIntro eyebrow="Electrical installations" title="Planned correctly." italic="Installed safely." body="Electrical planning, wiring, distribution, testing, maintenance and 24-hour emergency support—kept distinct from lighting selection and appliances."/>
-    <section className="solutions-stack section">{solutions.map(solution => { const Icon = solution.icon; return <article id={solution.id} className={`solution-row ${active === solution.id ? 'open' : ''}`} key={solution.id}><button aria-expanded={active === solution.id} onClick={() => setActive(active === solution.id ? '' : solution.id)}><Icon/><h2>{solution.title}</h2><ChevronDown/></button><AnimatePresence>{active === solution.id && <motion.div initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}} className="solution-detail"><p>{solution.body}</p><ul>{solution.points.map(point => <li key={point}><Check/>{point}</li>)}</ul><Link to="/contact">Discuss this installation <ArrowUpRight/></Link></motion.div>}</AnimatePresence></article>;})}</section>
+    <section className="solutions-stack section">
+      {solutions.map(solution => {
+        const Icon = solution.icon;
+        const isActive = active === solution.id;
+        return <article id={solution.id} className={`solution-row ${isActive ? 'open' : ''}`} key={solution.id}>
+          <button aria-expanded={isActive} aria-controls={`${solution.id}-details`} onClick={() => setActive(isActive ? '' : solution.id)}><Icon/><h2>{solution.title}</h2><ChevronDown/></button>
+          <AnimatePresence initial={false}>{isActive && <motion.div id={`${solution.id}-details`} className="solution-detail solution-detail--mobile" initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}} transition={{height: {duration: .34, ease: [.22, 1, .36, 1]}, opacity: {duration: .2}}}><p>{solution.body}</p><ul>{solution.points.map(point => <li key={point}><Check/>{point}</li>)}</ul><Link to="/contact">Discuss this installation <ArrowUpRight/></Link></motion.div>}</AnimatePresence>
+        </article>;
+      })}
+      <AnimatePresence initial={false}>{activeSolution && ActiveIcon && <motion.aside key="desktop-solution-panel" className="solution-expanded" initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}} transition={{height: {duration: .42, ease: [.22, 1, .36, 1]}, opacity: {duration: .22}}}>
+        <motion.div key={activeSolution.id} className="solution-detail solution-detail--desktop" initial={{opacity: 0, y: 8}} animate={{opacity: 1, y: 0}} transition={{duration: .24, ease: 'easeOut'}}>
+          <div className="solution-detail-heading"><ActiveIcon/><span>Selected service</span><h3>{activeSolution.title}</h3></div>
+          <p>{activeSolution.body}</p><ul>{activeSolution.points.map(point => <li key={point}><Check/>{point}</li>)}</ul><Link to="/contact">Discuss this installation <ArrowUpRight/></Link>
+        </motion.div>
+      </motion.aside>}</AnimatePresence>
+    </section>
     <section className="process section"><div><span className="eyebrow">From survey to final electrical test</span><h2>A controlled route to<br/><em>safe switch-on.</em></h2></div><div className="process-map">{['Survey & load', 'Plan & specify', 'Install & coordinate', 'Test & support'].map((step, index) => <div key={step}><CircleDot/><i/><b>{step}</b><small>{['Understand the building, demand and constraints.', 'Define circuits, protection, equipment and interfaces.', 'Complete clean site work with every trade coordinated.', 'Inspect, test, document and support the system.'][index]}</small></div>)}</div></section>
   </>;
 }
