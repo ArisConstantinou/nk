@@ -17,17 +17,17 @@ import {publicAsset} from '../utils/assets';
 import {ThemeControls} from './ThemeControls';
 
 const electricalNav = [
-  {label: 'Home', route: '/', code: '00', Icon: House},
-  {label: 'Installations', route: '/electrical-installations', code: '01', Icon: PlugZap},
-  {label: 'Lighting', route: '/lighting', code: '02', Icon: Lightbulb},
-  {label: 'Appliances', route: '/appliances', code: '03', Icon: Refrigerator},
-  {label: 'Projects', route: '/projects', code: '04', Icon: PanelsTopLeft},
-  {label: 'About', route: '/about', code: '05', Icon: UsersRound},
-  {label: 'Contact', route: '/contact', code: '06', Icon: Contact},
+  {label: 'Home', route: '/', code: 'START', Icon: House},
+  {label: 'Installations', route: '/electrical-installations', code: 'POWER', Icon: PlugZap},
+  {label: 'Lighting', route: '/lighting', code: 'LIGHT', Icon: Lightbulb},
+  {label: 'Appliances', route: '/appliances', code: 'EQUIP', Icon: Refrigerator},
+  {label: 'Projects', route: '/projects', code: 'WORK', Icon: PanelsTopLeft},
+  {label: 'About', route: '/about', code: 'TEAM', Icon: UsersRound},
+  {label: 'Contact', route: '/contact', code: 'TALK', Icon: Contact},
 ];
 
 const contextByRoute: Record<string, string> = {
-  '/': 'Electrical operations',
+  '/': 'Power · Lighting · Appliances',
   '/electrical-installations': 'Power installations',
   '/lighting': 'Lighting design & supply',
   '/appliances': 'Appliance selection',
@@ -101,7 +101,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     <aside className="electrical-rail">
       <Link className="electrical-rail-brand" to="/" aria-label="NK Electrical Ltd. systems home">
         <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
-        <span className="electrical-rail-wordmark"><strong>Electrical</strong><small>Ltd.</small></span>
+        <span className="electrical-rail-wordmark"><strong>Electrical</strong><small>Ltd. · Since 1985</small></span>
       </Link>
       <nav className="electrical-rail-nav" aria-label="Electrical systems navigation">
         {electricalNav.map(({label, route, code, Icon}) => <NavLink to={route} key={route} aria-label={label} data-label={label} end={route === '/'}>
@@ -115,7 +115,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       <header className="electrical-commandbar">
         <Link className="electrical-command-brand" to="/" aria-label="NK Electrical Ltd. home">
           <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
-          <span><strong>Electrical</strong><small>Ltd.</small></span>
+          <span><strong>Electrical</strong><small>Ltd. · Since 1985</small></span>
         </Link>
         <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => { setMenuOpen(open => !open); setEnquiryOpen(false); }}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
         <div className="electrical-command-location"><strong>{section}</strong></div>
