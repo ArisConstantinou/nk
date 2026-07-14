@@ -15,6 +15,7 @@ import {
 import {Link} from 'react-router-dom';
 import {useContent} from '../../context/ContentContext';
 import {publicAsset} from '../../utils/assets';
+import {LedSensitivityPanel} from '../../components/LedSensitivityPanel';
 
 const systems = [
   {
@@ -129,8 +130,10 @@ export default function ElectricalHome() {
       </div>
     </section>
 
+    <LedSensitivityPanel/>
+
     <section className="power-project-feed">
-      <div className="power-section-id"><span>02 / INSTALLED EVIDENCE</span><b>25 projects in archive</b></div>
+      <div className="power-section-id"><span>03 / INSTALLED EVIDENCE</span><b>25 projects in archive</b></div>
       <div className="power-project-lead"><h2>Not concepts.<br/><em>Completed circuits.</em></h2><p>Real electrical and LED lighting work from the NK project archive.</p><Link to="/projects">Open every project <ArrowRight/></Link></div>
       <div className="power-project-grid">{projects.map((project, index) => <Link to="/projects" className="power-project" key={`${project.name}-${index}`}>
         <img src={publicAsset(project.image)} alt={project.name}/>
@@ -142,7 +145,7 @@ export default function ElectricalHome() {
     </section>
 
     <section className="power-assurance">
-      <div className="power-assurance-title"><span>03 / SWITCH-ON STANDARD</span><h2>Safe power is<br/>the finished product.</h2></div>
+      <div className="power-assurance-title"><span>04 / SWITCH-ON STANDARD</span><h2>Safe power is<br/>the finished product.</h2></div>
       <div className="power-assurance-grid">
         <div><Gauge/><b>40</b><span>Years of electrical experience</span></div>
         <div><Box/><b>50+</b><span>Projects coordinated each year</span></div>
