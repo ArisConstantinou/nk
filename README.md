@@ -4,7 +4,7 @@ A ground-up React/Vite rebuild of the NK Electrical website, designed around the
 
 ## Live website
 
-<https://arisconstantinou.github.io/nk-electrical-website/>
+<https://arisconstantinou.github.io/nk/>
 
 ## Run locally
 
