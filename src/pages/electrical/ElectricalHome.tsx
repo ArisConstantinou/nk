@@ -34,7 +34,7 @@ const systems = [
     route: '/lighting',
     Icon: Lightbulb,
     detail: 'Interior, exterior, decorative and professional lighting selected around the architecture.',
-    signal: 'Layer → select → aim → commission',
+    signal: 'Layer → select → aim → test',
   },
   {
     code: 'APL-03',

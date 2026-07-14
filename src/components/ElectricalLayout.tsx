@@ -31,7 +31,7 @@ const routeName = (pathname: string) => electricalNav.find(item => item.route !=
 const workflowByRoute: Record<string, [string, string, string, string]> = {
   '/': ['Survey', 'Engineer', 'Install', 'Maintain'],
   '/electrical-installations': ['Load', 'Protect', 'Wire', 'Certify'],
-  '/lighting': ['Layer', 'Specify', 'Aim', 'Commission'],
+  '/lighting': ['Layer', 'Specify', 'Aim', 'Test'],
   '/appliances': ['Select', 'Supply', 'Connect', 'Support'],
   '/projects': ['Scope', 'Coordinate', 'Install', 'Handover'],
   '/about': ['Experience', 'Coordinate', 'Install', 'Support'],
