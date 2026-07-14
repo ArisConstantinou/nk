@@ -135,37 +135,13 @@ export function LedSensitivityPanel() {
     aria-labelledby="led-lab-title"
     style={{'--rgb-color': color} as CSSProperties}
   >
-    <div className="led-lab-heading">
-      <div><span>LIVE / RGB LIGHTING CONTROL</span><i><Activity/> REMOTE LINKED</i></div>
-      <h2 id="led-lab-title">Choose the colour.<br/><em>Watch it live.</em></h2>
-      <p>Control the same installed LED layers as a complete room. Select any RGB colour, set the output level and compare static, breathing and spectrum scenes in real time.</p>
-    </div>
-
-    <div className="led-lab-player">
-      <Player
-        ref={playerRef}
-        component={LedSensitivityFilm}
-        inputProps={{color, brightness, power, effect}}
-        durationInFrames={360}
-        compositionWidth={1600}
-        compositionHeight={900}
-        fps={30}
-        loop
-        autoPlay
-        initiallyMuted
-        controls={false}
-        clickToPlay={false}
-        acknowledgeRemotionLicense
-        style={{width: '100%', height: '100%'}}
-      />
-      <div className="led-lab-fixtures" aria-label="RGB LED layers shown">
-        <span><SunDim/> RGB cove</span>
-        <span><Lightbulb/> Colour-tuned spots</span>
-        <span><Gauge/> Mapped wall washes</span>
-      </div>
-    </div>
-
     <div className="led-rgb-console">
+      <div className="led-lab-heading">
+        <div><span>LIVE / RGB LIGHTING CONTROL</span><i><Activity/> REMOTE LINKED</i></div>
+        <h2 id="led-lab-title">Set the colour.<br/><em>See the room respond.</em></h2>
+        <p>The remote and installed LED layers now work as one live control desk. Adjust colour, brightness or movement and see the complete room react beside it.</p>
+      </div>
+
       <div className="rgb-remote-stage">
         <div className="rgb-remote-stage-label"><Palette/> NK RGB REMOTE <span>{power ? 'LINK ACTIVE' : 'OUTPUT OFF'}</span></div>
         <div className={`rgb-remote-shell${power ? '' : ' is-off'}`}>
@@ -208,10 +184,35 @@ export function LedSensitivityPanel() {
         </div>
       </div>
 
+      <div className="led-lab-player">
+        <Player
+          ref={playerRef}
+          component={LedSensitivityFilm}
+          inputProps={{color, brightness, power, effect}}
+          durationInFrames={360}
+          compositionWidth={1600}
+          compositionHeight={900}
+          fps={30}
+          loop
+          autoPlay
+          initiallyMuted
+          controls={false}
+          clickToPlay={false}
+          acknowledgeRemotionLicense
+          style={{width: '100%', height: '100%'}}
+        />
+        <div className="led-lab-fixtures" aria-label="RGB LED layers shown">
+          <span><SunDim/> RGB cove</span>
+          <span><Lightbulb/> Colour-tuned spots</span>
+          <span><Gauge/> Mapped wall washes</span>
+        </div>
+      </div>
+
       <div className="rgb-control-panel">
-        <span className="rgb-control-kicker"><SlidersHorizontal/> LIVE OUTPUT CONTROL</span>
-        <h3>One remote.<br/>Every LED layer.</h3>
-        <p>The room responds as one coordinated installation: cove, recessed spots, ring and wall washes all inherit the same colour and output level.</p>
+        <div className="rgb-control-intro">
+          <span className="rgb-control-kicker"><SlidersHorizontal/> LIVE OUTPUT CONTROL</span>
+          <p>Cove, recessed spots, ring and wall washes inherit the same live colour and output.</p>
+        </div>
 
         <div className="rgb-live-readout">
           <label className="rgb-colour-readout">
@@ -264,7 +265,7 @@ export function LedSensitivityPanel() {
           >{effectLabels[value]}</button>)}
         </div>
 
-        <p className="rgb-control-note">Drag anywhere on the colour wheel, use the hardware presets, or choose an exact colour from the swatch. Every change is applied to the room immediately.</p>
+        <p className="rgb-control-note">Use the remote wheel or presets, then fine-tune brightness and movement here. Every change is visible in the room above.</p>
       </div>
     </div>
   </section>;
