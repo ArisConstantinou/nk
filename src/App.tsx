@@ -2,16 +2,19 @@ import {lazy, Suspense, useEffect, useState} from 'react';
 import {BrowserRouter, Navigate, Route, Routes, useParams} from 'react-router-dom';
 import {Layout} from './components/Layout';
 import {ContentProvider} from './context/ContentContext';
+import {ThemeProvider, useTheme} from './context/ThemeContext';
 import {AboutPage, AppliancesPage, ContactPage, ElectricalInstallationsPage, ExplorePage, LightingPage, NotFound, ProductPage, ProjectsPage} from './pages/PublicPages';
 
 const DesktopHome=lazy(()=>import('./pages/desktop/DesktopHome'));
 const MobileHome=lazy(()=>import('./pages/mobile/MobileHome'));
+const ElectricalHome=lazy(()=>import('./pages/electrical/ElectricalHome'));
 const Admin=lazy(()=>import('./pages/Admin'));
 
 function Home() {
+  const {electricalTheme} = useTheme();
   const [mobile,setMobile]=useState(()=>window.matchMedia('(max-width: 720px)').matches);
   useEffect(()=>{const media=window.matchMedia('(max-width: 720px)');const update=()=>setMobile(media.matches);media.addEventListener('change',update);return()=>media.removeEventListener('change',update)},[]);
-  return <Suspense fallback={<div className="route-loader">Connecting the space…</div>}>{mobile?<MobileHome/>:<DesktopHome/>}</Suspense>;
+  return <Suspense fallback={<div className="route-loader">Connecting the space…</div>}>{electricalTheme?<ElectricalHome/>:mobile?<MobileHome/>:<DesktopHome/>}</Suspense>;
 }
 
 const Public=({children}:{children:React.ReactNode})=><Layout>{children}</Layout>;
@@ -32,7 +35,7 @@ function LegacyProductRedirect(){
   return <Navigate to={productId?`/product/${productId}`:'/explore'} replace/>;
 }
 
-export default function App(){return <ContentProvider><BrowserRouter basename={routerBase}><Routes>
+export default function App(){return <ThemeProvider><ContentProvider><BrowserRouter basename={routerBase}><Routes>
   <Route path="/" element={<Public><Home/></Public>}/>
   <Route path="/about" element={<Public><AboutPage/></Public>}/>
   <Route path="/projects" element={<Public><ProjectsPage/></Public>}/>
@@ -59,4 +62,4 @@ export default function App(){return <ContentProvider><BrowserRouter basename={r
   <Route path="/developers" element={<Navigate to="/projects" replace/>}/>
   <Route path="/product-page/:slug" element={<LegacyProductRedirect/>}/>
   <Route path="*" element={<Public><NotFound/></Public>}/>
-</Routes></BrowserRouter></ContentProvider>}
+</Routes></BrowserRouter></ContentProvider></ThemeProvider>}

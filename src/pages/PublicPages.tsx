@@ -24,10 +24,18 @@ import {
 } from 'lucide-react';
 import {team} from '../content';
 import {useContent} from '../context/ContentContext';
+import {useTheme} from '../context/ThemeContext';
 import type {Product} from '../types';
 import {publicAsset} from '../utils/assets';
 
 export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
+  const {electricalTheme} = useTheme();
+  if (electricalTheme) return <section className="system-page-intro">
+    <div className="system-page-index"><span>NK / SYSTEM BRIEF</span><i>LIVE SCOPE</i></div>
+    <div className="system-page-title"><span>{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div>
+    <aside className="system-page-brief"><small>Project context</small><p>{body}</p><div><span>Survey</span><i/><span>Install</span><i/><span>Test</span></div></aside>
+    <div className="system-page-trace" aria-hidden="true"><i/><i/><i/><b/></div>
+  </section>;
   return <section className="page-intro section"><div><span className="eyebrow">{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div><p>{body}</p></section>;
 }
 
