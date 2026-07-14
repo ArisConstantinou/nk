@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CircleDot,
   ExternalLink,
   FileText,
   Mail,
@@ -265,6 +264,13 @@ const solutions = [
   {id: 'smart', icon: SlidersHorizontal, title: 'Smart home & low-voltage systems', body: 'KNX smart-home control, security, sound and vision integrated with the electrical installation.', points: ['Lighting and shutter control', 'Security and remote access', 'Sound, vision and system integration']},
 ];
 
+const installationDelivery = [
+  {icon: Zap, title: 'Installed to the plan', body: 'Containment, cabling, distribution boards and final connections completed as one coordinated installation.'},
+  {icon: ShieldCheck, title: 'Protection verified', body: 'Circuits, protective devices and loads checked before the electrical system is energised.'},
+  {icon: FileText, title: 'Tested before handover', body: 'Final inspection and functional testing confirm that the installation is ready for everyday use.'},
+  {icon: Wrench, title: 'Supported afterwards', body: 'Planned maintenance, fault diagnosis and 24-hour emergency electrical assistance remain available.'},
+];
+
 export function ElectricalInstallationsPage() {
   const [active, setActive] = useState('plan');
   const activeSolution = solutions.find(solution => solution.id === active);
@@ -287,7 +293,12 @@ export function ElectricalInstallationsPage() {
         </motion.div>
       </motion.aside>}</AnimatePresence>
     </section>
-    <section className="process section"><div><span className="eyebrow">From survey to final electrical test</span><h2>A controlled route to<br/><em>safe switch-on.</em></h2></div><div className="process-map">{['Survey & load', 'Plan & specify', 'Install & coordinate', 'Test & support'].map((step, index) => <div key={step}><CircleDot/><i/><b>{step}</b><small>{['Understand the building, demand and constraints.', 'Define circuits, protection, equipment and interfaces.', 'Complete clean site work with every trade coordinated.', 'Inspect, test, document and support the system.'][index]}</small></div>)}</div></section>
+    <section className="installation-delivery section">
+      <div className="installation-delivery-panel">
+        <header className="installation-delivery-heading"><span className="eyebrow">The NK installation standard</span><h2>What leaves the site<br/><em>complete.</em></h2><p>Every electrical installation is built around practical site work, verified protection and dependable support after handover.</p></header>
+        <div className="installation-delivery-grid">{installationDelivery.map(({icon: Icon, title, body}, index) => <article key={title}><span>{String(index + 1).padStart(2, '0')}</span><Icon/><h3>{title}</h3><p>{body}</p></article>)}</div>
+      </div>
+    </section>
   </>;
 }
 
