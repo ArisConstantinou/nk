@@ -9,12 +9,13 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function DesktopHome() {
   const {content} = useContent();
+  const theme = content.themeContent.studio;
   return <>
     <section className="hero desktop-hero">
       <div className="hero-copy">
-        <motion.span initial={{opacity:0, y:14}} animate={{opacity:1, y:0}} transition={{duration:.7, ease}} className="eyebrow light">{content.eyebrow}</motion.span>
-        <motion.h1 initial={{opacity:0, y:35}} animate={{opacity:1, y:0}} transition={{duration:.9, delay:.08, ease}}>{content.heroTitle}<br/><em>{content.heroAccent}</em></motion.h1>
-        <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.45}}>{content.heroBody}</motion.p>
+        <motion.span initial={{opacity:0, y:14}} animate={{opacity:1, y:0}} transition={{duration:.7, ease}} className="eyebrow light">{theme.eyebrow}</motion.span>
+        <motion.h1 initial={{opacity:0, y:35}} animate={{opacity:1, y:0}} transition={{duration:.9, delay:.08, ease}}>{theme.heroTitle}<br/><em>{theme.heroAccent}</em></motion.h1>
+        <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.45}}>{theme.heroBody}</motion.p>
         <motion.div initial={{opacity:0, y:16}} animate={{opacity:1, y:0}} transition={{delay:.55}} className="hero-actions">
           <Link className="button copper" to="/electrical-installations">Electrical installations <ArrowUpRight/></Link>
           <Link className="text-link light" to="/projects">See selected work <ArrowUpRight/></Link>

@@ -1,13 +1,16 @@
 import {createContext, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
 
+export type ExperienceTheme = 'flow' | 'tech' | 'studio';
+
 type ThemeApi = {
   darkTheme: boolean;
-  electricalTheme: boolean;
+  experienceTheme: ExperienceTheme;
+  setExperienceTheme: (theme: ExperienceTheme) => void;
   toggleDarkTheme: () => void;
-  toggleElectricalTheme: () => void;
 };
 
 const ThemeContext = createContext<ThemeApi | null>(null);
+const experienceThemes: ExperienceTheme[] = ['flow', 'tech', 'studio'];
 
 function readDarkTheme() {
   const savedTheme = window.localStorage.getItem('nk-color-theme');
@@ -16,14 +19,14 @@ function readDarkTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
-function readElectricalTheme() {
+function readExperienceTheme(): ExperienceTheme {
   const savedTheme = window.localStorage.getItem('nk-experience-theme');
-  return savedTheme ? savedTheme === 'tech' : true;
+  return experienceThemes.includes(savedTheme as ExperienceTheme) ? savedTheme as ExperienceTheme : 'flow';
 }
 
 export function ThemeProvider({children}: {children: ReactNode}) {
   const [darkTheme, setDarkTheme] = useState(readDarkTheme);
-  const [electricalTheme, setElectricalTheme] = useState(readElectricalTheme);
+  const [experienceTheme, setExperienceTheme] = useState<ExperienceTheme>(readExperienceTheme);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -33,16 +36,16 @@ export function ThemeProvider({children}: {children: ReactNode}) {
   }, [darkTheme]);
 
   useEffect(() => {
-    document.documentElement.dataset.experience = electricalTheme ? 'tech' : 'studio';
-    window.localStorage.setItem('nk-experience-theme', electricalTheme ? 'tech' : 'studio');
-  }, [electricalTheme]);
+    document.documentElement.dataset.experience = experienceTheme;
+    window.localStorage.setItem('nk-experience-theme', experienceTheme);
+  }, [experienceTheme]);
 
   const value = useMemo<ThemeApi>(() => ({
     darkTheme,
-    electricalTheme,
+    experienceTheme,
+    setExperienceTheme,
     toggleDarkTheme: () => setDarkTheme(current => !current),
-    toggleElectricalTheme: () => setElectricalTheme(current => !current),
-  }), [darkTheme, electricalTheme]);
+  }), [darkTheme, experienceTheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

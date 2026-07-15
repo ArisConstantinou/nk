@@ -76,10 +76,10 @@ const pageContextByEyebrow: Record<string, {index: string; status: string; brief
 };
 
 export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
-  const {electricalTheme} = useTheme();
+  const {experienceTheme} = useTheme();
   const focus = pageFocusByEyebrow[eyebrow];
   const context = pageContextByEyebrow[eyebrow];
-  if (electricalTheme) return <section className="system-page-intro">
+  if (experienceTheme === 'tech') return <section className="system-page-intro">
     <div className="system-page-index"><span>{context.index}</span><i>{context.status}</i></div>
     <div className="system-page-title"><span>{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div>
     <aside className="system-page-brief"><small>{context.brief}</small><p>{body}</p><div aria-label={`${eyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>

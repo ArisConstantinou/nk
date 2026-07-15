@@ -29,6 +29,16 @@ export type Catalogue = {
   url: string;
 };
 
+export type ThemeContent = {
+  eyebrow: string;
+  heroTitle: string;
+  heroAccent: string;
+  heroTail: string;
+  heroBody: string;
+  sectionTitle: string;
+  sectionBody: string;
+};
+
 export type SiteContent = {
   eyebrow: string;
   heroTitle: string;
@@ -39,6 +49,11 @@ export type SiteContent = {
   contactNote: string;
   heroImage: string;
   heroObject: {x: number; y: number};
+  themeContent: {
+    flow: ThemeContent;
+    tech: ThemeContent;
+    studio: ThemeContent;
+  };
   products: Product[];
   catalogues: Catalogue[];
 };

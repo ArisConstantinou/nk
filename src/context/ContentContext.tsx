@@ -14,10 +14,21 @@ type ContentApi = {
 
 const ContentContext = createContext<ContentApi | null>(null);
 
+const mergeContent = (value: Partial<SiteContent>): SiteContent => ({
+  ...defaultContent,
+  ...value,
+  heroObject: {...defaultContent.heroObject, ...value.heroObject},
+  themeContent: {
+    flow: {...defaultContent.themeContent.flow, ...value.themeContent?.flow},
+    tech: {...defaultContent.themeContent.tech, ...value.themeContent?.tech},
+    studio: {...defaultContent.themeContent.studio, ...value.themeContent?.studio},
+  },
+});
+
 const readStored = (): SiteContent => {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value ? {...defaultContent, ...JSON.parse(value)} : defaultContent;
+    return value ? mergeContent(JSON.parse(value) as Partial<SiteContent>) : defaultContent;
   } catch {
     return defaultContent;
   }
@@ -46,7 +57,7 @@ export function ContentProvider({children}: {children: ReactNode}) {
     importContent: async (file) => {
       const next = JSON.parse(await file.text()) as SiteContent;
       if (!next.heroTitle || !Array.isArray(next.products)) throw new Error('This is not a valid NK content file.');
-      setContent({...defaultContent, ...next});
+      setContent(mergeContent(next));
     },
   }), [content]);
 

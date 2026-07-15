@@ -4,6 +4,7 @@ import {ArrowUpRight, Facebook, Instagram, Linkedin, Menu, X} from 'lucide-react
 import {publicAsset} from '../utils/assets';
 import {useTheme} from '../context/ThemeContext';
 import {ElectricalLayout} from './ElectricalLayout';
+import {CurrentLayout} from './CurrentLayout';
 import {ThemeControls} from './ThemeControls';
 
 const nav = [
@@ -17,7 +18,7 @@ const nav = [
 
 export function Layout({children}: {children: ReactNode}) {
   const [open, setOpen] = useState(false);
-  const {electricalTheme} = useTheme();
+  const {experienceTheme} = useTheme();
   const location = useLocation();
 
   useEffect(() => {
@@ -25,7 +26,8 @@ export function Layout({children}: {children: ReactNode}) {
     window.scrollTo({top: 0, behavior: 'instant'});
   }, [location.pathname]);
 
-  if (electricalTheme) return <ElectricalLayout>{children}</ElectricalLayout>;
+  if (experienceTheme === 'flow') return <CurrentLayout>{children}</CurrentLayout>;
+  if (experienceTheme === 'tech') return <ElectricalLayout>{children}</ElectricalLayout>;
 
   return <div className="site-shell">
     <header className="topbar">

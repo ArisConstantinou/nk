@@ -5,10 +5,11 @@ import {publicAsset} from '../../utils/assets';
 
 export default function MobileHome() {
   const {content} = useContent();
+  const theme = content.themeContent.studio;
   return <>
     <section className="mobile-hero">
       <div className="mobile-hero-image"><img src={content.heroImage} alt="Architectural lighting in a contemporary Cyprus interior"/><div className="mobile-orbit"/><span>Since ’85</span></div>
-      <div className="mobile-hero-copy"><span className="eyebrow">{content.eyebrow}</span><h1>{content.heroTitle}<br/><em>{content.heroAccent}</em></h1><p>{content.heroBody}</p><Link className="button copper" to="/electrical-installations">Electrical installations <ArrowUpRight/></Link></div>
+      <div className="mobile-hero-copy"><span className="eyebrow">{theme.eyebrow}</span><h1>{theme.heroTitle}<br/><em>{theme.heroAccent}</em></h1><p>{theme.heroBody}</p><Link className="button copper" to="/electrical-installations">Electrical installations <ArrowUpRight/></Link></div>
     </section>
     <section className="mobile-manifesto"><small>Electrical work since 1985</small><h2>Planned clearly.<br/><em>Installed properly.</em></h2><p>Dedicated electrical installation, lighting, appliance and smart-system expertise.</p></section>
     <section className="mobile-disciplines">

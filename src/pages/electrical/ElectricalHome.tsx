@@ -64,6 +64,7 @@ const projects = [
 
 export default function ElectricalHome() {
   const {content} = useContent();
+  const theme = content.themeContent.tech;
   const [activeSystem, setActiveSystem] = useState(0);
   const active = systems[activeSystem];
   const ActiveIcon = active.Icon;
@@ -71,13 +72,13 @@ export default function ElectricalHome() {
   return <div className="power-home">
     <section className="power-hero">
       <div className="power-hero-copy">
-        <div className="power-kicker"><span>NK / INSTALLATIONS · LIGHTING · APPLIANCES</span></div>
+        <div className="power-kicker"><span>{theme.eyebrow}</span></div>
         <motion.h1 initial={{opacity: 0, y: 28}} animate={{opacity: 1, y: 0}} transition={{duration: .75}}>
-          <span>Power planned.</span>
-          <strong>Systems connected.</strong>
-          <em>Buildings switched on.</em>
+          <span>{theme.heroTitle}</span>
+          <strong>{theme.heroAccent}</strong>
+          <em>{theme.heroTail}</em>
         </motion.h1>
-        <p>{content.heroBody}</p>
+        <p>{theme.heroBody}</p>
         <div className="power-primary-actions">
           <Link className="power-action power-action--live" to="/electrical-installations"><span>Plan an installation</span><ArrowDownRight/></Link>
           <Link className="power-action" to="/projects"><span>Inspect completed work</span><ArrowRight/></Link>
@@ -121,7 +122,7 @@ export default function ElectricalHome() {
     <LedSensitivityPanel/>
 
     <section className="power-routing">
-      <header><span>01 / CAPABILITY ROUTING</span><h2>One project.<br/>Four connected layers.</h2><p>Each discipline has its own specialist path. The paths meet before anything reaches the site.</p></header>
+      <header><span>01 / CAPABILITY ROUTING</span><h2>{theme.sectionTitle}</h2><p>{theme.sectionBody}</p></header>
       <div className="power-routing-map">
         {systems.map((system, index) => <Link to={system.route} className="power-route" key={system.code}>
           <span className="power-route-index">{String(index + 1).padStart(2, '0')}</span>
