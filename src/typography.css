@@ -1,0 +1,148 @@
+/* Site-wide readable type scale. Keep functional text comfortably legible on phones. */
+:root{
+  --nk-type-micro:clamp(12px,.78vw,13px);
+  --nk-type-small:clamp(14px,.92vw,16px);
+  --nk-type-body:clamp(16px,1.08vw,18px);
+  --nk-type-action:clamp(14px,.9vw,16px);
+}
+
+body{font-size:var(--nk-type-body)}
+main p,aside p,footer p,.admin-main p{font-size:var(--nk-type-body)!important;line-height:1.65}
+small{font-size:var(--nk-type-micro)!important;line-height:1.4}
+input,select,textarea{font-size:16px!important;line-height:1.45}
+.button,.text-link,.header-cta{font-size:var(--nk-type-action)!important}
+.desktop-nav a{font-size:var(--nk-type-action)!important}
+.eyebrow{font-size:var(--nk-type-micro)!important;line-height:1.4}
+.theme-control:after{font-size:var(--nk-type-micro)!important}
+
+/* Shared Studio pages, collection, contact, projects and footer metadata. */
+.floating-label,.hero-index,.scroll-cue,.discipline-card>span,.season-card span,
+.proof-number span,.page-number,.story-image>span,.org-root small,.org-tabs button,
+.org-tabs button span,.project-index,.project-photo span,.project-principle>div,
+.solution-row>button>span,.installation-delivery-grid article>span,.filter-row>b,
+.filter-row button,.catalogue-controls button,.product-image>span,.product-info small,
+.back-link,.catalogue-controls b,.catalogue-cover>span,.catalogue-cover>small,
+.catalogue-card>div:last-child span,.contact-details b,.contact-details small,
+.form-intro>span,.contact-form label,.form-note,.not-found>span,.route-loader,
+.footer-grid b,.live-signal-marker,.project-status,.project-detail>b,.project-detail li,
+.appliance-controls button,.appliance-controls>span,.project-archive-image>span,
+.project-archive-copy small,.project-archive-copy>span,.project-modal-copy>small,
+.project-modal-copy>span,.project-modal-copy>b,.project-modal-copy li,
+.project-modal-identity small,.project-modal-identity span,.project-discussion-heading small,
+.project-discussion-panel label,.project-discussion-panel .project-discussion-note,
+.mobile-hero-image>span,.mobile-manifesto small,.mobile-disciplines a>span,
+.mobile-season-scroll span,.mobile-proof span,.person-portrait>span,
+.person-portrait>span>b,.person-card li{
+  font-size:var(--nk-type-micro)!important;
+  line-height:1.45;
+}
+
+.proof-line p,.person-card p,.installation-delivery-grid p,.product-info p,
+.contact-details span>a:last-child:not(:first-of-type),.hours>p,
+.project-discussion-panel>p,.layout-lab>aside p,.layout-lab>aside li,
+.person-card p.person-area,.person-card span.person-credential{
+  font-size:var(--nk-type-small)!important;
+  line-height:1.6;
+}
+
+.footer-grid>div,.admin-sidebar button,.admin-side-bottom a,.admin-actions button,
+.admin-actions a,.collection-toolbar>button,.admin-notice,.admin-panel>label,
+.collection-toolbar span,.product-admin-fields select,.draggable-object,
+.position-readout span,.panel-title p,.admin-main>header span,.panel-title>span{
+  font-size:var(--nk-type-small)!important;
+  line-height:1.45;
+}
+
+/* Systems theme: raise the source tokens so every technical surface follows suit. */
+html[data-experience='tech']{
+  --system-type-micro:clamp(12px,.78vw,14px);
+  --system-type-small:clamp(14px,.96vw,16px);
+  --system-type-body:clamp(17px,1.12vw,19px);
+}
+
+.electrical-rail-nav a small,.electrical-rail-nav a:after,.electrical-rail-tools>span,
+.electrical-menu-trigger,.electrical-command-location span,.electrical-command-flow,
+.electrical-menu-heading>span,.electrical-menu-panel>nav a small,.electrical-menu-meta,
+.power-kicker,.power-action,.power-hero-facts dt,.power-field-coordinate,
+.power-system-readout>span,.power-system-readout small,.power-system-readout a,
+.power-node-switcher button span,.power-node-switcher button small,
+.power-routing>header>span,.power-section-id,.power-assurance-title>span,
+.power-route-index,.power-route-copy small,.power-route-state,.led-lab-fixtures span,
+.rgb-remote-power,.rgb-remote-scenes button>span,.rgb-remote-scenes small,
+.rgb-control-kicker,.rgb-live-readout small,.rgb-brightness-control>span,
+.rgb-effect-controls button,.rgb-control-panel .rgb-control-note,
+.power-project-lead a,.power-project>small,.power-project>div span,
+.power-assurance-grid span,.system-page-index,.system-page-title>span,
+.system-page-brief small,.system-page-brief>div,.electrical-main .story-image>span,
+.electrical-main .person-card li,.electrical-footer-signal,.electrical-footer-title small,
+.electrical-footer-title a,.electrical-footer-grid>div,.electrical-command-brand small,
+.electrical-rail-wordmark small,.theme-controls--rail .theme-control-label,
+.electrical-mobile-dock a,.electrical-mobile-dock button{
+  font-size:var(--nk-type-micro)!important;
+  line-height:1.45;
+}
+
+.electrical-command-location strong,.electrical-command-contact,.power-hero-facts dd,
+.power-system-readout p,.power-route-copy p,.electrical-enquiry-heading small,
+.electrical-enquiry-fields label,.electrical-enquiry-panel form>p.electrical-enquiry-note{
+  font-size:var(--nk-type-small)!important;
+}
+
+.rgb-remote-scenes strong{font-size:16px!important}
+.electrical-main .button{font-size:var(--nk-type-action)!important}
+
+/* Flow theme: every compact data label and navigation aid has a readable floor. */
+.current-brand small,.current-path-nav a,.current-explore-trigger,.current-brief-cta,
+.current-launcher-heading>span,.current-launcher-meta,.current-kicker,
+.current-situations>header>span,.current-energy-heading>span,
+.current-electricity-guide>header>span,.current-process-copy>span,
+.current-project-proof>header span,.current-launcher>nav small,.current-button,
+.current-hero-promise,.current-project-starter>header span,
+.current-project-starter nav a>span,.current-project-starter>footer span,
+.current-live-strip>div>span,.current-live-strip small,.current-live-strip>p,
+.current-situation-card>span,.current-situation-card b,.current-energy-controls label,
+.current-energy-output small,.current-energy-output span,
+.current-electricity-guide article>span,.current-electricity-guide article small,
+.current-process-copy a,.current-process li>span,.current-project-proof>header>a,
+.current-project-proof>div>a>span,.current-project-proof>div small,
+.current-footer-callout>span,.current-footer-callout>a,.current-footer-details small,
+.current-footer>p,.admin-theme-switcher small,.admin-theme-switcher>button>b,
+.admin-theme-heading>div>span,.admin-theme-heading>button,.admin-theme-preview small{
+  font-size:var(--nk-type-micro)!important;
+  line-height:1.45;
+}
+
+.current-launcher-heading p,.current-project-starter>header small,
+.current-situations>header p,.current-situation-card p,.current-energy-heading p,
+.current-energy-controls label>span,.current-energy-output p,
+.current-electricity-guide article p,.current-process-copy p,.current-process li p,
+.admin-theme-switcher p,.admin-theme-heading p,.admin-theme-preview p{
+  font-size:var(--nk-type-small)!important;
+  line-height:1.65;
+}
+
+.current-brand strong{font-size:17px!important}
+.current-launcher>nav strong{font-size:19px!important}
+.current-project-starter nav strong{font-size:18px!important}
+.current-project-starter>footer b{font-size:15px!important}
+.current-live-strip strong{font-size:17px!important}
+.current-footer-details a{font-size:16px!important}
+.current-hero-copy>p{font-size:clamp(17px,1.25vw,20px)!important}
+
+@media(max-width:900px){
+  :root{--nk-type-micro:12px;--nk-type-small:14px;--nk-type-body:16px;--nk-type-action:15px}
+  .current-mobile-menu>a strong{font-size:26px!important}
+  .current-mobile-menu>a small,.current-mobile-utilities a{font-size:12px!important;line-height:1.45}
+  .current-mobile-dock a,.electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important;line-height:1.2}
+  .current-brand strong{font-size:16px!important}
+  .brand-wordmark strong{font-size:16px!important}
+  .brand-wordmark small,.electrical-command-brand small,.electrical-rail-wordmark small{font-size:12px!important}
+  .mobile-hero-copy>p,.mobile-manifesto p{font-size:16px!important;line-height:1.65}
+  .mobile-disciplines h3{font-size:23px!important}
+  .mobile-season-scroll b{font-size:18px!important}
+}
+
+@media(max-width:390px){
+  .current-mobile-dock a,.electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important}
+  .current-header{padding-left:10px;padding-right:10px}
+}

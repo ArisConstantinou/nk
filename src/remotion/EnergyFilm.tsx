@@ -32,6 +32,6 @@ export function EnergyFilm() {
         <circle cx={travel} cy="52" r="1.2" fill="#fff" filter="url(#glow)"/>
       </svg>
     </div>
-    <div style={{position:'absolute', right:'7%', bottom:'8%', color:'#f2e7d5', fontFamily:'Arial, sans-serif', textTransform:'uppercase', letterSpacing:'.24em', fontSize:11, opacity:.58}}>Energy · light · control</div>
+    <div style={{position:'absolute', right:'7%', bottom:'8%', color:'#f2e7d5', fontFamily:'Arial, sans-serif', textTransform:'uppercase', letterSpacing:'.24em', fontSize:12, opacity:.58}}>Energy · light · control</div>
   </AbsoluteFill>;
 }

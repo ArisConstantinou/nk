@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App';
 import './styles.css';
 import './current-theme.css';
+import './typography.css';
 
 const storedColourTheme = window.localStorage.getItem('nk-color-theme');
 const storedExperienceTheme = window.localStorage.getItem('nk-experience-theme');
