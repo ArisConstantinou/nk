@@ -1,5 +1,5 @@
-import {useEffect, useState, type FormEvent} from 'react';
-import {Link, useParams, useSearchParams} from 'react-router-dom';
+import {useEffect, useRef, useState} from 'react';
+import {Link, useLocation, useParams, useSearchParams} from 'react-router-dom';
 import {AnimatePresence, motion} from 'framer-motion';
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Share2,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -25,6 +26,9 @@ import {team} from '../content';
 import {useContent} from '../context/ContentContext';
 import type {Product, Project} from '../types';
 import {publicAsset} from '../utils/assets';
+import {CmsSections} from '../components/CmsSections';
+import {ResponsiveImage} from '../components/ResponsiveImage';
+import {ManagedPublicForm} from '../components/ManagedPublicForm';
 
 const pageFocusByEyebrow: Record<string, [string, string, string]> = {
   'The people behind every installation': ['Engineering', 'Design', 'Installations'],
@@ -75,30 +79,37 @@ const pageContextByEyebrow: Record<string, {index: string; status: string; brief
 };
 
 export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
-  const focus = pageFocusByEyebrow[eyebrow] || ['Scope', 'Coordinate', 'Deliver'];
-  const context = pageContextByEyebrow[eyebrow] || {
-    index: `${eyebrow.toUpperCase()} / NK ELECTRICAL`,
+  const location = useLocation();
+  const {pageForRoute} = useContent();
+  const cmsPage = pageForRoute(location.pathname);
+  const visibleEyebrow = cmsPage?.eyebrow || eyebrow;
+  const visibleTitle = cmsPage?.introTitle || cmsPage?.heroTitle || title;
+  const visibleItalic = cmsPage?.introAccent || italic;
+  const visibleBody = cmsPage?.introBody || cmsPage?.heroBody || body;
+  const focus = pageFocusByEyebrow[visibleEyebrow] || ['Scope', 'Coordinate', 'Deliver'];
+  const context = pageContextByEyebrow[visibleEyebrow] || {
+    index: `${visibleEyebrow.toUpperCase()} / NK ELECTRICAL`,
     status: 'STROVOLOS · CYPRUS · SINCE 1985',
     brief: 'Page overview',
   };
-  return <section className="system-page-intro">
+  return <><section className="system-page-intro">
     <div className="system-page-index"><span>{context.index}</span><i>{context.status}</i></div>
-    <div className="system-page-title"><span>{eyebrow}</span><h1>{title}{italic && <><br/><em>{italic}</em></>}</h1></div>
-    <aside className="system-page-brief"><small>{context.brief}</small><p>{body}</p><div aria-label={`${eyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
+    <div className="system-page-title"><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'eyebrow', 'data-visual-edit': 'text', 'data-visual-label': 'Page eyebrow'} : {})}>{visibleEyebrow}</span><h1><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introTitle', 'data-visual-edit': 'text', 'data-visual-label': 'Page title'} : {})}>{visibleTitle}</span>{visibleItalic && <><br/><em {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introAccent', 'data-visual-edit': 'text', 'data-visual-label': 'Page title accent'} : {})}>{visibleItalic}</em></>}</h1></div>
+    <aside className="system-page-brief"><small>{context.brief}</small><p {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introBody', 'data-visual-edit': 'text', 'data-visual-label': 'Page introduction', 'data-visual-multiline': 'true'} : {})}>{visibleBody}</p><div aria-label={`${visibleEyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
     <div className="system-page-trace" aria-hidden="true"><i/><i/><i/><b/></div>
-  </section>;
+  </section>{cmsPage&&<CmsSections sections={cmsPage.sections} pageSlug={cmsPage.slug}/>}</>;
 }
 
 export function AboutPage() {
-  const {content} = useContent();
+  const {content, company} = useContent();
   return <>
     <PageIntro eyebrow="The people behind every installation" title={content.aboutTitle} body={content.aboutBody}/>
     <section className="story-visual section">
       <div className="story-image"><img src={publicAsset('assets/generated/team-craft.webp')} alt="Electrical designer studying a warmly lit interior"/><span>Family-founded · electrically focused</span></div>
       <div className="story-copy">
-        <p className="dropcap">NK Electrical has specialised in electrical installations for private residences, stores, showrooms, restaurants and public spaces since 1985.</p>
-        <p>From the store at 72 Makedonitissis in Strovolos, engineers, lighting designers, product specialists and electricians coordinate power, lighting, appliances, smart homes, security, sound and vision.</p>
-        <div className="timeline"><div><b>1985</b><span>Ntinos and Eliana establish NK Electrical.</span></div><div><b>Today</b><span>Specialists plan, supply, install, test and support each system.</span></div><div><b>Next</b><span>More connected, energy-aware electrical spaces for Cyprus.</span></div></div>
+        <p className="dropcap" data-visual-kind="company" data-visual-slug={company.slug} data-visual-path="introduction" data-visual-edit="text" data-visual-label="Company introduction" data-visual-multiline="true">{company.introduction}</p>
+        <p data-visual-kind="company" data-visual-slug={company.slug} data-visual-path="heading" data-visual-edit="text" data-visual-label="Company summary" data-visual-multiline="true">{company.heading}</p>
+        <div className="timeline">{(company.history.length ? company.history : ['1985 — Ntinos and Eliana establish NK Electrical.', 'Today — Specialists plan, supply, install, test and support each system.', 'Next — More connected, energy-aware electrical spaces for Cyprus.']).map((entry, index) => <div key={`${entry}-${index}`}><b>{String(index + 1).padStart(2, '0')}</b><span data-visual-kind="company" data-visual-slug={company.slug} data-visual-path={`history@line.${index}`} data-visual-edit="text" data-visual-label={`History entry ${index + 1}`} data-visual-multiline="true">{entry}</span></div>)}</div>
       </div>
     </section>
     <section className="org-section section">
@@ -112,7 +123,7 @@ export function AboutPage() {
     </section>
     <section className="ia-partnerships section">
       <header><span>PARTNERSHIPS / PRODUCT ECOSYSTEM</span><h2>Specialist relationships that support the work.</h2><p>NK Electrical combines its installation team with established lighting brands, product suppliers and project collaborators.</p></header>
-      <div><article><small>01 / LIGHTING</small><h3>ACA Lighting</h3><p>Decorative, architectural, kids and ceiling-fan collections available through the showroom and catalogue library.</p></article><article><small>02 / LIGHTING</small><h3>Nova Luce</h3><p>Decorative, architectural and natural-material collections used for product selection and lighting specification.</p></article><article><small>03 / LIGHTING</small><h3>VIOKEF</h3><p>Decorative and architectural lighting ranges included in the NK Electrical catalogue ecosystem.</p></article><article><small>04 / PROJECT DELIVERY</small><h3>Architects, designers & contractors</h3><p>Coordination with the wider project team keeps power, lighting, equipment and controls aligned before installation.</p></article></div>
+      <div>{(company.partnerships.length ? company.partnerships : ['ACA Lighting', 'Nova Luce', 'VIOKEF', 'Architects, designers & contractors']).map((partner, index) => <article key={`${partner}-${index}`}><small>{String(index + 1).padStart(2, '0')} / PARTNER</small><h3 data-visual-kind="company" data-visual-slug={company.slug} data-visual-path={`partnerships@line.${index}`} data-visual-edit="text" data-visual-label={`Partnership ${index + 1}`}>{partner}</h3><p>{index < 3 ? 'Lighting and product expertise available through the NK Electrical project and showroom ecosystem.' : 'Project collaboration that keeps power, lighting, equipment and controls aligned before installation.'}</p></article>)}</div>
     </section>
   </>;
 }
@@ -123,7 +134,8 @@ export function ProjectsPage() {
   const [category, setCategory] = useState('All');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [discussionOpen, setDiscussionOpen] = useState(false);
-  const [discussionPrepared, setDiscussionPrepared] = useState(false);
+  const modalRef = useRef<HTMLElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   const moveProject = (direction: -1 | 1) => {
     setSelectedProject(current => {
@@ -135,6 +147,7 @@ export function ProjectsPage() {
 
   useEffect(() => {
     if (!selectedProject) return;
+    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     const handleProjectKeys = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setSelectedProject(null);
@@ -148,16 +161,17 @@ export function ProjectsPage() {
       }
     };
     document.body.style.overflow = 'hidden';
+    window.setTimeout(() => modalRef.current?.querySelector<HTMLElement>('button, a, input, textarea, select')?.focus(), 0);
     window.addEventListener('keydown', handleProjectKeys);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleProjectKeys);
+      previouslyFocusedRef.current?.focus();
     };
   }, [selectedProject]);
 
   useEffect(() => {
     setDiscussionOpen(false);
-    setDiscussionPrepared(false);
   }, [selectedProject?.id]);
 
   useEffect(() => {
@@ -170,49 +184,33 @@ export function ProjectsPage() {
   const nextProject = selectedIndex >= 0 ? projectCards[(selectedIndex + 1) % projectCards.length] : null;
   const filteredProjects = category === 'All' ? projectCards : projectCards.filter(project => project.category === category);
 
-  const prepareProjectDiscussion = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!selectedProject) return;
-    const data = new FormData(event.currentTarget);
-    const subject = encodeURIComponent(`Project discussion: ${selectedProject.name} · Project ${selectedProject.number}`);
-    const body = encodeURIComponent(`Project: ${selectedProject.name} · Project ${selectedProject.number}\nWork type: ${selectedProject.type}\n\nName: ${data.get('name')}\nPhone: ${data.get('phone')}\n\nDiscussion notes:\n${data.get('message')}`);
-    window.location.href = `mailto:info@nk-electrical.com?subject=${subject}&body=${body}`;
-    setDiscussionPrepared(true);
-  };
-
   return <>
     <PageIntro eyebrow="Complete installed project archive" title="Electrical work," italic="shown on site." body="Filter the installed project archive by sector. Each record now includes a visible completion-date field; dates not present in the source archive are clearly marked for confirmation rather than invented."/>
     <section className="ia-project-filters section" aria-label="Project filters"><div><SlidersHorizontal/><span>Filter projects</span></div><div>{['All', 'Residential', 'Commercial', 'Retail', 'Mixed use'].map(value => <button type="button" className={category === value ? 'active' : ''} aria-pressed={category === value} onClick={() => setCategory(value)} key={value}>{value}</button>)}</div><b>{filteredProjects.length} projects</b></section>
     <section className="project-archive-grid section" aria-label="NK Electrical completed projects">{filteredProjects.map(project =>
       <button className="project-archive-card" type="button" aria-haspopup="dialog" onClick={() => setSelectedProject(project)} key={project.id}>
-        <span className="project-archive-image"><img src={project.image} alt={`${project.name} completed installation ${project.number}`} loading="lazy"/><span>View project <ArrowUpRight/></span></span>
-        <span className="project-archive-copy"><small>Project {project.number} · {project.category}</small><strong>{project.name}</strong><span>{project.type}</span><time>Completion date · {project.completionDate || 'Date to be confirmed'}</time></span>
+        <span className="project-archive-image"><ResponsiveImage src={project.image} alt={`${project.name} completed installation ${project.number}`} loading="lazy" data-visual-kind="project" data-visual-slug={project.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Project image"/><span>View project <ArrowUpRight/></span></span>
+        <span className="project-archive-copy"><small>Project <span data-visual-kind="project" data-visual-slug={project.id} data-visual-path="number" data-visual-edit="text" data-visual-label="Project number">{project.number}</span> · <span data-visual-kind="project" data-visual-slug={project.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Project category">{project.category}</span></small><strong data-visual-kind="project" data-visual-slug={project.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Project title">{project.name}</strong><span data-visual-kind="project" data-visual-slug={project.id} data-visual-path="type" data-visual-edit="text" data-visual-label="Project type">{project.type}</span><time>Completion date · <span data-visual-kind="project" data-visual-slug={project.id} data-visual-path="completionDate" data-visual-edit="text" data-visual-label="Completion date">{project.completionDate || 'Date to be confirmed'}</span></time></span>
       </button>
     )}</section>
     <section className="project-principle section"><span className="eyebrow light">The electrical method</span><blockquote>“Plan the circuits, coordinate the fittings, test every connection.”</blockquote><div><span>Survey the site</span><ArrowRight/><span>Install the system</span><ArrowRight/><span>Test and support</span></div></section>
     <AnimatePresence>{selectedProject &&
       <motion.div className="project-modal-backdrop" role="presentation" onMouseDown={() => setSelectedProject(null)} initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
-        <motion.article className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onMouseDown={event => event.stopPropagation()} initial={{opacity: 0, y: 30, scale: .98}} animate={{opacity: 1, y: 0, scale: 1}} exit={{opacity: 0, y: 20, scale: .98}}>
+        <motion.article ref={modalRef} className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onMouseDown={event => event.stopPropagation()} initial={{opacity: 0, y: 30, scale: .98}} animate={{opacity: 1, y: 0, scale: 1}} exit={{opacity: 0, y: 20, scale: .98}}>
           <button className="project-modal-close" type="button" aria-label="Close project details" onClick={() => setSelectedProject(null)}><X/></button>
           <div className="project-modal-image">
-            <img key={selectedProject.id} src={selectedProject.image} alt={`${selectedProject.name} completed installation ${selectedProject.number}`}/>
+            <ResponsiveImage key={selectedProject.id} src={selectedProject.image} alt={`${selectedProject.name} completed installation ${selectedProject.number}`}/>
             <div className="project-modal-identity" aria-live="polite"><small>Installed project · {selectedProject.number} of {projectCards.length}</small><h2 id="project-modal-title">{selectedProject.name}</h2><span>{selectedProject.type}</span><time>Completion date · {selectedProject.completionDate || 'Date to be confirmed'}</time></div>
             <button className="project-modal-nav previous" type="button" aria-label={`Previous project: ${previousProject?.name}`} onClick={() => moveProject(-1)}><ChevronLeft/></button>
             <button className="project-modal-nav next" type="button" aria-label={`Next project: ${nextProject?.name}`} onClick={() => moveProject(1)}><ChevronRight/></button>
           </div>
           <div className="project-modal-copy">
             <p>{selectedProject.text}</p><b>Installed scope</b><ul>{selectedProject.systems.map(system => <li key={system}><Check/>{system}</li>)}</ul>
-            <button className={`button copper project-discussion-toggle ${discussionOpen ? 'open' : ''}`} type="button" aria-expanded={discussionOpen} aria-controls="project-discussion-panel" onClick={() => { setDiscussionOpen(open => !open); setDiscussionPrepared(false); }}><span>{discussionOpen ? 'Close discussion' : 'Discuss a similar project'}</span><ChevronDown/></button>
+            <button className={`button copper project-discussion-toggle ${discussionOpen ? 'open' : ''}`} type="button" aria-expanded={discussionOpen} aria-controls="project-discussion-panel" onClick={() => setDiscussionOpen(open => !open)}><span>{discussionOpen ? 'Close discussion' : 'Discuss a similar project'}</span><ChevronDown/></button>
             <AnimatePresence initial={false}>{discussionOpen &&
-              <motion.form id="project-discussion-panel" className="project-discussion-panel" onSubmit={prepareProjectDiscussion} initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}}>
-                <div className="project-discussion-heading"><div><small>Project {selectedProject.number}</small><strong>Start the discussion</strong></div><button type="button" aria-label="Close discussion panel" onClick={() => setDiscussionOpen(false)}><X/></button></div>
-                <p>Leave the essentials here and NK Electrical can continue with the right project context.</p>
-                <label>Your name<input required name="name" autoComplete="name"/></label>
-                <label>Phone<input required name="phone" autoComplete="tel" inputMode="tel"/></label>
-                <label>What would you like to discuss?<textarea required name="message" rows={4}/></label>
-                <button className="button cream" type="submit">Prepare discussion email <ArrowUpRight/></button>
-                {discussionPrepared && <p className="project-discussion-note"><Check/> Your email app should now be open with this project attached.</p>}
-              </motion.form>
+              <motion.div id="project-discussion-panel" initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}}>
+                <ManagedPublicForm slug="project-discussion" className="project-discussion-panel" eyebrow={`Project ${selectedProject.number}`} title="Start the discussion" defaults={{project: `${selectedProject.name} · Project ${selectedProject.number}`}}/>
+              </motion.div>
             }</AnimatePresence>
           </div>
         </motion.article>
@@ -273,7 +271,7 @@ const filterValues = {
 };
 
 function ProductCard({item}: {item: Product}) {
-  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className="product-image"><img src={item.image} alt={item.name}/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small>{item.category} · {item.season}</small><h3>{item.name}</h3><p>{item.note}</p></div></Link>;
+  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className="product-image"><ResponsiveImage src={item.image} alt={item.name} data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Product season">{item.season}</span></small><h3 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h3><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p></div></Link>;
 }
 
 export function ExplorePage() {
@@ -298,7 +296,7 @@ export function ProductPage() {
   const {content} = useContent();
   const item = content.products.find(product => product.id === id);
   if (!item) return <section className="not-found"><span>Not found</span><h1>That product has moved.</h1><Link to="/shop">Return to the Shop</Link></section>;
-  return <section className="product-detail section"><Link className="back-link" to="/shop">← Back to Shop</Link><div className="product-detail-image"><img src={item.image} alt={item.name}/></div><div className="product-detail-copy"><span className="eyebrow">{item.category} · {item.space}</span><h1>{item.name}</h1><p>{item.note}</p><dl><div><dt>Best considered for</dt><dd>{item.space}</dd></div><div><dt>Seasonal edit</dt><dd>{item.season}</dd></div><div><dt>Available through</dt><dd>NK Electrical, Strovolos</dd></div></dl><a className="button copper" href={`mailto:info@nk-electrical.com?subject=${encodeURIComponent(`Product enquiry: ${item.name}`)}`}>Ask about this product <ArrowUpRight/></a></div></section>;
+  return <section className="product-detail section"><Link className="back-link" to="/shop">← Back to Shop</Link><div className="product-detail-image"><ResponsiveImage src={item.image} alt={item.name} data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/></div><div className="product-detail-copy"><span className="eyebrow"><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="space" data-visual-edit="text" data-visual-label="Product space">{item.space}</span></span><h1 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h1><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p><dl><div><dt>Best considered for</dt><dd data-visual-kind="product" data-visual-slug={item.id} data-visual-path="space" data-visual-edit="text" data-visual-label="Best space">{item.space}</dd></div><div><dt>Seasonal edit</dt><dd data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Season">{item.season}</dd></div><div><dt>Available through</dt><dd>NK Electrical, Strovolos</dd></div></dl><a className="button copper" href={`mailto:info@nk-electrical.com?subject=${encodeURIComponent(`Product enquiry: ${item.name}`)}`}>Ask about this product <ArrowUpRight/></a></div></section>;
 }
 
 export function LightingPage() {
@@ -309,7 +307,7 @@ export function LightingPage() {
   return <>
     <PageIntro eyebrow="Shop catalogues & downloads" title="Official collections," italic="ready to open." body="Browse original PDF catalogues by brand and lighting purpose. These downloads belong to the Shop; lighting design remains a separate service."/>
     <section className="catalogue-controls section"><div><b>Brand</b>{['All', 'ACA', 'Nova Luce', 'VIOKEF'].map(value => <button className={brand === value ? 'active' : ''} onClick={() => setBrand(value)} key={value}>{value}</button>)}</div><div><b>Focus</b>{['All', 'Decorative', 'Architectural', 'Kids', 'Natural', 'Fans'].map(value => <button className={focus === value ? 'active' : ''} onClick={() => setFocus(value)} key={value}>{value}</button>)}</div></section>
-    <section className="catalogue-grid section">{shown.map((catalogue, index) => <a className={`catalogue-card tone-${index % 4}`} target="_blank" rel="noreferrer" href={catalogue.url} key={catalogue.url}><div className="catalogue-cover"><span>NK / LIGHTING</span><b>{catalogue.brand}</b><strong>{catalogue.year}</strong><i/><small>{catalogue.focus}</small></div><div><FileText/><h3>{catalogue.name}</h3><span>Open original catalogue <ArrowUpRight/></span></div></a>)}</section>
+    <section className="catalogue-grid section">{shown.map((catalogue, index) => <a className={`catalogue-card tone-${index % 4}`} target="_blank" rel="noreferrer" href={catalogue.url} key={catalogue.url}><div className="catalogue-cover"><span>NK / LIGHTING</span><b data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="brand" data-visual-edit="text" data-visual-label="Catalogue brand">{catalogue.brand}</b><strong data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="year" data-visual-edit="text" data-visual-label="Catalogue year">{catalogue.year}</strong><i/><small data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="focus" data-visual-edit="text" data-visual-label="Catalogue focus">{catalogue.focus}</small></div><div><FileText/><h3 data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="$title" data-visual-edit="text" data-visual-label="Catalogue name" data-visual-link-path="url">{catalogue.name}</h3><span>Open original catalogue <ArrowUpRight/></span></div></a>)}</section>
     <section className="catalogue-help section"><div><BookOpen/><h2>Found a product?</h2></div><p>Email the catalogue name, product code and quantity. Add your name and phone number so the Shop team can respond with the right context.</p><a className="button copper" href="mailto:thelma@nk-electrical.com?subject=Shop%20catalogue%20enquiry">Ask about a catalogue product <ArrowUpRight/></a></section>
   </>;
 }
@@ -326,16 +324,18 @@ export function AppliancesPage() {
 }
 
 export function ContactPage() {
-  const {content} = useContent();
+  const {content, settings} = useContent();
   const [params] = useSearchParams();
   const project = params.get('project');
-  const [sent, setSent] = useState(false);
-  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const data = new FormData(event.currentTarget); const subject = encodeURIComponent(`${data.get('subject')} — ${data.get('name')}`); const body = encodeURIComponent(`Name: ${data.get('name')}\nPhone: ${data.get('phone')}\n\n${data.get('message')}`); window.location.href = `mailto:info@nk-electrical.com?subject=${subject}&body=${body}`; setSent(true); };
-  const defaultMessage = project ? `I would like to discuss the ${project} project and a related electrical requirement.\n\nProject or property details:` : '';
+  const message = project ? `I would like to discuss the ${project} project and a related electrical requirement.\n\nProject or property details:` : '';
+  const locations = settings.locations.filter(item => item.active);
+  const phones = settings.phones.filter(item => item.active);
+  const emails = settings.emails.filter(item => item.active);
+  const schedules = settings.openingHours.filter(item => item.active);
+  const socials = settings.socialLinks.filter(item => item.active && item.placements.includes('contact'));
   return <>
     <PageIntro eyebrow="Electrical enquiry" title="Your enquiry," italic="sent to the right specialist." body={content.contactNote}/>
-    <section className="contact-layout section"><div className="contact-details"><div><MapPin/><span><b>Visit the store</b>72 Makedonitissis Str.<br/>Strovolos 2057, Cyprus<a target="_blank" rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus">Open in maps <ArrowUpRight/></a></span></div><div><Phone/><span><b>Call</b><a href="tel:+35722494145">+357 22 494145</a><small>Electrical installation, fault and maintenance enquiries</small></span></div><div><Mail/><span><b>Write</b><a href="mailto:info@nk-electrical.com">info@nk-electrical.com</a></span></div><div className="hours"><b>Store hours</b><p><span>Mon · Tue · Thu · Fri</span>09:00–18:00</p><p><span>Wednesday · Saturday</span>09:00–14:00</p><p><span>Sunday</span>Closed</p></div></div>
-      <form className="contact-form" onSubmit={submit}><div className="form-intro"><span>{project ? 'Project discussion' : 'Electrical enquiry'}</span><h2>What needs powering,<br/>installing or controlling?</h2></div><label>Your name<input required name="name" autoComplete="name"/></label><label>Phone<input required name="phone" autoComplete="tel"/></label><label>Starting point<select name="subject" defaultValue={project ? 'Project discussion' : 'New electrical project'}>{project && <option>Project discussion</option>}<option>New electrical project</option><option>Electrical installation</option><option>Lighting selection</option><option>Appliance enquiry</option><option>Smart home system</option><option>Electrical support</option></select></label><label>Tell us about the work<textarea required name="message" rows={6} defaultValue={defaultMessage}/></label><button className="button copper" type="submit">Prepare email <ArrowUpRight/></button>{sent && <p className="form-note"><Check/> Your email app should now be open with the details prepared.</p>}</form></section>
+    <section className="contact-layout section"><div className="contact-details">{locations.map(item => <div key={item.id}><MapPin/><span><b>{item.label}</b>{item.address}<a target="_blank" rel="noreferrer" href={item.mapsUrl}>Open in maps <ArrowUpRight/></a></span></div>)}{phones.map(item => <div key={item.id}><Phone/><span><b>{item.label}</b><a href={`tel:${item.number.replace(/[^+\d]/g, '')}`}>{item.number}</a><small>Electrical installation, fault and maintenance enquiries</small></span></div>)}{emails.map(item => <div key={item.id}><Mail/><span><b>{item.label}</b><a href={`mailto:${item.address}`}>{item.address}</a></span></div>)}{schedules.map(item => <div className="hours" key={item.id}><b>{item.label}</b>{item.hours.split('\n').map(line => <p key={line}>{line}</p>)}</div>)}{socials.length > 0 && <div className="contact-socials"><Share2/><span><b>Follow NK Electrical</b><span>{socials.map(item => <a href={item.url} target={item.newTab ? '_blank' : undefined} rel={item.newTab ? 'noreferrer' : undefined} key={item.id}>{item.iconUrl && <img src={item.iconUrl} alt=""/>}{item.platform}</a>)}</span></span></div>}{settings.mapEmbedUrl && <iframe className="contact-map" title="NK Electrical location map" loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={settings.mapEmbedUrl}/>}</div><ManagedPublicForm slug="contact" eyebrow={project ? 'Project discussion' : 'Electrical enquiry'} title="What needs powering, installing or controlling?" defaults={{subject: project ? 'Project discussion' : 'New electrical project', message}}/></section>
     <section className="ia-conversion-band section"><div><small>READY TO SCOPE THE WORK?</small><h2>Use the structured quote form for project requirements.</h2></div><Link to="/request-a-quote">Request a Quote <ArrowRight/></Link></section>
   </>;
 }

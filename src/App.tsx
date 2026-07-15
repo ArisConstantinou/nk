@@ -1,4 +1,4 @@
-import {lazy, Suspense} from 'react';
+import {Component, lazy, Suspense, type ErrorInfo, type ReactNode} from 'react';
 import {BrowserRouter, Navigate, Route, Routes, useParams} from 'react-router-dom';
 import {ElectricalLayout} from './components/ElectricalLayout';
 import {ContentProvider} from './context/ContentContext';
@@ -9,6 +9,19 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ElectricalHome = lazy(() => import('./pages/electrical/ElectricalHome'));
 const Public = ({children}: {children: React.ReactNode}) => <ElectricalLayout>{children}</ElectricalLayout>;
 const routerBase = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, '');
+
+class PublicRenderBoundary extends Component<{children: ReactNode}, {error: Error | null}> {
+  state: {error: Error | null} = {error: null};
+  static getDerivedStateFromError(error: Error) {return {error};}
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    if (new URLSearchParams(window.location.search).has('visualEditor')) console.error('Visual preview render failed', error, info);
+  }
+  render() {
+    if (!this.state.error) return this.props.children;
+    const preview = new URLSearchParams(window.location.search).has('visualEditor');
+    return <main className="route-loader" role="alert">{preview ? `Preview error: ${this.state.error.message}` : 'The page could not be displayed. Please refresh and try again.'}</main>;
+  }
+}
 
 const legacyProducts: Record<string, string> = {
   'oia-pendant-light': 'oia', 'fame-pendant-lights': 'fame', 'neri-led-surface-liners': 'neri', 'polo-wall-light': 'polo', 'el-led-ceiling-light': 'el-led', 'ragno-pendant-light': 'ragno',
@@ -31,7 +44,7 @@ function LegacyProductIdRedirect() {
 }
 
 export default function App() {
-  return <ContentProvider><BrowserRouter basename={routerBase}><Routes>
+  return <PublicRenderBoundary><ContentProvider><BrowserRouter basename={routerBase}><Routes>
     <Route path="/" element={<Public><Suspense fallback={<div className="route-loader">Connecting systems…</div>}><ElectricalHome/></Suspense></Public>}/>
     <Route path="/services" element={<Public><ServicesPage/></Public>}/>
     <Route path="/services/:service" element={<Public><ServiceDetailPage/></Public>}/>
@@ -43,7 +56,7 @@ export default function App() {
     <Route path="/about" element={<Public><AboutPage/></Public>}/>
     <Route path="/contact" element={<Public><ContactPage/></Public>}/>
     <Route path="/request-a-quote" element={<Public><QuotePage/></Public>}/>
-    <Route path="/admin" element={<Suspense fallback={<div className="route-loader">Opening content admin…</div>}><Admin/></Suspense>}/>
+    <Route path="/admin/*" element={<Suspense fallback={<div className="route-loader">Opening secure admin…</div>}><Admin/></Suspense>}/>
 
     <Route path="/electrical-installations" element={<Navigate to="/services/electrical-installations" replace/>}/>
     <Route path="/lighting" element={<Navigate to="/services/lighting-design" replace/>}/>
@@ -63,5 +76,5 @@ export default function App() {
     <Route path="/product/:id" element={<LegacyProductIdRedirect/>}/>
     <Route path="/product-page/:slug" element={<LegacyProductRedirect/>}/>
     <Route path="*" element={<Public><NotFound/></Public>}/>
-  </Routes></BrowserRouter></ContentProvider>;
+  </Routes></BrowserRouter></ContentProvider></PublicRenderBoundary>;
 }

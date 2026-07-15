@@ -16,6 +16,7 @@ import {Link} from 'react-router-dom';
 import {useContent} from '../../context/ContentContext';
 import {publicAsset} from '../../utils/assets';
 import {LedSensitivityPanel} from '../../components/LedSensitivityPanel';
+import {CmsSections} from '../../components/CmsSections';
 
 const systems = [
   {
@@ -63,8 +64,9 @@ const projects = [
 ];
 
 export default function ElectricalHome() {
-  const {content} = useContent();
+  const {content, pageForRoute} = useContent();
   const theme = content.themeContent.tech;
+  const homepage = pageForRoute('/');
   const [activeSystem, setActiveSystem] = useState(0);
   const active = systems[activeSystem];
   const ActiveIcon = active.Icon;
@@ -72,13 +74,13 @@ export default function ElectricalHome() {
   return <div className="power-home">
     <section className="power-hero">
       <div className="power-hero-copy">
-        <div className="power-kicker"><span>{theme.eyebrow}</span></div>
+        <div className="power-kicker"><span data-visual-kind="page" data-visual-slug="homepage" data-visual-path="eyebrow" data-visual-edit="text" data-visual-label="Hero eyebrow">{theme.eyebrow}</span></div>
         <motion.h1 initial={{opacity: 0, y: 28}} animate={{opacity: 1, y: 0}} transition={{duration: .75}}>
-          <span>{theme.heroTitle}</span>
-          <strong>{theme.heroAccent}</strong>
-          <em>{theme.heroTail}</em>
+          <span data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroTitle" data-visual-edit="text" data-visual-label="Hero title">{theme.heroTitle}</span>
+          <strong data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroAccent" data-visual-edit="text" data-visual-label="Hero accent">{theme.heroAccent}</strong>
+          <em data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroTail" data-visual-edit="text" data-visual-label="Hero final line">{theme.heroTail}</em>
         </motion.h1>
-        <p>{theme.heroBody}</p>
+        <p data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroBody" data-visual-edit="text" data-visual-label="Hero description" data-visual-multiline="true">{theme.heroBody}</p>
         <div className="power-primary-actions">
           <Link className="power-action power-action--live" to="/services/electrical-installations"><span>Plan an installation</span><ArrowDownRight/></Link>
           <Link className="power-action" to="/projects"><span>Inspect completed work</span><ArrowRight/></Link>
@@ -92,7 +94,7 @@ export default function ElectricalHome() {
       </div>
 
       <div className="power-field">
-        <img src={content.heroImage} alt="Completed architectural electrical and lighting installation"/>
+        <img src={content.heroImage} alt="Completed architectural electrical and lighting installation" data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroImage" data-visual-edit="image" data-visual-label="Hero image"/>
         <div className="power-field-shade"/>
         <div className="power-field-coordinate power-field-coordinate--top">35.165° N / 33.365° E</div>
         <div className="power-field-coordinate power-field-coordinate--bottom">STROVOLOS / CYPRUS</div>
@@ -121,13 +123,15 @@ export default function ElectricalHome() {
 
     <LedSensitivityPanel/>
 
+    {homepage && <CmsSections sections={homepage.sections} pageSlug={homepage.slug}/>}
+
     <section className="ia-home-split" aria-label="Services and shop paths">
       <Link to="/services"><small>01 / SERVICES</small><h2>Need work planned or installed?</h2><p>Electrical installations, lighting design, automation, security and maintenance—performed by the NK team.</p><span>Explore Services <ArrowRight/></span></Link>
       <Link to="/shop"><small>02 / SHOP</small><h2>Looking for a product?</h2><p>Browse lighting, appliances and official catalogues without mixing products into service pages.</p><span>Enter the Shop <ArrowRight/></span></Link>
     </section>
 
     <section className="power-routing">
-      <header><span>01 / CAPABILITY ROUTING</span><h2>{theme.sectionTitle}</h2><p>{theme.sectionBody}</p></header>
+      <header><span>01 / CAPABILITY ROUTING</span><h2 data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionTitle" data-visual-edit="text" data-visual-label="Capabilities heading" data-visual-multiline="true">{theme.sectionTitle}</h2><p data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionBody" data-visual-edit="text" data-visual-label="Capabilities description" data-visual-multiline="true">{theme.sectionBody}</p></header>
       <div className="power-routing-map">
         {systems.map((system, index) => <Link to={system.route} className="power-route" key={system.code}>
           <span className="power-route-index">{String(index + 1).padStart(2, '0')}</span>

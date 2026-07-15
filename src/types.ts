@@ -22,6 +22,7 @@ export type TeamMember = {
 };
 
 export type Catalogue = {
+  id?: string;
   name: string;
   brand: 'ACA' | 'Nova Luce' | 'VIOKEF';
   year: string;

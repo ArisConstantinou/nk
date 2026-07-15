@@ -1,7 +1,6 @@
 import {
   AbsoluteFill,
   Easing,
-  Img,
   interpolate,
   staticFile,
   useCurrentFrame,
@@ -115,8 +114,9 @@ export function LedSensitivityFilm({color, brightness, power, effect}: LedSensit
   });
 
   return <AbsoluteFill style={{overflow: 'hidden', backgroundColor: '#020611', color: '#f4f9ff'}}>
-    <Img
+    <img
       src={ledRoomAsset}
+      alt=""
       style={{
         position: 'absolute',
         inset: 0,

@@ -1,6 +1,6 @@
 # NK Electrical digital experience
 
-A ground-up React/Vite rebuild of the NK Electrical website, designed around the verified content and links from `nk-electrical.com`.
+A React/Vite rebuild of the NK Electrical website, designed around the verified content and links from `nk-electrical.com`.
 
 ## Live website
 
@@ -13,32 +13,48 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-The development server is fixed to <http://127.0.0.1:5191/>.
+The development server is fixed to <http://127.0.0.1:5191/>. The secure admin API requires Node.js 22.5 or newer because it uses the built-in SQLite module.
+
+## Secure admin
+
+The admin is implemented as a separate security boundary while remaining available at `/admin` in the same React application. Start the website and persistent admin API together:
+
+```powershell
+npm.cmd run dev:admin
+```
+
+Then open <http://127.0.0.1:5191/admin/>. The development runner explicitly permits one-time setup from loopback and locks the endpoint permanently after the owner exists. Every other start mode requires a long random `ADMIN_BOOTSTRAP_TOKEN` before first setup, regardless of proxy topology or `NODE_ENV`.
+
+Admin data is stored in `.data/admin.sqlite` and uploaded media in `.data/media`; both locations are ignored by Git. The API uses server-side scrypt password hashes, HttpOnly same-site sessions, CSRF and origin checks, role permissions, validation, optimistic record versions, revisions and audit logging.
+
+When the API runs behind a reverse proxy on the same host, set `ADMIN_TRUST_LOOPBACK_PROXY=true` only if that proxy overwrites (rather than appends untrusted input to) `X-Forwarded-For`. This keeps login and public-form rate limits per client without trusting arbitrary forwarded headers.
+
+Useful checks:
+
+```powershell
+npm.cmd run check:admin
+```
+
+The complete deployment, backup, migration, permissions, publishing and recovery runbook is in [docs/ADMIN_PRODUCTION.md](docs/ADMIN_PRODUCTION.md).
+
+For a same-origin Node deployment, run the production build and set `ADMIN_SERVE_SITE=true` before `npm.cmd run start:admin`. GitHub Pages can continue hosting the public static build, but it cannot host the authenticated API; a production admin therefore needs the Node service or an equivalent server deployment/reverse proxy.
 
 ## Main routes
 
-- `/` — separate desktop and mobile home experiences
-- `/about` — company story and complete faceless illustrated team
-- `/electrical-installations` — planning, installation, maintenance and smart systems
-- `/projects` — documented installations with project-discussion links
-- `/explore` — season, space and category product filtering
-- `/lighting` — grouped PDF catalogue library
-- `/contact` — store details and email-preparation form
-- `/admin` — live local content studio
+- `/` — Systems-theme homepage and live LED response lab
+- `/services` and `/services/:service` — service-only routes
+- `/shop`, `/shop/:category` and `/shop/product/:id` — products
+- `/shop/catalogues` — catalogues and PDF downloads
+- `/projects` — filterable completed-project archive
+- `/about` — company story, team and partnerships
+- `/contact` and `/request-a-quote` — conversion routes
+- `/admin/*` — authenticated administration workspace
 
-All audited Wix-era routes redirect to their relevant new destination. Product deep links resolve to individual product pages.
+Audited legacy routes redirect to their relevant destination. Product deep links resolve to individual product pages.
 
-## Content studio
+## Content boundary
 
-The local-first studio saves to the browser automatically. It supports:
-
-- live editing of hero, story and contact copy;
-- local hero-image upload or direct asset paths;
-- product creation, deletion, reordering, copy, image path and filter metadata;
-- direct drag-to-position editing of the live hero signal marker;
-- JSON import/export and a one-click reset to the published defaults.
-
-For a multi-user production CMS, replace the storage adapter in `src/context/ContentContext.tsx` with the chosen authenticated database or headless CMS.
+The public renderer reads only the API's published CMS snapshot and falls back to the bundled defaults if the service is unavailable or a payload is invalid. Draft and archived records never enter the public payload. This preserves the public website during admin/API outages while allowing reviewed, published changes to appear normally.
 
 ## Asset and license note
 
