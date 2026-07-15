@@ -1,4 +1,4 @@
-import {useEffect, useState, type ReactNode} from 'react';
+import {useEffect, useRef, useState, type ReactNode} from 'react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {ArrowRight, BookOpen, Boxes, Building2, ChevronDown, FolderCheck, Lightbulb, Menu, Phone, PlugZap, Users, X, Zap} from 'lucide-react';
 import {publicAsset} from '../utils/assets';
@@ -21,6 +21,7 @@ const utilityNav = [
 export function CurrentLayout({children}: {children: ReactNode}) {
   const [launcherOpen, setLauncherOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const shellRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -29,11 +30,11 @@ export function CurrentLayout({children}: {children: ReactNode}) {
     if (location.hash) {
       window.requestAnimationFrame(() => document.querySelector(location.hash)?.scrollIntoView({behavior: 'smooth'}));
     } else {
-      window.scrollTo({top: 0, behavior: 'instant'});
+      shellRef.current?.scrollTo({top: 0, behavior: 'auto'});
     }
   }, [location.pathname, location.hash]);
 
-  return <div className="current-shell">
+  return <div className="current-shell" ref={shellRef}>
     <header className="current-header">
       <Link className="current-brand" to="/" aria-label="NK Electrical home">
         <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
