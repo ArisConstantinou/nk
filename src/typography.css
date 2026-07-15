@@ -40,7 +40,7 @@ input,select,textarea{font-size:16px!important;line-height:1.45}
 .proof-line p,.person-card p,.installation-delivery-grid p,.product-info p,
 .contact-details span>a:last-child:not(:first-of-type),.hours>p,
 .project-discussion-panel>p,.layout-lab>aside p,.layout-lab>aside li,
-.person-card p.person-area,.person-card span.person-credential{
+.person-card p.person-area,.person-card span.person-credential,.product-detail dl>div{
   font-size:var(--nk-type-small)!important;
   line-height:1.6;
 }
@@ -91,58 +91,12 @@ html[data-experience='tech']{
 .rgb-remote-scenes strong{font-size:16px!important}
 .electrical-main .button{font-size:var(--nk-type-action)!important}
 
-/* Flow theme: every compact data label and navigation aid has a readable floor. */
-.current-brand small,.current-path-nav a,.current-explore-trigger,.current-brief-cta,
-.current-launcher-heading>span,.current-launcher-meta,.current-kicker,
-.current-situations>header>span,.current-energy-heading>span,
-.current-electricity-guide>header>span,.current-process-copy>span,
-.current-project-proof>header span,.current-launcher>nav small,.current-button,
-.current-hero-promise,.current-project-starter>header span,
-.current-project-starter nav a>span,.current-project-starter>footer span,
-.current-live-strip>div>span,.current-live-strip small,.current-live-strip>p,
-.current-situation-card>span,.current-situation-card b,.current-energy-controls label,
-.current-energy-output small,.current-energy-output span,
-.current-electricity-guide article>span,.current-electricity-guide article small,
-.current-process-copy a,.current-process li>span,.current-project-proof>header>a,
-.current-project-proof>div>a>span,.current-project-proof>div small,
-.current-footer-callout>span,.current-footer-callout>a,.current-footer-details small,
-.current-footer>p,.admin-theme-switcher small,.admin-theme-switcher>button>b,
-.admin-theme-heading>div>span,.admin-theme-heading>button,.admin-theme-preview small{
-  font-size:var(--nk-type-micro)!important;
-  line-height:1.45;
-}
-
-.current-launcher-heading p,.current-project-starter>header small,
-.current-situations>header p,.current-situation-card p,.current-energy-heading p,
-.current-energy-controls label>span,.current-energy-output p,
-.current-electricity-guide article p,.current-process-copy p,.current-process li p,
-.admin-theme-switcher p,.admin-theme-heading p,.admin-theme-preview p{
-  font-size:var(--nk-type-small)!important;
-  line-height:1.65;
-}
-
-.current-brand strong{font-size:17px!important}
-.current-launcher>nav strong{font-size:19px!important}
-.current-project-starter nav strong{font-size:18px!important}
-.current-project-starter>footer b{font-size:15px!important}
-.current-live-strip strong{font-size:17px!important}
-.current-footer-details a{font-size:16px!important}
-.current-hero-copy>p{font-size:clamp(17px,1.25vw,20px)!important}
-
 @media(max-width:900px){
   :root{--nk-type-micro:12px;--nk-type-small:14px;--nk-type-body:16px;--nk-type-action:15px}
-  .current-mobile-menu>a strong{font-size:26px!important}
-  .current-mobile-menu>a small,.current-mobile-utilities a{font-size:12px!important;line-height:1.45}
-  .current-mobile-dock a,.electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important;line-height:1.2}
-  .current-brand strong{font-size:16px!important}
-  .brand-wordmark strong{font-size:16px!important}
-  .brand-wordmark small,.electrical-command-brand small,.electrical-rail-wordmark small{font-size:12px!important}
-  .mobile-hero-copy>p,.mobile-manifesto p{font-size:16px!important;line-height:1.65}
-  .mobile-disciplines h3{font-size:23px!important}
-  .mobile-season-scroll b{font-size:18px!important}
+  .electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important;line-height:1.2}
+  .electrical-command-brand small,.electrical-rail-wordmark small{font-size:12px!important}
 }
 
 @media(max-width:390px){
-  .current-mobile-dock a,.electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important}
-  .current-header{padding-left:10px;padding-right:10px}
+  .electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important}
 }

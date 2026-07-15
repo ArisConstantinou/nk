@@ -1,189 +1,122 @@
-import {useEffect, useState, type FormEvent, type ReactNode} from 'react';
-import {
-  ArrowRight,
-  CircuitBoard,
-  Contact,
-  House,
-  Lightbulb,
-  Menu,
-  PanelsTopLeft,
-  PlugZap,
-  Refrigerator,
-  UsersRound,
-  X,
-} from 'lucide-react';
+import {useEffect, useRef, useState, type ReactNode} from 'react';
+import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Phone, X} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
+import {serviceLinks, shopLinks} from '../navigation';
 import {publicAsset} from '../utils/assets';
-import {ThemeControls} from './ThemeControls';
+import {SeoRouteMeta} from './SeoRouteMeta';
 
-const electricalNav = [
-  {label: 'Home', route: '/', code: 'START', Icon: House},
-  {label: 'Installations', route: '/electrical-installations', code: 'POWER', Icon: PlugZap},
-  {label: 'Lighting', route: '/lighting', code: 'LIGHT', Icon: Lightbulb},
-  {label: 'Appliances', route: '/appliances', code: 'EQUIP', Icon: Refrigerator},
-  {label: 'Projects', route: '/projects', code: 'WORK', Icon: PanelsTopLeft},
-  {label: 'About', route: '/about', code: 'TEAM', Icon: UsersRound},
-  {label: 'Contact', route: '/contact', code: 'TALK', Icon: Contact},
-];
-
-const contextByRoute: Record<string, string> = {
-  '/': 'Power · Lighting · Appliances',
-  '/electrical-installations': 'Power installations',
-  '/lighting': 'Lighting design & supply',
-  '/appliances': 'Appliance selection',
-  '/projects': 'Completed installations',
-  '/about': 'People & responsibilities',
-  '/contact': 'Enquiry routing',
-};
-
-const routeContext = (pathname: string) => {
-  const route = Object.keys(contextByRoute).find(item => item !== '/' && pathname.startsWith(item));
-  return contextByRoute[route || '/'] || 'Project information';
-};
-
-const workflowByRoute: Record<string, [string, string, string, string]> = {
-  '/': ['Survey', 'Engineer', 'Install', 'Maintain'],
-  '/electrical-installations': ['Load', 'Protect', 'Wire', 'Certify'],
-  '/lighting': ['Layer', 'Specify', 'Aim', 'Test'],
-  '/appliances': ['Select', 'Supply', 'Connect', 'Support'],
-  '/projects': ['Scope', 'Coordinate', 'Install', 'Handover'],
-  '/about': ['Experience', 'Coordinate', 'Install', 'Support'],
-  '/contact': ['Describe', 'Route', 'Review', 'Respond'],
-};
-
-const routeWorkflow = (pathname: string) => {
-  const route = Object.keys(workflowByRoute).find(item => item !== '/' && pathname.startsWith(item));
-  return workflowByRoute[route || '/'];
-};
+type MegaSection = 'services' | 'shop' | null;
 
 export function ElectricalLayout({children}: {children: ReactNode}) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [enquiryOpen, setEnquiryOpen] = useState(false);
-  const [enquiryPrepared, setEnquiryPrepared] = useState(false);
+  const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSection, setMobileSection] = useState<MegaSection>('services');
+  const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
-  const section = routeContext(location.pathname);
-  const workflow = routeWorkflow(location.pathname);
 
   useEffect(() => {
-    setMenuOpen(false);
-    setEnquiryOpen(false);
+    setMegaOpen(null);
+    setMobileOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setMenuOpen(false);
-        setEnquiryOpen(false);
+        setMegaOpen(null);
+        setMobileOpen(false);
       }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, []);
 
-  const prepareEnquiry = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const subject = encodeURIComponent(`${data.get('workType')} enquiry from ${data.get('name')}`);
-    const body = encodeURIComponent([
-      `Name: ${data.get('name')}`,
-      `Phone: ${data.get('phone')}`,
-      `Work area: ${data.get('workType')}`,
-      '',
-      String(data.get('message')),
-    ].join('\n'));
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    if (mobileOpen) document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [mobileOpen]);
 
-    setEnquiryPrepared(true);
-    window.location.href = `mailto:info@nk-electrical.com?subject=${subject}&body=${body}`;
-  };
+  useEffect(() => {
+    if (!megaOpen) return;
+    const closeOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) setMegaOpen(null);
+    };
+    document.addEventListener('mousedown', closeOutside);
+    return () => document.removeEventListener('mousedown', closeOutside);
+  }, [megaOpen]);
 
-  return <div className="electrical-shell">
-    <aside className="electrical-rail">
-      <Link className="electrical-rail-brand" to="/" aria-label="NK Electrical Ltd. systems home">
-        <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
-        <span className="electrical-rail-wordmark"><strong>Electrical</strong><small>Ltd. · Since 1985</small></span>
-      </Link>
-      <nav className="electrical-rail-nav" aria-label="Electrical systems navigation">
-        {electricalNav.map(({label, route, code, Icon}) => <NavLink to={route} key={route} aria-label={label} data-label={label} end={route === '/'}>
-          <small>{code}</small><Icon/><span>{label}</span><i/>
-        </NavLink>)}
-      </nav>
-      <div className="electrical-rail-tools"><ThemeControls className="theme-controls--rail"/></div>
-    </aside>
+  const toggleMega = (section: Exclude<MegaSection, null>) => setMegaOpen(current => current === section ? null : section);
+  const toggleMobileSection = (section: Exclude<MegaSection, null>) => setMobileSection(current => current === section ? null : section);
 
-    <div className="electrical-stage">
-      <header className="electrical-commandbar">
-        <Link className="electrical-command-brand" to="/" aria-label="NK Electrical Ltd. home">
+  return <div className="electrical-shell ia-shell">
+    <SeoRouteMeta/>
+    <header className="ia-header" ref={headerRef}>
+      <div className="ia-header-bar">
+        <Link className="ia-brand" to="/" aria-label="NK Electrical home">
           <img src={publicAsset('assets/nk-logo-transparent.png')} alt="NK Electrical"/>
-          <span><strong>Electrical</strong><small>Ltd. · Since 1985</small></span>
+          <span><strong>NK Electrical</strong><small>Power · Light · Control</small></span>
         </Link>
-        <button className="electrical-menu-trigger" type="button" aria-label={menuOpen ? 'Close systems menu' : 'Open systems menu'} aria-expanded={menuOpen} onClick={() => { setMenuOpen(open => !open); setEnquiryOpen(false); }}>{menuOpen ? <X/> : <Menu/>}<span>Systems</span></button>
-        <div className="electrical-command-location"><strong>{section}</strong></div>
-        <div className="electrical-command-flow" aria-label={`${section} workflow`}><span>{workflow[0]}</span><i/><span>{workflow[1]}</span><i/><span>{workflow[2]}</span><i/><span>{workflow[3]}</span></div>
-        <ThemeControls className="theme-controls--command"/>
-        <button
-          className={`electrical-command-contact${enquiryOpen ? ' open' : ''}`}
-          type="button"
-          aria-expanded={enquiryOpen}
-          aria-controls="desktop-enquiry-panel"
-          onClick={() => {
-            setEnquiryOpen(open => !open);
-            setEnquiryPrepared(false);
-            setMenuOpen(false);
-          }}
-        >
-          <span>{enquiryOpen ? 'Close enquiry' : 'Route an enquiry'}</span>
-          {enquiryOpen ? <X/> : <ArrowRight/>}
-        </button>
-      </header>
 
-      {enquiryOpen && <aside id="desktop-enquiry-panel" className="electrical-enquiry-panel" aria-label="Route an enquiry">
-        <form onSubmit={prepareEnquiry}>
-          <div className="electrical-enquiry-heading">
-            <div><small>NK / ENQUIRY ROUTER</small><strong>Tell us where the work begins.</strong></div>
-            <button type="button" aria-label="Close enquiry panel" onClick={() => setEnquiryOpen(false)}><X/></button>
-          </div>
-          <p>Give the team a concise starting point. We will direct it to the right work area.</p>
-          <div className="electrical-enquiry-fields">
-            <label>Your name<input required name="name" autoComplete="name"/></label>
-            <label>Phone<input required name="phone" type="tel" autoComplete="tel"/></label>
-            <label className="wide">Work area<select required name="workType" defaultValue="Electrical installation">
-              <option>Electrical installation</option>
-              <option>Lighting selection and supply</option>
-              <option>Appliance selection and supply</option>
-              <option>CCTV and security systems</option>
-              <option>Electrical maintenance and support</option>
-            </select></label>
-            <label className="wide">Work summary<textarea required name="message" rows={3} placeholder="Property type, location and what needs to be done"/></label>
-          </div>
-          <button className="electrical-enquiry-submit" type="submit"><span>Prepare enquiry email</span><ArrowRight/></button>
-          {enquiryPrepared && <p className="electrical-enquiry-note">Your email application is ready with these project details.</p>}
-        </form>
-      </aside>}
+        <nav className="ia-desktop-nav" aria-label="Primary navigation">
+          <button type="button" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onClick={() => toggleMega('services')}>Services <ChevronDown/></button>
+          <button type="button" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onClick={() => toggleMega('shop')}>Shop <ChevronDown/></button>
+          <NavLink to="/projects">Projects</NavLink>
+          <NavLink to="/about">About</NavLink>
+          <NavLink to="/contact">Contact</NavLink>
+        </nav>
 
-      {menuOpen && <div className="electrical-menu-panel" role="dialog" aria-modal="true" aria-label="Electrical systems menu">
-        <div className="electrical-menu-heading"><span>NK / SYSTEM DIRECTORY</span><h2>Where does the<br/>work begin?</h2><p>Choose the discipline. Every route remains connected to the same project team.</p></div>
-        <nav>{electricalNav.map(({label, route, code, Icon}) => <NavLink to={route} key={route} end={route === '/'}><small>{code}</small><Icon/><strong>{label}</strong><ArrowRight/></NavLink>)}</nav>
-        <div className="electrical-menu-meta"><span>72 Makedonitissis Str.<br/>Strovolos 2057</span><a href="tel:+35722494145">+357 22 494145</a><a href="mailto:info@nk-electrical.com">info@nk-electrical.com</a></div>
+        <div className="ia-header-actions">
+          <a className="ia-header-phone" href="tel:+35722494145" aria-label="Call NK Electrical"><Phone/><span>+357 22 494145</span></a>
+          <Link className="ia-quote-button" to="/request-a-quote">Request a Quote <ArrowRight/></Link>
+          <button className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
+        </div>
+      </div>
+
+      {megaOpen && <div className={`ia-mega ia-mega--${megaOpen}`} id={`${megaOpen}-mega-menu`}>
+        <div className="ia-mega-heading">
+          <span>{megaOpen === 'services' ? 'SERVICES / EXPERTISE' : 'SHOP / PRODUCTS'}</span>
+          <h2>{megaOpen === 'services' ? 'Work performed by our team.' : 'Products available through NK Electrical.'}</h2>
+          <p>{megaOpen === 'services' ? 'Planning, installation, integration and support. No product categories are mixed into this path.' : 'Lighting, appliances and official PDF catalogues. Service enquiries remain under Services.'}</p>
+          <Link to={megaOpen === 'services' ? '/services' : '/shop'}>{megaOpen === 'services' ? 'View all services' : 'Browse all products'} <ArrowRight/></Link>
+        </div>
+        <nav aria-label={`${megaOpen === 'services' ? 'Services' : 'Shop'} menu`}>
+          {(megaOpen === 'services' ? serviceLinks : shopLinks).map((item, index) => <Link to={item.to} key={item.to}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{item.label}</strong><small>{item.description}</small></div><ArrowRight/></Link>)}
+        </nav>
+        <aside>
+          {megaOpen === 'services' ? <><CircuitBoard/><small>SERVICE PATH</small><strong>From survey to tested handover.</strong><p>Start with the requirement and the building. Equipment selection follows the scope.</p></> : <><FileText/><small>PRODUCT PATH</small><strong>Products, specifications and downloads.</strong><p>Find the item first, then ask about availability, supply or installation.</p></>}
+        </aside>
       </div>}
 
-      <main className="electrical-main">{children}</main>
-
-      <footer className="electrical-footer">
-        <div className="electrical-footer-signal"><CircuitBoard/><span>Project line available</span><i/></div>
-        <div className="electrical-footer-title"><small>FROM FIRST LOAD TO FINAL TEST</small><h2>Ready to define<br/>the electrical scope?</h2><Link to="/contact">Start with the building <ArrowRight/></Link></div>
-        <div className="electrical-footer-grid">
-          <div><b>Visit</b><a href="https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus" target="_blank" rel="noreferrer">72 Makedonitissis Str.<br/>Strovolos 2057, Cyprus</a></div>
-          <div><b>Connect</b><a href="tel:+35722494145">+357 22 494145</a><a href="mailto:info@nk-electrical.com">info@nk-electrical.com</a></div>
-          <div><b>Operations</b><span>Electrical installations</span><span>Lighting + appliances</span><span>Smart building systems</span></div>
-          <div><b>System</b><Link to="/admin">Content studio</Link><span>© {new Date().getFullYear()} NK Electrical Ltd.</span></div>
+      {mobileOpen && <nav className="ia-mobile-menu" aria-label="Mobile navigation">
+        <div className="ia-mobile-accordion">
+          <button type="button" aria-expanded={mobileSection === 'services'} onClick={() => toggleMobileSection('services')}><span>Services</span><ChevronDown/></button>
+          {mobileSection === 'services' && <div>{serviceLinks.map(item => <Link to={item.to} key={item.to}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></Link>)}</div>}
         </div>
+        <div className="ia-mobile-accordion">
+          <button type="button" aria-expanded={mobileSection === 'shop'} onClick={() => toggleMobileSection('shop')}><span>Shop</span><ChevronDown/></button>
+          {mobileSection === 'shop' && <div>{shopLinks.map(item => <Link to={item.to} key={item.to}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></Link>)}</div>}
+        </div>
+        <NavLink className="ia-mobile-primary" to="/projects">Projects <ArrowRight/></NavLink>
+        <NavLink className="ia-mobile-primary" to="/about">About <ArrowRight/></NavLink>
+        <NavLink className="ia-mobile-primary" to="/contact">Contact <ArrowRight/></NavLink>
+        <div className="ia-mobile-ctas"><a href="tel:+35722494145"><Phone/> Call us</a><Link to="/request-a-quote">Request a Quote <ArrowRight/></Link></div>
+      </nav>}
+    </header>
+
+    <div className="electrical-stage ia-stage">
+      <main className="electrical-main ia-main">{children}</main>
+
+      <footer className="ia-footer">
+        <div className="ia-footer-lead"><span>PROJECT LINE / CYPRUS</span><h2>Define the requirement.<br/>Then build it properly.</h2><Link to="/request-a-quote">Request a Quote <ArrowRight/></Link></div>
+        <div className="ia-footer-grid">
+          <div><b>Services</b>{serviceLinks.map(item => <Link to={item.to} key={item.to}>{item.label}</Link>)}</div>
+          <div><b>Shop</b>{shopLinks.map(item => <Link to={item.to} key={item.to}>{item.label}</Link>)}</div>
+          <div><b>Company</b><Link to="/projects">Projects</Link><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/request-a-quote">Request a Quote</Link></div>
+          <div><b>Contact</b><a href="https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus" target="_blank" rel="noreferrer"><MapPin/> 72 Makedonitissis Str.<br/>Strovolos 2057, Cyprus</a><a href="tel:+35722494145"><Phone/> +357 22 494145</a><a href="mailto:info@nk-electrical.com"><Mail/> info@nk-electrical.com</a></div>
+        </div>
+        <div className="ia-footer-bottom"><span>© {new Date().getFullYear()} NK Electrical Ltd. · Since 1985</span><Link to="/admin">Content admin</Link></div>
       </footer>
     </div>
-
-    <nav className="electrical-mobile-dock" aria-label="Quick navigation">
-      {electricalNav.filter(item => ['/', '/electrical-installations', '/projects', '/contact'].includes(item.route)).map(({label, route, Icon}) => <NavLink to={route} key={route} end={route === '/'}><Icon/><span>{label === 'Installations' ? 'Install' : label}</span></NavLink>)}
-      <button type="button" aria-label="Open all systems" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><CircuitBoard/><span>All</span></button>
-    </nav>
   </div>;
 }

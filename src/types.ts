@@ -29,6 +29,18 @@ export type Catalogue = {
   url: string;
 };
 
+export type Project = {
+  id: string;
+  number: string;
+  name: string;
+  image: string;
+  type: string;
+  category: 'Residential' | 'Commercial' | 'Retail' | 'Mixed use';
+  completionDate: string;
+  text: string;
+  systems: string[];
+};
+
 export type ThemeContent = {
   eyebrow: string;
   heroTitle: string;
@@ -50,10 +62,9 @@ export type SiteContent = {
   heroImage: string;
   heroObject: {x: number; y: number};
   themeContent: {
-    flow: ThemeContent;
     tech: ThemeContent;
-    studio: ThemeContent;
   };
   products: Product[];
   catalogues: Catalogue[];
+  projects: Project[];
 };

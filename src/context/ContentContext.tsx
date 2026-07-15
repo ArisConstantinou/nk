@@ -19,16 +19,20 @@ const mergeContent = (value: Partial<SiteContent>): SiteContent => ({
   ...value,
   heroObject: {...defaultContent.heroObject, ...value.heroObject},
   themeContent: {
-    flow: {...defaultContent.themeContent.flow, ...value.themeContent?.flow},
     tech: {...defaultContent.themeContent.tech, ...value.themeContent?.tech},
-    studio: {...defaultContent.themeContent.studio, ...value.themeContent?.studio},
   },
 });
 
 const readStored = (): SiteContent => {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value ? mergeContent(JSON.parse(value) as Partial<SiteContent>) : defaultContent;
+    if (!value) return defaultContent;
+    const parsed = JSON.parse(value) as Partial<SiteContent>;
+    const merged = mergeContent(parsed);
+    if (parsed.themeContent?.tech?.heroBody === 'Planning, installation, lighting, appliances and smart control from one experienced electrical team in Cyprus.') {
+      merged.themeContent.tech = defaultContent.themeContent.tech;
+    }
+    return merged;
   } catch {
     return defaultContent;
   }

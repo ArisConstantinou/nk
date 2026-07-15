@@ -8,8 +8,8 @@ import {
   Gauge,
   Lightbulb,
   PlugZap,
-  Refrigerator,
   ShieldCheck,
+  Wrench,
   Waves,
 } from 'lucide-react';
 import {Link} from 'react-router-dom';
@@ -22,7 +22,7 @@ const systems = [
     code: 'PWR-01',
     label: 'Electrical installations',
     short: 'Power',
-    route: '/electrical-installations',
+    route: '/services/electrical-installations',
     Icon: PlugZap,
     detail: 'Load planning, distribution, containment, wiring, protection, testing and documented switch-on.',
     signal: 'Survey → plan → install → test',
@@ -31,28 +31,28 @@ const systems = [
     code: 'LGT-02',
     label: 'Architectural lighting',
     short: 'Light',
-    route: '/lighting',
+    route: '/services/lighting-design',
     Icon: Lightbulb,
     detail: 'Interior, exterior, decorative and professional lighting selected around the architecture.',
     signal: 'Layer → select → aim → test',
   },
   {
-    code: 'APL-03',
-    label: 'Appliances',
-    short: 'Equip',
-    route: '/appliances',
-    Icon: Refrigerator,
-    detail: 'Practical appliance selection with the electrical requirements and installation considered together.',
-    signal: 'Compare → specify → supply → support',
+    code: 'AUT-03',
+    label: 'Smart home & automation',
+    short: 'Control',
+    route: '/services/smart-home-automation',
+    Icon: CircuitBoard,
+    detail: 'KNX, lighting scenes, shading and connected building controls planned around everyday use.',
+    signal: 'Connect → automate → monitor → adapt',
   },
   {
-    code: 'CTL-04',
-    label: 'Smart control',
-    short: 'Control',
-    route: '/electrical-installations#smart',
-    Icon: CircuitBoard,
-    detail: 'KNX, security, sound and vision coordinated as one dependable building-control layer.',
-    signal: 'Connect → automate → monitor → adapt',
+    code: 'MNT-04',
+    label: 'Maintenance & fault support',
+    short: 'Support',
+    route: '/services/maintenance',
+    Icon: Wrench,
+    detail: 'Fault diagnosis, corrective work and planned maintenance for existing electrical systems.',
+    signal: 'Inspect → diagnose → repair → verify',
   },
 ];
 
@@ -80,7 +80,7 @@ export default function ElectricalHome() {
         </motion.h1>
         <p>{theme.heroBody}</p>
         <div className="power-primary-actions">
-          <Link className="power-action power-action--live" to="/electrical-installations"><span>Plan an installation</span><ArrowDownRight/></Link>
+          <Link className="power-action power-action--live" to="/services/electrical-installations"><span>Plan an installation</span><ArrowDownRight/></Link>
           <Link className="power-action" to="/projects"><span>Inspect completed work</span><ArrowRight/></Link>
           <a className="power-action power-action--led" href="#led-lab"><span>Watch the live LED response</span><Lightbulb/></a>
         </div>
@@ -120,6 +120,11 @@ export default function ElectricalHome() {
     </section>
 
     <LedSensitivityPanel/>
+
+    <section className="ia-home-split" aria-label="Services and shop paths">
+      <Link to="/services"><small>01 / SERVICES</small><h2>Need work planned or installed?</h2><p>Electrical installations, lighting design, automation, security and maintenance—performed by the NK team.</p><span>Explore Services <ArrowRight/></span></Link>
+      <Link to="/shop"><small>02 / SHOP</small><h2>Looking for a product?</h2><p>Browse lighting, appliances and official catalogues without mixing products into service pages.</p><span>Enter the Shop <ArrowRight/></span></Link>
+    </section>
 
     <section className="power-routing">
       <header><span>01 / CAPABILITY ROUTING</span><h2>{theme.sectionTitle}</h2><p>{theme.sectionBody}</p></header>

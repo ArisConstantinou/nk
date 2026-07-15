@@ -1,4 +1,4 @@
-import type {Catalogue, Product, SiteContent, TeamMember} from './types';
+import type {Catalogue, Product, Project, SiteContent, TeamMember} from './types';
 import {publicAsset} from './utils/assets';
 
 const product = (id: string, name: string, category: Product['category'], season: Product['season'], space: Product['space'], ext: string, note: string): Product => ({
@@ -61,6 +61,37 @@ export const team: TeamMember[] = [
   {name: 'Lenia Kouri', role: 'Receptionist & Sales', responsibility: 'Reception & sales', workArea: 'Reception, customer enquiries & showroom sales', characteristics: ['Front desk', 'Customer enquiries', 'Product sales'], email: 'info@nk-electrical.com', image: publicAsset('assets/team/illustrated/lenia-faceless.webp'), branch: 'Reception & sales'},
 ];
 
+const archivedProjectNames = [
+  'Bank of Cyprus Head Offices', 'Private Residence', 'Building Residence + Offices + Stores', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Building Residence', 'Private Residence', 'Athienitis Supermarket, Pallouriotissa', 'Building Residence', 'Building Residence', 'Private Residence', 'Building Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Private Residence', 'Building Residence',
+];
+
+const projectType = (name: string) => {
+  if (name.includes('Bank of Cyprus')) return 'Commercial offices · electrical & LED lighting';
+  if (name.includes('Supermarket')) return 'Retail · electrical & LED lighting';
+  if (name.includes('Offices + Stores')) return 'Mixed use · residential, offices & retail';
+  if (name === 'Building Residence') return 'Residential building · electrical & LED lighting';
+  return 'Private residence · electrical & LED lighting';
+};
+
+const projectCategory = (name: string): Project['category'] => {
+  if (name.includes('Bank of Cyprus')) return 'Commercial';
+  if (name.includes('Supermarket')) return 'Retail';
+  if (name.includes('Offices + Stores')) return 'Mixed use';
+  return 'Residential';
+};
+
+export const projects: Project[] = archivedProjectNames.map((name, index) => ({
+  id: `archive-${String(index + 1).padStart(2, '0')}`,
+  number: String(index + 1).padStart(2, '0'),
+  name,
+  image: publicAsset(`assets/projects/archive/project-${String(index + 1).padStart(2, '0')}.jpg`),
+  type: projectType(name),
+  category: projectCategory(name),
+  completionDate: '',
+  text: 'Electrical and LED lighting installation, with lighting selected through the NK Electrical store.',
+  systems: ['Electrical installation', 'LED lighting installation', 'Lighting selection and supply'],
+}));
+
 export const defaultContent: SiteContent = {
   eyebrow: 'Electrical installations · Lighting · Appliances · Smart systems · Since 1985',
   heroTitle: 'Electrical systems,',
@@ -72,34 +103,17 @@ export const defaultContent: SiteContent = {
   heroImage: publicAsset('assets/generated/cyprus-lighting-hero.webp'),
   heroObject: {x: 72, y: 35},
   themeContent: {
-    flow: {
-      eyebrow: 'ELECTRICAL PARTNER / CYPRUS / SINCE 1985',
-      heroTitle: 'Power for the way',
-      heroAccent: 'Cyprus lives now.',
-      heroTail: 'One team from first question to final test.',
-      heroBody: 'Plan the power, shape the lighting, connect the controls and know who is responsible for every step.',
-      sectionTitle: 'Start with the situation, not a service list.',
-      sectionBody: 'Tell us what is changing in the building. We will map the electrical work, lighting, equipment and controls around it.',
-    },
     tech: {
-      eyebrow: 'NK / INSTALLATIONS · LIGHTING · APPLIANCES',
+      eyebrow: 'NK / ELECTRICAL SERVICES + PRODUCT SHOP',
       heroTitle: 'Power planned.',
       heroAccent: 'Systems connected.',
       heroTail: 'Buildings switched on.',
-      heroBody: 'Planning, installation, lighting, appliances and smart control from one experienced electrical team in Cyprus.',
-      sectionTitle: 'One project. Four connected layers.',
-      sectionBody: 'Each discipline has its own specialist path. The paths meet before anything reaches the site.',
-    },
-    studio: {
-      eyebrow: 'Electrical installations · Lighting · Appliances · Smart systems · Since 1985',
-      heroTitle: 'Electrical systems,',
-      heroAccent: 'installed right.',
-      heroTail: 'Planned clearly. Delivered responsibly.',
-      heroBody: 'Planning, installation, lighting, appliances and smart control from one experienced electrical team in Cyprus.',
-      sectionTitle: 'Four disciplines. One accountable team.',
-      sectionBody: 'Separate specialists for electrical work, lighting, appliances and smart systems, coordinated under one roof.',
+      heroBody: 'Electrical services, lighting design and smart systems from one experienced team—plus a separate Shop for products, appliances and catalogues.',
+      sectionTitle: 'Specialist services. One accountable team.',
+      sectionBody: 'Services stay focused on planning, installation and support. Products and PDF catalogues follow a separate Shop path.',
     },
   },
   products,
   catalogues,
+  projects,
 };
