@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Bot, CheckCircle2, ChevronRight, Languages, LoaderCircle, Map, RefreshCw, Save, ShieldCheck, Sparkles, Trash2, X} from 'lucide-react';
+import {Bot, CheckCircle2, ChevronRight, Eye, Languages, LoaderCircle, Map, RefreshCw, Save, ShieldCheck, Sparkles, Trash2, X} from 'lucide-react';
 import {useLocation} from 'react-router-dom';
 import {errorMessage} from '../api';
 import {applyCmsGuideStep, finishCmsGuide, requestCmsGuideStart, requestCmsGuideStep, type CmsGuideLanguage, type CmsGuideSession, type CmsGuideStepResult} from '../guide/aiGuide';
@@ -89,6 +89,18 @@ export function AdminGuide({open, onClose, onNavigate}: {open: boolean; onClose:
     if (!open || !['proposal', 'complete'].includes(phase)) return;
     panelRef.current?.querySelector('main')?.scrollTo({top: 0, behavior: 'smooth'});
   }, [open, phase, step]);
+  useEffect(() => {
+    if (!open || !inEditor || !window.matchMedia('(max-width: 520px)').matches || !['ready', 'analysing', 'proposal', 'applying', 'complete'].includes(phase)) return;
+    const revealStage = () => {
+      const stage = document.querySelector<HTMLElement>('.nk-visual-stage');
+      if (!stage) return;
+      const top = stage.getBoundingClientRect().top + window.scrollY - 8;
+      window.scrollTo({top: Math.max(0, top), behavior: 'auto'});
+    };
+    const timer = window.setTimeout(revealStage, phase === 'ready' ? 240 : 60);
+    const settledTimer = window.setTimeout(revealStage, phase === 'ready' ? 520 : 420);
+    return () => {window.clearTimeout(timer); window.clearTimeout(settledTimer);};
+  }, [inEditor, open, phase, step]);
 
   const startInEditor = useCallback(async () => {
     setPhase('starting'); setFailure(''); setResult(null); setLastApplied(null); setStep(0);
@@ -148,6 +160,7 @@ export function AdminGuide({open, onClose, onNavigate}: {open: boolean; onClose:
   if (!open) return null;
   const loading = ['starting', 'analysing', 'applying', 'finishing'].includes(phase);
   return <div className="nk-admin-guide-overlay nk-admin-ai-guide-overlay" role="presentation">
+    <div className="nk-admin-ai-guide-preview-label" aria-hidden="true"><Eye/>{language === 'el' ? 'LIVE PREVIEW ΠΑΝΩ' : 'LIVE PREVIEW ABOVE'}</div>
     <section ref={panelRef} className="nk-admin-guide nk-admin-ai-guide" role="dialog" aria-modal="false" aria-labelledby="admin-guide-title">
       <header><div><Bot/><span>{text.title}</span></div><button ref={closeRef} type="button" onClick={closeGuide} aria-label={text.close}><X/></button></header>
       <div className="nk-admin-guide-language" aria-label="Guide language"><Languages/><button type="button" className={language === 'el' ? 'active' : ''} aria-pressed={language === 'el'} onClick={() => setLanguage('el')}>Ελληνικά</button><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button></div>

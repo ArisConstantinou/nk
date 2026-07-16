@@ -447,7 +447,7 @@ export function VisualEditingBridge() {
           guideHighlightFrame = 0;
           if (!target) return;
           select(target);
-          target.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
+          target.scrollIntoView({behavior: 'smooth', block: window.innerWidth <= 520 ? 'start' : 'center', inline: 'center'});
           target.classList.remove('nk-visual-guide-highlight');
           void target.getBoundingClientRect();
           target.classList.add('nk-visual-guide-highlight');

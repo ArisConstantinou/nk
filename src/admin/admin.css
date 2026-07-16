@@ -217,6 +217,7 @@
 /* Interactive AI builder: docked beside the live editor, which remains usable throughout the guide. */
 .nk-admin-ai-guide-overlay{position:fixed;z-index:460;inset:0;display:flex;align-items:flex-start;justify-content:flex-end;padding:76px 18px 18px;background:transparent!important;backdrop-filter:none!important;pointer-events:none!important}
 .nk-admin-ai-guide{width:min(430px,calc(100vw - 36px));height:min(780px,calc(100dvh - 94px));border:1px solid #a8cdbd;box-shadow:0 26px 80px rgba(4,24,16,.3);pointer-events:auto!important}
+.nk-admin-ai-guide-preview-label{display:none}
 .nk-admin-ai-guide>main>div{padding:24px}
 .nk-admin-ai-guide-step{margin-bottom:10px}.nk-admin-ai-guide-step b{max-width:220px;text-align:right;line-height:1.35}
 .nk-admin-guide-added-hint{margin:0;color:var(--admin-muted);font-size:14px;line-height:1.65}
@@ -238,4 +239,17 @@
 .nk-admin-ai-guide .nk-admin-guide-step-actions.is-finish>button.danger{border-color:#e3aaa5;background:#fff5f4;color:#a6352e}
 .nk-admin-ai-guide .nk-admin-guide-step-actions.is-finish>button.danger:hover{background:#fde8e6}
 @media(max-width:840px){.nk-admin-ai-guide-overlay{align-items:flex-end;padding:10px}.nk-admin-ai-guide{width:min(430px,100%);height:min(760px,calc(100dvh - 20px))}}
-@media(max-width:520px){.nk-admin-ai-guide-overlay{padding:0}.nk-admin-ai-guide{width:100%;height:100dvh;max-height:none;border-radius:0}.nk-admin-ai-guide .nk-admin-guide-step-actions{grid-template-columns:1fr 1fr}.nk-admin-ai-guide>main>div{padding:20px}}
+@media(max-width:520px){
+  .nk-admin-ai-guide-overlay{align-items:flex-end;padding:0;overflow:visible}
+  .nk-admin-ai-guide{width:100%;height:min(620px,64dvh);max-height:64dvh;border-radius:18px 18px 0 0;border-bottom:0;box-shadow:0 -20px 54px rgba(4,24,16,.28)}
+  .nk-admin-ai-guide-preview-label{position:fixed;z-index:3;left:12px;bottom:calc(min(620px,64dvh) + 8px);display:flex;align-items:center;gap:6px;height:28px;border:1px solid rgba(123,213,178,.45);border-radius:999px;background:#092119;color:#bdf1dd;padding:0 10px;font:850 10px/1 ui-monospace,monospace;letter-spacing:.08em;box-shadow:0 6px 18px rgba(4,24,16,.2);pointer-events:none}
+  .nk-admin-ai-guide-preview-label svg{width:14px}
+  .nk-admin-ai-guide>header{min-height:50px;padding:7px 12px}.nk-admin-ai-guide>header>button{width:36px;height:36px}
+  .nk-admin-ai-guide .nk-admin-guide-language{padding:6px 12px}.nk-admin-ai-guide .nk-admin-guide-language button{height:30px;padding:0 10px}
+  .nk-admin-ai-guide-step{margin:0 10px 6px;padding:6px 8px}.nk-admin-ai-guide-step b{display:none}
+  .nk-admin-ai-guide>main>div{padding:14px}.nk-admin-ai-guide>main>.nk-admin-ai-live-receipt{margin:0 10px 3px!important;padding:6px 8px!important}
+  .nk-admin-ai-guide-result.is-proposal>svg{width:19px;height:19px}.nk-admin-ai-guide-result.is-proposal>h2{font-size:20px;line-height:1.08}
+  .nk-admin-guide-recipe{gap:4px!important;margin-top:8px!important}.nk-admin-guide-recipe>button{min-height:34px;grid-template-columns:27px minmax(0,1fr);padding:3px 7px}.nk-admin-guide-recipe>button>span:first-child{width:25px;height:25px}
+  .nk-admin-ai-guide .nk-admin-guide-step-actions{grid-template-columns:1fr 1fr}
+  .nk-admin-ai-guide>footer{min-height:56px;padding:6px 10px}.nk-admin-ai-guide>footer>button,.nk-admin-ai-guide .nk-admin-guide-step-actions>button{min-height:42px}
+}
