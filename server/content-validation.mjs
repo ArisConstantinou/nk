@@ -150,7 +150,7 @@ function structuredSettings(data) {
 
 const SECTION_TYPES = ['text', 'features', 'cta', 'media'];
 const SECTION_ICONS = ['check', 'zap', 'lightbulb', 'shield', 'settings', 'sliders', 'wrench', 'circuit'];
-const COMPONENT_TYPES = ['heading', 'text', 'button', 'image', 'icon', 'divider'];
+const COMPONENT_TYPES = ['heading', 'text', 'button', 'image', 'gallery', 'icon', 'divider'];
 const COMPONENT_SCOPES = ['local', 'global'];
 const COMPONENT_ALIGNS = ['left', 'center', 'right', 'stretch'];
 const COMPONENT_TONES = ['default', 'accent', 'muted', 'dark'];
@@ -189,7 +189,7 @@ function component(value, field, seenIds = new Set()) {
   const style = value.style && typeof value.style === 'object' && !Array.isArray(value.style) ? value.style : {};
   return {
     id, type: value.type, enabled: value.enabled !== false, label: optional(value.label, `${field}.label`, 120) || value.type,
-    text: optional(value.text, `${field}.text`, 12000), url: optionalUrl(value.url, `${field}.url`, {relative: true}), image: optionalUrl(value.image, `${field}.image`, {relative: true}), alt: optional(value.alt, `${field}.alt`, 300), icon: SECTION_ICONS.includes(value.icon) ? value.icon : 'check', scope: COMPONENT_SCOPES.includes(value.scope) ? value.scope : 'local', reusableId: optional(value.reusableId, `${field}.reusableId`, 80), groupId: optional(value.groupId, `${field}.groupId`, 80),
+    text: optional(value.text, `${field}.text`, 12000), url: optionalUrl(value.url, `${field}.url`, {relative: true}), image: optionalUrl(value.image, `${field}.image`, {relative: true}), images: Array.isArray(value.images) ? value.images.slice(0, 8).map((image, index) => optionalUrl(image, `${field}.images.${index}`, {relative: true})).filter(Boolean) : [], alt: optional(value.alt, `${field}.alt`, 300), icon: SECTION_ICONS.includes(value.icon) ? value.icon : 'check', scope: COMPONENT_SCOPES.includes(value.scope) ? value.scope : 'local', reusableId: optional(value.reusableId, `${field}.reusableId`, 80), groupId: optional(value.groupId, `${field}.groupId`, 80),
     style: {width: boundedNumber(style.width, 100, 20, 100), align: COMPONENT_ALIGNS.includes(style.align) ? style.align : 'stretch', tone: COMPONENT_TONES.includes(style.tone) ? style.tone : 'default', padding: boundedNumber(style.padding, 0, 0, 64), radius: boundedNumber(style.radius, 0, 0, 48)},
   };
 }
@@ -365,6 +365,7 @@ export function validatePublishReady(kind, data) {
       if (['heading', 'text'].includes(item.type) && !String(item.text || '').trim()) errors[field] = 'Add text or disable this component.';
       if (item.type === 'button' && (!String(item.text || '').trim() || !String(item.url || '').trim())) errors[field] = 'Complete the button label and destination.';
       if (item.type === 'image' && (!String(item.image || '').trim() || !String(item.alt || '').trim())) errors[field] = 'Choose an image and add alternative text.';
+      if (item.type === 'gallery' && (!Array.isArray(item.images) || item.images.length < 2 || !String(item.alt || '').trim())) errors[field] = 'Choose at least two gallery images and add alternative text.';
     });
   });
   if (Object.keys(errors).length) throw new ApiError(400, 'publish_validation_failed', 'Complete the highlighted page elements before publishing.', errors);

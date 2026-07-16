@@ -7,6 +7,7 @@ import {audit, contentRecord, db, enquiryRecord, formRecord, mediaRecord, naviga
 import {CONTENT_KINDS, validateContentInput, validatePublishReady} from './content-validation.mjs';
 import {NAVIGATION_MENUS, SUBMISSION_STATUSES, validateFormInput, validateNavigationInput, validateSubmission} from './cms-validation.mjs';
 import {ApiError, cleanText, hashPassword, normalizeEmail, randomToken, readCookies, safeEqual, sha256, validatePassword, verifyPassword} from './security.mjs';
+import {requestGuideProposal} from './ai-guide.mjs';
 import sharp from 'sharp';
 
 const HOST = process.env.ADMIN_API_HOST || '127.0.0.1';
@@ -781,6 +782,13 @@ async function handleRequest(req, res) {
       audit({userId: auth.user.id, action: 'session.logout', entityType: 'session', ipAddress: requestIp(req)});
     });
     return sendJson(res, 200, {ok: true}, {'Set-Cookie': clearSessionCookie()});
+  }
+
+  if (req.method === 'POST' && parts[0] === 'guide' && parts[1] === 'next') {
+    requireContentWrite(auth.user, 'page');
+    const body = await readJson(req, 250_000);
+    const result = await requestGuideProposal({context: body.context, language: body.language === 'el' ? 'el' : 'en'});
+    return sendJson(res, 200, result);
   }
 
   if (req.method === 'GET' && parts[0] === 'dashboard') return sendJson(res, 200, dashboardPayload(auth.user));

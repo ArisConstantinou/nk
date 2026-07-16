@@ -105,9 +105,9 @@ export type SiteForm = {id: string; slug: string; name: string; recipient: strin
 export type FormSubmission = {id: string; formId: string; formName: string; formSlug: string; status: 'new' | 'in_progress' | 'resolved' | 'spam'; payload: Record<string, string | boolean>; notes: string; createdAt: string; updatedAt: string};
 
 export type ComponentScope = 'local' | 'global';
-export type PageComponentType = 'heading' | 'text' | 'button' | 'image' | 'icon' | 'divider';
+export type PageComponentType = 'heading' | 'text' | 'button' | 'image' | 'gallery' | 'icon' | 'divider';
 export type PageComponentStyle = {width: number; align: 'left' | 'center' | 'right' | 'stretch'; tone: 'default' | 'accent' | 'muted' | 'dark'; padding: number; radius: number};
-export type PageComponent = {id: string; type: PageComponentType; enabled: boolean; label: string; text: string; url: string; image: string; alt: string; icon: string; scope: ComponentScope; reusableId: string; groupId: string; style: PageComponentStyle};
+export type PageComponent = {id: string; type: PageComponentType; enabled: boolean; label: string; text: string; url: string; image: string; images: string[]; alt: string; icon: string; scope: ComponentScope; reusableId: string; groupId: string; style: PageComponentStyle};
 export type ReusableComponent = {id: string; name: string; scope: ComponentScope; component: PageComponent; updatedAt: string};
 export type VisualHistoryAction = 'content' | 'replace' | 'style' | 'resize' | 'position' | 'move-section' | 'move-component' | 'move-auto' | 'delete-auto' | 'restore-auto' | 'add-section' | 'delete-section' | 'duplicate-section' | 'add-component' | 'delete-component' | 'duplicate-component' | 'group' | 'ungroup' | 'scope' | 'reusable';
 export type VisualHistoryEntry = {id: string; objectKey: string; objectLabel: string; action: VisualHistoryAction; path: string; before: unknown; after: unknown; meta: Record<string, unknown>; timestamp: string; active: boolean};

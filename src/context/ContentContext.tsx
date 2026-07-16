@@ -4,7 +4,7 @@ import type {Catalogue, Product, Project, SiteContent} from '../types';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
 
-export type PublicPageComponent = {id: string; type: 'heading' | 'text' | 'button' | 'image' | 'icon' | 'divider'; enabled: boolean; label: string; text: string; url: string; image: string; alt: string; icon: string; scope: 'local' | 'global'; reusableId: string; groupId: string; style: {width: number; align: 'left' | 'center' | 'right' | 'stretch'; tone: 'default' | 'accent' | 'muted' | 'dark'; padding: number; radius: number}};
+export type PublicPageComponent = {id: string; type: 'heading' | 'text' | 'button' | 'image' | 'gallery' | 'icon' | 'divider'; enabled: boolean; label: string; text: string; url: string; image: string; images: string[]; alt: string; icon: string; scope: 'local' | 'global'; reusableId: string; groupId: string; style: {width: number; align: 'left' | 'center' | 'right' | 'stretch'; tone: 'default' | 'accent' | 'muted' | 'dark'; padding: number; radius: number}};
 export type PublicPageSection = {id: string; type: 'text' | 'features' | 'cta' | 'media'; enabled: boolean; eyebrow: string; title: string; body: string; buttonLabel: string; buttonUrl: string; image: string; icon: string; items: string[]; layout: 'stack' | 'grid' | 'split'; columns: number; components: PublicPageComponent[]};
 export type PublicPage = {slug: string; title: string; route: string; navigationTitle: string; eyebrow: string; heroTitle: string; heroAccent: string; heroTail: string; heroBody: string; introTitle: string; introAccent: string; introBody: string; heroImage: string; sections: PublicPageSection[]};
 export type PublicNavigationItem = {id: string; menu: 'primary' | 'services' | 'shop' | 'footer-services' | 'footer-shop' | 'footer-company'; label: string; url: string; description: string; active: boolean; position: number};
@@ -200,10 +200,10 @@ function mapPayload(payload: PublicPayload): MappedPayload {
         const effective = definition ? {...definition, id: component.id, enabled: component.enabled, scope: 'global', reusableId: component.reusableId, groupId: component.groupId} : component;
         return {
           id: stringValue(effective.id, `component-${componentIndex + 1}`),
-          type: ['heading', 'text', 'button', 'image', 'icon', 'divider'].includes(stringValue(effective.type)) ? stringValue(effective.type) as PublicPageComponent['type'] : 'text',
+          type: ['heading', 'text', 'button', 'image', 'gallery', 'icon', 'divider'].includes(stringValue(effective.type)) ? stringValue(effective.type) as PublicPageComponent['type'] : 'text',
           enabled: effective.enabled !== false,
           label: stringValue(effective.label, 'Component'),
-          text: stringValue(effective.text), url: stringValue(effective.url), image: stringValue(effective.image), alt: stringValue(effective.alt), icon: stringValue(effective.icon, 'check'),
+          text: stringValue(effective.text), url: stringValue(effective.url), image: stringValue(effective.image), images: stringArray(effective.images).slice(0, 8), alt: stringValue(effective.alt), icon: stringValue(effective.icon, 'check'),
           scope: effective.scope === 'global' ? 'global' : 'local', reusableId: stringValue(effective.reusableId), groupId: stringValue(effective.groupId),
           style: isObject(effective.style) ? {width: Math.min(100, Math.max(20, Number(effective.style.width) || 100)), align: ['left', 'center', 'right', 'stretch'].includes(stringValue(effective.style.align)) ? stringValue(effective.style.align) as PublicPageComponent['style']['align'] : 'stretch', tone: ['default', 'accent', 'muted', 'dark'].includes(stringValue(effective.style.tone)) ? stringValue(effective.style.tone) as PublicPageComponent['style']['tone'] : 'default', padding: Math.min(64, Math.max(0, Number(effective.style.padding) || 0)), radius: Math.min(48, Math.max(0, Number(effective.style.radius) || 0))} : {width: 100, align: 'stretch', tone: 'default', padding: 0, radius: 0},
         };

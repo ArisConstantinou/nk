@@ -4,7 +4,7 @@ const alignments = ['left', 'center', 'right', 'stretch'] as const;
 const tones = ['default', 'accent', 'muted', 'dark'] as const;
 
 export const componentLabels: Record<PageComponentType, string> = {
-  heading: 'Heading', text: 'Text', button: 'Button', image: 'Image', icon: 'Icon', divider: 'Divider',
+  heading: 'Heading', text: 'Text', button: 'Button', image: 'Image', gallery: 'Gallery', icon: 'Icon', divider: 'Divider',
 };
 
 export function newComponent(type: PageComponentType, values: Partial<PageComponent> = {}): PageComponent {
@@ -13,11 +13,12 @@ export function newComponent(type: PageComponentType, values: Partial<PageCompon
     text: {text: 'Click to edit this text.', label: 'Text'},
     button: {text: 'Call to action', label: 'Button', url: '/contact'},
     image: {label: 'Image', alt: 'Describe this image'},
+    gallery: {label: 'Image gallery', alt: 'Gallery image'},
     icon: {label: 'Icon', icon: 'zap'},
     divider: {label: 'Divider'},
   };
   return {
-    id: crypto.randomUUID(), type, enabled: true, label: componentLabels[type], text: '', url: '', image: '', alt: '', icon: 'check',
+    id: crypto.randomUUID(), type, enabled: true, label: componentLabels[type], text: '', url: '', image: '', images: [], alt: '', icon: 'check',
     scope: 'local', reusableId: '', groupId: '',
     ...defaults[type], ...values,
     style: {...{width: 100, align: 'stretch', tone: 'default', padding: 0, radius: 0}, ...values.style},
@@ -25,7 +26,7 @@ export function newComponent(type: PageComponentType, values: Partial<PageCompon
 }
 
 export function normalizeComponent(value: Partial<PageComponent>, fallbackType: PageComponentType = 'text'): PageComponent {
-  const type = ['heading', 'text', 'button', 'image', 'icon', 'divider'].includes(String(value.type)) ? value.type as PageComponentType : fallbackType;
+  const type = ['heading', 'text', 'button', 'image', 'gallery', 'icon', 'divider'].includes(String(value.type)) ? value.type as PageComponentType : fallbackType;
   const width = Number(value.style?.width);
   const padding = Number(value.style?.padding);
   const radius = Number(value.style?.radius);
@@ -38,6 +39,7 @@ export function normalizeComponent(value: Partial<PageComponent>, fallbackType: 
     text: typeof value.text === 'string' ? value.text : '',
     url: typeof value.url === 'string' ? value.url : '',
     image: typeof value.image === 'string' ? value.image : '',
+    images: Array.isArray(value.images) ? value.images.filter((item): item is string => typeof item === 'string').slice(0, 8) : [],
     alt: typeof value.alt === 'string' ? value.alt : '',
     icon: typeof value.icon === 'string' ? value.icon : 'check',
     scope: value.scope === 'global' ? 'global' : 'local',

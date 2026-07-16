@@ -40,7 +40,6 @@ export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [guideTarget, setGuideTarget] = useState('');
   const sidebarRef = useRef<HTMLElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
@@ -48,14 +47,10 @@ export function AdminLayout() {
   const guideTriggerRef = useRef<HTMLButtonElement | null>(null);
   const closeCommand = useCallback((reason: 'dismiss' | 'select' = 'dismiss') => {
     setCommandOpen(false);
-    if (reason === 'select' && guideOpen && guideTarget === 'search') {
-      setGuideOpen(false);
-      setGuideTarget('');
-    }
-  }, [guideOpen, guideTarget]);
+    if (reason === 'select' && guideOpen) setGuideOpen(false);
+  }, [guideOpen]);
   const closeGuide = useCallback(() => {
     setGuideOpen(false);
-    setGuideTarget('');
     window.setTimeout(() => guideTriggerRef.current?.focus(), 0);
   }, []);
   const openGuide = (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -152,7 +147,7 @@ export function AdminLayout() {
       <header className="nk-admin-topbar"><button ref={mobileTriggerRef} className="nk-admin-menu-trigger" type="button" onClick={() => setMobileOpen(true)} aria-label="Open admin navigation" aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/></button><nav aria-label="Breadcrumb"><NavLink to="/admin/dashboard">Admin</NavLink><ChevronRight/><span>{currentGroup}</span><ChevronRight/><b>{currentLabel}</b></nav><div className="nk-admin-topbar-actions"><button className="nk-admin-topbar-guide" type="button" onClick={openGuide}><HelpCircle/><span>Guide / Οδηγός</span></button><button ref={commandTriggerRef} className="nk-admin-global-search" type="button" aria-label="Search admin" onClick={() => setCommandOpen(true)}><Search/><span>Search</span><kbd>Ctrl K</kbd></button><a href="/" target="_blank" rel="noreferrer">View site <ExternalLink/></a><NavLink className="nk-admin-topbar-avatar" to="/admin/profile" aria-label="Open your profile">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</NavLink></div></header>
       <main id="admin-main" tabIndex={-1}><div className="nk-admin-security-line"><ShieldCheck/><span>Secure workspace</span><i/>Changes are recorded in the audit log</div><Outlet/></main>
     </section>
-    <CommandPalette open={commandOpen} onClose={closeCommand} role={user.role} fallbackFocusRef={commandTriggerRef} guided={guideOpen && guideTarget === 'search'}/>
-    <AdminGuide open={guideOpen && !commandOpen} onClose={closeGuide} onNavigate={to => {setGuideOpen(false); setGuideTarget(''); navigate(to);}} onTargetChange={setGuideTarget}/>
+    <CommandPalette open={commandOpen} onClose={closeCommand} role={user.role} fallbackFocusRef={commandTriggerRef} guided={false}/>
+    <AdminGuide open={guideOpen && !commandOpen} onClose={closeGuide} onNavigate={to => navigate(to)}/>
   </div>;
 }

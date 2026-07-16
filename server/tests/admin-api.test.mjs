@@ -65,7 +65,7 @@ test('secure admin lifecycle', async t => {
   base = `http://127.0.0.1:${port}/api/admin`;
   const child = spawn(process.execPath, ['server/admin-server.mjs'], {
     cwd: root,
-    env: {...process.env, ADMIN_API_PORT: String(port), ADMIN_DB_PATH: join(temp, 'admin.sqlite'), ADMIN_MEDIA_PATH: join(temp, 'media'), ADMIN_ALLOWED_ORIGINS: origin, ADMIN_ALLOW_LOOPBACK_SETUP: 'true', NODE_ENV: 'development'},
+    env: {...process.env, OPENAI_API_KEY: '', ADMIN_API_PORT: String(port), ADMIN_DB_PATH: join(temp, 'admin.sqlite'), ADMIN_MEDIA_PATH: join(temp, 'media'), ADMIN_ALLOWED_ORIGINS: origin, ADMIN_ALLOW_LOOPBACK_SETUP: 'true', NODE_ENV: 'development'},
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   t.after(async () => {
@@ -94,6 +94,10 @@ test('secure admin lifecycle', async t => {
   csrf = session.payload.csrfToken;
   const repeatedSession = await request('/session', {cookie});
   assert.equal(repeatedSession.payload.csrfToken, csrf, 'reading a session must not rotate its CSRF token');
+
+  const guideWithoutKey = await request('/guide/next', {method: 'POST', cookie, csrf, body: {language: 'en', context: {page: {id: 'home', slug: 'homepage', title: 'Homepage', route: '/', sections: []}, availableMedia: []}}});
+  assert.equal(guideWithoutKey.response.status, 503);
+  assert.equal(guideWithoutKey.payload.error.code, 'ai_not_configured');
 
   const seedStatusBefore = await request('/content/seed', {cookie});
   assert.equal(seedStatusBefore.response.status, 200);

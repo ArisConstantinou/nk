@@ -5,6 +5,7 @@ import {useAdminAuth} from '../auth/AdminAuth';
 import {canReadKind, canReadMedia, canWriteKind} from '../permissions';
 import type {ContentKind, ContentRecord, MediaAsset, PageComponent, PageComponentType, PageSection, ReusableComponent, VisualHistoryAction, VisualHistoryEntry} from '../types';
 import {componentLabels, historyFrom, newComponent, newSection, normalizeComponent, reusableFrom, sectionsFrom} from './visualEditorModel';
+import {CMS_GUIDE_STEP_EVENT, type CmsGuideAction, type CmsGuideContext, type CmsGuideStepEventDetail} from '../guide/aiGuide';
 
 type ViewportName = 'desktop' | 'tablet' | 'mobile';
 type SavePhase = 'saved' | 'unsaved' | 'saving' | 'error';
@@ -15,7 +16,7 @@ const allKinds: ContentKind[] = ['page', 'service', 'product', 'catalogue', 'pro
 const viewportOptions = {desktop: {label: 'Desktop', width: 1440, height: 900, icon: Monitor}, tablet: {label: 'Tablet', width: 768, height: 1024, icon: Tablet}, mobile: {label: 'Mobile', width: 390, height: 844, icon: Smartphone}} satisfies Record<ViewportName, {label: string; width: number; height: number; icon: typeof Monitor}>;
 const kindLabels: Record<ContentKind, string> = {page: 'Page', service: 'Service', product: 'Product', catalogue: 'Catalogue', project: 'Project', company: 'Company', seo: 'SEO', settings: 'Global settings'};
 const iconOptions = ['arrow-right', 'arrow-up-right', 'book-open', 'box', 'check', 'chevron-down', 'circuit', 'circuit-board', 'external-link', 'file-text', 'gauge', 'lightbulb', 'link', 'mail', 'map-pin', 'menu', 'phone', 'plug-zap', 'settings', 'share', 'shield', 'shield-check', 'sliders', 'sliders-horizontal', 'sparkles', 'waves', 'wrench', 'x', 'zap'];
-const componentTypes: PageComponentType[] = ['heading', 'text', 'button', 'image', 'icon', 'divider'];
+const componentTypes: PageComponentType[] = ['heading', 'text', 'button', 'image', 'gallery', 'icon', 'divider'];
 const actionLabels: Record<VisualHistoryAction, string> = {content: 'Content changed', replace: 'Content replaced', style: 'Style changed', resize: 'Size changed', position: 'Position changed', 'move-section': 'Section moved', 'move-component': 'Component moved', 'move-auto': 'Element moved', 'delete-auto': 'Element deleted', 'restore-auto': 'Element restored', 'add-section': 'Section added', 'delete-section': 'Section deleted', 'duplicate-section': 'Section duplicated', 'add-component': 'Component added', 'delete-component': 'Component deleted', 'duplicate-component': 'Component duplicated', group: 'Components grouped', ungroup: 'Components ungrouped', scope: 'Scope changed', reusable: 'Reusable component saved'};
 const visualHash = (value: string) => {let hash = 0x811c9dc5; for (let index = 0; index < value.length; index += 1) {hash ^= value.charCodeAt(index); hash = Math.imul(hash, 0x01000193);} return (hash >>> 0).toString(16).padStart(8, '0');};
 const positionKeyForObject = (type: 'section' | 'component', id: string) => visualHash(`${type}:${id}`);
@@ -723,6 +724,84 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     setReusableName(''); setNotice(`${name} saved as a ${scope} reusable component.`);
   };
 
+  useEffect(() => {
+    const runGuideStep = (event: Event) => {
+      const detail = (event as CustomEvent<CmsGuideStepEventDetail>).detail;
+      if (!detail) return;
+      detail.handled();
+      void (async () => {
+        const page = activeRecord?.kind === 'page' ? activeRecord : null;
+        if (!page || !canWriteCurrent) throw new Error('Open an editable page in the Website Editor before running the AI guide.');
+        const sections = sectionsFrom(page.draft.sections);
+        const ignoredCoreFields = new Set(['sections', 'componentLibrary', 'editorHistory', 'visualOverrides', 'visualPlacements']);
+        const coreContent = Object.fromEntries(Object.entries(page.draft).flatMap(([key, value]) => !ignoredCoreFields.has(key) && ['string', 'number', 'boolean'].includes(typeof value) ? [[key, value as string | number | boolean]] : []));
+        const previewDocument = iframeRef.current?.contentDocument;
+        const renderedOutline = previewDocument ? [...previewDocument.querySelectorAll<HTMLElement>('main section')].slice(0, 30).map((element, index) => ({
+          index, id: element.id || '', role: element.getAttribute('aria-label') || element.getAttribute('data-visual-label') || '', className: element.className.slice(0, 240),
+          headings: [...element.querySelectorAll<HTMLElement>('h1,h2,h3')].slice(0, 8).map(heading => (heading.innerText || heading.textContent || '').trim().slice(0, 240)).filter(Boolean),
+          textSample: (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 1200), imageCount: element.querySelectorAll('img,video').length,
+          links: [...element.querySelectorAll<HTMLElement>('a,button')].slice(0, 12).map(link => (link.innerText || link.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 180)).filter(Boolean),
+          builderSectionId: element.getAttribute('data-visual-section-id') || '',
+        })) : [];
+        const context = {
+          page: {
+            id: page.id, slug: page.slug, title: page.title, route: previewRoute(page),
+            sections: sections.map(section => ({
+              id: section.id, type: section.type, title: section.title, body: section.body, layout: section.layout, columns: section.columns, enabled: section.enabled,
+              components: section.components.map(component => ({id: component.id, type: component.type, label: component.label, text: component.text, image: component.image, images: component.images, width: component.style.width, tone: component.style.tone, enabled: component.enabled})),
+            })),
+          },
+          coreContent, renderedOutline,
+          availableMedia: media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).slice(0, 30).map(asset => ({id: asset.id, url: asset.url, alt: asset.altText || asset.title || asset.filename})),
+          recentChanges: historyFrom(page.draft.editorHistory).slice(-12).map(entry => `${actionLabels[entry.action]}: ${entry.objectLabel}`),
+        };
+        const response = await adminApi<{proposal: CmsGuideAction; context: CmsGuideContext}>('/guide/next', {method: 'POST', body: JSON.stringify({language: detail.language, context})});
+        const proposal = response.proposal;
+        if (proposal.action === 'complete') {
+          detail.resolve({proposal, context: response.context, applied: false, objectLabel: ''});
+          return;
+        }
+        const current = recordsRef.current.find(record => record.id === page.id);
+        if (!current || current.kind !== 'page') throw new Error('The page changed while it was being analysed. Run the guide again.');
+        const currentSections = sectionsFrom(current.draft.sections);
+        if (currentSections.length >= 40 && proposal.action === 'insert_section') throw new Error('The page reached its section limit before the action could be applied.');
+        const approvedMedia = new Set(media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).map(asset => asset.url));
+        if ((proposal.component.image && !approvedMedia.has(proposal.component.image)) || proposal.component.images.some(image => !approvedMedia.has(image))) throw new Error('The AI selected media outside the active library. No content was changed.');
+        const component = newComponent(proposal.component.type, {
+          label: proposal.component.label, text: proposal.component.text, url: proposal.component.url, image: proposal.component.image,
+          images: proposal.component.images, alt: proposal.component.alt, icon: proposal.component.icon,
+        });
+        let sectionId = '';
+        if (proposal.action === 'insert_section') {
+          const afterIndex = currentSections.length ? currentSections.findIndex(section => section.id === proposal.afterSectionId) : -1;
+          if (currentSections.length && afterIndex < 0) throw new Error('The suggested section position no longer exists. Run the guide again.');
+          const section = newSection();
+          Object.assign(section, proposal.section, {id: crypto.randomUUID(), enabled: true, components: [component]});
+          const index = currentSections.length ? afterIndex + 1 : 0;
+          currentSections.splice(index, 0, section);
+          mutateSections(current, currentSections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id, componentId: component.id, source: 'ai-guide'}});
+          sectionId = section.id;
+        } else {
+          const section = currentSections.find(item => item.id === proposal.targetSectionId);
+          if (!section) throw new Error('The suggested target section no longer exists. Run the guide again.');
+          if (section.components.length >= 80) throw new Error('The target section reached its component limit. No content was changed.');
+          const afterIndex = proposal.afterComponentId ? section.components.findIndex(item => item.id === proposal.afterComponentId) : section.components.length - 1;
+          if (proposal.afterComponentId && afterIndex < 0) throw new Error('The suggested component position no longer exists. Run the guide again.');
+          const componentIndex = afterIndex + 1;
+          section.components.splice(componentIndex, 0, component);
+          mutateSections(current, currentSections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index: componentIndex}, meta: {componentId: component.id, sectionId: section.id, source: 'ai-guide'}});
+          sectionId = section.id;
+        }
+        const latestSections = sectionsFrom(recordsRef.current.find(record => record.id === page.id)?.draft.sections);
+        setSelection({kind: 'page', slug: page.slug, path: pathForObject(latestSections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
+        setNotice(`${proposal.explanation.summary} Saved to the draft; nothing was published.`);
+        detail.resolve({proposal, context: response.context, applied: true, objectLabel: component.label});
+      })().catch(detail.reject);
+    };
+    window.addEventListener(CMS_GUIDE_STEP_EVENT, runGuideStep);
+    return () => window.removeEventListener(CMS_GUIDE_STEP_EVENT, runGuideStep);
+  }, [activeRecord, canWriteCurrent, media, mutateSections]);
+
   const option = viewportOptions[viewport];
   if (loading) return <div className="nk-visual-loading"><LoaderCircle className="nk-admin-spin"/><strong>Loading the real website preview…</strong></div>;
   if (loadError) return <div className="nk-visual-error"><AlertTriangle/><h1>The visual editor could not load.</h1><p>{loadError}</p><button type="button" onClick={() => void load()}>Try again</button></div>;
@@ -753,6 +832,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
           {selection.edit === 'image' && <><label><span><ImageIcon/>Image or video URL</span><input type="url" value={String(selectedValue || '')} onChange={event => updateSelection(event.target.value)}/></label><div className="nk-visual-media"><span>MEDIA LIBRARY</span>{media.filter(asset => asset.mimeType.startsWith('image/')).length ? <div>{media.filter(asset => asset.mimeType.startsWith('image/')).slice(0, 12).map(asset => <button type="button" className={asset.url === selectedValue ? 'active' : ''} onClick={() => updateSelection(asset.url)} key={asset.id}><img src={asset.url} alt={asset.altText || asset.filename}/><small>{asset.filename}</small></button>)}</div> : <p>No active images. Upload one in Media or paste a public URL.</p>}</div></>}
           {selection.edit === 'icon' && <label><span><Layers3/>Icon</span><select value={String(selectedValue || 'check')} onChange={event => updateSelection(event.target.value)}>{!iconOptions.includes(String(selectedValue || 'check')) && <option value={String(selectedValue || 'check')}>{String(selectedValue || 'check')}</option>}{iconOptions.map(icon => <option value={icon} key={icon}>{icon}</option>)}</select></label>}
           {selection.linkPath && <label><span><Link2/>Link destination</span><input value={String(getPathValue(selectedRecord, selection.linkPath) ?? selection.linkFallbackValue ?? '')} onChange={event => updateSelection(event.target.value, selection.linkPath)} placeholder="/contact or https://…"/></label>}
+          {selectedComponent?.type === 'gallery' && <div className="nk-visual-gallery-tools"><label><span><ImageIcon/>Gallery images</span><textarea rows={5} value={selectedComponent.images.join('\n')} onChange={event => updateSelection(event.target.value.split('\n').map(value => value.trim()).filter(Boolean).slice(0, 8), `${pathForObject(activeSections, 'component', selectedComponent.id)}.images`, 'replace')}/><small>One image URL per line, up to 8 images.</small></label><label><span>Alternative text</span><input value={selectedComponent.alt} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.alt`)}/><small>Used as the base description for each gallery image.</small></label><div className="nk-visual-media"><span>MEDIA LIBRARY · SELECT 2–8</span>{media.filter(asset => asset.mimeType.startsWith('image/')).length ? <div>{media.filter(asset => asset.mimeType.startsWith('image/')).slice(0, 20).map(asset => {const active = selectedComponent.images.includes(asset.url); return <button type="button" className={active ? 'active' : ''} aria-pressed={active} onClick={() => updateSelection(active ? selectedComponent.images.filter(url => url !== asset.url) : [...selectedComponent.images, asset.url].slice(0, 8), `${pathForObject(activeSections, 'component', selectedComponent.id)}.images`, 'replace')} key={asset.id}><img src={asset.url} alt={asset.altText || asset.filename}/><small>{asset.filename}</small></button>;})}</div> : <p>Upload images in Media before building a gallery.</p>}</div></div>}
           <div className="nk-visual-object-tools nk-visual-position-tools"><p><Move/>Drag the four-arrow control on the selected element. Arrow keys move 1 px; hold Shift to move 10 px.</p><div><span>X <b>{selection.positionX}px</b></span><span>Y <b>{selection.positionY}px</b></span></div><button type="button" disabled={!selection.positionX && !selection.positionY} onClick={() => handlePosition({kind: selection.kind, slug: selection.slug, positionKey: selection.positionKey, x: 0, y: 0, label: selection.label, objectType: selection.objectType, objectId: selection.objectId, sectionId: selection.sectionId})}><Move/>Reset position</button><small>One saved position is shared by Desktop, Tablet and Mobile.</small></div>
           {selectedSection && selection.objectType === 'section' && <div className="nk-visual-object-tools"><label><span><Layers3/>Section layout</span><select value={selectedSection.layout} onChange={event => updateSelection(event.target.value, `${selection.path}.layout`, 'style')}><option value="stack">Stack</option><option value="grid">Grid</option><option value="split">Split</option></select></label><label><span>Columns</span><input type="range" min="1" max="4" value={selectedSection.columns} onChange={event => updateSelection(Number(event.target.value), `${selection.path}.columns`, 'resize')}/><small>{selectedSection.columns} column{selectedSection.columns === 1 ? '' : 's'}</small></label><label className="nk-visual-toggle"><input type="checkbox" checked={selectedSection.enabled} onChange={event => updateSelection(event.target.checked, `${selection.path}.enabled`)}/><span>Visible in this draft</span></label></div>}
           {selectedComponent && <div className="nk-visual-object-tools"><label><span>Component name</span><input value={selectedComponent.label} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.label`)}/></label><label><span>Width</span><input type="range" min="20" max="100" step="5" value={selectedComponent.style.width} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.width`, 'resize')}/><small>{selectedComponent.style.width}%</small></label><div className="nk-visual-property-grid"><label><span>Alignment</span><select value={selectedComponent.style.align} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.align`, 'style')}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option><option value="stretch">Stretch</option></select></label><label><span>Tone</span><select value={selectedComponent.style.tone} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.tone`, 'style')}><option value="default">Default</option><option value="accent">Accent</option><option value="muted">Muted</option><option value="dark">Dark</option></select></label></div><div className="nk-visual-property-grid"><label><span>Padding</span><input type="number" min="0" max="64" value={selectedComponent.style.padding} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.padding`, 'style')}/></label><label><span>Radius</span><input type="number" min="0" max="48" value={selectedComponent.style.radius} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.radius`, 'style')}/></label></div><label><span>Scope</span><select value={selectedComponent.scope} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.scope`, 'scope')}><option value="local">Local to this page</option><option value="global">Global site component</option></select></label><div className="nk-visual-save-reusable"><input value={reusableName} onChange={event => setReusableName(event.target.value)} placeholder="Reusable component name"/><button type="button" onClick={saveReusable}><Save/>{selectedComponent.scope === 'global' ? 'Save & sync global' : 'Save reusable'}</button></div>{selectedComponent.groupId ? <button type="button" onClick={ungroup}><Ungroup/>Ungroup components</button> : selectedSection && selectedSection.components.length > 1 && <label><span><Group/>Group with</span><select value="" onChange={event => groupWith(event.target.value)}><option value="">Choose component…</option>{selectedSection.components.filter(item => item.id !== selectedComponent.id).map(item => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>}</div>}
