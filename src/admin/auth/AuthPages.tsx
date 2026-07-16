@@ -2,14 +2,17 @@ import {useState, type FormEvent} from 'react';
 import {ArrowRight, LockKeyhole, RefreshCw, ShieldCheck} from 'lucide-react';
 import {Navigate, useNavigate} from 'react-router-dom';
 import {errorMessage} from '../api';
+import {isPagesAdminMode} from '../pagesMode';
 import {useAdminAuth} from './AdminAuth';
+import {pagesFirebaseEmailPasswordEnabled} from './firebaseAuth';
+import './firebaseAuth.css';
 
 function AuthShell({children, title, body}: {children: React.ReactNode; title: string; body: string}) {
-  return <div className="nk-admin-auth"><aside><div className="nk-admin-auth-mark">NK</div><span>SECURE OPERATIONS</span><h1>{title}</h1><p>{body}</p><div><ShieldCheck/><b>Server-authenticated</b><small>Passwords, permissions and sessions are enforced outside the browser.</small></div></aside><main>{children}<a href="/">← Return to NK Electrical</a></main></div>;
+  return <div className="nk-admin-auth"><aside><div className="nk-admin-auth-mark">NK</div><span>SECURE OPERATIONS</span><h1>{title}</h1><p>{body}</p><div><ShieldCheck/><b>{isPagesAdminMode ? 'Firebase-authenticated' : 'Server-authenticated'}</b><small>{isPagesAdminMode ? 'Google verifies the administrator before this browser can open the CMS workspace.' : 'Passwords, permissions and sessions are enforced outside the browser.'}</small></div></aside><main>{children}<a href={import.meta.env.BASE_URL}>← Return to NK Electrical</a></main></div>;
 }
 
 export function LoginPage() {
-  const {phase, login} = useAdminAuth();
+  const {phase, login, loginWithGoogle} = useAdminAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -25,7 +28,14 @@ export function LoginPage() {
     finally { setBusy(false); }
   };
 
-  return <AuthShell title="Control the content. Protect the operation." body="Sign in to manage published content, enquiries, media and access controls."><form className="nk-admin-auth-form" onSubmit={submit}><div><LockKeyhole/><span>ADMIN SIGN IN</span><h2>Welcome back</h2></div>{error && <p className="nk-admin-form-error" role="alert">{error}</p>}<label>Email<input name="email" type="email" autoComplete="username" required autoFocus/></label><label>Password<input name="password" type="password" autoComplete="current-password" required minLength={12}/></label><button type="submit" disabled={busy}>{busy ? <><RefreshCw className="nk-admin-spin"/>Signing in…</> : <>Sign in <ArrowRight/></>}</button></form></AuthShell>;
+  const googleLogin = async () => {
+    setBusy(true); setError('');
+    try { await loginWithGoogle(); navigate('/admin/dashboard', {replace: true}); }
+    catch (nextError) { setError(errorMessage(nextError)); }
+    finally { setBusy(false); }
+  };
+
+  return <AuthShell title="Control the content. Protect the operation." body="Sign in to manage published content, enquiries, media and access controls."><form className="nk-admin-auth-form" onSubmit={submit}><div><LockKeyhole/><span>{isPagesAdminMode ? 'FIREBASE ADMIN SIGN IN' : 'ADMIN SIGN IN'}</span><h2>Welcome back</h2></div>{error && <p className="nk-admin-form-error" role="alert">{error}</p>}{isPagesAdminMode && <button className="nk-admin-google-login" type="button" disabled={busy} onClick={() => void googleLogin()}>{busy ? <><RefreshCw className="nk-admin-spin"/>Connecting…</> : <>Continue with Google <ArrowRight/></>}</button>}{(!isPagesAdminMode || pagesFirebaseEmailPasswordEnabled) && <><label>Email<input name="email" type="email" autoComplete="username" required autoFocus={!isPagesAdminMode}/></label><label>Password<input name="password" type="password" autoComplete="current-password" required minLength={isPagesAdminMode ? 6 : 12}/></label><button type="submit" disabled={busy}>{busy ? <><RefreshCw className="nk-admin-spin"/>Signing in…</> : <>Sign in <ArrowRight/></>}</button></>}</form></AuthShell>;
 }
 
 export function SetupPage() {

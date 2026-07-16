@@ -1,0 +1,11 @@
+.nk-admin-auth-form > .nk-admin-google-login {
+  margin-top: 6px;
+  background: #fff;
+  color: var(--admin-text);
+  border: 1px solid var(--admin-line-strong);
+}
+
+.nk-admin-auth-form > .nk-admin-google-login:hover {
+  background: var(--admin-surface-soft);
+  border-color: var(--admin-accent);
+}

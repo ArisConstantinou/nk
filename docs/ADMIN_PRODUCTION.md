@@ -28,6 +28,12 @@ Required decisions:
 
 Terminate TLS at the reverse proxy or hosting platform and proxy `/api/admin/*` without caching. Preserve `Set-Cookie`, `Origin`, range requests and response security headers. Apply request-size limits of at least 36 MB to the media upload routes and smaller limits to all other API routes.
 
+### GitHub Pages authentication
+
+The static GitHub Pages build uses Firebase Authentication instead of the Node session API. Configure a Firebase web app, enable Google sign-in, add `arisconstantinou.github.io` to Authentication → Settings → Authorised domains, and set these GitHub repository variables: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_APP_ID`, and `FIREBASE_ADMIN_EMAILS`. The email list is comma-separated. Set `FIREBASE_EMAIL_PASSWORD_ENABLED=true` only when the Email/Password provider and an administrator account have also been configured.
+
+Firebase web configuration is public by design and is not an administrator credential. Access is established by Firebase Authentication; any future Firestore or Storage data must additionally be protected with Firebase Security Rules and App Check. The current Pages workspace content remains local to the signed-in browser and is not a replacement for the server-backed SQLite CMS.
+
 ## Initial deployment
 
 1. Install exact dependencies with `npm ci`.

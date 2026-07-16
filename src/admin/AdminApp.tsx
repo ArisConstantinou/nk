@@ -89,7 +89,7 @@ function AdminRoutes() {
   if (phase === 'loading') return <AdminLoading label="Connecting to secure admin…"/>;
   if (phase === 'unavailable') return <ServiceUnavailablePage/>;
   return <Routes>
-    <Route path="login" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <LoginPage/>}/>
+    <Route path="login" element={<LoginPage/>}/>
     <Route path="setup" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <SetupPage/>}/>
     <Route element={<ProtectedRoot/>}>
       <Route element={<AdminLayout/>}>
