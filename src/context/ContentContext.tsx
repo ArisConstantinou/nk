@@ -1,5 +1,6 @@
 import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {defaultContent} from '../content';
+import {isPagesAdminMode, PAGES_ADMIN_CHANGED_EVENT, PAGES_ADMIN_STORAGE_KEY, readPagesPublicPayload, savePagesSubmission} from '../admin/pagesMode';
 import type {Catalogue, Product, Project, SiteContent} from '../types';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
@@ -280,6 +281,15 @@ export function ContentProvider({children}: {children: ReactNode}) {
 
   const refresh = useCallback(async () => {
     try {
+      if (isPagesAdminMode) {
+        const stored = readPagesPublicPayload();
+        if (!stored) return;
+        const basePayload = normalizePayload(stored);
+        basePayloadRef.current = basePayload;
+        const payload = previewRecordsRef.current ? mergePreviewRecords(basePayload, previewRecordsRef.current) : basePayload;
+        applyMapped(mapPayload(payload));
+        return;
+      }
       const response = await fetch('/api/admin/public/site', {cache: 'no-store', credentials: 'same-origin', headers: {Accept: 'application/json'}});
       if (!response.ok) throw new Error('CMS unavailable');
       const basePayload = normalizePayload(await response.json());
@@ -292,6 +302,18 @@ export function ContentProvider({children}: {children: ReactNode}) {
   }, [applyMapped]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  useEffect(() => {
+    if (!isPagesAdminMode) return;
+    const onChanged = () => { void refresh(); };
+    const onStorage = (event: StorageEvent) => { if (event.key === PAGES_ADMIN_STORAGE_KEY) void refresh(); };
+    window.addEventListener(PAGES_ADMIN_CHANGED_EVENT, onChanged);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(PAGES_ADMIN_CHANGED_EVENT, onChanged);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [refresh]);
 
   useEffect(() => {
     if (!visualEditorNonce || window.parent === window) return;
@@ -339,6 +361,10 @@ export function ContentProvider({children}: {children: ReactNode}) {
       const website = String(values.website || '');
       const cleanValues = {...values};
       delete cleanValues.website;
+      if (isPagesAdminMode) {
+        if (website) return 'Thank you. Your submission has been received.';
+        return savePagesSubmission(slug, cleanValues);
+      }
       const response = await fetch('/api/admin/public/submissions', {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json', Accept: 'application/json'}, body: JSON.stringify({formSlug: slug, values: cleanValues, website})});
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error?.message || 'The form could not be submitted.');

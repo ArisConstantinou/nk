@@ -20,6 +20,7 @@ import {FormsPage} from './pages/FormsPage';
 import {SettingsPage} from './pages/SettingsPage';
 import './admin.css';
 import './productivity.css';
+import {isPagesAdminMode} from './pagesMode';
 
 class AdminErrorBoundary extends Component<{children: ReactNode}, {error: Error | null}> {
   state = {error: null as Error | null};
@@ -88,8 +89,8 @@ function AdminRoutes() {
   if (phase === 'loading') return <AdminLoading label="Connecting to secure admin…"/>;
   if (phase === 'unavailable') return <ServiceUnavailablePage/>;
   return <Routes>
-    <Route path="login" element={<LoginPage/>}/>
-    <Route path="setup" element={<SetupPage/>}/>
+    <Route path="login" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <LoginPage/>}/>
+    <Route path="setup" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <SetupPage/>}/>
     <Route element={<ProtectedRoot/>}>
       <Route element={<AdminLayout/>}>
         <Route index element={<Navigate to="dashboard" replace/>}/>
@@ -106,9 +107,9 @@ function AdminRoutes() {
         <Route path="media" element={<MediaRoute/>}/>
         <Route path="navigation" element={<NavigationRoute/>}/>
         <Route path="forms" element={<FormsRoute/>}/>
-        <Route path="users" element={<OwnerRoute><UsersPage/></OwnerRoute>}/>
+        <Route path="users" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <OwnerRoute><UsersPage/></OwnerRoute>}/>
         <Route path="audit" element={<AuditPage/>}/>
-        <Route path="profile" element={<ProfilePage/>}/>
+        <Route path="profile" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <ProfilePage/>}/>
         <Route path="*" element={<div className="nk-admin-not-found"><span>ADMIN / 404</span><h1>Section not found.</h1><a href="/admin/dashboard">Return to dashboard</a></div>}/>
       </Route>
     </Route>

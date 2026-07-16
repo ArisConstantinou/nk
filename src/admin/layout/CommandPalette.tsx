@@ -4,6 +4,7 @@ import {useNavigate} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
 import type {AdminRole, AdminSearchResult} from '../types';
 import {canManageEnquiries, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation} from '../permissions';
+import {isPagesAdminMode} from '../pagesMode';
 
 type Command = {id: string; label: string; group: string; description: string; to: string; external?: boolean};
 type PaletteItem = Command & {searchResult?: AdminSearchResult};
@@ -30,6 +31,7 @@ const commands: Omit<Command, 'id'>[] = [
 ];
 
 function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
+  if (isPagesAdminMode && (command.to === '/admin/users' || command.to === '/admin/profile')) return false;
   if (command.to === '/admin/pages') return canReadKind(role, 'page');
   if (command.to === '/admin/services') return canReadKind(role, 'service');
   if (command.to === '/admin/products') return canReadKind(role, 'product');

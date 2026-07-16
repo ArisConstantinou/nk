@@ -6,6 +6,7 @@ import {canManageEnquiries, canManageUsers, canReadForms, canReadKind, canReadMe
 import {CommandPalette} from './CommandPalette';
 import {AdminGuide} from './AdminGuide';
 import {publicAsset} from '../../utils/assets';
+import {isPagesAdminMode} from '../pagesMode';
 
 const overview = [
   {to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard},
@@ -136,16 +137,16 @@ export function AdminLayout() {
         {settings.filter(item => item.to === '/admin/navigation' ? canReadNavigation(user.role) : canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}
 
         <small>ADMINISTRATION</small>
-        {canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}
+        {!isPagesAdminMode && canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}
         <NavItem to="/admin/audit" label={user.role === 'owner' ? 'Audit Log' : 'My Activity'} icon={Activity} close={close}/>
       </nav>
       <button className="nk-admin-guide-trigger" type="button" onClick={openGuide} data-admin-tour="guide"><HelpCircle/><span>Guide / Οδηγός</span></button>
-      <div className="nk-admin-sidebar-user"><NavLink to="/admin/profile" onClick={close} data-admin-tour="profile"><UserRound/><span><b>{user.displayName}</b><small>{user.role} · {user.email}</small></span></NavLink><button type="button" onClick={() => void signOut()} data-admin-tour="signout"><LogOut/>Sign out</button></div>
+      <div className="nk-admin-sidebar-user">{isPagesAdminMode ? <div className="nk-admin-device-user"><UserRound/><span><b>{user.displayName}</b><small>Login disabled · this device</small></span></div> : <><NavLink to="/admin/profile" onClick={close} data-admin-tour="profile"><UserRound/><span><b>{user.displayName}</b><small>{user.role} · {user.email}</small></span></NavLink><button type="button" onClick={() => void signOut()} data-admin-tour="signout"><LogOut/>Sign out</button></>}</div>
     </aside>
     {mobileOpen && <button className="nk-admin-scrim" type="button" aria-label="Close navigation" onClick={close}/>}
     <section ref={workspaceRef} className="nk-admin-workspace">
-      <header className="nk-admin-topbar"><button ref={mobileTriggerRef} className="nk-admin-menu-trigger" type="button" onClick={() => setMobileOpen(true)} aria-label="Open admin navigation" aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/></button><nav aria-label="Breadcrumb"><NavLink to="/admin/dashboard">Admin</NavLink><ChevronRight/><span>{currentGroup}</span><ChevronRight/><b>{currentLabel}</b></nav><div className="nk-admin-topbar-actions"><button className="nk-admin-topbar-guide" type="button" onClick={openGuide}><HelpCircle/><span>Guide / Οδηγός</span></button><button ref={commandTriggerRef} className="nk-admin-global-search" type="button" aria-label="Search admin" onClick={() => setCommandOpen(true)}><Search/><span>Search</span><kbd>Ctrl K</kbd></button><a href="/" target="_blank" rel="noreferrer">View site <ExternalLink/></a><NavLink className="nk-admin-topbar-avatar" to="/admin/profile" aria-label="Open your profile">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</NavLink></div></header>
-      <main id="admin-main" tabIndex={-1}><div className="nk-admin-security-line"><ShieldCheck/><span>Secure workspace</span><i/>Changes are recorded in the audit log</div><Outlet/></main>
+      <header className="nk-admin-topbar"><button ref={mobileTriggerRef} className="nk-admin-menu-trigger" type="button" onClick={() => setMobileOpen(true)} aria-label="Open admin navigation" aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/></button><nav aria-label="Breadcrumb"><NavLink to="/admin/dashboard">Admin</NavLink><ChevronRight/><span>{currentGroup}</span><ChevronRight/><b>{currentLabel}</b></nav><div className="nk-admin-topbar-actions"><button className="nk-admin-topbar-guide" type="button" onClick={openGuide}><HelpCircle/><span>Guide / Οδηγός</span></button><button ref={commandTriggerRef} className="nk-admin-global-search" type="button" aria-label="Search admin" onClick={() => setCommandOpen(true)}><Search/><span>Search</span><kbd>Ctrl K</kbd></button><a href={import.meta.env.BASE_URL} target="_blank" rel="noreferrer">View site <ExternalLink/></a>{isPagesAdminMode ? <span className="nk-admin-topbar-avatar" aria-label="Mobile device admin">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</span> : <NavLink className="nk-admin-topbar-avatar" to="/admin/profile" aria-label="Open your profile">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</NavLink>}</div></header>
+      <main id="admin-main" tabIndex={-1}><div className={`nk-admin-security-line ${isPagesAdminMode ? 'nk-admin-security-line--device' : ''}`}><ShieldCheck/><span>{isPagesAdminMode ? 'Login disabled on GitHub Pages' : 'Secure workspace'}</span><i/>{isPagesAdminMode ? 'Changes are saved in this browser on this device' : 'Changes are recorded in the audit log'}</div><Outlet/></main>
     </section>
     <CommandPalette open={commandOpen} onClose={closeCommand} role={user.role} fallbackFocusRef={commandTriggerRef} guided={false}/>
     <AdminGuide open={guideOpen && !commandOpen} onClose={closeGuide} onNavigate={to => navigate(to)}/>

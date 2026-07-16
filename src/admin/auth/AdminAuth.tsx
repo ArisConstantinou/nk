@@ -1,6 +1,7 @@
 import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {adminApi, setCsrfToken, setUnauthorizedHandler} from '../api';
 import type {AdminUser} from '../types';
+import {isPagesAdminMode, pagesAdminUser} from '../pagesMode';
 
 type AuthPhase = 'loading' | 'setup' | 'guest' | 'authenticated' | 'unavailable';
 
@@ -18,13 +19,20 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AdminAuthProvider({children}: {children: ReactNode}) {
-  const [phase, setPhase] = useState<AuthPhase>('loading');
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [phase, setPhase] = useState<AuthPhase>(isPagesAdminMode ? 'authenticated' : 'loading');
+  const [user, setUser] = useState<AdminUser | null>(isPagesAdminMode ? pagesAdminUser : null);
   const [error, setError] = useState('');
   const [requiresBootstrapToken, setRequiresBootstrapToken] = useState(true);
   const initialRefreshStarted = useRef(false);
 
   const refresh = useCallback(async () => {
+    if (isPagesAdminMode) {
+      setError('');
+      setUser(pagesAdminUser);
+      setRequiresBootstrapToken(false);
+      setPhase('authenticated');
+      return;
+    }
     setPhase('loading');
     setError('');
     try {
@@ -82,6 +90,11 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
   };
 
   const logout = async () => {
+    if (isPagesAdminMode) {
+      setUser(pagesAdminUser);
+      setPhase('authenticated');
+      return;
+    }
     await adminApi('/logout', {method: 'POST'});
     setCsrfToken('');
     setUser(null);

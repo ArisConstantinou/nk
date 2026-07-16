@@ -1,4 +1,5 @@
 import type {ApiFailure} from './types';
+import {isPagesAdminMode, pagesAdminRequest} from './pagesMode';
 
 let csrfToken = '';
 let unauthorizedHandler: (() => void) | null = null;
@@ -21,6 +22,14 @@ export const setCsrfToken = (token: string) => { csrfToken = token; };
 export const setUnauthorizedHandler = (handler: (() => void) | null) => { unauthorizedHandler = handler; };
 
 export async function adminApi<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (isPagesAdminMode) {
+    const response = await pagesAdminRequest(path, init);
+    if (response.status >= 400) {
+      const payload = response.payload as {error?: ApiFailure};
+      throw new AdminApiError(response.status, payload.error || {code: 'request_failed', message: 'The request could not be completed.'});
+    }
+    return response.payload as T;
+  }
   const method = init.method || 'GET';
   const headers = new Headers(init.headers);
   if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
