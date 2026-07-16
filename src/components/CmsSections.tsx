@@ -58,7 +58,7 @@ export function CmsSections({sections, pageSlug}: {sections: PublicPageSection[]
   const active = sections.map((section, index) => ({section, index})).filter(({section}) => section.enabled);
   if (!active.length) return null;
   return <div className="cms-sections" data-visual-sections-root="true">{active.map(({section, index}) => {
-    if (section.components.length) return <BuilderSection section={section} pageSlug={pageSlug} index={index} key={section.id}/>;
+    if (section.components.length || pageSlug.startsWith('guided-page-')) return <BuilderSection section={section} pageSlug={pageSlug} index={index} key={section.id}/>;
     const Icon = sectionIcons[section.icon] || Check;
     const sectionProps = visual(pageSlug, `sections.${index}`, 'section', `${section.title || section.type} section`, objectData('section', section.id, section.id));
     const eyebrow = visual(pageSlug, `sections.${index}.eyebrow`, 'text', 'Section eyebrow');

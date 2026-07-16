@@ -220,7 +220,17 @@
 .nk-admin-ai-guide>main>div{padding:24px}
 .nk-admin-ai-guide-step{margin-bottom:10px}.nk-admin-ai-guide-step b{max-width:220px;text-align:right;line-height:1.35}
 .nk-admin-guide-added-hint{margin:0;color:var(--admin-muted);font-size:14px;line-height:1.65}
-.nk-admin-ai-guide-result.is-proposal>svg{color:#c79818}.nk-admin-ai-guide-result.is-complete>svg{color:var(--admin-accent)}
+.nk-admin-ai-guide>main>.nk-admin-ai-live-receipt{margin:0 18px 4px!important;padding:8px 10px!important;border:1px solid #9bd7bf!important;border-radius:11px!important;background:#eaf9f2!important;display:flex!important;align-items:flex-start;gap:8px;color:#155f47!important}
+.nk-admin-ai-live-receipt>svg{width:18px!important;height:18px;flex:0 0 auto;margin-top:1px;color:#0b9569}.nk-admin-ai-live-receipt>span{min-width:0;display:flex;flex-direction:column;gap:2px}.nk-admin-ai-live-receipt small{color:#0b7d5b;font:850 9px/1.2 ui-monospace,monospace;letter-spacing:.1em}.nk-admin-ai-live-receipt b{color:#174c3b;font-size:12px;line-height:1.3}.nk-admin-ai-live-receipt em{display:none}
+.nk-admin-ai-guide-result.is-proposal>svg{width:24px;height:24px;margin-bottom:5px;color:#c79818}.nk-admin-ai-guide-result.is-proposal>h2{margin:5px 0 8px;font-size:25px;line-height:1.08}.nk-admin-ai-guide-result.is-complete>svg{color:var(--admin-accent)}
+.nk-admin-guide-recipe{display:grid!important;gap:5px!important;margin:11px 0 0!important;padding:0!important;border:0!important;background:transparent!important}
+.nk-admin-guide-recipe>button{width:100%;min-height:40px;border:1px solid #d5dfda;border-radius:9px;display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:8px;padding:5px 8px;text-align:left;transition:background .16s,border-color .16s,transform .16s}
+.nk-admin-guide-recipe>button>span:first-child{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;background:#eef2f0;color:#86938d;font:800 10px ui-monospace,monospace}.nk-admin-guide-recipe>button>span:first-child svg{width:15px}
+.nk-admin-guide-recipe>button>span:last-child{min-width:0;display:flex;flex-direction:column;gap:1px}.nk-admin-guide-recipe b{font-size:12px;line-height:1.15}.nk-admin-guide-recipe small{font-size:10px!important;line-height:1.15!important}
+.nk-admin-guide-recipe>button.is-current{border-color:#13875f;background:#e7f7f0;color:#125c43;cursor:pointer;box-shadow:0 0 0 3px rgba(19,135,95,.12)}.nk-admin-guide-recipe>button.is-current:hover{transform:translateY(-1px);background:#dcf3e9}.nk-admin-guide-recipe>button.is-current>span:first-child{background:#13875f;color:#fff}.nk-admin-guide-recipe>button.is-current small{color:#187253}
+.nk-admin-guide-recipe>button.is-done{border-color:#c9ddd4;background:#f5faf7;color:#3d6858}.nk-admin-guide-recipe>button.is-done>span:first-child{background:#dff3ea;color:#16805d}.nk-admin-guide-recipe>button.is-done small{color:#6b8379}
+.nk-admin-guide-recipe>button.is-locked{border-color:#e1e5e3;background:#f4f5f5;color:#9aa39f;cursor:not-allowed}.nk-admin-guide-recipe>button.is-locked small{color:#a5ada9}.nk-admin-guide-recipe>button:disabled{opacity:1!important}
+.nk-admin-guide-manual-hint{margin:12px 0 0;color:#74847d;font-size:11px;line-height:1.4}.nk-admin-ai-guide>footer>.nk-admin-guide-manual-action{width:100%;min-height:46px;background:#fff!important;border-color:#b9cec4!important;color:#285f4c!important}
 .nk-admin-ai-guide>footer{padding:12px 14px;min-height:70px}.nk-admin-ai-guide>footer>button{min-height:46px}
 .nk-admin-ai-guide .nk-admin-guide-step-actions{width:100%;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
 .nk-admin-ai-guide .nk-admin-guide-step-actions>button{min-height:46px;line-height:1.25;padding:9px 10px}

@@ -164,11 +164,12 @@ Safety rules:
 - Respect every constraint, current layout pattern, component density, responsive behavior, and the existing dark electrical design language.
 - Avoid duplicating content already present. Prefer complete when no meaningful safe improvement exists.
 - The renderedOutline describes the real live preview and may contain substantial page content even when page.sections is empty. Analyse coreContent, renderedOutline, and builder sections together; never call a page empty solely because builder sections is empty.
-- This workflow builds a temporary demo from a blank builder canvas. When it is genuinely empty, start with a hero section containing one strong heading component. Then prefer a short supporting text, an approved image when available, and one clear button before adding a second section.
+- This workflow visibly teaches page hierarchy one live action at a time. When the canvas is genuinely empty, the first action MUST be insert_section only. Its required component payload is a harmless text placeholder and will not be inserted. Explain that a section is the container that must exist before content.
+- When that first section exists but has no components, propose one heading component. Only after the heading exists, propose one supporting text component. Then prefer an approved image when available and one clear button. Return complete once this first simple flow is built; do not add a second section automatically. Never combine section + heading or heading + content into one visible step.
 - Treat manual editor changes as intentional. Adapt the next proposal to the current hierarchy instead of following a fixed checklist. If a hero or any suggested element already exists, choose the next missing piece.
 - Keep copy concise, useful, and suitable for a polished real page. Do not use tutorial filler as page content.
 - For an image gallery, use 2-8 approved media-library URLs. Place it where it improves the content flow; for example after the second section only when that is genuinely the best location.
-- Explanations must use warm, beginner-friendly language and tell the administrator what will be added, why it belongs there, and exactly how to change, move, or undo it in the editor.
+- Explanations must use warm, beginner-friendly language, explicitly connect each step to the previous one, and tell the administrator what will be added, why it follows now, and exactly how they can add/change it themselves, move it, or undo it in the editor.
 - Match the requested explanation language while keeping JSON keys unchanged.`;
 
 function extractOutputText(payload) {

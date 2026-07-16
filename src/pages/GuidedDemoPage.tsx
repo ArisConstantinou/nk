@@ -12,7 +12,7 @@ export function GuidedDemoPage() {
   return <div className="cms-guide-page">
     <VisualEditingBridge/>
     <main className="cms-guide-canvas" aria-label="Interactive guide demo page">
-      {page?.sections.length ? <CmsSections sections={page.sections} pageSlug={page.slug}/> : visualPreview ? <div className="cms-guide-empty" aria-live="polite"><Sparkles/><span>Κενός demo καμβάς</span><small>Ο AI βοηθός θα προτείνει το πρώτο πραγματικό component.</small></div> : null}
+      {page?.sections.length ? <CmsSections sections={page.sections} pageSlug={page.slug}/> : visualPreview ? <div className="cms-guide-empty" aria-live="polite"><Sparkles/><span>Η σελίδα είναι ακόμη κενή</span><small>Πρώτο βήμα: ένα section που θα κρατήσει τον τίτλο και το περιεχόμενο.</small></div> : null}
     </main>
   </div>;
 }

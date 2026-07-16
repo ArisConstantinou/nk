@@ -223,12 +223,12 @@ function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
 
   if (!sections.length) return finish({
     action: 'insert_section', afterSectionId: '', targetSectionId: '', afterComponentId: '',
-    section: {...guideSectionDefaults, type: 'media', eyebrow: local('WELCOME', 'ΚΑΛΩΣ ΗΡΘΑΤΕ'), title: local('Hero introduction', 'Κεντρική παρουσίαση'), layout: 'split', columns: 2},
-    component: {...guideComponentDefaults, type: 'heading', label: local('Hero heading', 'Κεντρικός τίτλος'), text: local('Power and lighting, designed around real life.', 'Ρεύμα και φωτισμός, σχεδιασμένα για την πραγματική ζωή.')},
+    section: {...guideSectionDefaults, type: 'text', title: local('Hero section', 'Κεντρικό section'), layout: 'stack', columns: 1},
+    component: {...guideComponentDefaults},
     explanation: local(
-      {summary: 'Let’s begin with a clear hero heading.', reason: 'The page is completely empty, so a strong heading gives it purpose and creates the visual anchor for everything that follows.', howToChange: 'Click the heading on the canvas and type directly, or edit it in Properties. You can also drag it to adjust its position.'},
-      {summary: 'Ας ξεκινήσουμε με έναν καθαρό κεντρικό τίτλο.', reason: 'Η σελίδα είναι εντελώς κενή, άρα ένας δυνατός τίτλος της δίνει αμέσως σκοπό και δημιουργεί το οπτικό σημείο αναφοράς για ό,τι θα ακολουθήσει.', howToChange: 'Πάτησε τον τίτλο πάνω στον καμβά και γράψε απευθείας ή άλλαξε το κείμενο από τις Ιδιότητες. Μπορείς επίσης να τον σύρεις για να αλλάξεις θέση.'}),
-    designNotes: [local('A two-column hero leaves room for an image later.', 'Η διάταξη δύο στηλών αφήνει χώρο για εικόνα αργότερα.')],
+      {summary: 'The page is empty. First, it needs a section.', reason: 'A section is the container that gives the heading and content a real place in the page structure. We build the container before putting anything inside it.', howToChange: 'Let me add it live, or use Section under Add to Page yourself. You can then select and drag the whole section.'},
+      {summary: 'Η σελίδα είναι κενή. Πρώτα χρειάζεται ένα section.', reason: 'Το section είναι το δοχείο που δίνει πραγματική θέση στον τίτλο και στο περιεχόμενο. Χτίζουμε πρώτα το δοχείο και μετά βάζουμε τα στοιχεία μέσα του.', howToChange: 'Άφησέ με να το προσθέσω live ή πάτησε εσύ Section στο Add to Page. Μετά μπορείς να επιλέξεις και να σύρεις ολόκληρο το section.'}),
+    designNotes: [local('Sequence: section, heading, content.', 'Σειρά: section, τίτλος, περιεχόμενο.')],
   });
 
   const hero = sections[0];
@@ -254,13 +254,11 @@ function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
     {summary: 'Ας προσθέσουμε μία καθαρή επόμενη ενέργεια.', reason: 'Το hero πλέον εξηγεί και δείχνει την πρόταση, οπότε ένα μόνο κουμπί δίνει στον επισκέπτη φυσική συνέχεια.', howToChange: 'Επίλεξε το κουμπί για να αλλάξεις τόσο την ετικέτα όσο και τον προορισμό του.'});
 
   if (sections.length === 1) return finish({
-    action: 'insert_section', afterSectionId: hero.id, targetSectionId: '', afterComponentId: '',
-    section: {...guideSectionDefaults, type: 'features', eyebrow: local('WHAT WE DO', 'ΤΙ ΠΡΟΣΦΕΡΟΥΜΕ'), title: local('The next section', 'Η επόμενη ενότητα'), layout: 'grid', columns: 3},
-    component: {...guideComponentDefaults, type: 'heading', label: local('Services heading', 'Τίτλος υπηρεσιών'), text: local('From planning to handover.', 'Από τη μελέτη μέχρι την παράδοση.')},
+    action: 'complete', afterSectionId: '', targetSectionId: '', afterComponentId: '', section: {...guideSectionDefaults}, component: {...guideComponentDefaults},
     explanation: local(
-      {summary: 'The hero is complete; add a second content section.', reason: 'The first screen now has hierarchy, context, imagery and an action. A new section lets the story continue without overcrowding it.', howToChange: 'Select the section to change its grid and columns, or drag the entire section to reorder it.'},
-      {summary: 'Το hero ολοκληρώθηκε· ας προσθέσουμε δεύτερη ενότητα.', reason: 'Η πρώτη οθόνη έχει πλέον ιεραρχία, επεξήγηση, εικόνα και ενέργεια. Μια νέα ενότητα συνεχίζει την ιστορία χωρίς να τη φορτώνει.', howToChange: 'Επίλεξε την ενότητα για να αλλάξεις grid και στήλες ή σύρε ολόκληρη την ενότητα για νέα σειρά.'}),
-    designNotes: [local('The new section follows the hero instead of crowding it.', 'Η νέα ενότητα μπαίνει μετά το hero, όχι μέσα σε αυτό.')],
+      {summary: 'The first page flow is complete.', reason: 'You built it in the correct order: section, heading, content, optional image and button. Every item is now a normal live editor component.', howToChange: 'Keep the draft to continue editing, or delete the demo and begin again from a blank page.'},
+      {summary: 'Η πρώτη ροή της σελίδας ολοκληρώθηκε.', reason: 'Τη χτίσαμε με τη σωστή σειρά: section, τίτλος, περιεχόμενο, προαιρετική εικόνα και κουμπί. Όλα είναι πλέον κανονικά live components του editor.', howToChange: 'Κράτησε το draft για να συνεχίσεις την επεξεργασία ή διέγραψε τη demo και ξεκίνα ξανά από κενή σελίδα.'}),
+    designNotes: [local('Every step was added separately and remains editable.', 'Κάθε βήμα μπήκε ξεχωριστά και παραμένει επεξεργάσιμο.')],
   });
 
   const second = sections[1];

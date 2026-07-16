@@ -124,10 +124,21 @@ function previewDocumentKey(path: string) {
   return `${url.pathname}${url.search}`;
 }
 
+function sectionsForRecord(record: ContentRecord): PageSection[] {
+  const rawSections = Array.isArray(record.draft.sections) ? record.draft.sections : [];
+  const normalized = sectionsFrom(rawSections);
+  if (record.kind !== 'page' || typeof record.draft.route !== 'string' || !record.draft.route.startsWith('/_cms-guide/')) return normalized;
+  return normalized.map((section, index) => {
+    const raw = rawSections[index];
+    if (!raw || typeof raw !== 'object' || !Array.isArray((raw as Partial<PageSection>).components)) return section;
+    return {...section, components: (raw as Partial<PageSection>).components!.map(component => normalizeComponent(component))};
+  });
+}
+
 function normalizeLoadedRecord(record: ContentRecord): ContentRecord {
   if (record.kind !== 'page') return record;
   const next = cloneRecord(record);
-  next.draft.sections = sectionsFrom(next.draft.sections);
+  next.draft.sections = sectionsForRecord(next);
   next.draft.componentLibrary = reusableFrom(next.draft.componentLibrary).filter(item => item.scope === 'local');
   next.draft.editorHistory = historyFrom(next.draft.editorHistory);
   return next;
@@ -135,7 +146,7 @@ function normalizeLoadedRecord(record: ContentRecord): ContentRecord {
 
 function objectContext(record: ContentRecord, path: string, selection?: VisualSelection | null) {
   if (selection?.objectType === 'auto' && selection.objectId) return {objectKey: `auto:${selection.objectId}`, objectLabel: selection.label || 'Page element', meta: {autoId: selection.objectId}};
-  const sections = sectionsFrom(record.draft.sections);
+  const sections = sectionsForRecord(record);
   const componentMatch = path.match(/^sections\.(\d+)\.components\.(\d+)(?:\.(.+))?$/);
   const sectionMatch = path.match(/^sections\.(\d+)(?:\.(.+))?$/);
   const componentId = selection?.objectType === 'component' ? selection.objectId : componentMatch ? sections[Number(componentMatch[1])]?.components[Number(componentMatch[2])]?.id : '';
@@ -160,7 +171,7 @@ function pathForObject(sections: PageSection[], type: 'section' | 'component', i
 }
 
 function resolveHistoryPath(record: ContentRecord, entry: VisualHistoryEntry) {
-  const sections = sectionsFrom(record.draft.sections);
+  const sections = sectionsForRecord(record);
   const componentId = typeof entry.meta.componentId === 'string' ? entry.meta.componentId : '';
   const sectionId = typeof entry.meta.sectionId === 'string' ? entry.meta.sectionId : '';
   const field = typeof entry.meta.field === 'string' ? entry.meta.field : '';
@@ -198,7 +209,7 @@ function moveComponentTo(sections: PageSection[], componentId: string, destinati
 function applyHistoryValue(record: ContentRecord, entry: VisualHistoryEntry, forward: boolean): ContentRecord {
   const value = forward ? entry.after : entry.before;
   let next = cloneRecord(record);
-  let sections = sectionsFrom(next.draft.sections);
+  let sections = sectionsForRecord(next);
   if (['content', 'replace', 'style', 'resize', 'position', 'scope', 'reusable', 'move-auto', 'delete-auto', 'restore-auto'].includes(entry.action)) {
     const path = resolveHistoryPath(next, entry);
     if ((entry.action === 'move-auto' || entry.action === 'position') && value == null) return path ? removePathValue(next, path) : next;
@@ -483,7 +494,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     }
     const record = recordsRef.current.find(item => item.id === activeRecordId);
     if (!record || record.kind !== 'page' || !editableKinds.includes('page')) return;
-    const sections = sectionsFrom(record.draft.sections);
+    const sections = sectionsForRecord(record);
     if (sourceType === 'section') {
       const from = sections.findIndex(section => section.id === sourceId);
       const toTarget = sections.findIndex(section => section.id === String(data.targetId || ''));
@@ -598,7 +609,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const selectedValue = selectedRecord && selection ? getPathValue(selectedRecord, selection.path) ?? selection.fallbackValue ?? '' : '';
   const phase = activeRecord ? savePhases[activeRecord.id] || 'saved' : 'saved';
   const canWriteCurrent = Boolean(user && activeRecord && canWriteKind(user.role, activeRecord.kind));
-  const activeSections = activeRecord?.kind === 'page' ? sectionsFrom(activeRecord.draft.sections) : [];
+  const activeSections = activeRecord?.kind === 'page' ? sectionsForRecord(activeRecord) : [];
   const selectedSection = selection?.sectionId ? activeSections.find(section => section.id === selection.sectionId) : selection?.objectType === 'section' ? activeSections.find(section => section.id === selection.objectId) : undefined;
   const selectedComponent = selection?.objectType === 'component' ? activeSections.flatMap(section => section.components).find(component => component.id === selection.objectId) : undefined;
   const settingsRecord = records.find(record => record.kind === 'settings');
@@ -638,14 +649,14 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const addSection = () => {
     const page = activeRecord?.kind === 'page' ? activeRecord : recordsRef.current.find(record => record.kind === 'page' && previewRoute(record) === previewPath);
     if (!page || !editableKinds.includes('page')) return;
-    const sections = sectionsFrom(page.draft.sections); const section = newSection(); const index = sections.length; sections.push(section);
+    const sections = sectionsForRecord(page); const section = newSection(); const index = sections.length; sections.push(section);
     mutateSections(page, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id}});
     setActiveRecordId(page.id); setSelection({kind: 'page', slug: page.slug, path: `sections.${index}`, edit: 'section', label: section.title, linkPath: '', sectionId: section.id, objectType: 'section', objectId: section.id, positionKey: positionKeyForObject('section', section.id), positionX: 0, positionY: 0}); setNotice('Section added. Select it in the preview to position it.');
   };
 
   const addComponent = (type: PageComponentType, reusable?: ReusableComponent) => {
     if (!activeRecord || activeRecord.kind !== 'page' || !editableKinds.includes('page')) return;
-    const sections = sectionsFrom(activeRecord.draft.sections); let section = sections.find(item => item.id === selectedSection?.id) || sections[0];
+    const sections = sectionsForRecord(activeRecord); let section = sections.find(item => item.id === selectedSection?.id) || sections[0];
     if (!section) {section = newSection(); section.components = []; sections.push(section);}
     const component = reusable ? normalizeComponent({...structuredClone(reusable.component), id: crypto.randomUUID(), reusableId: reusable.id, scope: reusable.scope, groupId: ''}) : newComponent(type);
     const index = section.components.length; section.components.push(component);
@@ -655,7 +666,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
 
   const duplicateSelected = () => {
     if (!activeRecord || activeRecord.kind !== 'page' || !selection) return;
-    const sections = sectionsFrom(activeRecord.draft.sections);
+    const sections = sectionsForRecord(activeRecord);
     if (selection.objectType === 'section') {
       const index = sections.findIndex(section => section.id === selection.objectId); if (index < 0) return;
       const section = structuredClone(sections[index]);
@@ -685,7 +696,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       return;
     }
     if (activeRecord.kind !== 'page') return;
-    const sections = sectionsFrom(activeRecord.draft.sections);
+    const sections = sectionsForRecord(activeRecord);
     if (selection.objectType === 'section') {
       const index = sections.findIndex(section => section.id === selection.objectId); if (index < 0 || !window.confirm('Delete this entire section from the draft?')) return;
       const section = sections[index]; sections.splice(index, 1); mutateSections(activeRecord, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'delete-section', path: 'sections', before: {section, index}, after: null, meta: {sectionId: section.id}});
@@ -706,14 +717,14 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
 
   const groupWith = (otherId: string) => {
     if (!activeRecord || activeRecord.kind !== 'page' || !selectedComponent || !selectedSection) return;
-    const sections = sectionsFrom(activeRecord.draft.sections); const section = sections.find(item => item.id === selectedSection.id); if (!section) return;
+    const sections = sectionsForRecord(activeRecord); const section = sections.find(item => item.id === selectedSection.id); if (!section) return;
     const other = section.components.find(component => component.id === otherId); const current = section.components.find(component => component.id === selectedComponent.id); if (!other || !current) return;
     const before = [current, other].map(component => ({id: component.id, groupId: component.groupId})); const groupId = current.groupId || other.groupId || crypto.randomUUID(); current.groupId = groupId; other.groupId = groupId;
     const after = [current, other].map(component => ({id: component.id, groupId: component.groupId})); mutateSections(activeRecord, sections, {objectKey: `component:${current.id}`, objectLabel: current.label, action: 'group', path: 'sections', before, after, meta: {componentId: current.id, sectionId: section.id, affectedObjectIds: after.map(item => item.id)}});
   };
   const ungroup = () => {
     if (!activeRecord || activeRecord.kind !== 'page' || !selectedComponent?.groupId) return;
-    const sections = sectionsFrom(activeRecord.draft.sections); const grouped = sections.flatMap(section => section.components).filter(component => component.groupId === selectedComponent.groupId); const before = grouped.map(component => ({id: component.id, groupId: component.groupId})); grouped.forEach(component => {component.groupId = '';}); const after = grouped.map(component => ({id: component.id, groupId: ''})); mutateSections(activeRecord, sections, {objectKey: `component:${selectedComponent.id}`, objectLabel: selectedComponent.label, action: 'ungroup', path: 'sections', before, after, meta: {componentId: selectedComponent.id, sectionId: selectedSection?.id || '', affectedObjectIds: after.map(item => item.id)}});
+    const sections = sectionsForRecord(activeRecord); const grouped = sections.flatMap(section => section.components).filter(component => component.groupId === selectedComponent.groupId); const before = grouped.map(component => ({id: component.id, groupId: component.groupId})); grouped.forEach(component => {component.groupId = '';}); const after = grouped.map(component => ({id: component.id, groupId: ''})); mutateSections(activeRecord, sections, {objectKey: `component:${selectedComponent.id}`, objectLabel: selectedComponent.label, action: 'ungroup', path: 'sections', before, after, meta: {componentId: selectedComponent.id, sectionId: selectedSection?.id || '', affectedObjectIds: after.map(item => item.id)}});
   };
 
   const saveReusable = () => {
@@ -731,7 +742,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       const affectedIds = [settingsRecord.id, activeRecord.id];
       let syncedPages = 1;
       for (const page of recordsRef.current.filter(record => record.kind === 'page' && record.id !== activeRecord.id)) {
-        const pageSections = sectionsFrom(page.draft.sections);
+        const pageSections = sectionsForRecord(page);
         let changed = false;
         pageSections.forEach(section => {section.components = section.components.map(instance => {
           if (instance.scope !== 'global' || instance.reusableId !== id) return instance;
@@ -754,7 +765,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
 
   useEffect(() => {
     const guidePage = () => guideSession ? recordsRef.current.find(record => record.id === guideSession.session.recordId && record.kind === 'page') : null;
-    const structureFor = (page: ContentRecord) => sectionsFrom(page.draft.sections).map(section => ({
+    const structureFor = (page: ContentRecord) => sectionsForRecord(page).map(section => ({
       id: section.id, type: section.type, title: section.title.trim().slice(0, 240), body: section.body.trim().slice(0, 800), layout: section.layout,
       columns: Math.min(4, Math.max(1, Number(section.columns) || 1)), enabled: section.enabled !== false,
       components: section.components.map(component => ({
@@ -829,7 +840,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         if (!page) throw new Error('Start the interactive guide to create its blank demo page first.');
         const context = contextFor(page);
         const response = await adminApi<{proposal: CmsGuideAction; context: CmsGuideContext}>('/guide/next', {method: 'POST', body: JSON.stringify({language: detail.language, context})});
-        detail.resolve({proposal: response.proposal, context: response.context, applied: false, objectLabel: response.proposal.component.label});
+        detail.resolve({proposal: response.proposal, context: response.context, applied: false, objectLabel: response.proposal.action === 'insert_section' ? response.proposal.section.title : response.proposal.component.label});
       })().catch(detail.reject);
     };
     const applyGuideStep = (event: Event) => {
@@ -842,36 +853,45 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         if (detail.context.page.id !== current.id || !sameValue(detail.context.page.sections, structureFor(current))) throw new Error('The page changed after the suggestion. Analyse it again so the next action fits the current layout.');
         const proposal = detail.proposal;
         if (proposal.action === 'complete') {detail.resolve({proposal, context: detail.context, applied: false, objectLabel: ''}); return;}
-        const currentSections = sectionsFrom(current.draft.sections);
+        const currentSections = sectionsForRecord(current);
         if (currentSections.length >= 40 && proposal.action === 'insert_section') throw new Error('The page reached its section limit before the action could be applied.');
         const approvedMedia = new Set(media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).map(asset => asset.url));
-        if ((proposal.component.image && !approvedMedia.has(proposal.component.image)) || proposal.component.images.some(image => !approvedMedia.has(image))) throw new Error('The suggestion references media that is no longer active. Analyse the page again.');
-        const component = newComponent(proposal.component.type, {label: proposal.component.label, text: proposal.component.text, url: proposal.component.url, image: proposal.component.image, images: proposal.component.images, alt: proposal.component.alt, icon: proposal.component.icon});
+        if (proposal.action === 'insert_component' && ((proposal.component.image && !approvedMedia.has(proposal.component.image)) || proposal.component.images.some(image => !approvedMedia.has(image)))) throw new Error('The suggestion references media that is no longer active. Analyse the page again.');
         let sectionId = '';
+        let objectType: 'section' | 'component' = 'section';
+        let objectId = '';
+        let objectLabel = '';
         if (proposal.action === 'insert_section') {
           const afterIndex = currentSections.length ? currentSections.findIndex(section => section.id === proposal.afterSectionId) : -1;
           if (currentSections.length && afterIndex < 0) throw new Error('The suggested section position no longer exists. Analyse the page again.');
           const section = newSection();
-          Object.assign(section, proposal.section, {id: crypto.randomUUID(), enabled: true, components: [component]});
+          Object.assign(section, proposal.section, {id: crypto.randomUUID(), enabled: true, components: []});
           const index = currentSections.length ? afterIndex + 1 : 0;
           currentSections.splice(index, 0, section);
-          mutateSections(current, currentSections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id, componentId: component.id, source: 'ai-guide'}});
+          mutateSections(current, currentSections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id, source: 'ai-guide'}});
           sectionId = section.id;
+          objectId = section.id;
+          objectLabel = section.title;
+          setSelection({kind: 'page', slug: current.slug, path: `sections.${index}`, edit: 'section', label: section.title, linkPath: '', sectionId, objectType: 'section', objectId: section.id, positionKey: positionKeyForObject('section', section.id), positionX: 0, positionY: 0});
         } else {
           const section = currentSections.find(item => item.id === proposal.targetSectionId);
           if (!section) throw new Error('The suggested target section no longer exists. Analyse the page again.');
           if (section.components.length >= 80) throw new Error('That section has reached its component limit.');
+          const component = newComponent(proposal.component.type, {label: proposal.component.label, text: proposal.component.text, url: proposal.component.url, image: proposal.component.image, images: proposal.component.images, alt: proposal.component.alt, icon: proposal.component.icon});
           const afterIndex = proposal.afterComponentId ? section.components.findIndex(item => item.id === proposal.afterComponentId) : section.components.length - 1;
           if (proposal.afterComponentId && afterIndex < 0) throw new Error('The suggested component position no longer exists. Analyse the page again.');
           const componentIndex = afterIndex + 1;
           section.components.splice(componentIndex, 0, component);
           mutateSections(current, currentSections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index: componentIndex}, meta: {componentId: component.id, sectionId: section.id, source: 'ai-guide'}});
           sectionId = section.id;
+          objectType = 'component';
+          objectId = component.id;
+          objectLabel = component.label;
+          setSelection({kind: 'page', slug: current.slug, path: pathForObject(currentSections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
         }
-        setSelection({kind: 'page', slug: current.slug, path: pathForObject(currentSections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
         setNotice(`${proposal.explanation.summary} Saved only to the demo draft.`);
-        window.setTimeout(() => iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:guide-highlight', nonce: nonceRef.current, objectType: 'component', objectId: component.id}, window.location.origin), 120);
-        detail.resolve({proposal, context: detail.context, applied: true, objectLabel: component.label});
+        window.setTimeout(() => iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:guide-highlight', nonce: nonceRef.current, objectType, objectId}, window.location.origin), 120);
+        detail.resolve({proposal, context: detail.context, applied: true, objectLabel});
       })().catch(detail.reject);
     };
     const finishGuide = (event: Event) => {
