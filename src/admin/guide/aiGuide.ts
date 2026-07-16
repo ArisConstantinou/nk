@@ -2,6 +2,7 @@ import type {PageComponentType, PageSection} from '../types';
 
 export type CmsGuideLanguage = 'en' | 'el';
 export type CmsGuideActionName = 'insert_section' | 'insert_component' | 'complete';
+export type CmsGuideFinishMode = 'keep' | 'discard';
 export type CmsGuideComponent = {type: PageComponentType; label: string; text: string; url: string; image: string; alt: string; icon: string; images: string[]};
 export type CmsGuideAction = {
   action: CmsGuideActionName; afterSectionId: string; targetSectionId: string; afterComponentId: string;
@@ -16,22 +17,37 @@ export type CmsGuideContext = {
   availableMedia: Array<{id: string; url: string; alt: string}>; recentChanges: string[];
   constraints: {additiveOnly: true; noAutomaticPublish: true; maxSections: number; maxComponentsPerSection: number; maxColumns: number; sharedAcrossViewports: true; allowedActions: CmsGuideActionName[]};
 };
+export type CmsGuideSession = {recordId: string; slug: string; title: string; route: string; startedAt: string};
+export type CmsGuideStartResult = {session: CmsGuideSession};
 export type CmsGuideStepResult = {proposal: CmsGuideAction; context: CmsGuideContext; applied: boolean; objectLabel: string};
-export type CmsGuideStepEventDetail = {language: CmsGuideLanguage; handled: () => void; resolve: (result: CmsGuideStepResult) => void; reject: (error: unknown) => void};
+export type CmsGuideFinishResult = {mode: CmsGuideFinishMode; recordId: string};
 
-export const CMS_GUIDE_STEP_EVENT = 'nk-admin-guide:run-cms-step';
+type GuideEventHandlers<T> = {handled: () => void; resolve: (result: T) => void; reject: (error: unknown) => void};
+export type CmsGuideStartEventDetail = GuideEventHandlers<CmsGuideStartResult> & {language: CmsGuideLanguage};
+export type CmsGuideStepEventDetail = GuideEventHandlers<CmsGuideStepResult> & {language: CmsGuideLanguage};
+export type CmsGuideApplyEventDetail = GuideEventHandlers<CmsGuideStepResult> & {proposal: CmsGuideAction; context: CmsGuideContext};
+export type CmsGuideFinishEventDetail = GuideEventHandlers<CmsGuideFinishResult> & {mode: CmsGuideFinishMode};
 
-export function requestCmsGuideStep(language: CmsGuideLanguage): Promise<CmsGuideStepResult> {
+export const CMS_GUIDE_START_EVENT = 'nk-admin-guide:start-demo';
+export const CMS_GUIDE_STEP_EVENT = 'nk-admin-guide:analyse-step';
+export const CMS_GUIDE_APPLY_EVENT = 'nk-admin-guide:apply-step';
+export const CMS_GUIDE_FINISH_EVENT = 'nk-admin-guide:finish-demo';
+
+function requestGuideEvent<T>(name: string, payload: Record<string, unknown>, timeoutMs: number, missingMessage: string): Promise<T> {
   return new Promise((resolve, reject) => {
     let handled = false;
-    const timeout = window.setTimeout(() => reject(new Error(handled ? 'The AI guide timed out. No content was changed.' : 'Open the Website Editor before running the AI guide.')), 35_000);
+    const timeout = window.setTimeout(() => reject(new Error(handled ? 'The interactive guide timed out. No additional content was changed.' : missingMessage)), timeoutMs);
     const finish = (callback: () => void) => {window.clearTimeout(timeout); callback();};
-    const detail: CmsGuideStepEventDetail = {
-      language,
+    window.dispatchEvent(new CustomEvent(name, {detail: {
+      ...payload,
       handled: () => {handled = true;},
-      resolve: result => finish(() => resolve(result)),
-      reject: error => finish(() => reject(error)),
-    };
-    window.dispatchEvent(new CustomEvent<CmsGuideStepEventDetail>(CMS_GUIDE_STEP_EVENT, {detail}));
+      resolve: (result: T) => finish(() => resolve(result)),
+      reject: (error: unknown) => finish(() => reject(error)),
+    }}));
   });
 }
+
+export const requestCmsGuideStart = (language: CmsGuideLanguage) => requestGuideEvent<CmsGuideStartResult>(CMS_GUIDE_START_EVENT, {language}, 20_000, 'Open the Website Editor before starting the interactive guide.');
+export const requestCmsGuideStep = (language: CmsGuideLanguage) => requestGuideEvent<CmsGuideStepResult>(CMS_GUIDE_STEP_EVENT, {language}, 35_000, 'Open the interactive demo in the Website Editor before asking for the next step.');
+export const applyCmsGuideStep = (proposal: CmsGuideAction, context: CmsGuideContext) => requestGuideEvent<CmsGuideStepResult>(CMS_GUIDE_APPLY_EVENT, {proposal, context}, 20_000, 'Open the interactive demo in the Website Editor before applying this step.');
+export const finishCmsGuide = (mode: CmsGuideFinishMode) => requestGuideEvent<CmsGuideFinishResult>(CMS_GUIDE_FINISH_EVENT, {mode}, 20_000, 'Open the interactive demo in the Website Editor before finishing the guide.');

@@ -518,3 +518,12 @@ html[data-experience='tech'] .electrical-shell{
 .nk-visual-preview .nk-visual-free-move-handle:active,.nk-visual-preview .nk-visual-free-move-handle.is-dragging{cursor:grabbing;background:#55d5c2;color:#041018}
 .nk-visual-preview .nk-visual-free-move-handle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .nk-visual-preview [data-visual-dropzone="component"]{min-height:72px}
+
+/* The guide preview is a real builder route with no prebuilt header, footer or simulated content. */
+.cms-guide-page{min-height:100vh;background:radial-gradient(circle at 16% 8%,rgba(47,208,146,.09),transparent 28%),#061119;color:#edf7f3}
+.cms-guide-canvas{min-height:100vh;padding:clamp(28px,5vw,72px)}
+.cms-guide-canvas>.cms-sections{width:min(1180px,100%);margin:0 auto}
+.cms-guide-empty{min-height:calc(100vh - clamp(56px,10vw,144px));border:1px dashed rgba(119,224,184,.28);border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#81a99a;background:rgba(255,255,255,.018)}
+.cms-guide-empty svg{width:32px;color:#58d2a5;margin-bottom:13px}.cms-guide-empty span{color:#dff3eb;font:650 18px Manrope,system-ui,sans-serif}.cms-guide-empty small{margin-top:7px;font-size:12px}
+.nk-visual-preview .nk-visual-guide-highlight{position:relative;z-index:5;animation:nk-visual-guide-pulse 1s ease-in-out 3!important;outline:4px solid #ffe66d!important;outline-offset:8px!important;box-shadow:0 0 0 14px rgba(255,230,109,.2),0 18px 54px rgba(0,0,0,.38)!important}
+@keyframes nk-visual-guide-pulse{0%,100%{outline-color:#ffe66d;box-shadow:0 0 0 10px rgba(255,230,109,.12),0 18px 54px rgba(0,0,0,.34)}50%{outline-color:#fff4a8;box-shadow:0 0 0 22px rgba(255,230,109,.26),0 18px 54px rgba(0,0,0,.42)}}

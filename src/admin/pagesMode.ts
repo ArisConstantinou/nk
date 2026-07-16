@@ -142,7 +142,7 @@ const guideSectionDefaults: CmsGuideAction['section'] = {
 };
 const guideComponentDefaults: CmsGuideAction['component'] = {type: 'text', label: '', text: '', url: '', image: '', alt: '', icon: 'check', images: []};
 
-function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
+function legacyPlanPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
   const source = body.context && typeof body.context === 'object' ? body.context as Partial<CmsGuideContext> : null;
   if (!source?.page || !Array.isArray(source.page.sections)) return fail(400, 'guide_context_missing', 'The page structure could not be analysed. No content was changed.');
   const language: CmsGuideLanguage = body.language === 'el' ? 'el' : 'en';
@@ -201,6 +201,80 @@ function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
       {summary: 'Η σελίδα είναι ισορροπημένη και ολοκληρωμένη.', reason: 'Η τρέχουσα δομή περιέχει ήδη τους χρήσιμους τύπους περιεχομένου που μπορεί να προσθέσει με ασφάλεια ο οδηγός της συσκευής.', howToChange: 'Συνέχισε την επεξεργασία των υπαρχόντων στοιχείων ή πρόσθεσε χειροκίνητα ένα συγκεκριμένο component όταν υπάρχει νέο περιεχόμενο.'},
     ),
     designNotes: language === 'el' ? ['Καμία καταστροφική ενέργεια.', 'Καμία αυτόματη δημοσίευση.'] : ['No destructive operation was used.', 'No automatic publishing.'],
+  });
+}
+
+function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
+  const source = body.context && typeof body.context === 'object' ? body.context as Partial<CmsGuideContext> : null;
+  if (!source?.page || !Array.isArray(source.page.sections)) return fail(400, 'guide_context_missing', 'The page structure could not be analysed. No content was changed.');
+  const language: CmsGuideLanguage = body.language === 'el' ? 'el' : 'en';
+  const context: CmsGuideContext = {
+    page: clone(source.page), coreContent: clone(source.coreContent || {}), renderedOutline: clone(Array.isArray(source.renderedOutline) ? source.renderedOutline : []),
+    availableMedia: clone(Array.isArray(source.availableMedia) ? source.availableMedia : []), recentChanges: clone(Array.isArray(source.recentChanges) ? source.recentChanges : []),
+    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
+  };
+  const sections = context.page.sections.filter(section => section.enabled !== false);
+  const media = context.availableMedia.filter(item => item.url);
+  const local = <T,>(en: T, el: T) => language === 'el' ? el : en;
+  const finish = (proposal: CmsGuideAction) => ok({proposal, context, planner: 'state-aware-on-device'});
+  const addComponent = (target: CmsGuideContext['page']['sections'][number], component: CmsGuideAction['component'], en: CmsGuideAction['explanation'], el: CmsGuideAction['explanation']) => finish({
+    action: 'insert_component', afterSectionId: '', targetSectionId: target.id, afterComponentId: target.components.at(-1)?.id || '', section: {...guideSectionDefaults}, component, explanation: local(en, el), designNotes: [],
+  });
+
+  if (!sections.length) return finish({
+    action: 'insert_section', afterSectionId: '', targetSectionId: '', afterComponentId: '',
+    section: {...guideSectionDefaults, type: 'media', eyebrow: local('WELCOME', 'ΚΑΛΩΣ ΗΡΘΑΤΕ'), title: local('Hero introduction', 'Κεντρική παρουσίαση'), layout: 'split', columns: 2},
+    component: {...guideComponentDefaults, type: 'heading', label: local('Hero heading', 'Κεντρικός τίτλος'), text: local('Power and lighting, designed around real life.', 'Ρεύμα και φωτισμός, σχεδιασμένα για την πραγματική ζωή.')},
+    explanation: local(
+      {summary: 'Let’s begin with a clear hero heading.', reason: 'The page is completely empty, so a strong heading gives it purpose and creates the visual anchor for everything that follows.', howToChange: 'Click the heading on the canvas and type directly, or edit it in Properties. You can also drag it to adjust its position.'},
+      {summary: 'Ας ξεκινήσουμε με έναν καθαρό κεντρικό τίτλο.', reason: 'Η σελίδα είναι εντελώς κενή, άρα ένας δυνατός τίτλος της δίνει αμέσως σκοπό και δημιουργεί το οπτικό σημείο αναφοράς για ό,τι θα ακολουθήσει.', howToChange: 'Πάτησε τον τίτλο πάνω στον καμβά και γράψε απευθείας ή άλλαξε το κείμενο από τις Ιδιότητες. Μπορείς επίσης να τον σύρεις για να αλλάξεις θέση.'}),
+    designNotes: [local('A two-column hero leaves room for an image later.', 'Η διάταξη δύο στηλών αφήνει χώρο για εικόνα αργότερα.')],
+  });
+
+  const hero = sections[0];
+  const heroComponents = hero.components.filter(component => component.enabled !== false);
+  if (!heroComponents.some(component => component.type === 'heading')) return addComponent(hero,
+    {...guideComponentDefaults, type: 'heading', label: local('Hero heading', 'Κεντρικός τίτλος'), text: local('Power and lighting, designed around real life.', 'Ρεύμα και φωτισμός, σχεδιασμένα για την πραγματική ζωή.')},
+    {summary: 'The hero needs a heading.', reason: 'A visitor should understand the page before seeing supporting details.', howToChange: 'Select the heading and type directly, or edit it from Properties.'},
+    {summary: 'Το hero χρειάζεται τίτλο.', reason: 'Ο επισκέπτης πρέπει να καταλαβαίνει τη σελίδα πριν δει τις υποστηρικτικές λεπτομέρειες.', howToChange: 'Επίλεξε τον τίτλο και γράψε απευθείας ή άλλαξέ τον από τις Ιδιότητες.'});
+
+  if (!heroComponents.some(component => component.type === 'text')) return addComponent(hero,
+    {...guideComponentDefaults, type: 'text', label: local('Hero paragraph', 'Εισαγωγική παράγραφος'), text: local('From planning to installation, we combine safety, comfort and clean design.', 'Από τη μελέτη μέχρι την εγκατάσταση, συνδυάζουμε ασφάλεια, άνεση και καθαρό σχεδιασμό.')},
+    {summary: 'Now add a short supporting paragraph.', reason: 'The heading attracts attention; one concise paragraph explains the value without making the hero feel heavy.', howToChange: 'Click the paragraph to rewrite it. Keep it to one or two short sentences for a cleaner first screen.'},
+    {summary: 'Τώρα ταιριάζει μια σύντομη υποστηρικτική παράγραφος.', reason: 'Ο τίτλος τραβά την προσοχή· μία λιτή παράγραφος εξηγεί την αξία χωρίς να βαραίνει το hero.', howToChange: 'Πάτησε την παράγραφο για να την ξαναγράψεις. Κράτησέ την σε μία ή δύο μικρές προτάσεις.'});
+
+  if (media.length && !heroComponents.some(component => component.type === 'image' || component.type === 'gallery')) return addComponent(hero,
+    {...guideComponentDefaults, type: 'image', label: local('Hero image', 'Κεντρική εικόνα'), image: media[0].url, alt: media[0].alt || local('Page hero image', 'Κεντρική εικόνα σελίδας')},
+    {summary: 'The hero is ready for an image.', reason: 'The title and paragraph explain the message. An approved image now balances the second column and gives the page atmosphere.', howToChange: 'Select the image and choose another item from the Media Library. Its width, padding and position remain editable.'},
+    {summary: 'Το hero είναι έτοιμο για εικόνα.', reason: 'Ο τίτλος και η παράγραφος εξηγούν ήδη το μήνυμα. Μια εγκεκριμένη εικόνα ισορροπεί τη δεύτερη στήλη και δίνει ατμόσφαιρα.', howToChange: 'Επίλεξε την εικόνα και διάλεξε άλλη από τη Media Library. Το πλάτος, το padding και η θέση της παραμένουν επεξεργάσιμα.'});
+
+  if (!heroComponents.some(component => component.type === 'button')) return addComponent(hero,
+    {...guideComponentDefaults, type: 'button', label: local('Primary action', 'Κύριο κουμπί'), text: local('Request a quote', 'Ζήτησε προσφορά'), url: '/request-a-quote'},
+    {summary: 'Add one clear next action.', reason: 'The hero now explains and shows the offer, so one button gives visitors a natural next step.', howToChange: 'Select the button to change both its label and destination.'},
+    {summary: 'Ας προσθέσουμε μία καθαρή επόμενη ενέργεια.', reason: 'Το hero πλέον εξηγεί και δείχνει την πρόταση, οπότε ένα μόνο κουμπί δίνει στον επισκέπτη φυσική συνέχεια.', howToChange: 'Επίλεξε το κουμπί για να αλλάξεις τόσο την ετικέτα όσο και τον προορισμό του.'});
+
+  if (sections.length === 1) return finish({
+    action: 'insert_section', afterSectionId: hero.id, targetSectionId: '', afterComponentId: '',
+    section: {...guideSectionDefaults, type: 'features', eyebrow: local('WHAT WE DO', 'ΤΙ ΠΡΟΣΦΕΡΟΥΜΕ'), title: local('The next section', 'Η επόμενη ενότητα'), layout: 'grid', columns: 3},
+    component: {...guideComponentDefaults, type: 'heading', label: local('Services heading', 'Τίτλος υπηρεσιών'), text: local('From planning to handover.', 'Από τη μελέτη μέχρι την παράδοση.')},
+    explanation: local(
+      {summary: 'The hero is complete; add a second content section.', reason: 'The first screen now has hierarchy, context, imagery and an action. A new section lets the story continue without overcrowding it.', howToChange: 'Select the section to change its grid and columns, or drag the entire section to reorder it.'},
+      {summary: 'Το hero ολοκληρώθηκε· ας προσθέσουμε δεύτερη ενότητα.', reason: 'Η πρώτη οθόνη έχει πλέον ιεραρχία, επεξήγηση, εικόνα και ενέργεια. Μια νέα ενότητα συνεχίζει την ιστορία χωρίς να τη φορτώνει.', howToChange: 'Επίλεξε την ενότητα για να αλλάξεις grid και στήλες ή σύρε ολόκληρη την ενότητα για νέα σειρά.'}),
+    designNotes: [local('The new section follows the hero instead of crowding it.', 'Η νέα ενότητα μπαίνει μετά το hero, όχι μέσα σε αυτό.')],
+  });
+
+  const second = sections[1];
+  if (second && !second.components.some(component => component.enabled !== false && component.type === 'text')) return addComponent(second,
+    {...guideComponentDefaults, type: 'text', label: local('Services description', 'Περιγραφή υπηρεσιών'), text: local('Planning, installation and support from one consistent technical team.', 'Μελέτη, εγκατάσταση και υποστήριξη με μία συνεπή τεχνική ομάδα.')},
+    {summary: 'Give the second section a short explanation.', reason: 'Its heading introduces the subject; a compact paragraph now makes the promise concrete.', howToChange: 'Edit the paragraph directly and keep it focused on the most important customer benefit.'},
+    {summary: 'Ας δώσουμε στη δεύτερη ενότητα μια σύντομη εξήγηση.', reason: 'Ο τίτλος εισάγει το θέμα· μια μικρή παράγραφος κάνει τώρα την υπόσχεση συγκεκριμένη.', howToChange: 'Άλλαξε την παράγραφο απευθείας και εστίασε στο σημαντικότερο όφελος για τον πελάτη.'});
+
+  return finish({
+    action: 'complete', afterSectionId: '', targetSectionId: '', afterComponentId: '', section: {...guideSectionDefaults}, component: {...guideComponentDefaults},
+    explanation: local(
+      {summary: 'This demo has a clear, balanced page flow.', reason: 'It opens with a complete hero and continues into a focused second section. More automatic content would become generic rather than helpful.', howToChange: 'Keep the draft and continue with the editor, or delete the whole demo and restart from a blank canvas.'},
+      {summary: 'Η demo έχει πλέον καθαρή και ισορροπημένη ροή.', reason: 'Ξεκινά με ολοκληρωμένο hero και συνεχίζει σε εστιασμένη δεύτερη ενότητα. Περισσότερο αυτόματο περιεχόμενο θα γινόταν γενικό αντί για χρήσιμο.', howToChange: 'Κράτησε το draft και συνέχισε με τον editor ή διέγραψε ολόκληρη τη demo και ξεκίνησε ξανά από κενό καμβά.'}),
+    designNotes: [local('Every element remains a normal draggable component.', 'Όλα τα στοιχεία παραμένουν κανονικά draggable components.')],
   });
 }
 

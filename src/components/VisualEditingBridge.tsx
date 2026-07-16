@@ -434,8 +434,29 @@ export function VisualEditingBridge() {
       });
     };
 
+    let guideHighlightTimer = 0;
+    let guideHighlightFrame = 0;
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== window.parent || !event.data || typeof event.data !== 'object') return;
+      if (event.data.type === 'nk-visual-editor:guide-highlight' && event.data.nonce === nonce && typeof event.data.objectId === 'string') {
+        if (guideHighlightFrame) window.cancelAnimationFrame(guideHighlightFrame);
+        let attempts = 0;
+        const reveal = () => {
+          const target = [...document.querySelectorAll<VisualElement>('[data-visual-object-id]')].find(element => element.dataset.visualObjectId === event.data.objectId && element.dataset.visualObjectType === event.data.objectType && !element.classList.contains('cms-builder-drag-handle'));
+          if (!target && attempts < 60) {attempts += 1; guideHighlightFrame = window.requestAnimationFrame(reveal); return;}
+          guideHighlightFrame = 0;
+          if (!target) return;
+          select(target);
+          target.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
+          target.classList.remove('nk-visual-guide-highlight');
+          void target.getBoundingClientRect();
+          target.classList.add('nk-visual-guide-highlight');
+          if (guideHighlightTimer) window.clearTimeout(guideHighlightTimer);
+          guideHighlightTimer = window.setTimeout(() => target.classList.remove('nk-visual-guide-highlight'), 3200);
+        };
+        reveal();
+        return;
+      }
       if (event.data.type === 'nk-visual-editor:history-sync' && event.data.nonce === nonce) {
         if (suppressTimerRef.current) window.clearTimeout(suppressTimerRef.current);
         suppressCommitRef.current = true;
@@ -649,6 +670,8 @@ export function VisualEditingBridge() {
     return () => {
       observer.disconnect();
       if (prepareFrame) window.cancelAnimationFrame(prepareFrame);
+      if (guideHighlightFrame) window.cancelAnimationFrame(guideHighlightFrame);
+      if (guideHighlightTimer) window.clearTimeout(guideHighlightTimer);
       if (suppressTimerRef.current) window.clearTimeout(suppressTimerRef.current);
       window.clearTimeout(readyTimer);
       window.removeEventListener('message', onMessage);

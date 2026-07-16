@@ -5,7 +5,7 @@ import {useAdminAuth} from '../auth/AdminAuth';
 import {canReadKind, canReadMedia, canWriteKind} from '../permissions';
 import type {ContentKind, ContentRecord, MediaAsset, PageComponent, PageComponentType, PageSection, ReusableComponent, VisualHistoryAction, VisualHistoryEntry} from '../types';
 import {componentLabels, historyFrom, newComponent, newSection, normalizeComponent, reusableFrom, sectionsFrom} from './visualEditorModel';
-import {CMS_GUIDE_STEP_EVENT, type CmsGuideAction, type CmsGuideContext, type CmsGuideStepEventDetail} from '../guide/aiGuide';
+import {CMS_GUIDE_APPLY_EVENT, CMS_GUIDE_FINISH_EVENT, CMS_GUIDE_START_EVENT, CMS_GUIDE_STEP_EVENT, type CmsGuideAction, type CmsGuideApplyEventDetail, type CmsGuideContext, type CmsGuideFinishEventDetail, type CmsGuideSession, type CmsGuideStartEventDetail, type CmsGuideStepEventDetail} from '../guide/aiGuide';
 
 type ViewportName = 'desktop' | 'tablet' | 'mobile';
 type SavePhase = 'saved' | 'unsaved' | 'saving' | 'error';
@@ -270,6 +270,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const saveErrorsRef = useRef<Record<string, string>>({});
   const historyCommandRef = useRef<(direction: 'undo' | 'redo', objectOnly?: boolean) => void>(() => undefined);
   const historyEchoGuardRef = useRef<{kind: ContentKind; slug: string; path: string; staleValue: unknown; expiresAt: number} | null>(null);
+  const [guideSession, setGuideSession] = useState<{session: CmsGuideSession; returnRecordId: string} | null>(null);
 
   const replaceRecords = useCallback((updater: (current: ContentRecord[]) => ContentRecord[]) => {
     const next = updater(recordsRef.current);
@@ -752,56 +753,104 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   };
 
   useEffect(() => {
+    const guidePage = () => guideSession ? recordsRef.current.find(record => record.id === guideSession.session.recordId && record.kind === 'page') : null;
+    const structureFor = (page: ContentRecord) => sectionsFrom(page.draft.sections).map(section => ({
+      id: section.id, type: section.type, title: section.title.trim().slice(0, 240), body: section.body.trim().slice(0, 800), layout: section.layout,
+      columns: Math.min(4, Math.max(1, Number(section.columns) || 1)), enabled: section.enabled !== false,
+      components: section.components.map(component => ({
+        id: component.id, type: component.type, label: component.label.trim().slice(0, 120), text: component.text.trim().slice(0, 600), image: component.image.trim().slice(0, 500),
+        images: component.images.slice(0, 8).map(image => image.trim().slice(0, 500)).filter(Boolean), width: Math.min(100, Math.max(20, Number(component.style.width) || 100)), tone: component.style.tone, enabled: component.enabled !== false,
+      })),
+    }));
+    const contextFor = (page: ContentRecord) => {
+      const ignoredCoreFields = new Set(['sections', 'componentLibrary', 'editorHistory', 'visualOverrides', 'visualPlacements', 'aiGuideSession']);
+      if (page.id === guideSession?.session.recordId) {
+        ['eyebrow', 'heroTitle', 'heroAccent', 'heroTail', 'heroBody', 'sectionTitle', 'sectionBody', 'heroImage', 'introTitle', 'introAccent', 'introBody'].forEach(field => ignoredCoreFields.add(field));
+      }
+      const coreContent = Object.fromEntries(Object.entries(page.draft).flatMap(([key, value]) => !ignoredCoreFields.has(key) && ['string', 'number', 'boolean'].includes(typeof value) ? [[key, value as string | number | boolean]] : []));
+      const previewDocument = iframeRef.current?.contentDocument;
+      const renderedOutline = previewDocument ? [...previewDocument.querySelectorAll<HTMLElement>('main section')].slice(0, 30).map((element, index) => ({
+        index, id: element.id || '', role: element.getAttribute('aria-label') || element.getAttribute('data-visual-label') || '', className: element.className.slice(0, 240),
+        headings: [...element.querySelectorAll<HTMLElement>('h1,h2,h3')].slice(0, 8).map(heading => (heading.innerText || heading.textContent || '').trim().slice(0, 240)).filter(Boolean),
+        textSample: (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 1200), imageCount: element.querySelectorAll('img,video').length,
+        links: [...element.querySelectorAll<HTMLElement>('a,button')].slice(0, 12).map(link => (link.innerText || link.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 180)).filter(Boolean),
+        builderSectionId: element.getAttribute('data-visual-section-id') || '',
+      })) : [];
+      return {
+        page: {id: page.id, slug: page.slug, title: page.title, route: previewRoute(page), sections: structureFor(page)},
+        coreContent, renderedOutline,
+        availableMedia: media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).slice(0, 30).map(asset => ({id: asset.id, url: asset.url, alt: asset.altText || asset.title || asset.filename})),
+        recentChanges: historyFrom(page.draft.editorHistory).slice(-12).map(entry => `${actionLabels[entry.action]}: ${entry.objectLabel}`),
+      };
+    };
+    const runGuideStart = (event: Event) => {
+      const detail = (event as CustomEvent<CmsGuideStartEventDetail>).detail;
+      if (!detail) return;
+      detail.handled();
+      void (async () => {
+        if (!editableKinds.includes('page')) throw new Error('You do not have permission to create an interactive demo page.');
+        const existing = guideSession && recordsRef.current.find(record => record.id === guideSession.session.recordId);
+        if (existing) {
+          setActiveRecordId(existing.id); transitionPreview(guideSession.session.route); setSelection(null);
+          detail.resolve({session: guideSession.session});
+          return;
+        }
+        const token = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 6)}`;
+        const slug = `guided-page-${token}`;
+        const route = `/_cms-guide/${slug}`;
+        const startedAt = new Date().toISOString();
+        const title = detail.language === 'el' ? 'Σελίδα από τον AI οδηγό' : 'AI guided page';
+        const result = await adminApi<{record: ContentRecord}>('/content', {method: 'POST', body: JSON.stringify({
+          kind: 'page', title, slug, category: 'Interactive demo', tags: ['ai-guide', 'temporary'],
+          data: {
+            eyebrow: detail.language === 'el' ? 'ΔΙΑΔΡΑΣΤΙΚΗ DEMO' : 'INTERACTIVE DEMO', heroTitle: title,
+            heroAccent: '', heroTail: '', heroBody: detail.language === 'el' ? 'Προσωρινός καμβάς του διαδραστικού οδηγού.' : 'Temporary interactive guide canvas.',
+            sectionTitle: '', sectionBody: '', heroImage: '', route, navigationTitle: title, introTitle: '', introAccent: '', introBody: '',
+            sections: [], componentLibrary: [], editorHistory: [], visualOverrides: {}, visualPlacements: {}, aiGuideSession: {temporary: true, startedAt},
+          },
+        })});
+        const record = normalizeLoadedRecord(result.record);
+        const nextRecords = replaceRecords(records => [...records, record].sort((left, right) => left.kind.localeCompare(right.kind) || left.position - right.position));
+        savePhasesRef.current = {...savePhasesRef.current, [record.id]: 'saved'};
+        setSavePhases(current => ({...current, [record.id]: 'saved'}));
+        setActiveRecordId(record.id); setSelection(null); setNotice('Interactive demo ready. This separate draft has not been published.');
+        transitionPreview(route); window.requestAnimationFrame(() => postRecords(nextRecords, [record.id]));
+        const session = {recordId: record.id, slug, title, route, startedAt};
+        setGuideSession({session, returnRecordId: activeRecord?.id || ''});
+        detail.resolve({session});
+      })().catch(detail.reject);
+    };
     const runGuideStep = (event: Event) => {
       const detail = (event as CustomEvent<CmsGuideStepEventDetail>).detail;
       if (!detail) return;
       detail.handled();
       void (async () => {
-        const page = activeRecord?.kind === 'page' ? activeRecord : null;
-        if (!page || !canWriteCurrent) throw new Error('Open an editable page in the Website Editor before running the AI guide.');
-        const sections = sectionsFrom(page.draft.sections);
-        const ignoredCoreFields = new Set(['sections', 'componentLibrary', 'editorHistory', 'visualOverrides', 'visualPlacements']);
-        const coreContent = Object.fromEntries(Object.entries(page.draft).flatMap(([key, value]) => !ignoredCoreFields.has(key) && ['string', 'number', 'boolean'].includes(typeof value) ? [[key, value as string | number | boolean]] : []));
-        const previewDocument = iframeRef.current?.contentDocument;
-        const renderedOutline = previewDocument ? [...previewDocument.querySelectorAll<HTMLElement>('main section')].slice(0, 30).map((element, index) => ({
-          index, id: element.id || '', role: element.getAttribute('aria-label') || element.getAttribute('data-visual-label') || '', className: element.className.slice(0, 240),
-          headings: [...element.querySelectorAll<HTMLElement>('h1,h2,h3')].slice(0, 8).map(heading => (heading.innerText || heading.textContent || '').trim().slice(0, 240)).filter(Boolean),
-          textSample: (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 1200), imageCount: element.querySelectorAll('img,video').length,
-          links: [...element.querySelectorAll<HTMLElement>('a,button')].slice(0, 12).map(link => (link.innerText || link.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 180)).filter(Boolean),
-          builderSectionId: element.getAttribute('data-visual-section-id') || '',
-        })) : [];
-        const context = {
-          page: {
-            id: page.id, slug: page.slug, title: page.title, route: previewRoute(page),
-            sections: sections.map(section => ({
-              id: section.id, type: section.type, title: section.title, body: section.body, layout: section.layout, columns: section.columns, enabled: section.enabled,
-              components: section.components.map(component => ({id: component.id, type: component.type, label: component.label, text: component.text, image: component.image, images: component.images, width: component.style.width, tone: component.style.tone, enabled: component.enabled})),
-            })),
-          },
-          coreContent, renderedOutline,
-          availableMedia: media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).slice(0, 30).map(asset => ({id: asset.id, url: asset.url, alt: asset.altText || asset.title || asset.filename})),
-          recentChanges: historyFrom(page.draft.editorHistory).slice(-12).map(entry => `${actionLabels[entry.action]}: ${entry.objectLabel}`),
-        };
+        const page = guidePage();
+        if (!page) throw new Error('Start the interactive guide to create its blank demo page first.');
+        const context = contextFor(page);
         const response = await adminApi<{proposal: CmsGuideAction; context: CmsGuideContext}>('/guide/next', {method: 'POST', body: JSON.stringify({language: detail.language, context})});
-        const proposal = response.proposal;
-        if (proposal.action === 'complete') {
-          detail.resolve({proposal, context: response.context, applied: false, objectLabel: ''});
-          return;
-        }
-        const current = recordsRef.current.find(record => record.id === page.id);
-        if (!current || current.kind !== 'page') throw new Error('The page changed while it was being analysed. Run the guide again.');
+        detail.resolve({proposal: response.proposal, context: response.context, applied: false, objectLabel: response.proposal.component.label});
+      })().catch(detail.reject);
+    };
+    const applyGuideStep = (event: Event) => {
+      const detail = (event as CustomEvent<CmsGuideApplyEventDetail>).detail;
+      if (!detail) return;
+      detail.handled();
+      void (async () => {
+        const current = guidePage();
+        if (!current) throw new Error('The temporary demo page is no longer available. Start the guide again.');
+        if (detail.context.page.id !== current.id || !sameValue(detail.context.page.sections, structureFor(current))) throw new Error('The page changed after the suggestion. Analyse it again so the next action fits the current layout.');
+        const proposal = detail.proposal;
+        if (proposal.action === 'complete') {detail.resolve({proposal, context: detail.context, applied: false, objectLabel: ''}); return;}
         const currentSections = sectionsFrom(current.draft.sections);
         if (currentSections.length >= 40 && proposal.action === 'insert_section') throw new Error('The page reached its section limit before the action could be applied.');
         const approvedMedia = new Set(media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).map(asset => asset.url));
-        if ((proposal.component.image && !approvedMedia.has(proposal.component.image)) || proposal.component.images.some(image => !approvedMedia.has(image))) throw new Error('The AI selected media outside the active library. No content was changed.');
-        const component = newComponent(proposal.component.type, {
-          label: proposal.component.label, text: proposal.component.text, url: proposal.component.url, image: proposal.component.image,
-          images: proposal.component.images, alt: proposal.component.alt, icon: proposal.component.icon,
-        });
+        if ((proposal.component.image && !approvedMedia.has(proposal.component.image)) || proposal.component.images.some(image => !approvedMedia.has(image))) throw new Error('The suggestion references media that is no longer active. Analyse the page again.');
+        const component = newComponent(proposal.component.type, {label: proposal.component.label, text: proposal.component.text, url: proposal.component.url, image: proposal.component.image, images: proposal.component.images, alt: proposal.component.alt, icon: proposal.component.icon});
         let sectionId = '';
         if (proposal.action === 'insert_section') {
           const afterIndex = currentSections.length ? currentSections.findIndex(section => section.id === proposal.afterSectionId) : -1;
-          if (currentSections.length && afterIndex < 0) throw new Error('The suggested section position no longer exists. Run the guide again.');
+          if (currentSections.length && afterIndex < 0) throw new Error('The suggested section position no longer exists. Analyse the page again.');
           const section = newSection();
           Object.assign(section, proposal.section, {id: crypto.randomUUID(), enabled: true, components: [component]});
           const index = currentSections.length ? afterIndex + 1 : 0;
@@ -810,24 +859,68 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
           sectionId = section.id;
         } else {
           const section = currentSections.find(item => item.id === proposal.targetSectionId);
-          if (!section) throw new Error('The suggested target section no longer exists. Run the guide again.');
-          if (section.components.length >= 80) throw new Error('The target section reached its component limit. No content was changed.');
+          if (!section) throw new Error('The suggested target section no longer exists. Analyse the page again.');
+          if (section.components.length >= 80) throw new Error('That section has reached its component limit.');
           const afterIndex = proposal.afterComponentId ? section.components.findIndex(item => item.id === proposal.afterComponentId) : section.components.length - 1;
-          if (proposal.afterComponentId && afterIndex < 0) throw new Error('The suggested component position no longer exists. Run the guide again.');
+          if (proposal.afterComponentId && afterIndex < 0) throw new Error('The suggested component position no longer exists. Analyse the page again.');
           const componentIndex = afterIndex + 1;
           section.components.splice(componentIndex, 0, component);
           mutateSections(current, currentSections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index: componentIndex}, meta: {componentId: component.id, sectionId: section.id, source: 'ai-guide'}});
           sectionId = section.id;
         }
-        const latestSections = sectionsFrom(recordsRef.current.find(record => record.id === page.id)?.draft.sections);
-        setSelection({kind: 'page', slug: page.slug, path: pathForObject(latestSections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
-        setNotice(`${proposal.explanation.summary} Saved to the draft; nothing was published.`);
-        detail.resolve({proposal, context: response.context, applied: true, objectLabel: component.label});
+        setSelection({kind: 'page', slug: current.slug, path: pathForObject(currentSections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
+        setNotice(`${proposal.explanation.summary} Saved only to the demo draft.`);
+        window.setTimeout(() => iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:guide-highlight', nonce: nonceRef.current, objectType: 'component', objectId: component.id}, window.location.origin), 120);
+        detail.resolve({proposal, context: detail.context, applied: true, objectLabel: component.label});
       })().catch(detail.reject);
     };
+    const finishGuide = (event: Event) => {
+      const detail = (event as CustomEvent<CmsGuideFinishEventDetail>).detail;
+      if (!detail) return;
+      detail.handled();
+      void (async () => {
+        const sessionState = guideSession;
+        const current = guidePage();
+        if (!sessionState || !current) throw new Error('The temporary demo page is no longer available.');
+        if (detail.mode === 'keep') {
+          const next = cloneRecord(current);
+          delete next.draft.aiGuideSession;
+          next.category = 'Guided pages';
+          next.tags = next.tags.filter(tag => tag !== 'temporary');
+          commitRecord(next);
+          await flushSave(next.id);
+          setGuideSession(null);
+          setNotice('The guided page is now a normal draft. Nothing was published.');
+          detail.resolve({mode: detail.mode, recordId: current.id});
+          return;
+        }
+        const timer = saveTimersRef.current.get(current.id);
+        if (timer) window.clearTimeout(timer);
+        saveTimersRef.current.delete(current.id);
+        const running = savePromisesRef.current.get(current.id);
+        if (running) await running;
+        const followupTimer = saveTimersRef.current.get(current.id);
+        if (followupTimer) window.clearTimeout(followupTimer);
+        saveTimersRef.current.delete(current.id); pendingSaveRef.current.delete(current.id);
+        await adminApi(`/content/${current.id}`, {method: 'DELETE'});
+        const nextRecords = replaceRecords(records => records.filter(record => record.id !== current.id));
+        const fallback = nextRecords.find(record => record.id === sessionState.returnRecordId) || nextRecords.find(record => record.kind === 'page' && record.slug === 'homepage') || nextRecords.find(record => record.kind === 'page') || nextRecords[0];
+        setGuideSession(null); setSelection(null); setNotice('The temporary demo page and all of its components were deleted.');
+        if (fallback) {setActiveRecordId(fallback.id); transitionPreview(previewRoute(fallback));}
+        detail.resolve({mode: detail.mode, recordId: current.id});
+      })().catch(detail.reject);
+    };
+    window.addEventListener(CMS_GUIDE_START_EVENT, runGuideStart);
     window.addEventListener(CMS_GUIDE_STEP_EVENT, runGuideStep);
-    return () => window.removeEventListener(CMS_GUIDE_STEP_EVENT, runGuideStep);
-  }, [activeRecord, canWriteCurrent, media, mutateSections]);
+    window.addEventListener(CMS_GUIDE_APPLY_EVENT, applyGuideStep);
+    window.addEventListener(CMS_GUIDE_FINISH_EVENT, finishGuide);
+    return () => {
+      window.removeEventListener(CMS_GUIDE_START_EVENT, runGuideStart);
+      window.removeEventListener(CMS_GUIDE_STEP_EVENT, runGuideStep);
+      window.removeEventListener(CMS_GUIDE_APPLY_EVENT, applyGuideStep);
+      window.removeEventListener(CMS_GUIDE_FINISH_EVENT, finishGuide);
+    };
+  }, [activeRecord?.id, commitRecord, editableKinds, flushSave, guideSession, media, mutateSections, postRecords, replaceRecords, transitionPreview]);
 
   const option = viewportOptions[viewport];
   if (loading) return <div className="nk-visual-loading"><LoaderCircle className="nk-admin-spin"/><strong>Loading the real website preview…</strong></div>;
