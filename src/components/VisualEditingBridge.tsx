@@ -48,6 +48,42 @@ const visualHash = (value: string) => {
   return (hash >>> 0).toString(16).padStart(8, '0');
 };
 
+const positionKeyFor = (element: VisualElement) => {
+  const type = element.dataset.visualObjectType || '';
+  const id = element.dataset.visualObjectId || '';
+  if (type && type !== 'auto' && id) return visualHash(`${type}:${id}`);
+  const path = element.dataset.visualPath || '';
+  const automaticPath = path.match(/^visualOverrides\.([a-f0-9]{8,16})\./i);
+  if (path && !automaticPath) return visualHash(`binding:${element.dataset.visualKind || ''}:${element.dataset.visualSlug || ''}:${path}`);
+  return automaticPath?.[1] || element.dataset.visualAutoKey || id;
+};
+
+const movementTargetFor = (element: VisualElement | null): VisualElement | null => {
+  if (!element) return null;
+  const type = element.dataset.visualObjectType || '';
+  const id = element.dataset.visualObjectId || '';
+  if (type !== 'section' && type !== 'component') return element;
+  let current: Element | null = element;
+  while (current) {
+    if ((current instanceof HTMLElement || current instanceof SVGElement) && current.dataset.visualObjectType === type && current.dataset.visualObjectId === id && current.dataset.visualDraggable === 'true' && !current.classList.contains('cms-builder-drag-handle')) return current;
+    current = current.parentElement;
+  }
+  return [...document.querySelectorAll<VisualElement>('[data-visual-draggable="true"]')].find(candidate => candidate.dataset.visualObjectType === type && candidate.dataset.visualObjectId === id && !candidate.classList.contains('cms-builder-drag-handle')) || element;
+};
+
+const positionOf = (element: VisualElement | null) => ({
+  x: Math.round(Number(element?.dataset.visualPositionX) || 0),
+  y: Math.round(Number(element?.dataset.visualPositionY) || 0),
+});
+
+const applyPosition = (element: VisualElement, x: number, y: number) => {
+  const safeX = Math.max(-4000, Math.min(4000, Math.round(x)));
+  const safeY = Math.max(-4000, Math.min(4000, Math.round(y)));
+  element.dataset.visualPositionX = String(safeX);
+  element.dataset.visualPositionY = String(safeY);
+  element.style.translate = safeX || safeY ? `${safeX}px ${safeY}px` : '';
+};
+
 const backgroundImageUrl = (value: string) => {
   const match = /url\((['"]?)(.*?)\1\)/i.exec(value);
   return match?.[2] || '';
@@ -260,6 +296,15 @@ function prepareAutomaticContent({nonce, routeRecord, settingsRecord, allRecords
     target.parentElement.insertBefore(source, placement.position === 'before' ? target : target.nextSibling);
     automaticallyPlaced.add(source);
   });
+  document.querySelectorAll<VisualElement>('[data-visual-draggable="true"]').forEach(element => {
+    if (element.classList.contains('cms-builder-drag-handle') || movementTargetFor(element) !== element) return;
+    const record = allRecords[`${element.dataset.visualKind}:${element.dataset.visualSlug}`];
+    const positionKey = positionKeyFor(element);
+    if (!record || !positionKey) return;
+    const position = record.overrides?.[positionKey];
+    element.dataset.visualPositionKey = positionKey;
+    applyPosition(element, position?.x || 0, position?.y || 0);
+  });
 }
 
 export function VisualEditingBridge() {
@@ -270,11 +315,10 @@ export function VisualEditingBridge() {
   const settingsRecord = visualRecords['settings:business-details'];
   const editableKindsRef = useRef<Set<string>>(new Set());
   const selectedRef = useRef<VisualElement | null>(null);
-  const dragRef = useRef<VisualElement | null>(null);
   const suppressCommitRef = useRef(false);
   const suppressTimerRef = useRef<number>(0);
   const recordsReceivedRef = useRef(false);
-  const pointerDragRef = useRef<{source: VisualElement; startX: number; startY: number; active: boolean; target: VisualElement | null} | null>(null);
+  const pointerDragRef = useRef<{source: VisualElement; startX: number; startY: number; originX: number; originY: number; active: boolean} | null>(null);
   const justDraggedRef = useRef(false);
 
   useEffect(() => {
@@ -296,13 +340,44 @@ export function VisualEditingBridge() {
 
     document.documentElement.classList.add('nk-visual-preview');
     const post = (message: VisualMessage) => window.parent.postMessage({...message, nonce}, window.location.origin);
+    const moveHandle = document.createElement('button');
+    moveHandle.type = 'button';
+    moveHandle.className = 'nk-visual-free-move-handle';
+    moveHandle.dataset.visualNoEdit = 'true';
+    moveHandle.setAttribute('aria-label', 'Move selected element. Drag, or use the arrow keys.');
+    moveHandle.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown ArrowLeft ArrowRight');
+    moveHandle.title = 'Move element · drag or use arrow keys · Shift moves 10 px';
+    moveHandle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3m3-3 3 3M12 22l-3-3m3 3 3-3M2 12l3-3m-3 3 3 3M22 12l-3-3m3 3-3 3"/></svg>';
+    document.body.appendChild(moveHandle);
+
+    const updateMoveHandle = () => {
+      const target = movementTargetFor(selectedRef.current);
+      if (!target?.isConnected || !editableKindsRef.current.has(target.dataset.visualKind || '')) {
+        moveHandle.hidden = true;
+        return;
+      }
+      const rect = target.getBoundingClientRect();
+      if (!rect.width && !rect.height) {moveHandle.hidden = true; return;}
+      moveHandle.hidden = false;
+      const left = Math.max(6, Math.min(window.innerWidth - 44, rect.left + Math.min(rect.width / 2, 44) - 20));
+      const top = rect.top >= 48 ? rect.top - 42 : Math.min(window.innerHeight - 44, rect.top + 6);
+      moveHandle.style.left = `${Math.round(left)}px`;
+      moveHandle.style.top = `${Math.round(Math.max(6, top))}px`;
+    };
 
     const select = (element: VisualElement) => {
       if (!editableKindsRef.current.has(element.dataset.visualKind || '')) return;
       const isNewSelection = selectedRef.current !== element;
+      movementTargetFor(selectedRef.current)?.classList.remove('nk-visual-move-selected');
       selectedRef.current?.classList.remove('nk-visual-selected');
       selectedRef.current = element;
       element.classList.add('nk-visual-selected');
+      const movementTarget = movementTargetFor(element);
+      movementTarget?.classList.add('nk-visual-move-selected');
+      const position = positionOf(movementTarget);
+      const positionKey = movementTarget ? positionKeyFor(movementTarget) : '';
+      if (movementTarget && positionKey) movementTarget.dataset.visualPositionKey = positionKey;
+      updateMoveHandle();
       if (element.dataset.visualEdit === 'text' && (isNewSelection || element.dataset.visualInitialValue === undefined)) {
         element.dataset.visualInitialValue = element instanceof HTMLElement ? element.innerText.replace(/\r/g, '') : element.textContent || '';
       }
@@ -318,6 +393,9 @@ export function VisualEditingBridge() {
         sectionId: element.dataset.visualSectionId || '',
         objectType: element.dataset.visualObjectType || '',
         objectId: element.dataset.visualObjectId || '',
+        positionKey,
+        positionX: position.x,
+        positionY: position.y,
         fallbackValue: element.dataset.visualEdit === 'image' ? element.dataset.visualFallbackValue || element.getAttribute('src') || '' : element.dataset.visualEdit === 'icon' ? inferIconName(element) : element instanceof HTMLElement ? element.innerText.replace(/\r/g, '') : element.textContent || '',
         linkFallbackValue: element.dataset.visualLinkPath ? element.closest('a[href]')?.getAttribute('href') || '' : '',
       });
@@ -334,10 +412,9 @@ export function VisualEditingBridge() {
       });
       document.querySelectorAll<VisualElement>('[data-visual-draggable="true"]').forEach(element => {
         const editable = editableKindsRef.current.has(element.dataset.visualKind || '');
-        const draggable = editable && !element.classList.contains('cms-builder-drag-handle');
-        if (element instanceof HTMLElement) element.draggable = draggable;
-        element.setAttribute('draggable', draggable ? 'true' : 'false');
-        if (editable) element.setAttribute('aria-roledescription', 'draggable website object');
+        if (element instanceof HTMLElement) element.draggable = false;
+        element.setAttribute('draggable', 'false');
+        if (editable) element.setAttribute('aria-roledescription', 'movable website object');
       });
       document.querySelectorAll<HTMLElement>('[data-visual-edit="text"][data-visual-kind]').forEach(element => {
         const editable = editableKindsRef.current.has(element.dataset.visualKind || '');
@@ -376,15 +453,23 @@ export function VisualEditingBridge() {
         if (suppressTimerRef.current) window.clearTimeout(suppressTimerRef.current);
         suppressTimerRef.current = 0;
         suppressCommitRef.current = false;
+        updateMoveHandle();
       });
     };
 
     const onPointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Element && event.target.closest('.nk-visual-free-move-handle')) {
+        const source = movementTargetFor(selectedRef.current);
+        if (!source || !editableKindsRef.current.has(source.dataset.visualKind || '')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const position = positionOf(source);
+        pointerDragRef.current = {source, startX: event.clientX, startY: event.clientY, originX: position.x, originY: position.y, active: false};
+        moveHandle.focus({preventScroll: true});
+        return;
+      }
       const element = readVisualTarget(event.target);
       if (element) select(element);
-      const explicitHandle = event.target instanceof Element ? event.target.closest<HTMLElement>('.cms-builder-drag-handle[data-visual-draggable="true"]') : null;
-      const handle = explicitHandle || (element?.dataset.visualObjectType === 'auto' ? element : null);
-      if (handle && editableKindsRef.current.has(handle.dataset.visualKind || '')) pointerDragRef.current = {source: handle, startX: event.clientX, startY: event.clientY, active: false, target: null};
     };
 
     const onFocusIn = (event: FocusEvent) => {
@@ -466,8 +551,25 @@ export function VisualEditingBridge() {
         const selected = selectedRef.current;
         const objectId = selected?.dataset.visualObjectId || '';
         const objectType = selected?.dataset.visualObjectType || '';
-      if (selected?.dataset.visualAutoWrapper === 'true') blurVisualElement(selected);
+        if (selected?.dataset.visualAutoWrapper === 'true') blurVisualElement(selected);
         post({type: 'nk-visual-editor:history-shortcut', direction: event.key.toLowerCase() === 'y' || event.shiftKey ? 'redo' : 'undo', objectOnly: Boolean(objectId), objectId, objectType});
+        return;
+      }
+      const movementKeys: Record<string, [number, number]> = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]};
+      const movement = movementKeys[event.key];
+      const movementTarget = movementTargetFor(selectedRef.current);
+      const target = event.target;
+      const isMoveHandle = target instanceof Element && Boolean(target.closest('.nk-visual-free-move-handle'));
+      const isEditingControl = target instanceof HTMLElement && (target.isContentEditable || target.matches('input, textarea, select'));
+      if (movement && movementTarget && !event.altKey && !event.ctrlKey && !event.metaKey && (isMoveHandle || !isEditingControl)) {
+        event.preventDefault();
+        event.stopPropagation();
+        const position = positionOf(movementTarget);
+        const distance = event.shiftKey ? 10 : 1;
+        applyPosition(movementTarget, position.x + movement[0] * distance, position.y + movement[1] * distance);
+        updateMoveHandle();
+        const next = positionOf(movementTarget);
+        post({type: 'nk-visual-editor:position', kind: movementTarget.dataset.visualKind || '', slug: movementTarget.dataset.visualSlug || '', positionKey: movementTarget.dataset.visualPositionKey || positionKeyFor(movementTarget), x: next.x, y: next.y, label: selectedRef.current?.dataset.visualLabel || movementTarget.dataset.visualLabel || 'Element', objectType: movementTarget.dataset.visualObjectType || '', objectId: movementTarget.dataset.visualObjectId || '', sectionId: movementTarget.dataset.visualSectionId || ''});
         return;
       }
       const element = readVisualTarget(event.target);
@@ -492,70 +594,25 @@ export function VisualEditingBridge() {
       }
     };
 
-    const clearDragTarget = () => document.querySelectorAll('.nk-visual-drag-target').forEach(element => element.classList.remove('nk-visual-drag-target'));
-    const dropTargetFor = (source: VisualElement, target: Element | null) => {
-      const selector = source.dataset.visualObjectType === 'section' ? '[data-visual-object-type="section"][data-visual-draggable="true"]' : source.dataset.visualObjectType === 'auto' ? '[data-visual-draggable="true"][data-visual-auto-key]' : '[data-visual-object-type="component"][data-visual-draggable="true"], [data-visual-dropzone="component"], [data-visual-object-type="section"][data-visual-draggable="true"]';
-      const candidate = target?.closest<VisualElement>(selector) || null;
-      if (!candidate || candidate === source || candidate.dataset.visualObjectId === source.dataset.visualObjectId) return null;
-      if (source.contains(candidate)) return null;
-      return candidate;
-    };
-    const postDrop = (source: VisualElement, target: VisualElement, clientY: number) => {
-      const rect = target.getBoundingClientRect();
-      post({type: 'nk-visual-editor:drop', sourceType: source.dataset.visualObjectType || '', sourceId: source.dataset.visualObjectId || '', sourceSectionId: source.dataset.visualSectionId || '', sourceKind: source.dataset.visualKind || '', sourceSlug: source.dataset.visualSlug || '', targetType: target.dataset.visualObjectType || (target.dataset.visualDropzone === 'component' ? 'component-zone' : ''), targetId: source.dataset.visualObjectType === 'auto' ? target.dataset.visualAutoKey || '' : target.dataset.visualObjectId || '', targetSectionId: target.dataset.visualSectionId || '', targetKind: target.dataset.visualKind || '', targetSlug: target.dataset.visualSlug || '', position: clientY < rect.top + rect.height / 2 ? 'before' : 'after'});
-    };
     const onPointerMove = (event: PointerEvent) => {
       const state = pointerDragRef.current;
       if (!state) return;
-      if (!state.active && Math.hypot(event.clientX - state.startX, event.clientY - state.startY) < 7) return;
-      if (!state.active) {state.active = true; state.source.classList.add('nk-visual-dragging');}
+      if (!state.active && Math.hypot(event.clientX - state.startX, event.clientY - state.startY) < 3) return;
+      if (!state.active) {state.active = true; state.source.classList.add('nk-visual-positioning'); moveHandle.classList.add('is-dragging');}
       event.preventDefault();
-      const target = dropTargetFor(state.source, document.elementFromPoint(event.clientX, event.clientY));
-      if (state.target !== target) {clearDragTarget(); state.target = target; target?.classList.add('nk-visual-drag-target');}
+      applyPosition(state.source, state.originX + event.clientX - state.startX, state.originY + event.clientY - state.startY);
+      updateMoveHandle();
     };
     const onPointerUp = (event: PointerEvent) => {
       const state = pointerDragRef.current;
       pointerDragRef.current = null;
       if (!state?.active) return;
       event.preventDefault();
-      state.source.classList.remove('nk-visual-dragging');
-      if (state.target) postDrop(state.source, state.target, event.clientY);
-      clearDragTarget();
+      state.source.classList.remove('nk-visual-positioning');
+      moveHandle.classList.remove('is-dragging');
+      const position = positionOf(state.source);
+      post({type: 'nk-visual-editor:position', kind: state.source.dataset.visualKind || '', slug: state.source.dataset.visualSlug || '', positionKey: state.source.dataset.visualPositionKey || positionKeyFor(state.source), x: position.x, y: position.y, label: selectedRef.current?.dataset.visualLabel || state.source.dataset.visualLabel || 'Element', objectType: state.source.dataset.visualObjectType || '', objectId: state.source.dataset.visualObjectId || '', sectionId: state.source.dataset.visualSectionId || ''});
       justDraggedRef.current = true;
-    };
-    const onDragStart = (event: DragEvent) => {
-      const element = event.target instanceof Element ? event.target.closest<VisualElement>('[data-visual-draggable="true"]') : null;
-      if (!element || !editableKindsRef.current.has(element.dataset.visualKind || '')) return;
-      dragRef.current = element;
-      element.classList.add('nk-visual-dragging');
-      event.dataTransfer?.setData('text/plain', element.dataset.visualObjectId || 'website-object');
-      if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
-    };
-    const onDragOver = (event: DragEvent) => {
-      if (!dragRef.current) return;
-      const target = dropTargetFor(dragRef.current, event.target instanceof Element ? event.target : null);
-      if (!target || target === dragRef.current) return;
-      const sourceType = dragRef.current.dataset.visualObjectType;
-      const targetType = target.dataset.visualObjectType || (target.dataset.visualDropzone === 'component' ? 'component-zone' : '');
-      if (sourceType === 'section' && targetType !== 'section') return;
-      if (sourceType === 'component' && !['component', 'component-zone', 'section'].includes(targetType)) return;
-      event.preventDefault();
-      clearDragTarget();
-      target.classList.add('nk-visual-drag-target');
-      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
-    };
-    const onDrop = (event: DragEvent) => {
-      if (!dragRef.current) return;
-      const target = dropTargetFor(dragRef.current, event.target instanceof Element ? event.target : null);
-      if (!target || target === dragRef.current) return;
-      event.preventDefault();
-      postDrop(dragRef.current, target, event.clientY);
-      clearDragTarget();
-    };
-    const onDragEnd = () => {
-      dragRef.current?.classList.remove('nk-visual-dragging');
-      dragRef.current = null;
-      clearDragTarget();
     };
 
     const onSubmit = (event: SubmitEvent) => {
@@ -570,6 +627,7 @@ export function VisualEditingBridge() {
     };
     const observer = new MutationObserver(mutations => {
       if (mutations.some(mutation => [...mutation.addedNodes].some(node => node instanceof Element && (node.matches('[data-visual-kind], [data-visual-draggable], [data-visual-dropzone]') || node.querySelector('[data-visual-kind], [data-visual-draggable], [data-visual-dropzone]'))))) schedulePreparation();
+      window.requestAnimationFrame(updateMoveHandle);
     });
     observer.observe(document.body, {childList: true, subtree: true});
     window.addEventListener('message', onMessage);
@@ -582,10 +640,8 @@ export function VisualEditingBridge() {
     document.addEventListener('input', onInput, true);
     document.addEventListener('focusout', onFocusOut, true);
     document.addEventListener('keydown', onKeyDown, true);
-    document.addEventListener('dragstart', onDragStart, true);
-    document.addEventListener('dragover', onDragOver, true);
-    document.addEventListener('drop', onDrop, true);
-    document.addEventListener('dragend', onDragEnd, true);
+    document.addEventListener('scroll', updateMoveHandle, true);
+    window.addEventListener('resize', updateMoveHandle);
     document.addEventListener('submit', onSubmit, true);
     const readyTimer = window.setTimeout(() => post({type: 'nk-visual-editor:ready', path: `${location.pathname}${location.search}`}), 0);
     prepareEditableElements();
@@ -605,12 +661,12 @@ export function VisualEditingBridge() {
       document.removeEventListener('input', onInput, true);
       document.removeEventListener('focusout', onFocusOut, true);
       document.removeEventListener('keydown', onKeyDown, true);
-      document.removeEventListener('dragstart', onDragStart, true);
-      document.removeEventListener('dragover', onDragOver, true);
-      document.removeEventListener('drop', onDrop, true);
-      document.removeEventListener('dragend', onDragEnd, true);
+      document.removeEventListener('scroll', updateMoveHandle, true);
+      window.removeEventListener('resize', updateMoveHandle);
       document.removeEventListener('submit', onSubmit, true);
       selectedRef.current?.classList.remove('nk-visual-selected');
+      movementTargetFor(selectedRef.current)?.classList.remove('nk-visual-move-selected');
+      moveHandle.remove();
       document.documentElement.classList.remove('nk-visual-preview');
     };
   }, [location.pathname, location.search, nonce]);

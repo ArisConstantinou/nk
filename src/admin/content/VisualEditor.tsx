@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Cloud, Copy, ExternalLink, GripVertical, Group, Image as ImageIcon, Layers3, Link2, LoaderCircle, Monitor, MousePointer2, Plus, Redo2, Rocket, Save, Smartphone, Tablet, Tags, Trash2, Type, Undo2, Ungroup} from 'lucide-react';
+import {AlertTriangle, Check, ChevronDown, Cloud, Copy, ExternalLink, Group, Image as ImageIcon, Layers3, Link2, LoaderCircle, Monitor, MousePointer2, Move, Plus, Redo2, Rocket, Save, Smartphone, Tablet, Tags, Trash2, Type, Undo2, Ungroup} from 'lucide-react';
 import {adminApi, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
 import {canReadKind, canReadMedia, canWriteKind} from '../permissions';
@@ -8,7 +8,7 @@ import {componentLabels, historyFrom, newComponent, newSection, normalizeCompone
 
 type ViewportName = 'desktop' | 'tablet' | 'mobile';
 type SavePhase = 'saved' | 'unsaved' | 'saving' | 'error';
-type VisualSelection = {kind: ContentKind; slug: string; path: string; edit: 'text' | 'image' | 'icon' | 'section' | 'component'; label: string; linkPath: string; sectionId: string; objectType: '' | 'section' | 'component' | 'auto'; objectId: string; fallbackValue?: string; linkFallbackValue?: string};
+type VisualSelection = {kind: ContentKind; slug: string; path: string; edit: 'text' | 'image' | 'icon' | 'section' | 'component'; label: string; linkPath: string; sectionId: string; objectType: '' | 'section' | 'component' | 'auto'; objectId: string; positionKey: string; positionX: number; positionY: number; fallbackValue?: string; linkFallbackValue?: string};
 type HistorySpec = {objectKey: string; objectLabel: string; action: VisualHistoryAction; path: string; before: unknown; after: unknown; meta?: Record<string, unknown>; coalesce?: boolean};
 
 const allKinds: ContentKind[] = ['page', 'service', 'product', 'catalogue', 'project', 'company', 'settings'];
@@ -16,7 +16,9 @@ const viewportOptions = {desktop: {label: 'Desktop', width: 1440, height: 900, i
 const kindLabels: Record<ContentKind, string> = {page: 'Page', service: 'Service', product: 'Product', catalogue: 'Catalogue', project: 'Project', company: 'Company', seo: 'SEO', settings: 'Global settings'};
 const iconOptions = ['arrow-right', 'arrow-up-right', 'book-open', 'box', 'check', 'chevron-down', 'circuit', 'circuit-board', 'external-link', 'file-text', 'gauge', 'lightbulb', 'link', 'mail', 'map-pin', 'menu', 'phone', 'plug-zap', 'settings', 'share', 'shield', 'shield-check', 'sliders', 'sliders-horizontal', 'sparkles', 'waves', 'wrench', 'x', 'zap'];
 const componentTypes: PageComponentType[] = ['heading', 'text', 'button', 'image', 'icon', 'divider'];
-const actionLabels: Record<VisualHistoryAction, string> = {content: 'Content changed', replace: 'Content replaced', style: 'Style changed', resize: 'Size changed', 'move-section': 'Section moved', 'move-component': 'Component moved', 'move-auto': 'Element moved', 'delete-auto': 'Element deleted', 'restore-auto': 'Element restored', 'add-section': 'Section added', 'delete-section': 'Section deleted', 'duplicate-section': 'Section duplicated', 'add-component': 'Component added', 'delete-component': 'Component deleted', 'duplicate-component': 'Component duplicated', group: 'Components grouped', ungroup: 'Components ungrouped', scope: 'Scope changed', reusable: 'Reusable component saved'};
+const actionLabels: Record<VisualHistoryAction, string> = {content: 'Content changed', replace: 'Content replaced', style: 'Style changed', resize: 'Size changed', position: 'Position changed', 'move-section': 'Section moved', 'move-component': 'Component moved', 'move-auto': 'Element moved', 'delete-auto': 'Element deleted', 'restore-auto': 'Element restored', 'add-section': 'Section added', 'delete-section': 'Section deleted', 'duplicate-section': 'Section duplicated', 'add-component': 'Component added', 'delete-component': 'Component deleted', 'duplicate-component': 'Component duplicated', group: 'Components grouped', ungroup: 'Components ungrouped', scope: 'Scope changed', reusable: 'Reusable component saved'};
+const visualHash = (value: string) => {let hash = 0x811c9dc5; for (let index = 0; index < value.length; index += 1) {hash ^= value.charCodeAt(index); hash = Math.imul(hash, 0x01000193);} return (hash >>> 0).toString(16).padStart(8, '0');};
+const positionKeyForObject = (type: 'section' | 'component', id: string) => visualHash(`${type}:${id}`);
 
 function previewRoute(record: ContentRecord) {
   if (record.kind === 'page') return typeof record.draft.route === 'string' ? record.draft.route : record.slug === 'homepage' ? '/' : `/${record.slug}`;
@@ -174,9 +176,9 @@ function applyHistoryValue(record: ContentRecord, entry: VisualHistoryEntry, for
   const value = forward ? entry.after : entry.before;
   let next = cloneRecord(record);
   let sections = sectionsFrom(next.draft.sections);
-  if (['content', 'replace', 'style', 'resize', 'scope', 'reusable', 'move-auto', 'delete-auto', 'restore-auto'].includes(entry.action)) {
+  if (['content', 'replace', 'style', 'resize', 'position', 'scope', 'reusable', 'move-auto', 'delete-auto', 'restore-auto'].includes(entry.action)) {
     const path = resolveHistoryPath(next, entry);
-    if (entry.action === 'move-auto' && value == null) return path ? removePathValue(next, path) : next;
+    if ((entry.action === 'move-auto' || entry.action === 'position') && value == null) return path ? removePathValue(next, path) : next;
     return path ? setPathValue(next, path, structuredClone(value)) : next;
   }
   if (entry.action === 'move-section') sections = reorderSections(sections, value);
@@ -406,7 +408,12 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-    const updateScale = () => setScale(Math.min(1, Math.max(280, stage.clientWidth - 28) / viewportOptions[viewport].width));
+    const updateScale = () => {
+      const option = viewportOptions[viewport];
+      const widthScale = Math.max(280, stage.clientWidth - 28) / option.width;
+      const heightScale = Math.max(320, stage.clientHeight - 28) / option.height;
+      setScale(Math.min(1, widthScale, heightScale));
+    };
     updateScale();
     const observer = new ResizeObserver(updateScale);
     observer.observe(stage);
@@ -441,7 +448,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       const record = recordsRef.current.find(item => item.kind === data.sourceKind && item.slug === data.sourceSlug);
       const targetId = String(data.targetId || '');
       if (!record || !editableKinds.includes(record.kind) || !/^[a-f0-9]{8,16}$/i.test(sourceId) || !/^[a-f0-9]{8,16}$/i.test(targetId)) return;
-      const currentSelection = selection?.objectType === 'auto' && selection.objectId === sourceId ? selection : {kind: record.kind, slug: record.slug, path: `visualOverrides.${sourceId}`, edit: 'component' as const, label: 'Page element', linkPath: '', sectionId: String(data.targetSectionId || ''), objectType: 'auto' as const, objectId: sourceId};
+      const currentSelection = selection?.objectType === 'auto' && selection.objectId === sourceId ? selection : {kind: record.kind, slug: record.slug, path: `visualOverrides.${sourceId}`, edit: 'component' as const, label: 'Page element', linkPath: '', sectionId: String(data.targetSectionId || ''), objectType: 'auto' as const, objectId: sourceId, positionKey: sourceId, positionX: 0, positionY: 0};
       patchRecord(record, `visualPlacements.${sourceId}`, {target: targetId, position: data.position === 'after' ? 'after' : 'before'}, true, currentSelection, 'move-auto');
       setActiveRecordId(record.id); setSelection(currentSelection); setNotice('Element moved. The draft layout has been saved.');
       return;
@@ -484,6 +491,32 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     setSelection(current => current?.objectId === sourceId ? {...current, sectionId: targetSection.id, path: pathForObject(sections, 'component', sourceId)} : current);
   }, [activeRecordId, editableKinds, mutateWithHistory, patchRecord, selection]);
 
+  const handlePosition = useCallback((data: Record<string, unknown>) => {
+    const positionKey = String(data.positionKey || '');
+    const record = recordsRef.current.find(item => item.kind === data.kind && item.slug === data.slug);
+    if (!record || !editableKinds.includes(record.kind) || !/^[a-f0-9]{8,16}$/i.test(positionKey)) return;
+    const x = Math.max(-4000, Math.min(4000, Math.round(Number(data.x) || 0)));
+    const y = Math.max(-4000, Math.min(4000, Math.round(Number(data.y) || 0)));
+    const path = `visualOverrides.${positionKey}`;
+    const currentValue = getPathValue(record, path);
+    const before = currentValue && typeof currentValue === 'object' && !Array.isArray(currentValue) ? structuredClone(currentValue as Record<string, unknown>) : null;
+    const merged: Record<string, unknown> = before ? {...before} : {};
+    if (x) merged.x = x; else delete merged.x;
+    if (y) merged.y = y; else delete merged.y;
+    const after = Object.keys(merged).length ? merged : null;
+    const next = after ? setPathValue(record, path, after) : removePathValue(record, path);
+    const objectType = ['section', 'component', 'auto'].includes(String(data.objectType || '')) ? String(data.objectType) as VisualSelection['objectType'] : '';
+    const objectId = String(data.objectId || '');
+    const currentSelection: VisualSelection = selection && selection.kind === record.kind && selection.slug === record.slug
+      ? {...selection, positionKey, positionX: x, positionY: y}
+      : {kind: record.kind, slug: record.slug, path, edit: 'component', label: String(data.label || 'Page element'), linkPath: '', sectionId: String(data.sectionId || ''), objectType, objectId, positionKey, positionX: x, positionY: y};
+    const context = objectContext(record, currentSelection.path, currentSelection);
+    mutateWithHistory(record, next, {...context, action: 'position', path, before, after, coalesce: true});
+    setActiveRecordId(record.id);
+    setSelection(currentSelection);
+    setNotice(`Position saved at X ${x}px, Y ${y}px. This position applies to every resolution.`);
+  }, [editableKinds, mutateWithHistory, selection]);
+
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== iframeRef.current?.contentWindow || !event.data || typeof event.data !== 'object' || event.data.nonce !== nonceRef.current) return;
@@ -495,11 +528,12 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       }
       if (event.data.type === 'nk-visual-editor:blocked-action') {setNotice('Form submissions are disabled inside the editor preview. Open the live page to test a real submission.'); return;}
       if (event.data.type === 'nk-visual-editor:history-shortcut') {historyCommandRef.current(event.data.direction === 'redo' ? 'redo' : 'undo', event.data.objectOnly !== false); return;}
+      if (event.data.type === 'nk-visual-editor:position') {handlePosition(event.data as Record<string, unknown>); return;}
       if (event.data.type === 'nk-visual-editor:drop') {handleDrop(event.data as Record<string, unknown>); return;}
       if (event.data.type !== 'nk-visual-editor:change' && event.data.type !== 'nk-visual-editor:select') return;
       const target = recordsRef.current.find(record => record.kind === event.data.kind && record.slug === event.data.slug);
       if (!target) return;
-      const nextSelection: VisualSelection = {kind: target.kind, slug: target.slug, path: String(event.data.path || ''), edit: ['text', 'image', 'icon', 'section', 'component'].includes(event.data.edit) ? event.data.edit : 'text', label: String(event.data.label || 'Element'), linkPath: String(event.data.linkPath || ''), sectionId: String(event.data.sectionId || ''), objectType: ['section', 'component', 'auto'].includes(event.data.objectType) ? event.data.objectType : '', objectId: String(event.data.objectId || ''), fallbackValue: String(event.data.fallbackValue || ''), linkFallbackValue: String(event.data.linkFallbackValue || '')};
+      const nextSelection: VisualSelection = {kind: target.kind, slug: target.slug, path: String(event.data.path || ''), edit: ['text', 'image', 'icon', 'section', 'component'].includes(event.data.edit) ? event.data.edit : 'text', label: String(event.data.label || 'Element'), linkPath: String(event.data.linkPath || ''), sectionId: String(event.data.sectionId || ''), objectType: ['section', 'component', 'auto'].includes(event.data.objectType) ? event.data.objectType : '', objectId: String(event.data.objectId || ''), positionKey: String(event.data.positionKey || event.data.objectId || ''), positionX: Math.round(Number(event.data.positionX) || 0), positionY: Math.round(Number(event.data.positionY) || 0), fallbackValue: String(event.data.fallbackValue || ''), linkFallbackValue: String(event.data.linkFallbackValue || '')};
       setActiveRecordId(target.id); setSelection(nextSelection); if (event.data.selectOnly || event.data.type === 'nk-visual-editor:select') return;
       if (!editableKinds.includes(target.kind) || typeof event.data.path !== 'string') return;
       const guard = historyEchoGuardRef.current;
@@ -508,7 +542,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       patchRecord(target, event.data.path, event.data.value, Boolean(event.data.commit), nextSelection);
     };
     window.addEventListener('message', onMessage); return () => window.removeEventListener('message', onMessage);
-  }, [editableKinds, handleDrop, patchRecord, postRecords, transitionPreview]);
+  }, [editableKinds, handleDrop, handlePosition, patchRecord, postRecords, transitionPreview]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -577,7 +611,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     if (!page || !editableKinds.includes('page')) return;
     const sections = sectionsFrom(page.draft.sections); const section = newSection(); const index = sections.length; sections.push(section);
     mutateSections(page, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id}});
-    setActiveRecordId(page.id); setSelection({kind: 'page', slug: page.slug, path: `sections.${index}`, edit: 'section', label: section.title, linkPath: '', sectionId: section.id, objectType: 'section', objectId: section.id}); setNotice('Section added. Drag components into it or use the component library.');
+    setActiveRecordId(page.id); setSelection({kind: 'page', slug: page.slug, path: `sections.${index}`, edit: 'section', label: section.title, linkPath: '', sectionId: section.id, objectType: 'section', objectId: section.id, positionKey: positionKeyForObject('section', section.id), positionX: 0, positionY: 0}); setNotice('Section added. Select it in the preview to position it.');
   };
 
   const addComponent = (type: PageComponentType, reusable?: ReusableComponent) => {
@@ -587,7 +621,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     const component = reusable ? normalizeComponent({...structuredClone(reusable.component), id: crypto.randomUUID(), reusableId: reusable.id, scope: reusable.scope, groupId: ''}) : newComponent(type);
     const index = section.components.length; section.components.push(component);
     mutateSections(activeRecord, sections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index}, meta: {componentId: component.id, sectionId: section.id}});
-    setSelection({kind: 'page', slug: activeRecord.slug, path: pathForObject(sections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId: section.id, objectType: 'component', objectId: component.id});
+    setSelection({kind: 'page', slug: activeRecord.slug, path: pathForObject(sections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId: section.id, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
   };
 
   const duplicateSelected = () => {
@@ -602,51 +636,12 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         return {...component, id: crypto.randomUUID(), groupId};
       }); sections.splice(index + 1, 0, section);
       mutateSections(activeRecord, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'duplicate-section', path: 'sections', before: null, after: {section, index: index + 1}, meta: {sectionId: section.id}});
-      setSelection({...selection, objectId: section.id, sectionId: section.id, path: `sections.${index + 1}`, label: section.title});
+      setSelection({...selection, objectId: section.id, sectionId: section.id, path: `sections.${index + 1}`, label: section.title, positionKey: positionKeyForObject('section', section.id), positionX: 0, positionY: 0});
     } else if (selection.objectType === 'component' && selectedComponent && selectedSection) {
       const section = sections.find(item => item.id === selectedSection.id); if (!section) return;
       const index = section.components.findIndex(component => component.id === selectedComponent.id); const component = normalizeComponent({...structuredClone(selectedComponent), id: crypto.randomUUID(), label: `${selectedComponent.label} copy`, groupId: ''}); section.components.splice(index + 1, 0, component);
       mutateSections(activeRecord, sections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'duplicate-component', path: 'sections', before: null, after: {component, sectionId: section.id, index: index + 1}, meta: {componentId: component.id, sectionId: section.id}});
-      setSelection({...selection, objectId: component.id, path: pathForObject(sections, 'component', component.id), label: component.label});
-    }
-  };
-
-  const canMoveSelected = (direction: -1 | 1) => {
-    if (!selection) return false;
-    if (selection.objectType === 'section') {
-      const index = activeSections.findIndex(section => section.id === selection.objectId);
-      return index >= 0 && index + direction >= 0 && index + direction < activeSections.length;
-    }
-    if (selection.objectType === 'component' && selectedSection) {
-      const index = selectedSection.components.findIndex(component => component.id === selection.objectId);
-      return index >= 0 && index + direction >= 0 && index + direction < selectedSection.components.length;
-    }
-    return false;
-  };
-
-  const moveSelected = (direction: -1 | 1) => {
-    if (!activeRecord || activeRecord.kind !== 'page' || !selection) return;
-    const sections = sectionsFrom(activeRecord.draft.sections);
-    if (selection.objectType === 'section') {
-      const index = sections.findIndex(section => section.id === selection.objectId);
-      const target = index + direction;
-      if (index < 0 || target < 0 || target >= sections.length) return;
-      const before = sections.map(section => section.id);
-      [sections[index], sections[target]] = [sections[target], sections[index]];
-      mutateSections(activeRecord, sections, {objectKey: `section:${selection.objectId}`, objectLabel: sections[target].title || 'Section', action: 'move-section', path: 'sections', before, after: sections.map(section => section.id), meta: {sectionId: selection.objectId}});
-      setSelection({...selection, path: pathForObject(sections, 'section', selection.objectId)});
-      return;
-    }
-    if (selection.objectType === 'component' && selectedSection && selectedComponent) {
-      const section = sections.find(item => item.id === selectedSection.id);
-      if (!section) return;
-      const index = section.components.findIndex(component => component.id === selectedComponent.id);
-      const target = index + direction;
-      if (index < 0 || target < 0 || target >= section.components.length) return;
-      const before = {sectionId: section.id, index};
-      [section.components[index], section.components[target]] = [section.components[target], section.components[index]];
-      mutateSections(activeRecord, sections, {objectKey: `component:${selectedComponent.id}`, objectLabel: selectedComponent.label, action: 'move-component', path: 'sections', before, after: {sectionId: section.id, index: target}, meta: {componentId: selectedComponent.id, sectionId: section.id}});
-      setSelection({...selection, path: pathForObject(sections, 'component', selectedComponent.id)});
+      setSelection({...selection, objectId: component.id, path: pathForObject(sections, 'component', component.id), label: component.label, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
     }
   };
 
@@ -675,7 +670,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const restoreAutomatic = (key: string, label: string) => {
     if (!activeRecord || !/^[a-f0-9]{8,16}$/i.test(key)) return;
     const hiddenPath = `visualOverrides.${key}.hidden`;
-    const restoreSelection: VisualSelection = {kind: activeRecord.kind, slug: activeRecord.slug, path: hiddenPath, edit: 'component', label, linkPath: '', sectionId: '', objectType: 'auto', objectId: key};
+    const restoreSelection: VisualSelection = {kind: activeRecord.kind, slug: activeRecord.slug, path: hiddenPath, edit: 'component', label, linkPath: '', sectionId: '', objectType: 'auto', objectId: key, positionKey: key, positionX: 0, positionY: 0};
     patchRecord(activeRecord, hiddenPath, false, true, restoreSelection, 'restore-auto');
     setSelection(null); setNotice(`${label} restored to the draft.`);
   };
@@ -744,24 +739,25 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     {(saveErrors[activeRecord.id] || notice) && <div className={`nk-visual-notice ${saveErrors[activeRecord.id] ? 'error' : ''}`} role={saveErrors[activeRecord.id] ? 'alert' : 'status'}>{saveErrors[activeRecord.id] ? <AlertTriangle/> : <Check/>}<span>{saveErrors[activeRecord.id] || notice}</span><button type="button" onClick={() => {setNotice(''); setSaveErrors(current => ({...current, [activeRecord.id]: ''}));}}>Dismiss</button></div>}
     <div className="nk-visual-workspace">
       <section className="nk-visual-canvas" aria-label={`${option.label} website preview`}>
-        <div className="nk-visual-canvas-hint"><GripVertical/><span>{editableKinds.includes(activeRecord.kind) ? 'Click links to navigate and menus to open. Shift-click a linked label to edit it. Drag any editable object to move it.' : 'Read-only preview.'}</span><b>{option.width} × {option.height}</b></div>
+        <div className="nk-visual-canvas-hint"><Move/><span>{editableKinds.includes(activeRecord.kind) ? 'Select an element, then drag its four-arrow handle or use the arrow keys. Shift + arrow moves 10 px.' : 'Read-only preview.'}</span><b>{option.width} × {option.height}</b></div>
         <div className="nk-visual-stage" ref={stageRef}><div className="nk-visual-frame-sizer" style={{width: option.width * scale, height: option.height * scale}}><iframe ref={iframeRef} title={`${option.label} live website preview`} src={previewSrc(previewPath, nonceRef.current)} onLoad={handleFrameLoad} style={{width: option.width, height: option.height, transform: `scale(${scale})`}}/>{!frameReady && <div className="nk-visual-frame-loading"><LoaderCircle className="nk-admin-spin"/>Rendering live preview…</div>}</div></div>
       </section>
       <aside className="nk-visual-inspector" aria-label="Builder tools and selected element properties">
         <section className="nk-visual-admin-meta"><header><Tags/><span><b>ADMIN ORGANISATION</b><small>Search, filters and work queue</small></span></header><label>Category<input value={activeRecord.category || ''} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('category', event.target.value)} placeholder="e.g. Residential, Campaign"/></label><label>Tags<input value={(activeRecord.tags || []).join(', ')} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('tags', event.target.value.split(',').map(value => value.trim()).filter(Boolean))} placeholder="priority, lighting, showroom"/></label></section>
         {activeRecord.kind === 'page' && editableKinds.includes('page') && <section className="nk-visual-builder-library"><header><span>ADD TO PAGE</span><button type="button" onClick={addSection}><Plus/>Section</button></header><div className="nk-visual-component-palette">{componentTypes.map(type => <button type="button" onClick={() => addComponent(type)} key={type}><Plus/><span>{componentLabels[type]}</span></button>)}</div>{reusableComponents.length > 0 && <div className="nk-visual-reusable-list"><b>Reusable components</b>{reusableComponents.map(item => <button type="button" onClick={() => addComponent(item.component.type, item)} key={`${item.scope}-${item.id}`}><Plus/><span>{item.name}</span><small>{item.scope}</small></button>)}</div>}</section>}
         <header><span>PROPERTIES</span><h2>{selection?.label || 'Select an element'}</h2><p>{selection ? `${kindLabels[selection.kind]} · ${selection.slug}` : 'Click directly on the page. The relevant controls appear here.'}</p></header>
-        {!selection && <div className="nk-visual-empty-selection"><MousePointer2/><strong>Edit on the page itself</strong><p>Drag objects to reorder them, or add a new section and components above.</p></div>}
+        {!selection && <div className="nk-visual-empty-selection"><MousePointer2/><strong>Edit on the page itself</strong><p>Select an element to reveal its four-arrow move handle. Drag freely, or use the keyboard arrows for precise positioning.</p></div>}
         {selection && selectedRecord && !editableKinds.includes(selectedRecord.kind) && <div className="nk-visual-readonly"><AlertTriangle/><b>Read-only element</b><p>Your role can preview this content but cannot change it.</p></div>}
         {selection && selectedRecord && editableKinds.includes(selectedRecord.kind) && <div className="nk-visual-property-stack">
           {selection.edit === 'text' && <label><span><Type/>Text</span>{String(selectedValue || '').length > 70 || selection.path.toLowerCase().includes('body') || selection.path.includes('description') || selection.path.includes('introduction') ? <textarea rows={6} value={String(selectedValue || '')} onChange={event => updateSelection(event.target.value)}/> : <input value={String(selectedValue || '')} onChange={event => updateSelection(event.target.value)}/>}<small>You can also type directly in the preview.</small></label>}
           {selection.edit === 'image' && <><label><span><ImageIcon/>Image or video URL</span><input type="url" value={String(selectedValue || '')} onChange={event => updateSelection(event.target.value)}/></label><div className="nk-visual-media"><span>MEDIA LIBRARY</span>{media.filter(asset => asset.mimeType.startsWith('image/')).length ? <div>{media.filter(asset => asset.mimeType.startsWith('image/')).slice(0, 12).map(asset => <button type="button" className={asset.url === selectedValue ? 'active' : ''} onClick={() => updateSelection(asset.url)} key={asset.id}><img src={asset.url} alt={asset.altText || asset.filename}/><small>{asset.filename}</small></button>)}</div> : <p>No active images. Upload one in Media or paste a public URL.</p>}</div></>}
           {selection.edit === 'icon' && <label><span><Layers3/>Icon</span><select value={String(selectedValue || 'check')} onChange={event => updateSelection(event.target.value)}>{!iconOptions.includes(String(selectedValue || 'check')) && <option value={String(selectedValue || 'check')}>{String(selectedValue || 'check')}</option>}{iconOptions.map(icon => <option value={icon} key={icon}>{icon}</option>)}</select></label>}
           {selection.linkPath && <label><span><Link2/>Link destination</span><input value={String(getPathValue(selectedRecord, selection.linkPath) ?? selection.linkFallbackValue ?? '')} onChange={event => updateSelection(event.target.value, selection.linkPath)} placeholder="/contact or https://…"/></label>}
+          <div className="nk-visual-object-tools nk-visual-position-tools"><p><Move/>Drag the four-arrow control on the selected element. Arrow keys move 1 px; hold Shift to move 10 px.</p><div><span>X <b>{selection.positionX}px</b></span><span>Y <b>{selection.positionY}px</b></span></div><button type="button" disabled={!selection.positionX && !selection.positionY} onClick={() => handlePosition({kind: selection.kind, slug: selection.slug, positionKey: selection.positionKey, x: 0, y: 0, label: selection.label, objectType: selection.objectType, objectId: selection.objectId, sectionId: selection.sectionId})}><Move/>Reset position</button><small>One saved position is shared by Desktop, Tablet and Mobile.</small></div>
           {selectedSection && selection.objectType === 'section' && <div className="nk-visual-object-tools"><label><span><Layers3/>Section layout</span><select value={selectedSection.layout} onChange={event => updateSelection(event.target.value, `${selection.path}.layout`, 'style')}><option value="stack">Stack</option><option value="grid">Grid</option><option value="split">Split</option></select></label><label><span>Columns</span><input type="range" min="1" max="4" value={selectedSection.columns} onChange={event => updateSelection(Number(event.target.value), `${selection.path}.columns`, 'resize')}/><small>{selectedSection.columns} column{selectedSection.columns === 1 ? '' : 's'}</small></label><label className="nk-visual-toggle"><input type="checkbox" checked={selectedSection.enabled} onChange={event => updateSelection(event.target.checked, `${selection.path}.enabled`)}/><span>Visible in this draft</span></label></div>}
           {selectedComponent && <div className="nk-visual-object-tools"><label><span>Component name</span><input value={selectedComponent.label} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.label`)}/></label><label><span>Width</span><input type="range" min="20" max="100" step="5" value={selectedComponent.style.width} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.width`, 'resize')}/><small>{selectedComponent.style.width}%</small></label><div className="nk-visual-property-grid"><label><span>Alignment</span><select value={selectedComponent.style.align} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.align`, 'style')}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option><option value="stretch">Stretch</option></select></label><label><span>Tone</span><select value={selectedComponent.style.tone} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.tone`, 'style')}><option value="default">Default</option><option value="accent">Accent</option><option value="muted">Muted</option><option value="dark">Dark</option></select></label></div><div className="nk-visual-property-grid"><label><span>Padding</span><input type="number" min="0" max="64" value={selectedComponent.style.padding} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.padding`, 'style')}/></label><label><span>Radius</span><input type="number" min="0" max="48" value={selectedComponent.style.radius} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.radius`, 'style')}/></label></div><label><span>Scope</span><select value={selectedComponent.scope} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.scope`, 'scope')}><option value="local">Local to this page</option><option value="global">Global site component</option></select></label><div className="nk-visual-save-reusable"><input value={reusableName} onChange={event => setReusableName(event.target.value)} placeholder="Reusable component name"/><button type="button" onClick={saveReusable}><Save/>{selectedComponent.scope === 'global' ? 'Save & sync global' : 'Save reusable'}</button></div>{selectedComponent.groupId ? <button type="button" onClick={ungroup}><Ungroup/>Ungroup components</button> : selectedSection && selectedSection.components.length > 1 && <label><span><Group/>Group with</span><select value="" onChange={event => groupWith(event.target.value)}><option value="">Choose component…</option>{selectedSection.components.filter(item => item.id !== selectedComponent.id).map(item => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>}</div>}
-          {['section', 'component'].includes(selection.objectType) && <div className="nk-visual-object-actions"><button type="button" onClick={() => moveSelected(-1)} disabled={!canMoveSelected(-1)}><ArrowUp/>Move up</button><button type="button" onClick={() => moveSelected(1)} disabled={!canMoveSelected(1)}><ArrowDown/>Move down</button><button type="button" onClick={duplicateSelected}><Copy/>Duplicate</button><button className="danger" type="button" onClick={deleteSelected}><Trash2/>Delete</button></div>}
-          {selection.objectType === 'auto' && <div className="nk-visual-object-tools nk-visual-auto-tools"><p><GripVertical/>Drag this element directly onto another editable element to move it before or after that destination.</p><button className="danger" type="button" onClick={deleteSelected}><Trash2/>Delete this element</button></div>}
+          {['section', 'component'].includes(selection.objectType) && <div className="nk-visual-object-actions"><button type="button" onClick={duplicateSelected}><Copy/>Duplicate</button><button className="danger" type="button" onClick={deleteSelected}><Trash2/>Delete</button></div>}
+          {selection.objectType === 'auto' && <div className="nk-visual-object-tools nk-visual-auto-tools"><button className="danger" type="button" onClick={deleteSelected}><Trash2/>Delete this element</button></div>}
         </div>}
         {hiddenAutomaticItems.length > 0 && <section className="nk-visual-hidden-items"><header><span>DELETED CONTENT</span><b>{hiddenAutomaticItems.length} restorable element{hiddenAutomaticItems.length === 1 ? '' : 's'}</b></header>{hiddenAutomaticItems.map(item => <button type="button" onClick={() => restoreAutomatic(item.key, item.label)} key={item.key}><Undo2/><span><b>{item.label}</b><small>Restore to this draft</small></span></button>)}</section>}
         {activeRecord && <section className="nk-visual-history"><header><div><span>HISTORY</span><b>{historyMode === 'object' ? selection?.label || 'Selected object' : `Entire ${kindLabels[activeRecord.kind].toLowerCase()}`}</b></div><div><button type="button" className={historyMode === 'object' ? 'active' : ''} onClick={() => setHistoryMode('object')} disabled={!selection}>Object</button><button type="button" className={historyMode === 'page' ? 'active' : ''} onClick={() => setHistoryMode('page')}>Record</button></div></header><div className="nk-visual-history-actions"><button type="button" onClick={() => runHistory('undo')} disabled={!shownHistory.some(entry => entry.active)}><Undo2/>Undo <kbd>Ctrl Z</kbd></button><button type="button" onClick={() => runHistory('redo')} disabled={!shownHistory.some(entry => !entry.active)}><Redo2/>Redo <kbd>Ctrl Shift Z</kbd></button></div>{shownHistory.length ? <ol>{[...shownHistory].reverse().map(entry => <li className={!entry.active ? 'undone' : ''} key={entry.id}><i/><span><b>{actionLabels[entry.action]}</b><small>{entry.objectLabel} · {new Date(entry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}{!entry.active ? ' · undone' : ''}</small></span></li>)}</ol> : <div className="nk-visual-history-empty">{historyMode === 'object' && !selection ? 'Select an object to see its independent history.' : 'No changes recorded yet.'}</div>}</section>}

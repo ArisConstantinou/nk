@@ -126,14 +126,15 @@ test('secure admin lifecycle', async t => {
   const update = await request(`/content/${record.id}`, {method: 'PUT', cookie, csrf, body: {kind: 'page', slug: 'homepage', title: 'Updated homepage', expectedVersion: record.version, data: {
     ...record.draft,
     heroTitle: 'Updated safely.',
-    visualOverrides: {a1b2c3d4: {text: 'Edited automatically.', href: '/contact', icon: 'zap', hidden: false, label: 'Automatic test element'}},
+    visualOverrides: {a1b2c3d4: {text: 'Edited automatically.', href: '/contact', icon: 'zap', hidden: false, label: 'Automatic test element', x: 37, y: -18}},
     visualPlacements: {a1b2c3d4: {target: 'deadbeef', position: 'after'}},
-    editorHistory: [{id: 'visual-history-test', objectKey: 'auto:a1b2c3d4', objectLabel: 'Automatic test element', action: 'move-auto', path: 'visualPlacements.a1b2c3d4', before: null, after: {target: 'deadbeef', position: 'after'}, meta: {}, timestamp: new Date().toISOString(), active: true}],
+    editorHistory: [{id: 'visual-history-test', objectKey: 'auto:a1b2c3d4', objectLabel: 'Automatic test element', action: 'move-auto', path: 'visualPlacements.a1b2c3d4', before: null, after: {target: 'deadbeef', position: 'after'}, meta: {}, timestamp: new Date().toISOString(), active: true}, {id: 'visual-position-history-test', objectKey: 'auto:a1b2c3d4', objectLabel: 'Automatic test element', action: 'position', path: 'visualOverrides.a1b2c3d4', before: null, after: {x: 37, y: -18}, meta: {}, timestamp: new Date().toISOString(), active: true}],
   }}});
   assert.equal(update.response.status, 200);
   assert.equal(update.payload.record.status, 'draft');
   assert.equal(update.payload.record.version, record.version + 1);
   assert.equal(update.payload.record.draft.visualOverrides.a1b2c3d4.text, 'Edited automatically.');
+  assert.deepEqual({x: update.payload.record.draft.visualOverrides.a1b2c3d4.x, y: update.payload.record.draft.visualOverrides.a1b2c3d4.y}, {x: 37, y: -18});
   assert.equal(update.payload.record.draft.visualPlacements.a1b2c3d4.target, 'deadbeef');
   const staleUpdate = await request(`/content/${record.id}`, {method: 'PUT', cookie, csrf, body: {kind: 'page', slug: 'homepage', title: 'Stale edit', expectedVersion: record.version, data: {...record.draft, heroTitle: 'Must not overwrite.'}}});
   assert.equal(staleUpdate.response.status, 409);
@@ -155,6 +156,7 @@ test('secure admin lifecycle', async t => {
   assert.equal(publicSite.response.status, 200);
   assert.equal(publicSite.payload.records[0].data.heroTitle, 'Updated safely.');
   assert.equal(publicSite.payload.records[0].data.visualOverrides.a1b2c3d4.text, 'Edited automatically.');
+  assert.deepEqual({x: publicSite.payload.records[0].data.visualOverrides.a1b2c3d4.x, y: publicSite.payload.records[0].data.visualOverrides.a1b2c3d4.y}, {x: 37, y: -18});
   assert.equal(publicSite.payload.records[0].data.visualPlacements.a1b2c3d4.position, 'after');
   assert.equal(publicSite.payload.records[0].data.editorHistory, undefined);
   assert.equal(publicSite.payload.navigation[0].label, 'Services');

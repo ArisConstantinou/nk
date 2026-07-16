@@ -86,6 +86,8 @@ function visualOverrides(value) {
     if (item.icon != null) mapped.icon = VISUAL_ICONS.includes(item.icon) ? item.icon : 'check';
     if (item.hidden != null) mapped.hidden = item.hidden === true;
     if (item.label != null) mapped.label = optional(item.label, `visualOverrides.${key}.label`, 180);
+    if (item.x != null) mapped.x = Math.round(boundedNumber(item.x, 0, -4000, 4000));
+    if (item.y != null) mapped.y = Math.round(boundedNumber(item.y, 0, -4000, 4000));
     if (!Object.keys(mapped).length) throw new ApiError(400, 'validation_failed', 'Check the direct-edit content.', {visualOverrides: 'A direct-edit element has no supported value.'});
     return [key, mapped];
   }));
@@ -152,7 +154,7 @@ const COMPONENT_TYPES = ['heading', 'text', 'button', 'image', 'icon', 'divider'
 const COMPONENT_SCOPES = ['local', 'global'];
 const COMPONENT_ALIGNS = ['left', 'center', 'right', 'stretch'];
 const COMPONENT_TONES = ['default', 'accent', 'muted', 'dark'];
-const HISTORY_ACTIONS = ['content', 'replace', 'style', 'resize', 'move-section', 'move-component', 'move-auto', 'delete-auto', 'restore-auto', 'add-section', 'delete-section', 'duplicate-section', 'add-component', 'delete-component', 'duplicate-component', 'group', 'ungroup', 'scope', 'reusable'];
+const HISTORY_ACTIONS = ['content', 'replace', 'style', 'resize', 'position', 'move-section', 'move-component', 'move-auto', 'delete-auto', 'restore-auto', 'add-section', 'delete-section', 'duplicate-section', 'add-component', 'delete-component', 'duplicate-component', 'group', 'ungroup', 'scope', 'reusable'];
 
 const boundedNumber = (value, fallback, min, max) => {
   const number = Number(value);

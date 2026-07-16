@@ -20,7 +20,7 @@ export type SiteOpeningHours = {id: string; label: string; hours: string; active
 export type SiteSocialLink = {id: string; platform: string; icon: string; iconUrl: string; url: string; active: boolean; newTab: boolean; placements: Array<'header' | 'footer' | 'mobile' | 'contact'>};
 export type SiteSettings = {address: string; phone: string; email: string; hours: string; mapsUrl: string; mapEmbedUrl: string; brandName: string; brandTagline: string; logoUrl: string; logoAlt: string; faviconUrl: string; defaultSocialImage: string; siteName: string; defaultMetaTitle: string; defaultMetaDescription: string; language: string; locale: string; quoteLabel: string; quoteUrl: string; footerEyebrow: string; footerTitle: string; footerCtaLabel: string; footerCopyright: string; phones: SitePhone[]; emails: SiteEmail[]; locations: SiteLocation[]; openingHours: SiteOpeningHours[]; socialLinks: SiteSocialLink[]; header: {sticky: boolean; showTagline: boolean; showSocials: boolean}; footer: {showSocials: boolean; showContact: boolean; showHours: boolean}};
 export type PublicCompany = {slug: string; title: string; heading: string; introduction: string; history: string[]; partnerships: string[]};
-export type VisualOverrideEntry = {text?: string; src?: string; href?: string; icon?: string; hidden?: boolean; label?: string};
+export type VisualOverrideEntry = {text?: string; src?: string; href?: string; icon?: string; hidden?: boolean; label?: string; x?: number; y?: number};
 export type VisualOverrideMap = Record<string, VisualOverrideEntry>;
 export type VisualPlacementMap = Record<string, {target: string; position: 'before' | 'after'}>;
 export type VisualRecord = {kind: string; slug: string; overrides: VisualOverrideMap; placements: VisualPlacementMap};
@@ -107,6 +107,8 @@ const visualOverrides = (value: unknown): VisualOverrideMap => {
     if (typeof entry.icon === 'string') mapped.icon = entry.icon;
     if (typeof entry.hidden === 'boolean') mapped.hidden = entry.hidden;
     if (typeof entry.label === 'string') mapped.label = entry.label;
+    if (typeof entry.x === 'number' && Number.isFinite(entry.x)) mapped.x = Math.max(-4000, Math.min(4000, Math.round(entry.x)));
+    if (typeof entry.y === 'number' && Number.isFinite(entry.y)) mapped.y = Math.max(-4000, Math.min(4000, Math.round(entry.y)));
     return Object.keys(mapped).length ? [[key, mapped]] : [];
   }));
 };

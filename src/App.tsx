@@ -5,7 +5,8 @@ import {ContentProvider} from './context/ContentContext';
 import {AboutPage, ContactPage, ExplorePage, LightingPage, NotFound, ProductPage, ProjectsPage} from './pages/PublicPages';
 import {QuotePage, ServiceDetailPage, ServicesPage, ShopCategoryPage} from './pages/ArchitecturePages';
 
-const Admin = lazy(() => import('./pages/Admin'));
+const isGitHubPagesBuild = import.meta.env.MODE === 'github-pages';
+const Admin = isGitHubPagesBuild ? null : lazy(() => import('./pages/Admin'));
 const ElectricalHome = lazy(() => import('./pages/electrical/ElectricalHome'));
 const Public = ({children}: {children: React.ReactNode}) => <ElectricalLayout>{children}</ElectricalLayout>;
 const routerBase = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -56,7 +57,9 @@ export default function App() {
     <Route path="/about" element={<Public><AboutPage/></Public>}/>
     <Route path="/contact" element={<Public><ContactPage/></Public>}/>
     <Route path="/request-a-quote" element={<Public><QuotePage/></Public>}/>
-    <Route path="/admin/*" element={<Suspense fallback={<div className="route-loader">Opening secure admin…</div>}><Admin/></Suspense>}/>
+    {Admin
+      ? <Route path="/admin/*" element={<Suspense fallback={<div className="route-loader">Opening secure admin…</div>}><Admin/></Suspense>}/>
+      : <Route path="/admin/*" element={<Navigate to="/" replace/>}/>}
 
     <Route path="/electrical-installations" element={<Navigate to="/services/electrical-installations" replace/>}/>
     <Route path="/lighting" element={<Navigate to="/services/lighting-design" replace/>}/>
