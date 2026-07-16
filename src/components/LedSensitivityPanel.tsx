@@ -78,6 +78,7 @@ export function LedSensitivityPanel() {
   const [effect, setEffect] = useState<LedRgbEffect>('static');
   const [activeScene, setActiveScene] = useState('cyan');
   const playerRef = useRef<PlayerRef>(null);
+  const wheelPointerRef = useRef<number | null>(null);
   const selectedHsv = useMemo(() => hexToHsv(color), [color]);
   const thumbPosition = useMemo(() => {
     const radians = selectedHsv.h * Math.PI / 180;
@@ -106,8 +107,16 @@ export function LedSensitivityPanel() {
   };
 
   const handleWheelPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    wheelPointerRef.current = event.pointerId;
     event.currentTarget.setPointerCapture(event.pointerId);
     updateFromWheel(event);
+  };
+
+  const handleWheelPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (wheelPointerRef.current !== event.pointerId) return;
+    wheelPointerRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   const handleWheelKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -160,7 +169,9 @@ export function LedSensitivityPanel() {
             aria-valuenow={Math.round(selectedHsv.h)}
             aria-valuetext={`${color.toUpperCase()}, ${Math.round(selectedHsv.s)} percent saturation`}
             onPointerDown={handleWheelPointerDown}
-            onPointerMove={event => { if (event.buttons === 1) updateFromWheel(event); }}
+            onPointerMove={event => { if (wheelPointerRef.current === event.pointerId) updateFromWheel(event); }}
+            onPointerUp={handleWheelPointerEnd}
+            onPointerCancel={handleWheelPointerEnd}
             onKeyDown={handleWheelKeyDown}
           >
             <span className="rgb-color-wheel-thumb" style={thumbPosition}/>

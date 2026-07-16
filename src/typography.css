@@ -100,3 +100,18 @@ html[data-experience='tech']{
 @media(max-width:390px){
   .electrical-mobile-dock a,.electrical-mobile-dock button{font-size:12px!important}
 }
+
+/* The remote artwork has fixed internal geometry; keep its overlay labels inside each key. */
+.rgb-remote-shell .rgb-remote-power{font-size:8px!important;line-height:1!important}
+.rgb-remote-shell .rgb-remote-scenes button{grid-template-columns:20px minmax(0,1fr);padding:0 9px}
+.rgb-remote-shell .rgb-remote-scenes button>span{font-size:8px!important;line-height:1!important}
+.rgb-remote-shell .rgb-remote-scenes strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px!important;line-height:1!important}
+.rgb-remote-shell .rgb-remote-scenes small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px!important;line-height:1!important;letter-spacing:.025em}
+
+@media(max-width:480px){
+  .rgb-remote-shell{width:min(100%,196px)}
+  .rgb-remote-shell .rgb-remote-scenes button{grid-template-columns:18px minmax(0,1fr);padding:0 8px;border-radius:8px}
+  .rgb-remote-shell .rgb-remote-scenes button>span{font-size:7px!important}
+  .rgb-remote-shell .rgb-remote-scenes strong{font-size:12px!important}
+  .rgb-remote-shell .rgb-remote-scenes small{font-size:6.5px!important}
+}

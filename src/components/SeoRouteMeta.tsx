@@ -1,6 +1,7 @@
 import {useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
+import {resolvePublicUrl} from '../utils/assets';
 
 const routeMeta: Array<{match: (path: string) => boolean; title: string; description: string}> = [
   {match: path => path === '/', title: 'NK Electrical | Electrical Services, Lighting & Appliances in Cyprus', description: 'Electrical installations, lighting design, smart-home systems, products and project support from NK Electrical in Strovolos, Cyprus.'},
@@ -61,7 +62,7 @@ export function SeoRouteMeta() {
     setMeta('meta[property="og:site_name"]', 'property', 'og:site_name', settings.siteName);
     setMeta('meta[property="og:locale"]', 'property', 'og:locale', settings.locale);
     const ogImageSource = managed?.ogImage || settings.defaultSocialImage;
-    const ogImage = ogImageSource ? new URL(ogImageSource, window.location.origin).href : '';
+    const ogImage = ogImageSource ? new URL(resolvePublicUrl(ogImageSource), window.location.origin).href : '';
     setMeta('meta[property="og:image"]', 'property', 'og:image', ogImage);
     setMeta('meta[name="twitter:card"]', 'name', 'twitter:card', ogImage ? 'summary_large_image' : 'summary');
     setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', title);
@@ -71,7 +72,7 @@ export function SeoRouteMeta() {
     let favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (settings.faviconUrl) {
       if (!favicon) {favicon = document.createElement('link'); favicon.rel = 'icon'; document.head.appendChild(favicon);}
-      favicon.href = new URL(settings.faviconUrl, window.location.origin).href;
+      favicon.href = new URL(resolvePublicUrl(settings.faviconUrl), window.location.origin).href;
     }
   }, [managed, pathname, settings]);
 
