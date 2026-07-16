@@ -247,7 +247,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const [loadError, setLoadError] = useState('');
   const [activeRecordId, setActiveRecordId] = useState('');
   const [selection, setSelection] = useState<VisualSelection | null>(null);
-  const [viewport, setViewport] = useState<ViewportName>('desktop');
+  const [viewport, setViewport] = useState<ViewportName>(() => window.matchMedia('(max-width: 680px)').matches ? 'mobile' : 'desktop');
   const [previewPath, setPreviewPath] = useState('/');
   const [frameReady, setFrameReady] = useState(false);
   const [savePhases, setSavePhases] = useState<Record<string, SavePhase>>({});
@@ -433,6 +433,10 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     if (!stage) return;
     const updateScale = () => {
       const option = viewportOptions[viewport];
+      if (viewport === 'mobile' && window.matchMedia('(max-width: 680px)').matches) {
+        setScale(1);
+        return;
+      }
       const widthScale = Math.max(280, stage.clientWidth - 28) / option.width;
       const heightScale = Math.max(320, stage.clientHeight - 28) / option.height;
       setScale(Math.min(1, widthScale, heightScale));
@@ -841,7 +845,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     {(saveErrors[activeRecord.id] || notice) && <div className={`nk-visual-notice ${saveErrors[activeRecord.id] ? 'error' : ''}`} role={saveErrors[activeRecord.id] ? 'alert' : 'status'}>{saveErrors[activeRecord.id] ? <AlertTriangle/> : <Check/>}<span>{saveErrors[activeRecord.id] || notice}</span><button type="button" onClick={() => {setNotice(''); setSaveErrors(current => ({...current, [activeRecord.id]: ''}));}}>Dismiss</button></div>}
     <div className="nk-visual-workspace">
       <section className="nk-visual-canvas" aria-label={`${option.label} website preview`}>
-        <div className="nk-visual-canvas-hint"><Move/><span>{editableKinds.includes(activeRecord.kind) ? 'Select an element, then drag its four-arrow handle or use the arrow keys. Shift + arrow moves 10 px.' : 'Read-only preview.'}</span><b>{option.width} × {option.height}</b></div>
+        <div className="nk-visual-canvas-hint"><Move/><span className="nk-visual-hint-full">{editableKinds.includes(activeRecord.kind) ? 'Select an element, then drag its four-arrow handle or use the arrow keys. Shift + arrow moves 10 px.' : 'Read-only preview.'}</span><span className="nk-visual-hint-mobile">{editableKinds.includes(activeRecord.kind) ? 'Tap text to type · tap anything to select' : 'Read-only preview'}</span><b>{option.width} × {option.height}</b></div>
         <div className="nk-visual-stage" ref={stageRef}><div className="nk-visual-frame-sizer" style={{width: option.width * scale, height: option.height * scale}}><iframe ref={iframeRef} title={`${option.label} live website preview`} src={previewSrc(previewPath, nonceRef.current)} onLoad={handleFrameLoad} style={{width: option.width, height: option.height, transform: `scale(${scale})`}}/>{!frameReady && <div className="nk-visual-frame-loading"><LoaderCircle className="nk-admin-spin"/>Rendering live preview…</div>}</div></div>
       </section>
       <aside className="nk-visual-inspector" aria-label="Builder tools and selected element properties">
