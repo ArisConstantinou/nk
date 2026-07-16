@@ -10,5 +10,6 @@ export const shopLinks = [
   {label: 'All Products', description: 'Browse the complete lighting and appliance collection.', to: '/shop'},
   {label: 'Lighting Products', description: 'Decorative, architectural and practical lighting.', to: '/shop/lighting'},
   {label: 'Appliances', description: 'Kitchen, coffee, cooling and household products.', to: '/shop/appliances'},
+  {label: 'Offers', description: 'Browse every current NK Electrical offer in one visual collection.', to: '/shop/offers'},
   {label: 'Catalogues & Downloads', description: 'Official brand catalogues and product PDFs.', to: '/shop/catalogues'},
 ] as const;

@@ -1,11 +1,17 @@
 export type Product = {
   id: string;
   name: string;
-  category: 'Lighting' | 'Coffee' | 'Kitchen' | 'Cooling' | 'Cleaning';
+  category: 'Lighting' | 'Coffee' | 'Kitchen' | 'Cooling' | 'Cleaning' | 'Heating' | 'Home' | 'Beauty' | 'Sound & Vision';
   season: 'All year' | 'Summer' | 'Winter' | 'Christmas';
   space: 'Living' | 'Kitchen' | 'Outdoor' | 'Bedroom' | 'Workspace';
   image: string;
   note: string;
+  department?: 'lighting' | 'appliances';
+  legacyCategory?: string;
+  offer?: boolean;
+  sourceUrl?: string;
+  price?: number | null;
+  currency?: string | null;
 };
 
 export type TeamMember = {

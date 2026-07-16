@@ -5,6 +5,10 @@ import {PageIntro} from './PublicPages';
 import {useContent} from '../context/ContentContext';
 import {serviceLinks} from '../navigation';
 import {ManagedPublicForm} from '../components/ManagedPublicForm';
+import {ModernShopCategoryPage} from './ShopCataloguePage';
+
+// Category routes share the CMS catalogue while keeping their own live filters.
+
 
 type ServiceDefinition = {
   slug: string;
@@ -94,6 +98,10 @@ export function ServiceDetailPage() {
 }
 
 export function ShopCategoryPage() {
+  return <ModernShopCategoryPage/>;
+}
+
+function LegacyShopCategoryPage() {
   const {category = ''} = useParams();
   const {content} = useContent();
   const isLighting = category === 'lighting';

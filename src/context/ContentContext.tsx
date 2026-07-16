@@ -1,9 +1,20 @@
 import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {defaultContent} from '../content';
+import legacyProductData from '../data/legacy-products.json';
 import {isPagesAdminMode, PAGES_ADMIN_CHANGED_EVENT, PAGES_ADMIN_STORAGE_KEY, readPagesPublicPayload, savePagesSubmission} from '../admin/pagesMode';
 import type {Catalogue, Product, Project, SiteContent} from '../types';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
+const importedProducts = legacyProductData as unknown as Product[];
+
+function mergeCatalogueProducts(overrides: Product[] = []) {
+  const products = new Map(importedProducts.map(product => [product.id, product]));
+  defaultContent.products.forEach(product => products.set(product.id, {...products.get(product.id), ...product}));
+  overrides.forEach(product => products.set(product.id, {...products.get(product.id), ...product}));
+  return [...products.values()];
+}
+
+const defaultSiteContent: SiteContent = {...defaultContent, products: mergeCatalogueProducts()};
 
 export type PublicPageComponent = {id: string; type: 'heading' | 'text' | 'button' | 'image' | 'gallery' | 'icon' | 'divider'; enabled: boolean; label: string; text: string; url: string; image: string; images: string[]; alt: string; icon: string; scope: 'local' | 'global'; reusableId: string; groupId: string; style: {width: number; align: 'left' | 'center' | 'right' | 'stretch'; tone: 'default' | 'accent' | 'muted' | 'dark'; padding: number; radius: number}};
 export type PublicPageSection = {id: string; type: 'text' | 'features' | 'cta' | 'media'; enabled: boolean; eyebrow: string; title: string; body: string; buttonLabel: string; buttonUrl: string; image: string; icon: string; items: string[]; layout: 'stack' | 'grid' | 'split'; columns: number; components: PublicPageComponent[]};
@@ -58,8 +69,13 @@ const defaultSettings: SiteSettings = {
   emails: [{id: 'primary-email', label: 'General', address: 'info@nk-electrical.com', active: true, primary: true}],
   locations: [{id: 'primary-location', label: 'Main store', address: '72 Makedonitissis Str., Strovolos 2057, Cyprus', mapsUrl: 'https://www.google.com/maps/search/?api=1&query=72+Makedonitissis+Strovolos+2057+Cyprus', active: true, primary: true}],
   openingHours: [{id: 'store-hours', label: 'Store', hours: 'Mon, Tue, Thu, Fri: 09:00–18:00\nWednesday, Saturday: 09:00–14:00\nSunday: Closed', active: true}],
-  socialLinks: [],
-  header: {sticky: true, showTagline: true, showSocials: false},
+  socialLinks: [
+    {id: 'linkedin', platform: 'LinkedIn', icon: 'linkedin', iconUrl: '', url: 'https://www.linkedin.com/company/12901535/', active: true, newTab: true, placements: ['header', 'footer', 'mobile', 'contact']},
+    {id: 'facebook', platform: 'Facebook', icon: 'facebook', iconUrl: '', url: 'https://www.facebook.com/nkelectricalltd', active: true, newTab: true, placements: ['header', 'footer', 'mobile', 'contact']},
+    {id: 'instagram-lighting', platform: 'Instagram Lighting', icon: 'instagram', iconUrl: '', url: 'https://www.instagram.com/nk_electrical/', active: true, newTab: true, placements: ['header', 'footer', 'mobile', 'contact']},
+    {id: 'instagram-appliances', platform: 'Instagram Appliances', icon: 'instagram', iconUrl: '', url: 'https://www.instagram.com/nk.electrical.ltd/', active: true, newTab: true, placements: ['header', 'footer', 'mobile', 'contact']},
+  ],
+  header: {sticky: true, showTagline: true, showSocials: true},
   footer: {showSocials: true, showContact: true, showHours: false},
 };
 
@@ -84,13 +100,13 @@ type ContentApi = {
 };
 
 const ContentContext = createContext<ContentApi | null>(null);
-const mergeContent = (value: Partial<SiteContent>): SiteContent => ({...defaultContent, ...value, heroObject: {...defaultContent.heroObject, ...value.heroObject}, themeContent: {tech: {...defaultContent.themeContent.tech, ...value.themeContent?.tech}}});
+const mergeContent = (value: Partial<SiteContent>): SiteContent => ({...defaultSiteContent, ...value, products: mergeCatalogueProducts(value.products), heroObject: {...defaultContent.heroObject, ...value.heroObject}, themeContent: {tech: {...defaultContent.themeContent.tech, ...value.themeContent?.tech}}});
 const readStored = (): SiteContent => {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value ? mergeContent(JSON.parse(value) as Partial<SiteContent>) : defaultContent;
+    return value ? mergeContent(JSON.parse(value) as Partial<SiteContent>) : defaultSiteContent;
   } catch {
-    return defaultContent;
+    return defaultSiteContent;
   }
 };
 const stringValue = (value: unknown, fallback = '') => typeof value === 'string' ? value : fallback;
@@ -136,8 +152,8 @@ function mapSettings(value: Record<string, unknown>): SiteSettings {
     emails: emails.length ? emails : defaultSettings.emails.map(item => ({...item, address: stringValue(value.email, item.address)})),
     locations: locations.length ? locations : defaultSettings.locations.map(item => ({...item, address: stringValue(value.address, item.address), mapsUrl: stringValue(value.mapsUrl, item.mapsUrl)})),
     openingHours: openingHours.length ? openingHours : defaultSettings.openingHours.map(item => ({...item, hours: stringValue(value.hours, item.hours)})),
-    socialLinks,
-    header: {sticky: headerValue.sticky !== false, showTagline: headerValue.showTagline !== false, showSocials: headerValue.showSocials === true},
+    socialLinks: socialLinks.length ? socialLinks : defaultSettings.socialLinks,
+    header: {sticky: headerValue.sticky !== false, showTagline: headerValue.showTagline !== false, showSocials: headerValue.showSocials !== false},
     footer: {showSocials: footerValue.showSocials !== false, showContact: footerValue.showContact !== false, showHours: footerValue.showHours === true},
   } as SiteSettings;
 }
@@ -165,7 +181,8 @@ function mapPayload(payload: PublicPayload): MappedPayload {
   const globalComponents = new Map(objectArray(settingsRecord?.data.globalComponents).flatMap(item => typeof item.id === 'string' && isObject(item.component) ? [[item.id, item.component] as const] : []));
   const visualRecords = Object.fromEntries(payload.records.map(record => [`${record.kind}:${record.slug}`, {kind: record.kind, slug: record.slug, overrides: visualOverrides(record.data.visualOverrides), placements: visualPlacements(record.data.visualPlacements)}]));
 
-  const products: Product[] = productRecords.length ? productRecords.map(record => ({id: record.slug, name: record.title, category: stringValue(record.data.category, 'Lighting') as Product['category'], season: stringValue(record.data.season, 'All year') as Product['season'], space: stringValue(record.data.space, 'Living') as Product['space'], image: stringValue(record.data.image), note: stringValue(record.data.note)})) : defaultContent.products;
+  const managedProducts: Product[] = productRecords.map(record => ({id: record.slug, name: record.title, category: stringValue(record.data.category, 'Lighting') as Product['category'], season: stringValue(record.data.season, 'All year') as Product['season'], space: stringValue(record.data.space, 'Living') as Product['space'], image: stringValue(record.data.image), note: stringValue(record.data.note)}));
+  const products = mergeCatalogueProducts(managedProducts);
   const catalogues: Catalogue[] = catalogueRecords.length ? catalogueRecords.map(record => ({id: record.slug, name: record.title, brand: stringValue(record.data.brand, 'ACA') as Catalogue['brand'], year: stringValue(record.data.year), focus: stringValue(record.data.focus, 'Decorative') as Catalogue['focus'], url: stringValue(record.data.url)})) : defaultContent.catalogues;
   const projects: Project[] = projectRecords.length ? projectRecords.map(record => ({id: record.slug, number: stringValue(record.data.number), name: record.title, image: stringValue(record.data.image), type: stringValue(record.data.type), category: stringValue(record.data.category, 'Residential') as Project['category'], completionDate: stringValue(record.data.completionDate), text: stringValue(record.data.text), systems: stringArray(record.data.systems)})) : defaultContent.projects;
   const pages: PublicPage[] = pageRecords.map(record => ({

@@ -265,7 +265,7 @@ export function ElectricalInstallationsPage() {
 }
 
 const filterValues = {
-  category: ['All', 'Lighting', 'Coffee', 'Kitchen', 'Cooling', 'Cleaning'],
+  category: ['All', 'Lighting', 'Coffee', 'Kitchen', 'Cooling', 'Cleaning', 'Heating', 'Home', 'Beauty', 'Sound & Vision'],
   season: ['All', 'All year', 'Summer', 'Winter', 'Christmas'],
   space: ['All', 'Living', 'Kitchen', 'Outdoor', 'Bedroom', 'Workspace'],
 };
@@ -280,13 +280,17 @@ export function ExplorePage() {
   const category = params.get('category') || 'All';
   const season = params.get('season') || 'All';
   const space = params.get('space') || 'All';
+  const [visibleCount, setVisibleCount] = useState(48);
   const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
   const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
+  const shown = filtered.slice(0, visibleCount);
+  useEffect(() => setVisibleCount(48), [category, season, space]);
   return <>
     <PageIntro eyebrow="NK Electrical Shop" title="Products organised" italic="for practical browsing." body="Browse products only: lighting, coffee, kitchen, cooling and household equipment. Installation and design expertise remains under Services."/>
     <section className="filter-shell section"><div className="filter-top"><div><SlidersHorizontal/><b>Refine the collection</b></div><span>{filtered.length} considered matches</span></div>{Object.entries(filterValues).map(([key, values]) => <div className="filter-row" key={key}><b>{key}</b><div>{values.map(value => <button className={(key === 'category' ? category : key === 'season' ? season : space) === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div></div>)}</section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
-    <section className="product-grid section">{filtered.map(product => <ProductCard item={product} key={product.id}/>)}</section>
+    <section className="product-grid section">{shown.map(product => <ProductCard item={product} key={product.id}/>)}</section>
+    {shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load more products <ArrowRight/></button></section>}
     {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({})}>Clear filters</button></div>}
   </>;
 }

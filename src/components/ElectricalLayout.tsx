@@ -34,7 +34,7 @@ function SocialIcon({link}: {link: SiteSocialLink}) {
 function SocialLinks({links, placement, className}: {links: SiteSocialLink[]; placement: SiteSocialLink['placements'][number]; className?: string}) {
   const shown = links.filter(link => link.active && link.placements.includes(placement));
   if (!shown.length) return null;
-  return <div className={className || 'ia-social-links'}>{shown.map(link => <a href={link.url} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noreferrer' : undefined} aria-label={link.platform} key={link.id}><SocialIcon link={link}/></a>)}</div>;
+  return <div className={className || 'ia-social-links'}>{shown.map(link => <a href={link.url} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noreferrer' : undefined} aria-label={link.platform} data-platform={link.platform} key={link.id}><SocialIcon link={link}/></a>)}</div>;
 }
 
 export function ElectricalLayout({children}: {children: ReactNode}) {
@@ -50,9 +50,11 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const linkTo = (item: LinkItem) => item.url || item.to || '/';
   const primary: LinkItem[] = menu('primary').length ? menu('primary') : [{label: 'Services', url: '/services'}, {label: 'Shop', url: '/shop'}, {label: 'Projects', url: '/projects'}, {label: 'About', url: '/about'}, {label: 'Contact', url: '/contact'}];
   const serviceMenu: LinkItem[] = menu('services').length ? menu('services') : [...serviceLinks];
-  const shopMenu: LinkItem[] = menu('shop').length ? menu('shop') : [...shopLinks];
+  const managedShopMenu: LinkItem[] = menu('shop');
+  const shopMenu: LinkItem[] = managedShopMenu.length ? [...managedShopMenu, ...shopLinks.filter(fallback => !managedShopMenu.some(item => linkTo(item) === fallback.to))] : [...shopLinks];
   const footerServices: LinkItem[] = menu('footer-services').length ? menu('footer-services') : serviceMenu;
-  const footerShop: LinkItem[] = menu('footer-shop').length ? menu('footer-shop') : shopMenu;
+  const managedFooterShop: LinkItem[] = menu('footer-shop');
+  const footerShop: LinkItem[] = managedFooterShop.length ? [...managedFooterShop, ...shopLinks.filter(fallback => !managedFooterShop.some(item => linkTo(item) === fallback.to))] : shopMenu;
   const footerCompany: LinkItem[] = menu('footer-company').length ? menu('footer-company') : [{label: 'Projects', url: '/projects'}, {label: 'About', url: '/about'}, {label: 'Contact', url: '/contact'}, {label: 'Request a Quote', url: '/request-a-quote'}];
   const tel = settings.phone.replace(/[^+\d]/g, '');
 
@@ -135,6 +137,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <SocialLinks links={settings.socialLinks} placement="mobile" className="ia-social-links ia-social-links--mobile"/>
       </nav>}
     </header>
+    <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>
     <div className="electrical-stage ia-stage" inert={mobileOpen || undefined} aria-hidden={mobileOpen || undefined}>
       <main className="electrical-main ia-main">{children}</main>
       <footer className="ia-footer">

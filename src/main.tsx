@@ -10,6 +10,7 @@ import App from './App';
 import './styles.css';
 import './typography.css';
 import './navigation-redesign.css';
+import './shop-catalogue.css';
 
 document.documentElement.dataset.theme = 'dark';
 document.documentElement.dataset.experience = 'tech';
