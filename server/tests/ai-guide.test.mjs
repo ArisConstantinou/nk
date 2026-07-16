@@ -31,6 +31,19 @@ test('guide proposal rejects destructive actions and unapproved media', () => {
   assert.throws(() => validateGuideProposal({...proposal, component: {...proposal.component, images: [...proposal.component.images, 'https://example.com/invented.jpg']}}, context), error => error.code === 'ai_unapproved_media');
 });
 
+test('guide context preserves the user brief and derives safe build limits', () => {
+  const result = normalizeGuideContext({
+    brief: {title: 'Commercial lighting', pageType: 'service', goal: 'leads', audience: 'commercial', tone: 'technical', requestedFeatures: ['hero', 'services', 'process', 'cta'], notes: 'Focus on restaurants.', autoApply: true},
+    page: {id: 'guided', slug: 'guided-page-test', title: 'Commercial lighting', route: '/pages/guided-page-test', sections: []},
+  });
+  assert.equal(result.brief.title, 'Commercial lighting');
+  assert.equal(result.brief.audience, 'commercial');
+  assert.deepEqual(result.brief.requestedFeatures, ['hero', 'services', 'process', 'cta']);
+  assert.equal(result.constraints.targetSections, 4);
+  assert.equal(result.constraints.maxGuideSteps, 32);
+  assert.equal(result.constraints.noAutomaticPublish, true);
+});
+
 test('guide request uses strict structured output and validates its response', async () => {
   let requestBody;
   const fetchImpl = async (_url, init) => {

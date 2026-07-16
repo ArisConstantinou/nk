@@ -503,13 +503,13 @@ html[data-experience='tech'] .electrical-shell{
 }
 
 /* Authenticated visual-editor preview affordances. These styles activate only inside the nonce-protected preview iframe. */
-.nk-visual-preview [data-visual-kind][data-visual-path]{transition:outline-color .12s ease,box-shadow .12s ease;outline:1px dashed transparent;outline-offset:3px;cursor:pointer}
-.nk-visual-preview [data-visual-kind][data-visual-path]:hover{outline-color:#32c98d;box-shadow:0 0 0 5px rgba(50,201,141,.1)}
-.nk-visual-preview [data-visual-edit="text"][contenteditable="true"]{cursor:text;min-width:.5em}
-.nk-visual-preview [data-visual-edit="text"][contenteditable="true"]:focus,.nk-visual-preview .nk-visual-selected{outline:3px solid #2fd092!important;outline-offset:4px;box-shadow:0 0 0 7px rgba(47,208,146,.16)!important}
-.nk-visual-preview [data-visual-edit="image"]{cursor:copy}
-.nk-visual-preview [data-visual-edit="section"]{outline-offset:-3px}
-.nk-visual-preview [contenteditable="true"]:empty::before{content:'Type here';color:currentColor;opacity:.48}
+.nk-visual-preview.nk-visual-edit-enabled [data-visual-kind][data-visual-path]{transition:outline-color .12s ease,box-shadow .12s ease;outline:1px dashed transparent;outline-offset:3px;cursor:pointer}
+.nk-visual-preview.nk-visual-edit-enabled [data-visual-kind][data-visual-path]:hover{outline-color:#32c98d;box-shadow:0 0 0 5px rgba(50,201,141,.1)}
+.nk-visual-preview.nk-visual-edit-enabled [data-visual-edit="text"][contenteditable="true"]{cursor:text;min-width:.5em}
+.nk-visual-preview.nk-visual-edit-enabled [data-visual-edit="text"][contenteditable="true"]:focus,.nk-visual-preview.nk-visual-edit-enabled .nk-visual-selected{outline:3px solid #2fd092!important;outline-offset:4px;box-shadow:0 0 0 7px rgba(47,208,146,.16)!important}
+.nk-visual-preview.nk-visual-edit-enabled [data-visual-edit="image"]{cursor:copy}
+.nk-visual-preview.nk-visual-edit-enabled [data-visual-edit="section"]{outline-offset:-3px}
+.nk-visual-preview.nk-visual-edit-enabled [contenteditable="true"]:empty::before{content:'Type here';color:currentColor;opacity:.48}
 .nk-visual-preview .nk-visual-move-selected{outline:3px solid #2fd092!important;outline-offset:5px;box-shadow:0 0 0 8px rgba(47,208,146,.14)!important}
 .nk-visual-preview .nk-visual-positioning{will-change:translate;outline-color:#55d5c2!important;box-shadow:0 0 0 9px rgba(85,213,194,.2)!important}
 .nk-visual-preview .nk-visual-free-move-handle{position:fixed;z-index:2147483600;width:40px;height:40px;margin:0;padding:0;display:grid;place-items:center;border:1px solid #6de4d2;border-radius:10px;background:#07151d;color:#6de4d2;box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 3px rgba(85,213,194,.14);cursor:grab;touch-action:none}
@@ -517,6 +517,16 @@ html[data-experience='tech'] .electrical-shell{
 .nk-visual-preview .nk-visual-free-move-handle:hover,.nk-visual-preview .nk-visual-free-move-handle:focus-visible{background:#0d2930;color:#fff;outline:3px solid rgba(85,213,194,.45);outline-offset:2px}
 .nk-visual-preview .nk-visual-free-move-handle:active,.nk-visual-preview .nk-visual-free-move-handle.is-dragging{cursor:grabbing;background:#55d5c2;color:#041018}
 .nk-visual-preview .nk-visual-free-move-handle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.nk-visual-preview .nk-visual-context-toolbar{display:none!important}
+.nk-visual-preview .nk-visual-context-toolbar[hidden]{display:none}
+.nk-visual-preview .nk-visual-context-toolbar button{height:36px;min-width:42px;border:0;border-radius:8px;background:transparent;color:#dcebe5;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 8px;font:inherit;cursor:pointer;touch-action:none}
+.nk-visual-preview .nk-visual-context-toolbar button:hover,.nk-visual-preview .nk-visual-context-toolbar button:focus-visible{background:#15382f;color:#fff;outline:2px solid rgba(85,213,194,.48);outline-offset:0}
+.nk-visual-preview .nk-visual-context-toolbar button[data-action="move"]{cursor:grab}.nk-visual-preview .nk-visual-context-toolbar button[data-action="move"]:active{cursor:grabbing}
+.nk-visual-preview .nk-visual-context-toolbar button.danger{color:#ff9d96}.nk-visual-preview .nk-visual-context-toolbar button.danger:hover{background:#4a1f1c;color:#ffd1cd}
+.nk-visual-preview .nk-visual-context-toolbar button[hidden]{display:none}
+.nk-visual-preview .nk-visual-context-toolbar svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;flex:0 0 auto}
+.nk-visual-preview .nk-visual-context-toolbar span{pointer-events:none}
+@media(max-width:560px){.nk-visual-preview .nk-visual-context-toolbar{overflow-x:auto;scrollbar-width:none}.nk-visual-preview .nk-visual-context-toolbar::-webkit-scrollbar{display:none}.nk-visual-preview .nk-visual-context-toolbar button{min-width:40px;padding:0 7px}.nk-visual-preview .nk-visual-context-toolbar button span{display:none}}
 .nk-visual-preview [data-visual-dropzone="component"]{min-height:72px}
 
 /* The guide preview is a real builder route with no prebuilt header, footer or simulated content. */

@@ -15,7 +15,7 @@ function AuthShell({children, title, body}: {children: React.ReactNode; title: s
     : firebaseAvailable
       ? 'Google verifies online sign-in. The original local account remains available when Firebase is offline.'
       : 'Passwords, permissions and sessions are enforced by the local admin service.';
-  return <div className="nk-admin-auth"><aside><div className="nk-admin-auth-mark">NK</div><span>SECURE OPERATIONS</span><h1>{title}</h1><p>{body}</p><div><ShieldCheck/><b>{securityLabel}</b><small>{securityBody}</small></div></aside><main>{children}<a href={import.meta.env.BASE_URL}>← Return to NK Electrical</a></main></div>;
+  return <div className="nk-admin-auth"><aside><div className="nk-admin-auth-mark"><img src={`${import.meta.env.BASE_URL}assets/nk-logo-transparent-v2.png`} alt="NK Electrical" /></div><span>SECURE OPERATIONS</span><h1>{title}</h1><p>{body}</p><div><ShieldCheck/><b>{securityLabel}</b><small>{securityBody}</small></div></aside><main>{children}<a href={import.meta.env.BASE_URL}>← Return to NK Electrical</a></main></div>;
 }
 
 export function LoginPage() {

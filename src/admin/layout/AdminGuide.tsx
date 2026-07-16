@@ -1,134 +1,84 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {Bot, CheckCircle2, ChevronRight, Eye, Languages, LoaderCircle, Map, RefreshCw, Save, ShieldCheck, Sparkles, Trash2, X} from 'lucide-react';
+import {useCallback, useEffect, useRef, useState, type ReactNode} from 'react';
+import {Bot, CheckCircle2, ExternalLink, Eye, Languages, LayoutTemplate, LoaderCircle, Palette, RefreshCw, Rocket, Save, ShieldCheck, Sparkles, Target, Trash2, Users, X} from 'lucide-react';
 import {useLocation} from 'react-router-dom';
 import {errorMessage} from '../api';
-import {applyCmsGuideStep, finishCmsGuide, requestCmsGuideStart, requestCmsGuideStep, type CmsGuideLanguage, type CmsGuideSession, type CmsGuideStepResult} from '../guide/aiGuide';
+import {applyCmsGuideStep, finishCmsGuide, requestCmsGuideStart, requestCmsGuideStep, type CmsGuideBrief, type CmsGuideFeature, type CmsGuideFinishMode, type CmsGuideFinishResult, type CmsGuideLanguage, type CmsGuideSession, type CmsGuideStepResult} from '../guide/aiGuide';
 
-const copy = {
-  el: {
-    title: 'AI ΒΟΗΘΟΣ ΣΕΛΙΔΑΣ', close: 'Κλείσιμο έξυπνου βοηθού', badge: 'ΖΩΝΤΑΝΗ ΚΑΤΑΣΚΕΥΗ', safe: 'Ξεχωριστό draft · πραγματικά components · διαθέσιμο Undo',
-    introTitle: 'Ας χτίσουμε μια σελίδα μαζί.', intro: 'Θα ανοίξω μια κενή σελίδα. Πρώτα θα βάλουμε το section που κρατά το περιεχόμενο, μετά τον τίτλο και έπειτα το κείμενο. Θα βλέπεις κάθε στοιχείο να μπαίνει live μπροστά σου.',
-    start: 'Ξεκίνησε διαδραστικό οδηγό', returnEditor: 'Επιστροφή στον editor', starting: 'Ετοιμάζω τον κενό καμβά…', startingBody: 'Δημιουργείται ένα ξεχωριστό draft. Καμία υπάρχουσα σελίδα δεν αλλάζει.',
-    readyTitle: 'Ο κενός καμβάς είναι έτοιμος.', readyBody: 'Αναλύω αμέσως τη σελίδα και ετοιμάζω την πρώτη χρήσιμη προσθήκη.', analyse: 'Βρίσκω το επόμενο στοιχείο', analysing: 'Κοιτάζω τη σελίδα όπως είναι τώρα…', analysingBody: 'Ελέγχω τη δομή, τη σειρά και την οπτική ισορροπία. Δεν χρειάζεται να πατήσεις κάτι ακόμη.',
-    proposal: 'ΕΠΟΜΕΝΟ LIVE ΣΤΟΙΧΕΙΟ', why: 'Γιατί ακολουθεί τώρα', change: 'Πώς θα το αλλάξεις μετά', reanalyse: 'Νέα ανάλυση', manual: 'Το έβαλα/άλλαξα εγώ — έλεγξέ το', applying: 'Το προσθέτω live στο preview…',
-    added: 'LIVE ΣΤΟ PREVIEW', addedHint: 'Το στοιχείο προστέθηκε πραγματικά, επιλέχθηκε και φωτίζεται τώρα στον καμβά.', next: 'Βρες το επόμενο στοιχείο', finish: 'Τέλος για τώρα',
-    completeTitle: 'Η demo σελίδα είναι έτοιμη για την απόφασή σου.', completeBody: 'Μπορείς να την κρατήσεις ως κανονικό draft και να συνεχίσεις μόνος σου ή να τη διαγράψεις ολόκληρη και να ξεκινήσεις με νέο κενό καμβά.', keep: 'Κράτησε τη σελίδα', restart: 'Διαγραφή & νέο ξεκίνημα', finishing: 'Τακτοποιώ τη demo σελίδα…',
-    keptTitle: 'Η σελίδα κρατήθηκε ως draft.', keptBody: 'Δεν δημοσιεύτηκε. Παραμένει στον Website Editor και μπορείς να συνεχίσεις με τα ίδια εργαλεία, drag-and-drop και Undo.', done: 'Τέλος', error: 'Δεν ολοκληρώθηκε αυτό το βήμα', retry: 'Δοκιμή ξανά',
-  },
-  en: {
-    title: 'AI PAGE ASSISTANT', close: 'Close smart assistant', badge: 'LIVE BUILD', safe: 'Separate draft · real components · Undo available',
-    introTitle: "Let's build a page together.", intro: 'I will open a blank page. First we add the section that holds the content, then its heading, and then its text. You will see every element appear live in front of you.',
-    start: 'Start interactive guide', returnEditor: 'Return to editor', starting: 'Preparing the blank canvas…', startingBody: 'A separate draft is being created. No existing page is changed.',
-    readyTitle: 'Your blank canvas is ready.', readyBody: 'I am analysing it immediately and preparing the first useful addition.', analyse: 'Finding the next element', analysing: 'Reading the page as it is now…', analysingBody: 'I am checking structure, order and visual balance. You do not need to click anything yet.',
-    proposal: 'NEXT LIVE ELEMENT', why: 'Why it follows now', change: 'How to change it afterwards', reanalyse: 'Analyse again', manual: 'I added/changed it — check again', applying: 'Adding it live to the preview…',
-    added: 'LIVE IN THE PREVIEW', addedHint: 'The element was really added, selected and is highlighted on the canvas now.', next: 'Find the next element', finish: 'Finish here',
-    completeTitle: 'Your demo page is ready for your decision.', completeBody: 'Keep it as a normal draft and continue on your own, or delete the entire demo and begin with a new blank canvas.', keep: 'Keep this page', restart: 'Delete & start over', finishing: 'Tidying up the demo page…',
-    keptTitle: 'The page is now a normal draft.', keptBody: 'It was not published. It remains in the Website Editor with the same tools, drag and drop, and Undo.', done: 'Done', error: 'This step was not completed', retry: 'Try again',
-  },
-} as const;
+const fallbackBrief: CmsGuideBrief = {title: 'Νέα σελίδα NK Electrical', pageType: 'landing', goal: 'leads', audience: 'mixed', tone: 'professional', requestedFeatures: ['hero', 'services', 'benefits', 'gallery', 'cta'], notes: '', autoApply: true};
+type Phase = 'intro' | 'starting' | 'ready' | 'analysing' | 'proposal' | 'applying' | 'learning' | 'complete' | 'finishing' | 'kept' | 'published' | 'deleted' | 'error';
 
-type Phase = 'intro' | 'starting' | 'ready' | 'analysing' | 'proposal' | 'applying' | 'complete' | 'finishing' | 'kept' | 'error';
+const local = (language: CmsGuideLanguage, el: string, en: string) => language === 'el' ? el : en;
+const initialBrief = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('nk-admin-guide-brief') || '') as Partial<CmsGuideBrief>;
+    return {...fallbackBrief, ...saved, requestedFeatures: Array.isArray(saved.requestedFeatures) && saved.requestedFeatures.length ? saved.requestedFeatures : fallbackBrief.requestedFeatures};
+  } catch { return fallbackBrief; }
+};
+const liveRoute = (route: string) => `${import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')}${route}`;
 
 function actionLabel(result: CmsGuideStepResult, language: CmsGuideLanguage) {
-  if (result.proposal.action === 'insert_section') return language === 'el' ? 'Πρόσθεσε section live' : 'Add section live';
-  const labels = language === 'el'
-    ? {heading: 'Πρόσθεσε τίτλο', text: 'Πρόσθεσε παράγραφο', image: 'Πρόσθεσε εικόνα', gallery: 'Πρόσθεσε gallery', button: 'Πρόσθεσε κουμπί', icon: 'Πρόσθεσε εικονίδιο', divider: 'Πρόσθεσε διαχωριστικό'}
-    : {heading: 'Add heading', text: 'Add paragraph', image: 'Add image', gallery: 'Add gallery', button: 'Add button', icon: 'Add icon', divider: 'Add divider'};
-  return labels[result.proposal.component.type];
-}
-
-function appliedReceiptLabel(result: CmsGuideStepResult, language: CmsGuideLanguage) {
-  if (result.proposal.action === 'insert_section') return language === 'el'
-    ? 'Το section προστέθηκε live. Πάτησέ το στο preview για να το αλλάξεις.'
-    : 'The section was added live. Select it in the preview to change it.';
-  const labels = language === 'el'
-    ? {heading: 'Ο τίτλος', text: 'Η παράγραφος', image: 'Η εικόνα', gallery: 'Η συλλογή εικόνων', button: 'Το κουμπί', icon: 'Το εικονίδιο', divider: 'Ο διαχωριστής'}
-    : {heading: 'The heading', text: 'The paragraph', image: 'The image', gallery: 'The gallery', button: 'The button', icon: 'The icon', divider: 'The divider'};
-  const label = labels[result.proposal.component.type];
-  return language === 'el'
-    ? `${label} προστέθηκε live. Πάτησέ το στο preview για να το αλλάξεις.`
-    : `${label} was added live. Select it in the preview to change it.`;
+  if (result.proposal.action === 'insert_section') return local(language, `Νέο section: ${result.proposal.section.title}`, `New section: ${result.proposal.section.title}`);
+  const el = {heading: 'τίτλος', text: 'κείμενο', image: 'εικόνα', gallery: 'gallery', button: 'κουμπί', icon: 'εικονίδιο', divider: 'διαχωριστικό'};
+  return local(language, `Προσθήκη: ${el[result.proposal.component.type]}`, `Add: ${result.proposal.component.type}`);
 }
 
 export function AdminGuide({open, onClose, onNavigate}: {open: boolean; onClose: () => void; onNavigate: (to: string) => void}) {
   const location = useLocation();
   const [language, setLanguage] = useState<CmsGuideLanguage>(() => localStorage.getItem('nk-admin-guide-language') === 'en' ? 'en' : 'el');
+  const [brief, setBrief] = useState<CmsGuideBrief>(initialBrief);
   const [phase, setPhase] = useState<Phase>('intro');
   const [step, setStep] = useState(0);
   const [session, setSession] = useState<CmsGuideSession | null>(null);
   const [result, setResult] = useState<CmsGuideStepResult | null>(null);
   const [lastApplied, setLastApplied] = useState<CmsGuideStepResult | null>(null);
+  const [finished, setFinished] = useState<CmsGuideFinishResult | null>(null);
   const [failure, setFailure] = useState('');
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const pendingStartRef = useRef(false);
+  const pendingStart = useRef(false);
   const inEditor = location.pathname === '/admin/pages';
-  const text = copy[language];
-  const closeGuide = useCallback(() => {
-    if (phase === 'kept') {
-      setPhase('intro');
-      setStep(0);
-      setResult(null);
-      setLastApplied(null);
-      setFailure('');
-    }
-    onClose();
-  }, [onClose, phase]);
+  const autoApply = session?.brief.autoApply ?? brief.autoApply;
 
+  const reset = useCallback(() => {setPhase('intro'); setStep(0); setSession(null); setResult(null); setLastApplied(null); setFinished(null); setFailure('');}, []);
+  const close = useCallback(() => {if (['kept', 'published', 'deleted'].includes(phase)) reset(); onClose();}, [onClose, phase, reset]);
   useEffect(() => {localStorage.setItem('nk-admin-guide-language', language);}, [language]);
+  useEffect(() => {localStorage.setItem('nk-admin-guide-brief', JSON.stringify(brief));}, [brief]);
   useEffect(() => {if (open) window.setTimeout(() => closeRef.current?.focus(), 0);}, [open]);
   useEffect(() => {
     if (!open) return;
-    const keydown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && panelRef.current?.contains(document.activeElement)) closeGuide();
-    };
+    const keydown = (event: KeyboardEvent) => {if (event.key === 'Escape' && panelRef.current?.contains(document.activeElement)) close();};
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
-  }, [closeGuide, open]);
+  }, [close, open]);
+  useEffect(() => {if (open && ['proposal', 'learning', 'complete'].includes(phase)) panelRef.current?.querySelector('main')?.scrollTo({top: 0, behavior: 'smooth'});}, [open, phase, step]);
   useEffect(() => {
-    if (!open || !['proposal', 'complete'].includes(phase)) return;
-    panelRef.current?.querySelector('main')?.scrollTo({top: 0, behavior: 'smooth'});
-  }, [open, phase, step]);
-  useEffect(() => {
-    if (!open || !inEditor || !window.matchMedia('(max-width: 520px)').matches || !['ready', 'analysing', 'proposal', 'applying', 'complete'].includes(phase)) return;
-    const revealStage = () => {
-      const stage = document.querySelector<HTMLElement>('.nk-visual-stage');
-      if (!stage) return;
-      const top = stage.getBoundingClientRect().top + window.scrollY - 8;
-      window.scrollTo({top: Math.max(0, top), behavior: 'auto'});
-    };
-    const timer = window.setTimeout(revealStage, phase === 'ready' ? 240 : 60);
-    const settledTimer = window.setTimeout(revealStage, phase === 'ready' ? 520 : 420);
-    return () => {window.clearTimeout(timer); window.clearTimeout(settledTimer);};
+    if (!open || !inEditor || !window.matchMedia('(max-width: 520px)').matches || !['ready', 'analysing', 'proposal', 'applying', 'learning', 'complete'].includes(phase)) return;
+    const reveal = () => {const stage = document.querySelector<HTMLElement>('.nk-visual-stage'); if (stage) window.scrollTo({top: Math.max(0, stage.getBoundingClientRect().top + window.scrollY - 8), behavior: 'auto'});};
+    const first = window.setTimeout(reveal, 80); const settled = window.setTimeout(reveal, 420);
+    return () => {window.clearTimeout(first); window.clearTimeout(settled);};
   }, [inEditor, open, phase, step]);
 
   const startInEditor = useCallback(async () => {
-    setPhase('starting'); setFailure(''); setResult(null); setLastApplied(null); setStep(0);
+    setPhase('starting'); setFailure(''); setResult(null); setLastApplied(null); setFinished(null); setStep(0);
     try {
-      const started = await requestCmsGuideStart(language);
-      setSession(started.session);
-      setPhase('ready');
+      const normalized = {...brief, title: brief.title.trim() || fallbackBrief.title, requestedFeatures: [...new Set<CmsGuideFeature>(['hero', ...brief.requestedFeatures])]};
+      const started = await requestCmsGuideStart(language, normalized);
+      setBrief(normalized); setSession(started.session); setPhase('ready');
     } catch (error) {setFailure(errorMessage(error)); setPhase('error');}
-  }, [language]);
-
+  }, [brief, language]);
   useEffect(() => {
-    if (!open || !inEditor || !pendingStartRef.current) return;
-    pendingStartRef.current = false;
+    if (!open || !inEditor || !pendingStart.current) return;
+    pendingStart.current = false;
     const timer = window.setTimeout(() => void startInEditor(), 0);
     return () => window.clearTimeout(timer);
   }, [inEditor, open, startInEditor]);
+  const start = () => {if (inEditor) void startInEditor(); else {pendingStart.current = true; onNavigate('/admin/pages');}};
 
-  const start = () => {
-    if (inEditor) {void startInEditor(); return;}
-    pendingStartRef.current = true;
-    onNavigate('/admin/pages');
-  };
   const analyse = useCallback(async () => {
     setPhase('analysing'); setFailure('');
     try {
       const next = await requestCmsGuideStep(language);
-      setResult(next);
-      setPhase(next.proposal.action === 'complete' ? 'complete' : 'proposal');
+      setResult(next); setPhase(next.proposal.action === 'complete' ? 'complete' : 'proposal');
     } catch (error) {setFailure(errorMessage(error)); setPhase('error');}
   }, [language]);
   useEffect(() => {
@@ -136,93 +86,104 @@ export function AdminGuide({open, onClose, onNavigate}: {open: boolean; onClose:
     const timer = window.setTimeout(() => void analyse(), 180);
     return () => window.clearTimeout(timer);
   }, [analyse, inEditor, open, phase, session]);
-  const apply = async () => {
-    if (!result) return;
+
+  const apply = useCallback(async () => {
+    if (!result || phase !== 'proposal') return;
     setPhase('applying'); setFailure('');
     try {
       const applied = await applyCmsGuideStep(result.proposal, result.context);
-      setLastApplied(applied); setStep(current => current + 1);
-      await analyse();
+      setLastApplied(applied); setStep(value => value + 1); setPhase('learning');
     } catch (error) {setFailure(errorMessage(error)); setPhase('error');}
-  };
-  const checkManualChange = () => {setLastApplied(null); void analyse();};
-  const keep = async () => {
+  }, [phase, result]);
+  useEffect(() => {
+    if (!open || phase !== 'proposal' || !result || !autoApply) return;
+    const timer = window.setTimeout(() => void apply(), 1400);
+    return () => window.clearTimeout(timer);
+  }, [apply, autoApply, open, phase, result]);
+
+  const finish = async (mode: CmsGuideFinishMode) => {
     setPhase('finishing'); setFailure('');
-    try {await finishCmsGuide('keep'); setSession(null); setPhase('kept');}
-    catch (error) {setFailure(errorMessage(error)); setPhase('error');}
-  };
-  const restart = async () => {
-    setPhase('finishing'); setFailure('');
-    try {await finishCmsGuide('discard'); setSession(null); await startInEditor();}
-    catch (error) {setFailure(errorMessage(error)); setPhase('error');}
+    try {
+      const outcome = await finishCmsGuide(mode);
+      setFinished(outcome); setSession(null); setPhase(mode === 'publish' ? 'published' : mode === 'keep' ? 'kept' : 'deleted');
+    } catch (error) {setFailure(errorMessage(error)); setPhase('error');}
   };
 
   if (!open) return null;
-  const loading = ['starting', 'analysing', 'applying', 'finishing'].includes(phase);
+  const busy = ['starting', 'analysing', 'applying', 'finishing'].includes(phase);
   return <div className="nk-admin-guide-overlay nk-admin-ai-guide-overlay" role="presentation">
-    <div className="nk-admin-ai-guide-preview-label" aria-hidden="true"><Eye/>{language === 'el' ? 'LIVE PREVIEW ΠΑΝΩ' : 'LIVE PREVIEW ABOVE'}</div>
-    <section ref={panelRef} className="nk-admin-guide nk-admin-ai-guide" role="dialog" aria-modal="false" aria-labelledby="admin-guide-title">
-      <header><div><Bot/><span>{text.title}</span></div><button ref={closeRef} type="button" onClick={closeGuide} aria-label={text.close}><X/></button></header>
-      <div className="nk-admin-guide-language" aria-label="Guide language"><Languages/><button type="button" className={language === 'el' ? 'active' : ''} aria-pressed={language === 'el'} onClick={() => setLanguage('el')}>Ελληνικά</button><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button></div>
-      <div className="nk-admin-ai-guide-step"><Sparkles/><span>{text.badge}{session ? ` · ${String(step + 1).padStart(2, '0')}` : ''}</span><b>{text.safe}</b></div>
+    <div className="nk-admin-ai-guide-preview-label" aria-hidden="true"><Eye/>{local(language, 'LIVE PREVIEW ΠΑΝΩ', 'LIVE PREVIEW ABOVE')}</div>
+    <section id="admin-ai-page-guide" ref={panelRef} className="nk-admin-guide nk-admin-ai-guide nk-admin-ai-guide--next" role="dialog" aria-modal="false" aria-labelledby="admin-guide-title">
+      <header><div><Bot/><span>{local(language, 'AI ΟΔΗΓΟΣ ΣΕΛΙΔΑΣ', 'AI PAGE GUIDE')}</span></div><button ref={closeRef} type="button" onClick={close} aria-label={local(language, 'Κλείσιμο AI οδηγού', 'Close AI guide')}><X/></button></header>
+      <div className="nk-admin-guide-language"><Languages/><button type="button" className={language === 'el' ? 'active' : ''} onClick={() => setLanguage('el')}>Ελληνικά</button><button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>English</button></div>
+      <div className="nk-admin-ai-guide-step"><Sparkles/><span>{local(language, 'ΖΩΝΤΑΝΗ ΚΑΤΑΣΚΕΥΗ', 'LIVE BUILD')}{session ? ` · ${String(step + 1).padStart(2, '0')}` : ''}</span><b>{local(language, 'Ξεχωριστό draft · πραγματικά components · Undo', 'Separate draft · real components · Undo')}</b></div>
       <main aria-live="polite">
-        {lastApplied && !['finishing', 'kept'].includes(phase) && <LiveReceipt result={lastApplied} language={language}/>}
-        {!inEditor && session ? <div className="nk-admin-ai-guide-intro"><Map/><small>{text.badge}</small><h2 id="admin-guide-title">{text.readyTitle}</h2><p>{text.readyBody}</p><button type="button" onClick={() => onNavigate('/admin/pages')}>{text.returnEditor}<ChevronRight/></button></div>
-          : phase === 'intro' ? <div className="nk-admin-ai-guide-intro"><Bot/><small>{text.badge}</small><h2 id="admin-guide-title">{text.introTitle}</h2><p>{text.intro}</p><div className="nk-admin-ai-safety"><ShieldCheck/><span><b>{text.safe}</b><small>{language === 'el' ? 'Η demo σελίδα δεν δημοσιεύεται ποτέ αυτόματα.' : 'The demo page is never published automatically.'}</small></span></div></div>
-          : phase === 'starting' ? <GuideLoading title={text.starting} body={text.startingBody}/>
-          : phase === 'ready' ? <div className="nk-admin-ai-guide-intro"><CheckCircle2/><small>{text.badge}</small><h2 id="admin-guide-title">{text.readyTitle}</h2><p>{text.readyBody}</p></div>
-          : phase === 'analysing' ? <GuideLoading title={text.analysing} body={text.analysingBody}/>
-          : phase === 'applying' ? <GuideLoading title={text.applying} body={language === 'el' ? 'Χρησιμοποιώ την ίδια λειτουργία προσθήκης που χρησιμοποιούν τα κουμπιά και το drag-and-drop του editor.' : 'I am using the same add action as the editor buttons and drag-and-drop.'}/>
-          : phase === 'finishing' ? <GuideLoading title={text.finishing} body={language === 'el' ? 'Η επιλογή σου εφαρμόζεται μόνο στην προσωρινή demo σελίδα.' : 'Your choice is being applied only to the temporary demo page.'}/>
-          : phase === 'proposal' && result ? <div className="nk-admin-ai-guide-result is-proposal"><Sparkles/><small>{text.proposal} · {String(step + 1).padStart(2, '0')}</small><h2 id="admin-guide-title">{result.proposal.explanation.summary}</h2><GuideRecipe result={result} language={language} onApply={apply}/><section><b>{text.why}</b><p>{result.proposal.explanation.reason}</p></section><section><b>{text.change}</b><p>{result.proposal.explanation.howToChange}</p></section><p className="nk-admin-guide-manual-hint">{language === 'el' ? 'Η πράσινη επιλογή είναι η σωστή για τώρα. Εναλλακτικά, κάνε την αλλαγή μόνος σου στον editor και πάτησε τον έλεγχο από κάτω.' : 'The green option is the right one for now. Alternatively, make the change yourself in the editor and use the check button below.'}</p></div>
-          : phase === 'complete' ? <div className="nk-admin-ai-guide-result is-complete"><CheckCircle2/><small>{text.badge}</small><h2 id="admin-guide-title">{text.completeTitle}</h2><p className="nk-admin-guide-added-hint">{text.completeBody}</p></div>
-          : phase === 'kept' ? <div className="nk-admin-ai-guide-result is-complete"><Save/><small>{text.added}</small><h2 id="admin-guide-title">{text.keptTitle}</h2><p className="nk-admin-guide-added-hint">{text.keptBody}</p></div>
-          : <div className="nk-admin-ai-guide-error" role="alert"><X/><small>{text.error}</small><h2 id="admin-guide-title">{failure}</h2><p>{lastApplied ? (language === 'el' ? 'Το προηγούμενο στοιχείο μπήκε live. Μόνο ο έλεγχος για το επόμενο βήμα χρειάζεται επανάληψη.' : 'The previous element was added live. Only the check for the next step needs to run again.') : (language === 'el' ? 'Δεν εφαρμόστηκε καμία επιπλέον αλλαγή.' : 'No additional change was applied.')}</p></div>}
+        {phase === 'intro' ? <Intro brief={brief} language={language} onChange={setBrief}/>
+          : phase === 'starting' ? <Loading title={local(language, 'Ετοιμάζω τον καμβά…', 'Preparing the canvas…')} body={local(language, 'Δημιουργείται ξεχωριστό draft. Καμία υπάρχουσα σελίδα δεν αλλάζει.', 'A separate draft is being created. No existing page is changed.')}/>
+          : phase === 'ready' ? <State icon={<CheckCircle2/>} eyebrow="DRAFT" title={local(language, 'Το draft είναι έτοιμο.', 'The draft is ready.')} body={local(language, 'Στέλνω την τρέχουσα δομή σε JSON για την καλύτερη πρώτη ενέργεια.', 'Sending the current JSON structure for the best first action.')}/>
+          : phase === 'analysing' ? <Loading title={local(language, 'Αναλύω ξανά ολόκληρη τη σελίδα…', 'Re-analysing the entire page…')} body={local(language, 'Ελέγχω στόχο, δομή, περιεχόμενο, media, σειρά και responsive constraints.', 'Checking goal, structure, content, media, order and responsive constraints.')}/>
+          : phase === 'applying' ? <Loading title={local(language, 'Εφαρμόζω την ενέργεια στον υπάρχοντα editor…', 'Applying the action through the existing editor…')} body={local(language, 'Χρησιμοποιώ το ίδιο mutation και history με το drag-and-drop.', 'Using the same mutation and history as drag-and-drop.')}/>
+          : phase === 'finishing' ? <Loading title={local(language, 'Εφαρμόζω την τελική επιλογή…', 'Applying the final choice…')} body={local(language, 'Η επιλογή αφορά μόνο τη σελίδα αυτής της συνεδρίας.', 'The choice affects only this session page.')}/>
+          : phase === 'proposal' && result ? <Proposal result={result} language={language} autoApply={autoApply}/>
+          : phase === 'learning' && lastApplied ? <Learning result={lastApplied} language={language}/>
+          : phase === 'complete' && result ? <><State icon={<CheckCircle2/>} eyebrow="AI READY" title={local(language, 'Η σελίδα είναι έτοιμη για την απόφασή σου.', 'The page is ready for your decision.')} body={local(language, 'Η νέα ανάλυση κάλυψε τα ζητούμενα. Τίποτα δεν δημοσιεύεται χωρίς τη ρητή επιλογή σου.', 'The fresh analysis covered the request. Nothing is published without your explicit choice.')}/><ContextJson result={result} language={language}/></>
+          : phase === 'kept' ? <State icon={<Save/>} eyebrow="DRAFT" title={local(language, 'Η σελίδα κρατήθηκε ως draft.', 'The page was kept as a draft.')} body={local(language, 'Παραμένει στον Website Editor με drag-and-drop, Properties, βελάκια και Undo.', 'It remains in the Website Editor with drag-and-drop, Properties, arrow keys and Undo.')}/>
+          : phase === 'published' ? <><State icon={<Rocket/>} eyebrow="LIVE" title={local(language, 'Η σελίδα δημοσιεύτηκε.', 'The page is published.')} body={local(language, 'Το draft έγινε live έκδοση και παραμένει πλήρως επεξεργάσιμο.', 'The draft became the live version and remains fully editable.')}/>{finished && <a className="nk-admin-guide-live-link" href={liveRoute(finished.route)} target="_blank" rel="noreferrer">{local(language, 'Άνοιξε τη live σελίδα', 'Open the live page')}<ExternalLink/></a>}</>
+          : phase === 'deleted' ? <State icon={<Trash2/>} eyebrow="DELETED" title={local(language, 'Η draft σελίδα διαγράφηκε.', 'The draft page was deleted.')} body={local(language, 'Καμία άλλη σελίδα ή media δεν επηρεάστηκε.', 'No other page or media was affected.')}/>
+          : <div className="nk-admin-ai-guide-error" role="alert"><X/><small>{local(language, 'ΤΟ ΒΗΜΑ ΔΕΝ ΟΛΟΚΛΗΡΩΘΗΚΕ', 'STEP NOT COMPLETED')}</small><h2 id="admin-guide-title">{failure}</h2><p>{local(language, 'Δεν εφαρμόστηκε καταστροφική αλλαγή. Μπορείς να αναλύσεις ξανά.', 'No destructive change was applied. You can analyse again.')}</p></div>}
       </main>
       <footer>
-        {phase === 'intro' && <button type="button" onClick={start}><Sparkles/>{text.start}</button>}
-        {phase === 'proposal' && result && <button type="button" className="nk-admin-guide-manual-action" onClick={checkManualChange}><RefreshCw/>{text.manual}</button>}
-        {phase === 'complete' && <div className="nk-admin-guide-step-actions is-finish"><button className="danger" type="button" onClick={() => void restart()}><Trash2/>{text.restart}</button><button type="button" onClick={() => void keep()}><Save/>{text.keep}</button></div>}
-        {phase === 'kept' && <button type="button" onClick={closeGuide}><CheckCircle2/>{text.done}</button>}
-        {phase === 'error' && <button type="button" onClick={() => session ? void analyse() : start()}><RefreshCw/>{text.retry}</button>}
-        {loading && <button type="button" disabled><LoaderCircle className="nk-admin-spin"/>{phase === 'starting' ? text.starting : phase === 'finishing' ? text.finishing : phase === 'applying' ? text.applying : lastApplied ? (language === 'el' ? 'Μπήκε live · βρίσκω το επόμενο…' : 'Added live · finding the next step…') : text.analysing}</button>}
+        {phase === 'intro' && <button type="button" onClick={start} disabled={!brief.title.trim()}><Sparkles/>{local(language, 'Δημιούργησε το draft', 'Create the draft')}</button>}
+        {phase === 'proposal' && result && (autoApply ? <button type="button" disabled><LoaderCircle className="nk-admin-spin"/>{local(language, 'Αυτόματη εφαρμογή…', 'Applying automatically…')}</button> : <div className="nk-admin-guide-step-actions"><button className="secondary" type="button" onClick={() => void analyse()}><RefreshCw/>{local(language, 'Ανάλυσε τη δική μου αλλαγή', 'Analyse my change')}</button><button type="button" onClick={() => void apply()}><Sparkles/>{actionLabel(result, language)}</button></div>)}
+        {phase === 'learning' && <div className="nk-admin-guide-step-actions"><button className="danger" type="button" onClick={() => void finish('discard')}><Trash2/>{local(language, 'Σταμάτα & διέγραψε', 'Stop & delete')}</button><button type="button" onClick={() => void analyse()}><RefreshCw/>{local(language, 'Ανάλυσε το επόμενο βήμα', 'Analyse the next step')}</button></div>}
+        {phase === 'complete' && <div className="nk-admin-guide-final-actions"><button className="danger" type="button" onClick={() => void finish('discard')}><Trash2/>{local(language, 'Διαγραφή', 'Delete')}</button><button className="secondary" type="button" onClick={() => void finish('keep')}><Save/>{local(language, 'Κράτησε draft', 'Keep draft')}</button><button type="button" onClick={() => void finish('publish')}><Rocket/>{local(language, 'Δημοσίευση', 'Publish')}</button></div>}
+        {['kept', 'published'].includes(phase) && <button type="button" onClick={close}><CheckCircle2/>{local(language, 'Τέλος', 'Done')}</button>}
+        {phase === 'deleted' && <button type="button" onClick={reset}><Sparkles/>{local(language, 'Δημιούργησε άλλη σελίδα', 'Create another page')}</button>}
+        {phase === 'error' && <button type="button" onClick={() => session ? void analyse() : start()}><RefreshCw/>{local(language, 'Δοκιμή ξανά', 'Try again')}</button>}
+        {busy && <button type="button" disabled><LoaderCircle className="nk-admin-spin"/>{local(language, 'Εργασία σε εξέλιξη…', 'Working…')}</button>}
       </footer>
     </section>
   </div>;
 }
 
-function GuideLoading({title, body}: {title: string; body: string}) {
+function Intro({brief, language, onChange}: {brief: CmsGuideBrief; language: CmsGuideLanguage; onChange: (brief: CmsGuideBrief) => void}) {
+  return <div className="nk-admin-ai-guide-intro nk-admin-guide-brief"><Bot/><small>AI BRIEF</small><h2 id="admin-guide-title">{local(language, 'Πες μου τι σελίδα χρειάζεσαι.', 'Tell me what page you need.')}</h2><p>{local(language, 'Ο οδηγός χρησιμοποιεί τον υπάρχοντα Visual Editor, αναλύει νέο JSON πριν από κάθε βήμα και εφαρμόζει μία ασφαλή ενέργεια τη φορά.', 'The guide uses the existing Visual Editor, analyses fresh JSON before every step and applies one safe action at a time.')}</p><BriefForm brief={brief} language={language} onChange={onChange}/><div className="nk-admin-ai-safety"><ShieldCheck/><span><b>{local(language, 'Draft-safe κατασκευή', 'Draft-safe build')}</b><small>{local(language, 'Η δημοσίευση είναι πάντα ξεχωριστή τελική επιλογή.', 'Publishing is always a separate final choice.')}</small></span></div></div>;
+}
+
+function BriefForm({brief, language, onChange}: {brief: CmsGuideBrief; language: CmsGuideLanguage; onChange: (brief: CmsGuideBrief) => void}) {
+  const features: Array<[CmsGuideFeature, string]> = [['hero', 'Hero'], ['services', local(language, 'Υπηρεσίες', 'Services')], ['benefits', local(language, 'Οφέλη', 'Benefits')], ['process', local(language, 'Διαδικασία', 'Process')], ['gallery', 'Gallery'], ['cta', 'CTA']];
+  const toggle = (feature: CmsGuideFeature) => {if (feature !== 'hero') onChange({...brief, requestedFeatures: brief.requestedFeatures.includes(feature) ? brief.requestedFeatures.filter(item => item !== feature) : [...brief.requestedFeatures, feature]});};
+  return <div className="nk-admin-guide-brief-form">
+    <label className="is-wide"><span>{local(language, 'Όνομα σελίδας', 'Page name')}</span><input value={brief.title} maxLength={240} onChange={event => onChange({...brief, title: event.target.value})}/></label>
+    <Select icon={<LayoutTemplate/>} label={local(language, 'Τύπος σελίδας', 'Page type')} value={brief.pageType} onChange={value => onChange({...brief, pageType: value as CmsGuideBrief['pageType']})} options={[['landing', 'Landing page'], ['service', local(language, 'Σελίδα υπηρεσίας', 'Service page')], ['portfolio', 'Portfolio'], ['company', local(language, 'Εταιρική σελίδα', 'Company page')], ['contact', local(language, 'Σελίδα επικοινωνίας', 'Contact page')]]}/>
+    <Select icon={<Target/>} label={local(language, 'Κύριος στόχος', 'Primary goal')} value={brief.goal} onChange={value => onChange({...brief, goal: value as CmsGuideBrief['goal']})} options={[['leads', local(language, 'Νέες επικοινωνίες', 'Generate enquiries')], ['explain', local(language, 'Εξήγηση υπηρεσίας', 'Explain the offer')], ['showcase', local(language, 'Παρουσίαση έργων', 'Showcase work')], ['trust', local(language, 'Χτίσιμο εμπιστοσύνης', 'Build trust')]]}/>
+    <Select icon={<Users/>} label={local(language, 'Κοινό', 'Audience')} value={brief.audience} onChange={value => onChange({...brief, audience: value as CmsGuideBrief['audience']})} options={[['mixed', local(language, 'Κατοικίες & επιχειρήσεις', 'Homes & businesses')], ['residential', local(language, 'Κατοικίες', 'Residential')], ['commercial', local(language, 'Επιχειρήσεις', 'Commercial')]]}/>
+    <Select icon={<Palette/>} label={local(language, 'Ύφος', 'Tone')} value={brief.tone} onChange={value => onChange({...brief, tone: value as CmsGuideBrief['tone']})} options={[['professional', local(language, 'Επαγγελματικό', 'Professional')], ['bold', local(language, 'Δυναμικό', 'Bold')], ['technical', local(language, 'Τεχνικό', 'Technical')], ['warm', local(language, 'Φιλικό', 'Warm')]]}/>
+    <fieldset><legend>{local(language, 'Τι πρέπει να περιέχει;', 'What should it contain?')}</legend><div>{features.map(([id, label]) => <button key={id} type="button" className={brief.requestedFeatures.includes(id) || id === 'hero' ? 'active' : ''} onClick={() => toggle(id)} disabled={id === 'hero'}>{brief.requestedFeatures.includes(id) || id === 'hero' ? <CheckCircle2/> : <span/>}{label}</button>)}</div></fieldset>
+    <label className="is-wide"><span>{local(language, 'Πρόσθετες οδηγίες', 'Extra direction')}</span><textarea rows={3} maxLength={1200} value={brief.notes} onChange={event => onChange({...brief, notes: event.target.value})}/></label>
+    <label className="is-wide nk-admin-guide-auto"><input type="checkbox" checked={brief.autoApply} onChange={event => onChange({...brief, autoApply: event.target.checked})}/><span><b>{local(language, 'Αυτόματη εφαρμογή κάθε ασφαλούς βήματος', 'Apply every safe step automatically')}</b><small>{local(language, 'Με παύση για μάθηση πριν από την επόμενη ανάλυση.', 'Pauses for learning before the next analysis.')}</small></span></label>
+  </div>;
+}
+
+function Select({icon, label, value, onChange, options}: {icon: ReactNode; label: string; value: string; onChange: (value: string) => void; options: Array<[string, string]>}) {
+  return <label><span>{icon}{label}</span><select value={value} onChange={event => onChange(event.target.value)}>{options.map(([id, text]) => <option value={id} key={id}>{text}</option>)}</select></label>;
+}
+
+function Proposal({result, language, autoApply}: {result: CmsGuideStepResult; language: CmsGuideLanguage; autoApply: boolean}) {
+  return <div className="nk-admin-ai-guide-result is-proposal"><Sparkles/><small>{local(language, 'ΒΕΛΤΙΣΤΗ ΕΠΟΜΕΝΗ ΕΝΕΡΓΕΙΑ', 'BEST NEXT ACTION')}</small><h2 id="admin-guide-title">{result.proposal.explanation.summary}</h2><div className="nk-admin-guide-action-card"><span>{actionLabel(result, language)}</span><b>{autoApply ? local(language, 'Εφαρμόζεται αυτόματα σε λίγο', 'Applies automatically in a moment') : local(language, 'Έτοιμο για εφαρμογή', 'Ready to apply')}</b></div><Explain result={result} language={language}/><ContextJson result={result} language={language}/></div>;
+}
+function Learning({result, language}: {result: CmsGuideStepResult; language: CmsGuideLanguage}) {
+  return <div className="nk-admin-ai-guide-result is-learning"><CheckCircle2/><small>{local(language, 'ΤΟ ΒΗΜΑ ΕΦΑΡΜΟΣΤΗΚΕ', 'THE STEP WAS APPLIED')}</small><h2 id="admin-guide-title">{result.proposal.explanation.summary}</h2><div className="nk-admin-ai-live-receipt"><CheckCircle2/><span><small>LIVE PREVIEW</small><b>{actionLabel(result, language)}</b></span></div><Explain result={result} language={language}/>{result.proposal.designNotes.length > 0 && <ul>{result.proposal.designNotes.map(note => <li key={note}>{note}</li>)}</ul>}<p className="nk-admin-guide-practice">{local(language, 'Δοκίμασέ το τώρα στο preview. Η επόμενη ανάλυση θα διαβάσει ξανά τη νέα κατάσταση.', 'Try it now in the preview. The next analysis will read the new state again.')}</p></div>;
+}
+function Explain({result, language}: {result: CmsGuideStepResult; language: CmsGuideLanguage}) {
+  return <><section><b>{local(language, 'Γιατί μπαίνει εδώ', 'Why it belongs here')}</b><p>{result.proposal.explanation.reason}</p></section><section><b>{local(language, 'Μάθε κάνοντας', 'Learn by doing')}</b><p>{result.proposal.explanation.howToChange}</p></section></>;
+}
+function ContextJson({result, language}: {result: CmsGuideStepResult; language: CmsGuideLanguage}) {
+  return <details><summary><RefreshCw/>{local(language, 'JSON που αναλύθηκε για αυτό το βήμα', 'JSON analysed for this step')}</summary><pre>{JSON.stringify(result.context, null, 2)}</pre></details>;
+}
+function Loading({title, body}: {title: string; body: string}) {
   return <div className="nk-admin-ai-guide-loading"><LoaderCircle className="nk-admin-spin"/><h2 id="admin-guide-title">{title}</h2><p>{body}</p><div><i/><i/><i/></div></div>;
 }
-
-function LiveReceipt({result, language}: {result: CmsGuideStepResult; language: CmsGuideLanguage}) {
-  return <div className="nk-admin-ai-live-receipt" role="status"><CheckCircle2/><span><small>{language === 'el' ? 'LIVE ΣΤΟ PREVIEW' : 'LIVE IN THE PREVIEW'}</small><b>{appliedReceiptLabel(result, language)}</b></span></div>;
-}
-
-type RecipeKey = 'section' | 'heading' | 'text' | 'image' | 'button';
-
-function GuideRecipe({result, language, onApply}: {result: CmsGuideStepResult; language: CmsGuideLanguage; onApply: () => Promise<void>}) {
-  const items: Array<{key: RecipeKey; el: string; en: string}> = [
-    {key: 'section', el: 'Section', en: 'Section'},
-    {key: 'heading', el: 'Τίτλος / Header', en: 'Heading / Header'},
-    {key: 'text', el: 'Περιεχόμενο', en: 'Content'},
-    {key: 'image', el: 'Εικόνα (προαιρετικό)', en: 'Image (optional)'},
-    {key: 'button', el: 'Κουμπί', en: 'Button'},
-  ];
-  const sections = result.context.page.sections.filter(section => section.enabled !== false);
-  const components = sections.flatMap(section => section.components.filter(component => component.enabled !== false));
-  const current: RecipeKey | null = result.proposal.action === 'insert_section' ? 'section'
-    : result.proposal.action === 'insert_component' && result.proposal.component.type === 'heading' ? 'heading'
-    : result.proposal.action === 'insert_component' && result.proposal.component.type === 'text' ? 'text'
-    : result.proposal.action === 'insert_component' && ['image', 'gallery'].includes(result.proposal.component.type) ? 'image'
-    : result.proposal.action === 'insert_component' && result.proposal.component.type === 'button' ? 'button' : null;
-  const completed = (key: RecipeKey) => key === 'section' ? sections.length > 0 : components.some(component => component.type === key || (key === 'image' && component.type === 'gallery'));
-  return <div className="nk-admin-guide-recipe" aria-label={language === 'el' ? 'Σειρά κατασκευής σελίδας' : 'Page building sequence'}>{items.map((item, index) => {
-    const active = item.key === current;
-    const done = !active && completed(item.key);
-    return <button key={item.key} type="button" className={active ? 'is-current' : done ? 'is-done' : 'is-locked'} disabled={!active} onClick={() => void onApply()}>
-      <span>{done ? <CheckCircle2/> : String(index + 1).padStart(2, '0')}</span>
-      <span><b>{language === 'el' ? item.el : item.en}</b><small>{active ? actionLabel(result, language) : done ? (language === 'el' ? 'Μπήκε live' : 'Added live') : (language === 'el' ? 'Ακολουθεί αργότερα' : 'Comes later')}</small></span>
-    </button>;
-  })}</div>;
+function State({icon, eyebrow, title, body}: {icon: ReactNode; eyebrow: string; title: string; body: string}) {
+  return <div className="nk-admin-ai-guide-result is-complete">{icon}<small>{eyebrow}</small><h2 id="admin-guide-title">{title}</h2><p className="nk-admin-guide-added-hint">{body}</p></div>;
 }

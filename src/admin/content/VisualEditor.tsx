@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {AlertTriangle, Check, ChevronDown, Cloud, Copy, ExternalLink, Group, Image as ImageIcon, Layers3, Link2, LoaderCircle, Monitor, MousePointer2, Move, Plus, Redo2, Rocket, Save, Smartphone, Tablet, Tags, Trash2, Type, Undo2, Ungroup} from 'lucide-react';
+import {AlertTriangle, Check, ChevronDown, Cloud, Copy, ExternalLink, Group, Image as ImageIcon, Layers3, Link2, LoaderCircle, Monitor, MousePointer2, Move, PanelRightClose, PanelRightOpen, Pencil, Plus, Redo2, Rocket, Save, Smartphone, Tablet, Tags, Trash2, Type, Undo2, Ungroup, X} from 'lucide-react';
+import {useLocation} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
 import {canReadKind, canReadMedia, canWriteKind} from '../permissions';
@@ -249,6 +250,8 @@ function applyHistoryValue(record: ContentRecord, entry: VisualHistoryEntry, for
 
 export function VisualEditor({kind}: {kind: ContentKind}) {
   const {user} = useAdminAuth();
+  const editorLocation = useLocation();
+  const siteView = new URLSearchParams(editorLocation.search).get('siteView') === '1';
   const readableKinds = useMemo(() => user ? allKinds.filter(item => canReadKind(user.role, item)) : [], [user]);
   const editableKinds = useMemo(() => user ? allKinds.filter(item => canWriteKind(user.role, item)) : [], [user]);
   const [records, setRecords] = useState<ContentRecord[]>([]);
@@ -282,6 +285,11 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const historyCommandRef = useRef<(direction: 'undo' | 'redo', objectOnly?: boolean) => void>(() => undefined);
   const historyEchoGuardRef = useRef<{kind: ContentKind; slug: string; path: string; staleValue: unknown; expiresAt: number} | null>(null);
   const [guideSession, setGuideSession] = useState<{session: CmsGuideSession; returnRecordId: string} | null>(null);
+  const [editMode, setEditMode] = useState(() => !siteView);
+  const [inspectorOpen, setInspectorOpen] = useState(() => !siteView);
+  const previousSiteViewRef = useRef(siteView);
+  const inspectorRef = useRef<HTMLElement>(null);
+  const contextActionRef = useRef<(action: string) => void>(() => undefined);
 
   const replaceRecords = useCallback((updater: (current: ContentRecord[]) => ContentRecord[]) => {
     const next = updater(recordsRef.current);
@@ -293,8 +301,8 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const postRecords = useCallback((nextRecords = recordsRef.current, changedIds?: string[]) => {
     const changed = changedIds?.length ? new Set(changedIds) : null;
     const payload = changed ? nextRecords.filter(record => changed.has(record.id)) : nextRecords;
-    iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:records', nonce: nonceRef.current, mode: changed ? 'patch' : 'replace', editableKinds, records: payload.map(record => ({id: record.id, kind: record.kind, slug: record.slug, title: record.title, data: record.draft, position: record.position, publishedAt: record.publishedAt || ''}))}, window.location.origin);
-  }, [editableKinds]);
+    iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:records', nonce: nonceRef.current, mode: changed ? 'patch' : 'replace', editingEnabled: editMode, editableKinds: editMode ? editableKinds : [], records: payload.map(record => ({id: record.id, kind: record.kind, slug: record.slug, title: record.title, data: record.draft, position: record.position, publishedAt: record.publishedAt || ''}))}, window.location.origin);
+  }, [editMode, editableKinds]);
 
   const transitionPreview = useCallback((nextPath: string) => {
     const requiresDocumentLoad = previewDocumentKey(nextPath) !== previewDocumentKey(previewPath);
@@ -423,6 +431,14 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   }, [kind, readableKinds, user]);
 
   useEffect(() => {void load();}, [load]);
+  useEffect(() => {
+    if (previousSiteViewRef.current === siteView) return;
+    previousSiteViewRef.current = siteView;
+    setEditMode(!siteView);
+    setInspectorOpen(!siteView);
+    setSelection(null);
+  }, [siteView]);
+  useEffect(() => {if (frameReady) postRecords();}, [editMode, frameReady, postRecords]);
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!Object.values(savePhasesRef.current).some(value => value === 'unsaved' || value === 'saving')) return;
@@ -559,14 +575,34 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== iframeRef.current?.contentWindow || !event.data || typeof event.data !== 'object' || event.data.nonce !== nonceRef.current) return;
-      if (event.data.type === 'nk-visual-editor:ready') {setFrameReady(true); postRecords(); return;}
+      if (event.data.type === 'nk-visual-editor:ready') {
+        if (typeof event.data.path === 'string') {
+          const readyUrl = new URL(event.data.path, window.location.origin);
+          readyUrl.searchParams.delete('visualEditor');
+          const readyPath = logicalPreviewPath(readyUrl);
+          if (readyUrl.origin === window.location.origin && !readyPath.startsWith('/admin') && readyPath !== previewPath) {
+            const readyRecord = recordsRef.current.find(record => record.kind === 'page' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(readyPath));
+            if (readyRecord) setActiveRecordId(readyRecord.id);
+            setPreviewPath(readyPath);
+            setSelection(null);
+          }
+        }
+        setFrameReady(true); postRecords(); return;
+      }
       if (event.data.type === 'nk-visual-editor:navigate' && typeof event.data.path === 'string') {
         const url = new URL(event.data.path, window.location.origin);
         const nextPath = logicalPreviewPath(url);
-        if (url.origin === window.location.origin && !nextPath.startsWith('/admin')) {url.searchParams.delete('visualEditor'); transitionPreview(logicalPreviewPath(url));}
+        if (url.origin === window.location.origin && !nextPath.startsWith('/admin')) {
+          url.searchParams.delete('visualEditor');
+          const logicalPath = logicalPreviewPath(url);
+          const nextRecord = recordsRef.current.find(record => record.kind === 'page' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(logicalPath));
+          if (nextRecord) setActiveRecordId(nextRecord.id);
+          transitionPreview(logicalPath);
+        }
         return;
       }
       if (event.data.type === 'nk-visual-editor:blocked-action') {setNotice('Form submissions are disabled inside the editor preview. Open the live page to test a real submission.'); return;}
+      if (event.data.type === 'nk-visual-editor:context-action') {contextActionRef.current(String(event.data.action || '')); return;}
       if (event.data.type === 'nk-visual-editor:history-shortcut') {historyCommandRef.current(event.data.direction === 'redo' ? 'redo' : 'undo', event.data.objectOnly !== false); return;}
       if (event.data.type === 'nk-visual-editor:position') {handlePosition(event.data as Record<string, unknown>); return;}
       if (event.data.type === 'nk-visual-editor:drop') {handleDrop(event.data as Record<string, unknown>); return;}
@@ -582,7 +618,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       patchRecord(target, event.data.path, event.data.value, Boolean(event.data.commit), nextSelection);
     };
     window.addEventListener('message', onMessage); return () => window.removeEventListener('message', onMessage);
-  }, [editableKinds, handleDrop, handlePosition, patchRecord, postRecords, transitionPreview]);
+  }, [editableKinds, handleDrop, handlePosition, patchRecord, postRecords, previewPath, transitionPreview]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -607,13 +643,16 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const documentOptions = activeRecord && !kindRecords.some(record => record.id === activeRecord.id) ? [activeRecord, ...kindRecords] : kindRecords;
   const selectedRecord = selection ? records.find(record => record.kind === selection.kind && record.slug === selection.slug) : activeRecord;
   const selectedValue = selectedRecord && selection ? getPathValue(selectedRecord, selection.path) ?? selection.fallbackValue ?? '' : '';
+  const selectedLinkValue = selectedRecord && selection?.linkPath ? getPathValue(selectedRecord, selection.linkPath) ?? selection.linkFallbackValue ?? '' : '';
   const phase = activeRecord ? savePhases[activeRecord.id] || 'saved' : 'saved';
   const canWriteCurrent = Boolean(user && activeRecord && canWriteKind(user.role, activeRecord.kind));
   const activeSections = activeRecord?.kind === 'page' ? sectionsForRecord(activeRecord) : [];
   const selectedSection = selection?.sectionId ? activeSections.find(section => section.id === selection.sectionId) : selection?.objectType === 'section' ? activeSections.find(section => section.id === selection.objectId) : undefined;
   const selectedComponent = selection?.objectType === 'component' ? activeSections.flatMap(section => section.components).find(component => component.id === selection.objectId) : undefined;
   const settingsRecord = records.find(record => record.kind === 'settings');
-  const reusableComponents = [...(activeRecord?.kind === 'page' ? reusableFrom(activeRecord.draft.componentLibrary) : []), ...reusableFrom(settingsRecord?.draft.globalComponents)];
+  const previewPageRecord = records.find(record => record.kind === 'page' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(previewPath));
+  const pageForComponents = activeRecord?.kind === 'page' ? activeRecord : previewPageRecord;
+  const reusableComponents = [...(pageForComponents ? reusableFrom(pageForComponents.draft.componentLibrary) : []), ...reusableFrom(settingsRecord?.draft.globalComponents)];
   const activeHistory = activeRecord ? historyFrom(activeRecord.draft.editorHistory) : [];
   const selectedObjectKey = activeRecord && selection ? objectContext(activeRecord, selection.path, selection).objectKey : '';
   const shownHistory = historyMode === 'object' ? activeHistory.filter(entry => historyAffectsObject(entry, selectedObjectKey)) : activeHistory;
@@ -647,7 +686,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const mutateSections = (record: ContentRecord, sections: PageSection[], spec: HistorySpec) => {const next = cloneRecord(record); next.draft.sections = sections; return mutateWithHistory(record, next, spec);};
 
   const addSection = () => {
-    const page = activeRecord?.kind === 'page' ? activeRecord : recordsRef.current.find(record => record.kind === 'page' && previewRoute(record) === previewPath);
+    const page = activeRecord?.kind === 'page' ? activeRecord : recordsRef.current.find(record => record.kind === 'page' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(previewPath));
     if (!page || !editableKinds.includes('page')) return;
     const sections = sectionsForRecord(page); const section = newSection(); const index = sections.length; sections.push(section);
     mutateSections(page, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id}});
@@ -655,13 +694,15 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   };
 
   const addComponent = (type: PageComponentType, reusable?: ReusableComponent) => {
-    if (!activeRecord || activeRecord.kind !== 'page' || !editableKinds.includes('page')) return;
-    const sections = sectionsForRecord(activeRecord); let section = sections.find(item => item.id === selectedSection?.id) || sections[0];
+    const page = activeRecord?.kind === 'page' ? activeRecord : recordsRef.current.find(record => record.kind === 'page' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(previewPath));
+    if (!page || !editableKinds.includes('page')) return;
+    const sections = sectionsForRecord(page); let section = sections.find(item => item.id === selectedSection?.id) || sections[0];
     if (!section) {section = newSection(); section.components = []; sections.push(section);}
     const component = reusable ? normalizeComponent({...structuredClone(reusable.component), id: crypto.randomUUID(), reusableId: reusable.id, scope: reusable.scope, groupId: ''}) : newComponent(type);
     const index = section.components.length; section.components.push(component);
-    mutateSections(activeRecord, sections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index}, meta: {componentId: component.id, sectionId: section.id}});
-    setSelection({kind: 'page', slug: activeRecord.slug, path: pathForObject(sections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId: section.id, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
+    mutateSections(page, sections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index}, meta: {componentId: component.id, sectionId: section.id}});
+    setActiveRecordId(page.id);
+    setSelection({kind: 'page', slug: page.slug, path: pathForObject(sections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId: section.id, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
   };
 
   const duplicateSelected = () => {
@@ -713,6 +754,33 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     const restoreSelection: VisualSelection = {kind: activeRecord.kind, slug: activeRecord.slug, path: hiddenPath, edit: 'component', label, linkPath: '', sectionId: '', objectType: 'auto', objectId: key, positionKey: key, positionX: 0, positionY: 0};
     patchRecord(activeRecord, hiddenPath, false, true, restoreSelection, 'restore-auto');
     setSelection(null); setNotice(`${label} restored to the draft.`);
+  };
+
+  const revealInspector = (area: 'library' | 'properties') => {
+    setInspectorOpen(true);
+    window.setTimeout(() => inspectorRef.current?.querySelector<HTMLElement>(`[data-visual-inspector-section="${area}"]`)?.scrollIntoView({behavior: 'smooth', block: 'start'}), 0);
+  };
+  const focusSelectedMove = () => {
+    iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:focus-move', nonce: nonceRef.current}, window.location.origin);
+    setNotice('Drag the four-arrow handle on the selected element, or use the arrow keys for precise movement.');
+  };
+  const openSelectedLink = () => {
+    const href = String(selectedLinkValue || '').trim();
+    if (!href) return;
+    const url = new URL(href, publicPreviewUrl(previewPath));
+    if (url.origin === window.location.origin && !logicalPreviewPath(url).startsWith('/admin')) {
+      const logicalPath = logicalPreviewPath(url);
+      const nextRecord = recordsRef.current.find(record => record.kind === 'page' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(logicalPath));
+      if (nextRecord) setActiveRecordId(nextRecord.id);
+      transitionPreview(logicalPath);
+    }
+    else window.open(url.href, '_blank', 'noopener,noreferrer');
+  };
+  contextActionRef.current = action => {
+    if (action === 'add') {revealInspector('library'); return;}
+    if (action === 'properties') {revealInspector('properties'); return;}
+    if (action === 'duplicate') {duplicateSelected(); return;}
+    if (action === 'delete') deleteSelected();
   };
 
   const groupWith = (otherId: string) => {
@@ -788,6 +856,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         builderSectionId: element.getAttribute('data-visual-section-id') || '',
       })) : [];
       return {
+        brief: guideSession?.session.brief,
         page: {id: page.id, slug: page.slug, title: page.title, route: previewRoute(page), sections: structureFor(page)},
         coreContent, renderedOutline,
         availableMedia: media.filter(asset => asset.active && asset.mimeType.startsWith('image/')).slice(0, 30).map(asset => ({id: asset.id, url: asset.url, alt: asset.altText || asset.title || asset.filename})),
@@ -808,25 +877,25 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         }
         const token = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 6)}`;
         const slug = `guided-page-${token}`;
-        const route = `/_cms-guide/${slug}`;
+        const route = `/pages/${slug}`;
         const startedAt = new Date().toISOString();
-        const title = detail.language === 'el' ? 'Σελίδα από τον AI οδηγό' : 'AI guided page';
+        const title = detail.brief.title.trim().slice(0, 240) || (detail.language === 'el' ? 'Σελίδα από τον AI οδηγό' : 'AI guided page');
         const result = await adminApi<{record: ContentRecord}>('/content', {method: 'POST', body: JSON.stringify({
-          kind: 'page', title, slug, category: 'Interactive demo', tags: ['ai-guide', 'temporary'],
+          kind: 'page', title, slug, category: 'AI guided pages', tags: ['ai-guide', 'temporary', detail.brief.pageType, detail.brief.goal],
           data: {
-            eyebrow: detail.language === 'el' ? 'ΔΙΑΔΡΑΣΤΙΚΗ DEMO' : 'INTERACTIVE DEMO', heroTitle: title,
-            heroAccent: '', heroTail: '', heroBody: detail.language === 'el' ? 'Προσωρινός καμβάς του διαδραστικού οδηγού.' : 'Temporary interactive guide canvas.',
+            eyebrow: detail.language === 'el' ? 'AI ΔΗΜΙΟΥΡΓΙΑ ΣΕΛΙΔΑΣ' : 'AI PAGE BUILD', heroTitle: title,
+            heroAccent: '', heroTail: '', heroBody: detail.brief.notes || (detail.language === 'el' ? 'Πρόχειρη σελίδα του διαδραστικού οδηγού.' : 'Interactive guide draft page.'),
             sectionTitle: '', sectionBody: '', heroImage: '', route, navigationTitle: title, introTitle: '', introAccent: '', introBody: '',
-            sections: [], componentLibrary: [], editorHistory: [], visualOverrides: {}, visualPlacements: {}, aiGuideSession: {temporary: true, startedAt},
+            sections: [], componentLibrary: [], editorHistory: [], visualOverrides: {}, visualPlacements: {}, aiGuideSession: {temporary: true, startedAt, brief: detail.brief},
           },
         })});
         const record = normalizeLoadedRecord(result.record);
         const nextRecords = replaceRecords(records => [...records, record].sort((left, right) => left.kind.localeCompare(right.kind) || left.position - right.position));
         savePhasesRef.current = {...savePhasesRef.current, [record.id]: 'saved'};
         setSavePhases(current => ({...current, [record.id]: 'saved'}));
-        setActiveRecordId(record.id); setSelection(null); setNotice('Interactive demo ready. This separate draft has not been published.');
+        setActiveRecordId(record.id); setSelection(null); setNotice('AI page workspace ready. This separate draft has not been published.');
         transitionPreview(route); window.requestAnimationFrame(() => postRecords(nextRecords, [record.id]));
-        const session = {recordId: record.id, slug, title, route, startedAt};
+        const session = {recordId: record.id, slug, title, route, startedAt, brief: detail.brief};
         setGuideSession({session, returnRecordId: activeRecord?.id || ''});
         detail.resolve({session});
       })().catch(detail.reject);
@@ -889,7 +958,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
           objectLabel = component.label;
           setSelection({kind: 'page', slug: current.slug, path: pathForObject(currentSections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
         }
-        setNotice(`${proposal.explanation.summary} Saved only to the demo draft.`);
+        setNotice(`${proposal.explanation.summary} Saved only to the guided page draft.`);
         window.setTimeout(() => iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:guide-highlight', nonce: nonceRef.current, objectType, objectId}, window.location.origin), 120);
         detail.resolve({proposal, context: detail.context, applied: true, objectLabel});
       })().catch(detail.reject);
@@ -902,16 +971,30 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         const sessionState = guideSession;
         const current = guidePage();
         if (!sessionState || !current) throw new Error('The temporary demo page is no longer available.');
-        if (detail.mode === 'keep') {
+        if (detail.mode === 'keep' || detail.mode === 'publish') {
           const next = cloneRecord(current);
           delete next.draft.aiGuideSession;
-          next.category = 'Guided pages';
+          next.category = 'AI guided pages';
           next.tags = next.tags.filter(tag => tag !== 'temporary');
           commitRecord(next);
           await flushSave(next.id);
+          const saved = recordsRef.current.find(record => record.id === next.id);
+          if (!saved) throw new Error('The guided page could not be reloaded after saving.');
+          if (detail.mode === 'publish') {
+            const result = await adminApi<{record: ContentRecord}>(`/content/${saved.id}/publish`, {method: 'POST', body: JSON.stringify({expectedVersion: saved.version})});
+            const published = normalizeLoadedRecord(result.record);
+            const nextRecords = replaceRecords(records => records.map(record => record.id === published.id ? published : record));
+            savePhasesRef.current = {...savePhasesRef.current, [published.id]: 'saved'};
+            saveErrorsRef.current = {...saveErrorsRef.current, [published.id]: ''};
+            setSavePhases(phases => ({...phases, [published.id]: 'saved'}));
+            postRecords(nextRecords, [published.id]); setGuideSession(null);
+            setNotice('The guided page was published. Its live route now uses this version.');
+            detail.resolve({mode: detail.mode, recordId: published.id, route: sessionState.session.route, status: 'published'});
+            return;
+          }
           setGuideSession(null);
           setNotice('The guided page is now a normal draft. Nothing was published.');
-          detail.resolve({mode: detail.mode, recordId: current.id});
+          detail.resolve({mode: detail.mode, recordId: current.id, route: sessionState.session.route, status: 'draft'});
           return;
         }
         const timer = saveTimersRef.current.get(current.id);
@@ -927,7 +1010,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         const fallback = nextRecords.find(record => record.id === sessionState.returnRecordId) || nextRecords.find(record => record.kind === 'page' && record.slug === 'homepage') || nextRecords.find(record => record.kind === 'page') || nextRecords[0];
         setGuideSession(null); setSelection(null); setNotice('The temporary demo page and all of its components were deleted.');
         if (fallback) {setActiveRecordId(fallback.id); transitionPreview(previewRoute(fallback));}
-        detail.resolve({mode: detail.mode, recordId: current.id});
+        detail.resolve({mode: detail.mode, recordId: current.id, route: sessionState.session.route, status: 'deleted'});
       })().catch(detail.reject);
     };
     window.addEventListener(CMS_GUIDE_START_EVENT, runGuideStart);
@@ -949,22 +1032,25 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const statusText = phase === 'unsaved' ? 'Unsaved changes' : phase === 'saving' ? 'Saving draft…' : phase === 'error' ? 'Draft not saved' : activeRecord.status === 'published' ? 'Published' : activeRecord.published ? 'Draft saved · published version is live' : 'Draft saved';
   const StatusIcon = phase === 'saving' ? LoaderCircle : phase === 'error' ? AlertTriangle : phase === 'unsaved' ? Cloud : Check;
 
-  return <div className="nk-visual-editor">
+  return <div className={`nk-visual-editor ${siteView ? 'nk-visual-editor--site-view' : ''}`}>
     <header className="nk-visual-toolbar">
       <div className="nk-visual-document"><span>VISUAL WEBSITE EDITOR</span><details ref={documentMenuRef}><summary aria-label={`Choose ${kindLabels[kind].toLowerCase()}`}><b>{kindLabels[activeRecord.kind]}</b><span>{activeRecord.title}{activeRecord.kind !== kind && ' · global element'}</span><ChevronDown/></summary><div role="listbox" aria-label={`${kindLabels[kind]} records`}>{documentOptions.map(record => <button type="button" role="option" aria-selected={record.id === activeRecord.id} className={record.id === activeRecord.id ? 'active' : ''} onClick={() => {chooseRecord(record.id); if (documentMenuRef.current) documentMenuRef.current.open = false;}} key={record.id}><span>{record.title}</span>{record.kind !== kind && <small>Global element</small>}</button>)}</div></details></div>
       <div className="nk-visual-viewports" aria-label="Preview viewport">{(Object.entries(viewportOptions) as [ViewportName, typeof option][]).map(([name, item]) => <button type="button" className={viewport === name ? 'active' : ''} aria-pressed={viewport === name} onClick={() => setViewport(name)} key={name}><item.icon/><span>{item.label}</span><small>{item.width}</small></button>)}</div>
-      <div className="nk-visual-publish"><div className={`nk-visual-save-state ${phase}`} role="status"><StatusIcon className={phase === 'saving' ? 'nk-admin-spin' : ''}/><span><b>{statusText}</b><small>{activeRecord.title} · v{activeRecord.version}</small></span></div><a href={previewHref(previewPath)} target="_blank" rel="noreferrer">View live <ExternalLink/></a>{canWriteCurrent && <button className="nk-admin-primary" type="button" disabled={publishing || phase === 'saving' || phase === 'error'} onClick={() => void publish()}><Rocket/>{publishing ? 'Publishing…' : 'Publish'}</button>}</div>
+      <div className="nk-visual-publish">{siteView && <div className="nk-visual-mode-controls"><button type="button" className={`nk-visual-mode-toggle ${editMode ? 'active' : ''}`} aria-pressed={editMode} onClick={() => setEditMode(current => !current)}>{editMode ? <Check/> : <Pencil/>}<span><b>Edit mode</b><small>{editMode ? 'ON' : 'OFF'}</small></span></button><button type="button" className="nk-visual-tools-toggle" disabled={!editMode} aria-expanded={inspectorOpen} onClick={() => setInspectorOpen(current => !current)}>{inspectorOpen ? <PanelRightClose/> : <PanelRightOpen/>}<span>Elements</span></button></div>}<div className={`nk-visual-save-state ${phase}`} role="status"><StatusIcon className={phase === 'saving' ? 'nk-admin-spin' : ''}/><span><b>{statusText}</b><small>{activeRecord.title} · v{activeRecord.version}</small></span></div><a href={previewHref(previewPath)} target="_blank" rel="noreferrer">View live <ExternalLink/></a>{canWriteCurrent && <button className="nk-admin-primary" type="button" disabled={publishing || phase === 'saving' || phase === 'error'} onClick={() => void publish()}><Rocket/>{publishing ? 'Publishing…' : 'Publish'}</button>}</div>
     </header>
     {(saveErrors[activeRecord.id] || notice) && <div className={`nk-visual-notice ${saveErrors[activeRecord.id] ? 'error' : ''}`} role={saveErrors[activeRecord.id] ? 'alert' : 'status'}>{saveErrors[activeRecord.id] ? <AlertTriangle/> : <Check/>}<span>{saveErrors[activeRecord.id] || notice}</span><button type="button" onClick={() => {setNotice(''); setSaveErrors(current => ({...current, [activeRecord.id]: ''}));}}>Dismiss</button></div>}
-    <div className="nk-visual-workspace">
+    <div className={`nk-visual-workspace ${siteView ? 'nk-visual-workspace--site-view' : ''} ${inspectorOpen ? 'inspector-open' : 'inspector-closed'}`}>
       <section className="nk-visual-canvas" aria-label={`${option.label} website preview`}>
-        <div className="nk-visual-canvas-hint"><Move/><span className="nk-visual-hint-full">{editableKinds.includes(activeRecord.kind) ? 'Select an element, then drag its four-arrow handle or use the arrow keys. Shift + arrow moves 10 px.' : 'Read-only preview.'}</span><span className="nk-visual-hint-mobile">{editableKinds.includes(activeRecord.kind) ? 'Tap text to type · tap anything to select' : 'Read-only preview'}</span><b>{option.width} × {option.height}</b></div>
+        <div className="nk-visual-canvas-hint">{editMode ? <Move/> : <MousePointer2/>}<span className="nk-visual-hint-full">{!editMode ? 'Navigation is active. Turn on Edit Mode when you want to change the site.' : editableKinds.includes(activeRecord.kind) ? 'Click an element to edit. Ctrl/cmd + click or use Open link to navigate while editing.' : 'Read-only preview.'}</span><span className="nk-visual-hint-mobile">{!editMode ? 'Browse normally · Edit Mode is off' : editableKinds.includes(activeRecord.kind) ? 'Tap an element · use Open to navigate' : 'Read-only preview'}</span><b>{option.width} × {option.height}</b></div>
+        {siteView && editMode && selection && <div className="nk-visual-live-actions" role="toolbar" aria-label="Selected element quick actions"><strong title={selection.label}>{selection.label}</strong><button type="button" onClick={() => revealInspector('properties')}><Pencil/><span>Edit</span></button><button type="button" onClick={() => revealInspector('library')}><Plus/><span>Add</span></button><button type="button" onClick={focusSelectedMove}><Move/><span>Move</span></button>{['section', 'component'].includes(selection.objectType) && <button type="button" onClick={duplicateSelected}><Copy/><span>Copy</span></button>}<button className="danger" type="button" onClick={deleteSelected}><Trash2/><span>Delete</span></button>{Boolean(selectedLinkValue) && <button type="button" onClick={openSelectedLink}><ExternalLink/><span>Open</span></button>}</div>}
         <div className="nk-visual-stage" ref={stageRef}><div className="nk-visual-frame-sizer" style={{width: option.width * scale, height: option.height * scale}}><iframe ref={iframeRef} title={`${option.label} live website preview`} src={previewSrc(previewPath, nonceRef.current)} onLoad={handleFrameLoad} style={{width: option.width, height: option.height, transform: `scale(${scale})`}}/>{!frameReady && <div className="nk-visual-frame-loading"><LoaderCircle className="nk-admin-spin"/>Rendering live preview…</div>}</div></div>
       </section>
-      <aside className="nk-visual-inspector" aria-label="Builder tools and selected element properties">
+      {siteView && inspectorOpen && <button className="nk-visual-inspector-scrim" type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}/>}
+      <aside ref={inspectorRef} className={`nk-visual-inspector ${siteView ? inspectorOpen ? 'is-open' : 'is-closed' : ''}`} aria-label="Builder tools and selected element properties" aria-hidden={siteView && !inspectorOpen}>
+        {siteView && <div className="nk-visual-drawer-header"><span>ELEMENTS &amp; PROPERTIES</span><button type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}><X/></button></div>}
         <section className="nk-visual-admin-meta"><header><Tags/><span><b>ADMIN ORGANISATION</b><small>Search, filters and work queue</small></span></header><label>Category<input value={activeRecord.category || ''} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('category', event.target.value)} placeholder="e.g. Residential, Campaign"/></label><label>Tags<input value={(activeRecord.tags || []).join(', ')} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('tags', event.target.value.split(',').map(value => value.trim()).filter(Boolean))} placeholder="priority, lighting, showroom"/></label></section>
-        {activeRecord.kind === 'page' && editableKinds.includes('page') && <section className="nk-visual-builder-library"><header><span>ADD TO PAGE</span><button type="button" onClick={addSection}><Plus/>Section</button></header><div className="nk-visual-component-palette">{componentTypes.map(type => <button type="button" onClick={() => addComponent(type)} key={type}><Plus/><span>{componentLabels[type]}</span></button>)}</div>{reusableComponents.length > 0 && <div className="nk-visual-reusable-list"><b>Reusable components</b>{reusableComponents.map(item => <button type="button" onClick={() => addComponent(item.component.type, item)} key={`${item.scope}-${item.id}`}><Plus/><span>{item.name}</span><small>{item.scope}</small></button>)}</div>}</section>}
-        <header><span>PROPERTIES</span><h2>{selection?.label || 'Select an element'}</h2><p>{selection ? `${kindLabels[selection.kind]} · ${selection.slug}` : 'Click directly on the page. The relevant controls appear here.'}</p></header>
+        {pageForComponents && editableKinds.includes('page') && <section className="nk-visual-builder-library" data-visual-inspector-section="library"><header><span>ADD TO PAGE</span><button type="button" onClick={addSection}><Plus/>Section</button></header><div className="nk-visual-component-palette">{componentTypes.map(type => <button type="button" onClick={() => addComponent(type)} key={type}><Plus/><span>{componentLabels[type]}</span></button>)}</div>{reusableComponents.length > 0 && <div className="nk-visual-reusable-list"><b>Reusable components</b>{reusableComponents.map(item => <button type="button" onClick={() => addComponent(item.component.type, item)} key={`${item.scope}-${item.id}`}><Plus/><span>{item.name}</span><small>{item.scope}</small></button>)}</div>}</section>}
+        <header data-visual-inspector-section="properties"><span>PROPERTIES</span><h2>{selection?.label || 'Select an element'}</h2><p>{selection ? `${kindLabels[selection.kind]} · ${selection.slug}` : 'Click directly on the page. The relevant controls appear here.'}</p></header>
         {!selection && <div className="nk-visual-empty-selection"><MousePointer2/><strong>Edit on the page itself</strong><p>Select an element to reveal its four-arrow move handle. Drag freely, or use the keyboard arrows for precise positioning.</p></div>}
         {selection && selectedRecord && !editableKinds.includes(selectedRecord.kind) && <div className="nk-visual-readonly"><AlertTriangle/><b>Read-only element</b><p>Your role can preview this content but cannot change it.</p></div>}
         {selection && selectedRecord && editableKinds.includes(selectedRecord.kind) && <div className="nk-visual-property-stack">

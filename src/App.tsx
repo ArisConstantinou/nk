@@ -57,6 +57,7 @@ export default function App() {
     <Route path="/about" element={<Public><AboutPage/></Public>}/>
     <Route path="/contact" element={<Public><ContactPage/></Public>}/>
     <Route path="/request-a-quote" element={<Public><QuotePage/></Public>}/>
+    <Route path="/pages/:slug" element={<GuidedDemoPage/>}/>
     <Route path="/_cms-guide/:slug" element={<GuidedDemoPage/>}/>
     <Route path="/admin/*" element={<Suspense fallback={<div className="route-loader">Opening admin…</div>}><Admin/></Suspense>}/>
 

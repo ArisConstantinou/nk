@@ -11,8 +11,8 @@ export function GuidedDemoPage() {
   const visualPreview = new URLSearchParams(location.search).has('visualEditor');
   return <div className="cms-guide-page">
     <VisualEditingBridge/>
-    <main className="cms-guide-canvas" aria-label="Interactive guide demo page">
-      {page?.sections.length ? <CmsSections sections={page.sections} pageSlug={page.slug}/> : visualPreview ? <div className="cms-guide-empty" aria-live="polite"><Sparkles/><span>Η σελίδα είναι ακόμη κενή</span><small>Πρώτο βήμα: ένα section που θα κρατήσει τον τίτλο και το περιεχόμενο.</small></div> : null}
+    <main className="cms-guide-canvas" aria-label="AI guided CMS page">
+      {page?.sections.length ? <CmsSections sections={page.sections} pageSlug={page.slug}/> : visualPreview ? <div className="cms-guide-empty" aria-live="polite"><Sparkles/><span>Η draft σελίδα είναι έτοιμη</span><small>Ο AI οδηγός αναλύει τις επιλογές σου και θα προσθέσει το πρώτο ασφαλές section.</small></div> : null}
     </main>
   </div>;
 }

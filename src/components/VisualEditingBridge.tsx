@@ -314,6 +314,7 @@ export function VisualEditingBridge() {
   const routeRecord = visualRecordForRoute(location.pathname);
   const settingsRecord = visualRecords['settings:business-details'];
   const editableKindsRef = useRef<Set<string>>(new Set());
+  const editingEnabledRef = useRef(false);
   const selectedRef = useRef<VisualElement | null>(null);
   const suppressCommitRef = useRef(false);
   const suppressTimerRef = useRef<number>(0);
@@ -349,20 +350,50 @@ export function VisualEditingBridge() {
     moveHandle.title = 'Move element · drag or use arrow keys · Shift moves 10 px';
     moveHandle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3m3-3 3 3M12 22l-3-3m3 3 3-3M2 12l3-3m-3 3 3 3M22 12l-3-3m3 3-3 3"/></svg>';
     document.body.appendChild(moveHandle);
+    const contextToolbar = document.createElement('div');
+    contextToolbar.className = 'nk-visual-context-toolbar';
+    contextToolbar.dataset.visualNoEdit = 'true';
+    contextToolbar.setAttribute('role', 'toolbar');
+    contextToolbar.setAttribute('aria-label', 'Selected element actions');
+    contextToolbar.hidden = true;
+    contextToolbar.innerHTML = `
+      <button type="button" data-action="properties" title="Edit this element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Edit</span></button>
+      <button type="button" data-action="add" title="Add a section or element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></button>
+      <button type="button" data-action="move" title="Drag to move this element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3m3-3 3 3M12 22l-3-3m3 3 3-3M2 12l3-3m-3 3 3 3M22 12l-3-3m3 3-3 3"/></svg><span>Move</span></button>
+      <button type="button" data-action="duplicate" title="Duplicate this element"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button>
+      <button type="button" data-action="delete" class="danger" title="Delete this element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg><span>Delete</span></button>
+      <button type="button" data-action="navigate" title="Open this link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg><span>Open</span></button>`;
+    document.body.appendChild(contextToolbar);
+
+    const selectedLink = (element: VisualElement | null) => element
+      ? element.closest<HTMLAnchorElement>('a[href]') || element.querySelector<HTMLAnchorElement>('a[href]')
+      : null;
 
     const updateMoveHandle = () => {
       const target = movementTargetFor(selectedRef.current);
       if (!target?.isConnected || !editableKindsRef.current.has(target.dataset.visualKind || '')) {
         moveHandle.hidden = true;
+        contextToolbar.hidden = true;
         return;
       }
       const rect = target.getBoundingClientRect();
-      if (!rect.width && !rect.height) {moveHandle.hidden = true; return;}
+      if (!rect.width && !rect.height) {moveHandle.hidden = true; contextToolbar.hidden = true; return;}
       moveHandle.hidden = false;
       const left = Math.max(6, Math.min(window.innerWidth - 44, rect.left + Math.min(rect.width / 2, 44) - 20));
       const top = rect.top >= 48 ? rect.top - 42 : Math.min(window.innerHeight - 44, rect.top + 6);
       moveHandle.style.left = `${Math.round(left)}px`;
       moveHandle.style.top = `${Math.round(Math.max(6, top))}px`;
+      contextToolbar.hidden = false;
+      const duplicateButton = contextToolbar.querySelector<HTMLButtonElement>('[data-action="duplicate"]');
+      if (duplicateButton) duplicateButton.hidden = !['section', 'component'].includes(selectedRef.current?.dataset.visualObjectType || '');
+      const navigateButton = contextToolbar.querySelector<HTMLButtonElement>('[data-action="navigate"]');
+      if (navigateButton) navigateButton.hidden = !selectedLink(selectedRef.current);
+      const toolbarWidth = contextToolbar.offsetWidth || 320;
+      const toolbarHeight = contextToolbar.offsetHeight || 48;
+      const toolbarLeft = Math.max(6, Math.min(window.innerWidth - toolbarWidth - 6, rect.left));
+      const toolbarTop = rect.top >= toolbarHeight + 54 ? rect.top - toolbarHeight - 50 : Math.min(window.innerHeight - toolbarHeight - 6, rect.bottom + 8);
+      contextToolbar.style.left = `${Math.round(toolbarLeft)}px`;
+      contextToolbar.style.top = `${Math.round(Math.max(6, toolbarTop))}px`;
     };
 
     const select = (element: VisualElement) => {
@@ -402,6 +433,7 @@ export function VisualEditingBridge() {
     };
 
     const prepareEditableElements = () => {
+      document.documentElement.classList.toggle('nk-visual-edit-enabled', editingEnabledRef.current);
       document.querySelectorAll<VisualElement>('[data-visual-kind][data-visual-path]').forEach(element => {
         const editable = editableKindsRef.current.has(element.dataset.visualKind || '');
         if (editable && element.dataset.visualEdit !== 'text') {
@@ -434,6 +466,42 @@ export function VisualEditingBridge() {
       });
     };
 
+    const runContextAction = (action: string) => {
+      if (['add', 'duplicate', 'delete'].includes(action)) {
+        post({type: 'nk-visual-editor:context-action', action});
+        return;
+      }
+      const selected = selectedRef.current;
+      if (action === 'properties') {
+        if (selected && editableKindsRef.current.has(selected.dataset.visualKind || '') && selected.dataset.visualEdit === 'text' && selected instanceof HTMLElement) {
+          selected.contentEditable = 'true';
+          selected.focus({preventScroll: true});
+        } else post({type: 'nk-visual-editor:context-action', action: 'properties'});
+        return;
+      }
+      if (!selected || !editableKindsRef.current.has(selected.dataset.visualKind || '')) return;
+      if (action === 'navigate') {
+        const anchor = selectedLink(selected);
+        if (!anchor) return;
+        const url = new URL(anchor.href, window.location.href);
+        if (url.origin === window.location.origin) {
+          url.searchParams.set('visualEditor', nonce);
+          window.location.assign(url.href);
+        }
+        else window.open(url.href, '_blank', 'noopener,noreferrer');
+        return;
+      }
+    };
+    const onContextToolbarClick = (event: MouseEvent) => {
+      const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('button[data-action]') : null;
+      if (!button || !contextToolbar.contains(button)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const action = button.dataset.action || '';
+      if (action !== 'move' && event.detail === 0) runContextAction(action);
+    };
+    contextToolbar.addEventListener('click', onContextToolbarClick);
+
     let guideHighlightTimer = 0;
     let guideHighlightFrame = 0;
     const onMessage = (event: MessageEvent) => {
@@ -465,9 +533,22 @@ export function VisualEditingBridge() {
         suppressTimerRef.current = window.setTimeout(() => {suppressCommitRef.current = false; suppressTimerRef.current = 0;}, 1200);
         return;
       }
+      if (event.data.type === 'nk-visual-editor:focus-move' && event.data.nonce === nonce) {
+        if (!moveHandle.hidden) moveHandle.focus({preventScroll: true});
+        return;
+      }
       if (event.data.type !== 'nk-visual-editor:records' || event.data.nonce !== nonce) return;
       removeAutomaticTextWrappers();
-      editableKindsRef.current = new Set(Array.isArray(event.data.editableKinds) ? event.data.editableKinds.filter((kind: unknown): kind is string => typeof kind === 'string') : []);
+      editingEnabledRef.current = event.data.editingEnabled !== false;
+      editableKindsRef.current = editingEnabledRef.current ? new Set(Array.isArray(event.data.editableKinds) ? event.data.editableKinds.filter((kind: unknown): kind is string => typeof kind === 'string') : []) : new Set();
+      if (!editingEnabledRef.current) {
+        blurVisualElement(selectedRef.current);
+        movementTargetFor(selectedRef.current)?.classList.remove('nk-visual-move-selected');
+        selectedRef.current?.classList.remove('nk-visual-selected');
+        selectedRef.current = null;
+        moveHandle.hidden = true;
+        contextToolbar.hidden = true;
+      }
       recordsReceivedRef.current = true;
       prepareEditableElements();
       window.requestAnimationFrame(() => {
@@ -479,6 +560,20 @@ export function VisualEditingBridge() {
     };
 
     const onPointerDown = (event: PointerEvent) => {
+      const contextButton = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('.nk-visual-context-toolbar button') : null;
+      if (contextButton) {
+        const action = contextButton.dataset.action || '';
+        if (action === 'move') {
+          event.preventDefault();
+          event.stopPropagation();
+          const source = movementTargetFor(selectedRef.current);
+          if (!source || !editableKindsRef.current.has(source.dataset.visualKind || '')) return;
+          const position = positionOf(source);
+          pointerDragRef.current = {source, startX: event.clientX, startY: event.clientY, originX: position.x, originY: position.y, active: false};
+          contextButton.focus({preventScroll: true});
+        } else runContextAction(action);
+        return;
+      }
       if (event.target instanceof Element && event.target.closest('.nk-visual-free-move-handle')) {
         const source = movementTargetFor(selectedRef.current);
         if (!source || !editableKindsRef.current.has(source.dataset.visualKind || '')) return;
@@ -487,6 +582,19 @@ export function VisualEditingBridge() {
         const position = positionOf(source);
         pointerDragRef.current = {source, startX: event.clientX, startY: event.clientY, originX: position.x, originY: position.y, active: false};
         moveHandle.focus({preventScroll: true});
+        return;
+      }
+      const navigationAnchor = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null;
+      const navigationRequested = navigationAnchor && event.button === 0 && (!editingEnabledRef.current || event.ctrlKey || event.metaKey || event.shiftKey);
+      if (navigationAnchor && navigationRequested && !navigationAnchor.hasAttribute('download')) {
+        const url = new URL(navigationAnchor.href, window.location.href);
+        event.preventDefault();
+        event.stopPropagation();
+        if (url.origin === window.location.origin) {
+          url.searchParams.set('visualEditor', nonce);
+          window.location.assign(url.href);
+        }
+        else window.open(url.href, '_blank', 'noopener,noreferrer');
         return;
       }
       const element = readVisualTarget(event.target);
@@ -500,21 +608,22 @@ export function VisualEditingBridge() {
 
     const onClick = (event: MouseEvent) => {
       if (justDraggedRef.current) {event.preventDefault(); event.stopPropagation(); justDraggedRef.current = false; return;}
+      if (event.target instanceof Element && event.target.closest('.nk-visual-context-toolbar')) return;
       const element = readVisualTarget(event.target);
       const anchor = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null;
       const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('button') : null;
       if (element && editableKindsRef.current.has(element.dataset.visualKind || '')) {
         select(element);
-        if (anchor && !event.shiftKey) {
+        if (anchor && (event.ctrlKey || event.metaKey || event.shiftKey)) {
           const url = new URL(anchor.href, window.location.href);
           if (url.origin === window.location.origin && !anchor.hasAttribute('download')) {
             event.preventDefault();
             event.stopPropagation();
-            post({type: 'nk-visual-editor:navigate', path: `${url.pathname}${url.search}${url.hash}`});
+            url.searchParams.set('visualEditor', nonce);
+            window.location.assign(url.href);
           }
           return;
         }
-        if (button && !event.shiftKey) return;
         event.stopPropagation();
         if (element.dataset.visualEdit !== 'text' || anchor || button) event.preventDefault();
         if (element.dataset.visualEdit === 'text') {
@@ -526,9 +635,16 @@ export function VisualEditingBridge() {
         return;
       }
       if (anchor) {
-        event.preventDefault();
         const url = new URL(anchor.href, window.location.href);
-        if (url.origin === window.location.origin) post({type: 'nk-visual-editor:navigate', path: `${url.pathname}${url.search}${url.hash}`});
+        if (url.origin === window.location.origin) {
+          event.preventDefault();
+          event.stopPropagation();
+          url.searchParams.set('visualEditor', nonce);
+          window.location.assign(url.href);
+        } else {
+          event.preventDefault();
+          window.open(url.href, '_blank', 'noopener,noreferrer');
+        }
       }
     };
 
@@ -580,7 +696,7 @@ export function VisualEditingBridge() {
       const movement = movementKeys[event.key];
       const movementTarget = movementTargetFor(selectedRef.current);
       const target = event.target;
-      const isMoveHandle = target instanceof Element && Boolean(target.closest('.nk-visual-free-move-handle'));
+      const isMoveHandle = target instanceof Element && Boolean(target.closest('.nk-visual-free-move-handle, .nk-visual-context-toolbar [data-action="move"]'));
       const isEditingControl = target instanceof HTMLElement && (target.isContentEditable || target.matches('input, textarea, select'));
       if (movement && movementTarget && !event.altKey && !event.ctrlKey && !event.metaKey && (isMoveHandle || !isEditingControl)) {
         event.preventDefault();
@@ -601,7 +717,8 @@ export function VisualEditingBridge() {
         const url = new URL(anchor.href, window.location.href);
         if (url.origin === window.location.origin && !anchor.hasAttribute('download')) {
           event.preventDefault();
-          post({type: 'nk-visual-editor:navigate', path: `${url.pathname}${url.search}${url.hash}`});
+          url.searchParams.set('visualEditor', nonce);
+          window.location.assign(url.href);
         }
         return;
       }
@@ -690,7 +807,10 @@ export function VisualEditingBridge() {
       selectedRef.current?.classList.remove('nk-visual-selected');
       movementTargetFor(selectedRef.current)?.classList.remove('nk-visual-move-selected');
       moveHandle.remove();
+      contextToolbar.removeEventListener('click', onContextToolbarClick);
+      contextToolbar.remove();
       document.documentElement.classList.remove('nk-visual-preview');
+      document.documentElement.classList.remove('nk-visual-edit-enabled');
     };
   }, [location.pathname, location.search, nonce]);
 

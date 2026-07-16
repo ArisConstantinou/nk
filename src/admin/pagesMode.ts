@@ -10,7 +10,7 @@ import type {
   Revision,
   SiteForm,
 } from './types';
-import type {CmsGuideAction, CmsGuideContext, CmsGuideLanguage} from './guide/aiGuide';
+import type {CmsGuideAction, CmsGuideBrief, CmsGuideContext, CmsGuideFeature, CmsGuideLanguage} from './guide/aiGuide';
 
 export const isPagesAdminMode = import.meta.env.MODE === 'github-pages';
 export const PAGES_ADMIN_STORAGE_KEY = 'nk-pages-admin-workspace-v1';
@@ -141,18 +141,36 @@ const guideSectionDefaults: CmsGuideAction['section'] = {
   type: 'text', eyebrow: '', title: '', body: '', buttonLabel: '', buttonUrl: '', image: '', icon: 'check', layout: 'stack', columns: 1,
 };
 const guideComponentDefaults: CmsGuideAction['component'] = {type: 'text', label: '', text: '', url: '', image: '', alt: '', icon: 'check', images: []};
+const guideFeatures: CmsGuideFeature[] = ['hero', 'services', 'benefits', 'process', 'gallery', 'cta'];
+const defaultGuideBrief: CmsGuideBrief = {title: 'AI guided page', pageType: 'landing', goal: 'leads', audience: 'mixed', tone: 'professional', requestedFeatures: ['hero', 'benefits', 'cta'], notes: '', autoApply: true};
+
+function localGuideBrief(value: unknown): CmsGuideBrief {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value as Partial<CmsGuideBrief> : {};
+  const requestedFeatures = Array.isArray(source.requestedFeatures) ? source.requestedFeatures.filter((feature): feature is CmsGuideFeature => guideFeatures.includes(feature as CmsGuideFeature)).slice(0, 6) : [];
+  return {
+    title: String(source.title || defaultGuideBrief.title).slice(0, 240),
+    pageType: ['landing', 'service', 'portfolio', 'company', 'contact'].includes(String(source.pageType)) ? source.pageType! : defaultGuideBrief.pageType,
+    goal: ['leads', 'explain', 'showcase', 'trust'].includes(String(source.goal)) ? source.goal! : defaultGuideBrief.goal,
+    audience: ['residential', 'commercial', 'mixed'].includes(String(source.audience)) ? source.audience! : defaultGuideBrief.audience,
+    tone: ['professional', 'bold', 'technical', 'warm'].includes(String(source.tone)) ? source.tone! : defaultGuideBrief.tone,
+    requestedFeatures: requestedFeatures.length ? requestedFeatures : defaultGuideBrief.requestedFeatures,
+    notes: String(source.notes || '').slice(0, 1200), autoApply: source.autoApply !== false,
+  };
+}
 
 function legacyPlanPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
   const source = body.context && typeof body.context === 'object' ? body.context as Partial<CmsGuideContext> : null;
   if (!source?.page || !Array.isArray(source.page.sections)) return fail(400, 'guide_context_missing', 'The page structure could not be analysed. No content was changed.');
   const language: CmsGuideLanguage = body.language === 'el' ? 'el' : 'en';
+  const brief = localGuideBrief(source.brief);
   const context: CmsGuideContext = {
+    brief,
     page: clone(source.page),
     coreContent: clone(source.coreContent || {}),
     renderedOutline: clone(Array.isArray(source.renderedOutline) ? source.renderedOutline : []),
     availableMedia: clone(Array.isArray(source.availableMedia) ? source.availableMedia : []),
     recentChanges: clone(Array.isArray(source.recentChanges) ? source.recentChanges : []),
-    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
+    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, targetSections: Math.min(7, Math.max(2, brief.requestedFeatures.length)), maxGuideSteps: 32, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
   };
   const sections = context.page.sections.filter(section => section.enabled !== false);
   const components = sections.flatMap(section => section.components.filter(component => component.enabled !== false));
@@ -208,10 +226,11 @@ function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
   const source = body.context && typeof body.context === 'object' ? body.context as Partial<CmsGuideContext> : null;
   if (!source?.page || !Array.isArray(source.page.sections)) return fail(400, 'guide_context_missing', 'The page structure could not be analysed. No content was changed.');
   const language: CmsGuideLanguage = body.language === 'el' ? 'el' : 'en';
+  const brief = localGuideBrief(source.brief);
   const context: CmsGuideContext = {
-    page: clone(source.page), coreContent: clone(source.coreContent || {}), renderedOutline: clone(Array.isArray(source.renderedOutline) ? source.renderedOutline : []),
+    brief, page: clone(source.page), coreContent: clone(source.coreContent || {}), renderedOutline: clone(Array.isArray(source.renderedOutline) ? source.renderedOutline : []),
     availableMedia: clone(Array.isArray(source.availableMedia) ? source.availableMedia : []), recentChanges: clone(Array.isArray(source.recentChanges) ? source.recentChanges : []),
-    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
+    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, targetSections: Math.min(7, Math.max(2, brief.requestedFeatures.length)), maxGuideSteps: 32, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
   };
   const sections = context.page.sections.filter(section => section.enabled !== false);
   const media = context.availableMedia.filter(item => item.url);
@@ -273,6 +292,96 @@ function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
       {summary: 'This demo has a clear, balanced page flow.', reason: 'It opens with a complete hero and continues into a focused second section. More automatic content would become generic rather than helpful.', howToChange: 'Keep the draft and continue with the editor, or delete the whole demo and restart from a blank canvas.'},
       {summary: 'Η demo έχει πλέον καθαρή και ισορροπημένη ροή.', reason: 'Ξεκινά με ολοκληρωμένο hero και συνεχίζει σε εστιασμένη δεύτερη ενότητα. Περισσότερο αυτόματο περιεχόμενο θα γινόταν γενικό αντί για χρήσιμο.', howToChange: 'Κράτησε το draft και συνέχισε με τον editor ή διέγραψε ολόκληρη τη demo και ξεκίνησε ξανά από κενό καμβά.'}),
     designNotes: [local('Every element remains a normal draggable component.', 'Όλα τα στοιχεία παραμένουν κανονικά draggable components.')],
+  });
+}
+
+function planBriefDrivenPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
+  const source = body.context && typeof body.context === 'object' ? body.context as Partial<CmsGuideContext> : null;
+  if (!source?.page || !Array.isArray(source.page.sections)) return fail(400, 'guide_context_missing', 'The page structure could not be analysed. No content was changed.');
+  const language: CmsGuideLanguage = body.language === 'el' ? 'el' : 'en';
+  const brief = localGuideBrief(source.brief);
+  const context: CmsGuideContext = {
+    brief, page: clone(source.page), coreContent: clone(source.coreContent || {}), renderedOutline: clone(Array.isArray(source.renderedOutline) ? source.renderedOutline : []),
+    availableMedia: clone(Array.isArray(source.availableMedia) ? source.availableMedia : []), recentChanges: clone(Array.isArray(source.recentChanges) ? source.recentChanges : []),
+    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, targetSections: Math.min(7, Math.max(2, brief.requestedFeatures.length)), maxGuideSteps: 32, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
+  };
+  const local = <T,>(en: T, el: T) => language === 'el' ? el : en;
+  const sections = context.page.sections.filter(section => section.enabled !== false);
+  const media = context.availableMedia.filter(item => item.url);
+  const features = [...new Set<CmsGuideFeature>(['hero', ...brief.requestedFeatures])].slice(0, 6);
+  const audience = local(
+    brief.audience === 'residential' ? 'homeowners' : brief.audience === 'commercial' ? 'commercial teams' : 'homes and businesses',
+    brief.audience === 'residential' ? 'ιδιοκτήτες κατοικιών' : brief.audience === 'commercial' ? 'επαγγελματικές ομάδες' : 'κατοικίες και επιχειρήσεις',
+  );
+  const primaryAction = brief.goal === 'leads' ? local('Request a quote', 'Ζήτησε προσφορά') : brief.goal === 'showcase' ? local('Explore our work', 'Δες τα έργα μας') : local('Talk to our team', 'Μίλησε με την ομάδα μας');
+  const primaryUrl = brief.goal === 'showcase' ? '/projects' : brief.goal === 'leads' ? '/request-a-quote' : '/contact';
+  const finish = (proposal: CmsGuideAction) => ok({proposal, context, planner: 'brief-driven-on-device'});
+
+  const planFor = (feature: CmsGuideFeature) => {
+    const title = {
+      hero: brief.title,
+      services: local('Services designed around the project', 'Υπηρεσίες σχεδιασμένες γύρω από το έργο'),
+      benefits: local('Why clients choose NK Electrical', 'Γιατί οι πελάτες επιλέγουν την NK Electrical'),
+      process: local('A clear path from plan to delivery', 'Καθαρή πορεία από τη μελέτη έως την παράδοση'),
+      gallery: local('Selected electrical work', 'Επιλεγμένα ηλεκτρολογικά έργα'),
+      cta: local('Ready to plan the next step?', 'Έτοιμοι να σχεδιάσουμε το επόμενο βήμα;'),
+    }[feature];
+    const body = {
+      hero: brief.notes || local(`A focused ${brief.pageType} page for ${audience}, built to ${brief.goal === 'leads' ? 'turn interest into qualified enquiries' : brief.goal === 'showcase' ? 'make proven work easy to explore' : brief.goal === 'trust' ? 'build confidence through clear expertise' : 'explain the offer with clarity'}.`, `Μια στοχευμένη σελίδα για ${audience}, σχεδιασμένη ώστε ${brief.goal === 'leads' ? 'να μετατρέπει το ενδιαφέρον σε ουσιαστικές επικοινωνίες' : brief.goal === 'showcase' ? 'να παρουσιάζει καθαρά πραγματικά έργα' : brief.goal === 'trust' ? 'να χτίζει εμπιστοσύνη μέσα από σαφή τεχνογνωσία' : 'να εξηγεί καθαρά την πρόταση'}.`),
+      services: local('Planning, installation and ongoing support stay connected, so every decision works as one complete electrical system.', 'Μελέτη, εγκατάσταση και συνεχής υποστήριξη παραμένουν συνδεδεμένες, ώστε κάθε απόφαση να λειτουργεί ως ένα ολοκληρωμένο ηλεκτρολογικό σύστημα.'),
+      benefits: local('Safety-led engineering, careful coordination and clean execution give every client a result that is easier to use and maintain.', 'Μηχανική με προτεραιότητα στην ασφάλεια, σωστός συντονισμός και καθαρή εκτέλεση δίνουν ένα αποτέλεσμα εύκολο στη χρήση και στη συντήρηση.'),
+      process: local('We clarify the requirement, define the technical plan, coordinate installation and verify the result before handover.', 'Ξεκαθαρίζουμε την ανάγκη, ορίζουμε το τεχνικό πλάνο, συντονίζουμε την εγκατάσταση και ελέγχουμε το αποτέλεσμα πριν από την παράδοση.'),
+      gallery: media.length >= 2 ? local('A concise visual record of completed installations and lighting details.', 'Μια σύντομη οπτική καταγραφή ολοκληρωμένων εγκαταστάσεων και λεπτομερειών φωτισμού.') : local('Recent work spans distribution upgrades, architectural lighting, automation and ongoing technical support.', 'Πρόσφατα έργα καλύπτουν αναβαθμίσεις διανομής, αρχιτεκτονικό φωτισμό, αυτοματισμούς και συνεχή τεχνική υποστήριξη.'),
+      cta: local('Share the site, priorities and timing. The team can then recommend the clearest technical route forward.', 'Μοιράσου τον χώρο, τις προτεραιότητες και το χρονοδιάγραμμα. Η ομάδα θα προτείνει την καθαρότερη τεχνική πορεία.'),
+    }[feature];
+    const heading: CmsGuideAction['component'] = {...guideComponentDefaults, type: 'heading', label: local(`${feature} heading`, `Τίτλος ${feature}`), text: title};
+    const text: CmsGuideAction['component'] = {...guideComponentDefaults, type: 'text', label: local(`${feature} text`, `Κείμενο ${feature}`), text: body};
+    const components: CmsGuideAction['component'][] = [heading, text];
+    if (feature === 'hero' && media[0]) components.push({...guideComponentDefaults, type: 'image', label: local('Hero image', 'Κεντρική εικόνα'), image: media[0].url, alt: media[0].alt || brief.title});
+    if (feature === 'hero' && brief.goal === 'leads') components.push({...guideComponentDefaults, type: 'button', label: local('Primary action', 'Κύρια ενέργεια'), text: primaryAction, url: primaryUrl});
+    if (feature === 'benefits') components.push({...guideComponentDefaults, type: 'icon', label: local('Trust marker', 'Σήμα εμπιστοσύνης'), icon: 'shield'});
+    if (feature === 'process') components.push({...guideComponentDefaults, type: 'divider', label: local('Process divider', 'Διαχωριστικό διαδικασίας')});
+    if (feature === 'gallery' && media.length >= 2) components.push({...guideComponentDefaults, type: 'gallery', label: local('Project gallery', 'Συλλογή έργων'), images: media.slice(0, 6).map(item => item.url), alt: local('NK Electrical project', 'Έργο της NK Electrical')});
+    if (feature === 'cta') components.push({...guideComponentDefaults, type: 'button', label: local('Call to action', 'Κάλεσμα για ενέργεια'), text: primaryAction, url: primaryUrl});
+    return {
+      title, components,
+      section: {...guideSectionDefaults, type: feature === 'gallery' ? 'media' as const : feature === 'cta' ? 'cta' as const : feature === 'benefits' ? 'features' as const : 'text' as const, title, layout: feature === 'hero' || feature === 'gallery' ? 'split' as const : feature === 'benefits' ? 'grid' as const : 'stack' as const, columns: feature === 'benefits' ? 3 : feature === 'hero' || feature === 'gallery' ? 2 : 1},
+    };
+  };
+
+  for (let featureIndex = 0; featureIndex < features.length; featureIndex += 1) {
+    const feature = features[featureIndex];
+    const plan = planFor(feature);
+    if (!sections[featureIndex]) return finish({
+      action: 'insert_section', afterSectionId: sections.at(-1)?.id || '', targetSectionId: '', afterComponentId: '', section: plan.section, component: {...guideComponentDefaults},
+      explanation: {
+        summary: local(`Create the ${feature} section.`, `Δημιουργία ενότητας ${feature}.`),
+        reason: local(`The live JSON shows that the next requested part of the ${brief.pageType} page is still missing. This section creates its responsive container without changing anything already built.`, `Το ζωντανό JSON δείχνει ότι λείπει ακόμη το επόμενο ζητούμενο μέρος της σελίδας. Το section δημιουργεί το responsive δοχείο του χωρίς να αλλάζει τίποτα από όσα έχουν ήδη χτιστεί.`),
+        howToChange: local('Select the section to change its layout or columns, drag it to reorder it, or use Undo to remove this step.', 'Επίλεξε το section για αλλαγή layout ή στηλών, σύρε το για αλλαγή σειράς ή χρησιμοποίησε Undo για αφαίρεση αυτού του βήματος.'),
+      },
+      designNotes: [local(`Tone: ${brief.tone}. Audience: ${brief.audience}.`, `Τόνος: ${brief.tone}. Κοινό: ${brief.audience}.`), local('The same structure is shared across desktop, tablet and mobile.', 'Η ίδια δομή εφαρμόζεται σε desktop, tablet και mobile.')],
+    });
+    const target = sections[featureIndex];
+    const missing = plan.components.find(component => !target.components.some(existing => existing.enabled !== false && existing.type === component.type));
+    if (missing) return finish({
+      action: 'insert_component', afterSectionId: '', targetSectionId: target.id, afterComponentId: target.components.at(-1)?.id || '', section: {...guideSectionDefaults}, component: missing,
+      explanation: {
+        summary: local(`Add ${missing.label.toLowerCase()}.`, `Προσθήκη: ${missing.label.toLowerCase()}.`),
+        reason: local(`The latest page JSON shows that the ${feature} container exists, but this is the most useful missing element for the selected ${brief.goal} goal.`, `Το τελευταίο JSON της σελίδας δείχνει ότι το section ${feature} υπάρχει, αλλά αυτό είναι το χρησιμότερο στοιχείο που λείπει για τον επιλεγμένο στόχο ${brief.goal}.`),
+        howToChange: local('Select it in the live preview to edit its Properties. Drag it to move, use the arrow keys for precise movement, or Undo to revert this addition.', 'Επίλεξέ το στο live preview για αλλαγή από τις Ιδιότητες. Σύρε το για μετακίνηση, χρησιμοποίησε τα βελάκια για ακρίβεια ή Undo για αναίρεση της προσθήκης.'),
+      },
+      designNotes: [local('Only a single additive editor action is applied in this step.', 'Σε αυτό το βήμα εφαρμόζεται μόνο μία προσθετική ενέργεια του editor.')],
+    });
+  }
+
+  return finish({
+    action: 'complete', afterSectionId: '', targetSectionId: '', afterComponentId: '', section: {...guideSectionDefaults}, component: {...guideComponentDefaults},
+    explanation: {
+      summary: local(`${brief.title} is ready for your decision.`, `Η σελίδα «${brief.title}» είναι έτοιμη για την απόφασή σου.`),
+      reason: local('A fresh analysis found every requested section represented in a balanced, editable flow. Another automatic addition would be repetitive.', 'Η νέα ανάλυση βρήκε όλα τα ζητούμενα sections σε μια ισορροπημένη και επεξεργάσιμη ροή. Μια ακόμη αυτόματη προσθήκη θα ήταν επαναληπτική.'),
+      howToChange: local('Publish now, keep it as a draft, or delete it. Every element remains editable with the existing visual editor.', 'Δημοσίευσέ τη τώρα, κράτησέ τη ως draft ή διέγραψέ τη. Κάθε στοιχείο παραμένει επεξεργάσιμο με τον υπάρχοντα visual editor.'),
+    },
+    designNotes: [local('No existing page was changed.', 'Δεν άλλαξε καμία υπάρχουσα σελίδα.'), local('Publishing still requires your explicit final choice.', 'Η δημοσίευση απαιτεί τη ρητή τελική επιλογή σου.')],
   });
 }
 
@@ -486,7 +595,7 @@ export async function pagesAdminRequest(path: string, init: RequestInit = {}): P
     const key = `${parts[1]}:${parts[2]}`; const active = body.active !== false;
     state.favorites = active ? [...new Set([...state.favorites, key])] : state.favorites.filter(value => value !== key); writeState(state); return ok({active, favorites: dashboard(state).favorites});
   }
-  if (parts[0] === 'guide' && parts[1] === 'next' && method === 'POST') return planPagesGuideStep(body);
+  if (parts[0] === 'guide' && parts[1] === 'next' && method === 'POST') return planBriefDrivenPagesGuideStep(body);
   return fail(404, 'not_found', 'This action is unavailable in the mobile device workspace.');
 }
 

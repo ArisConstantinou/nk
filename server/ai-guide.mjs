@@ -5,6 +5,11 @@ const SECTION_TYPES = ['text', 'features', 'cta', 'media'];
 const SECTION_LAYOUTS = ['stack', 'grid', 'split'];
 const COMPONENT_TYPES = ['heading', 'text', 'button', 'image', 'gallery', 'icon', 'divider'];
 const ICONS = ['check', 'zap', 'lightbulb', 'shield', 'settings', 'wrench', 'circuit'];
+const PAGE_TYPES = ['landing', 'service', 'portfolio', 'company', 'contact'];
+const GOALS = ['leads', 'explain', 'showcase', 'trust'];
+const AUDIENCES = ['residential', 'commercial', 'mixed'];
+const TONES = ['professional', 'bold', 'technical', 'warm'];
+const FEATURES = ['hero', 'services', 'benefits', 'process', 'gallery', 'cta'];
 
 const string = (value, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 const stringArray = (value, maxItems = 12, maxLength = 500) => Array.isArray(value) ? value.filter(item => typeof item === 'string').slice(0, maxItems).map(item => item.trim().slice(0, maxLength)).filter(Boolean) : [];
@@ -47,6 +52,17 @@ export const guideActionSchema = {
 
 export function normalizeGuideContext(value) {
   const source = record(value);
+  const briefSource = record(source.brief);
+  const requestedFeatures = stringArray(briefSource.requestedFeatures, 6, 30).filter(item => FEATURES.includes(item));
+  const brief = {
+    title: string(briefSource.title, 240) || 'AI guided page',
+    pageType: PAGE_TYPES.includes(briefSource.pageType) ? briefSource.pageType : 'landing',
+    goal: GOALS.includes(briefSource.goal) ? briefSource.goal : 'leads',
+    audience: AUDIENCES.includes(briefSource.audience) ? briefSource.audience : 'mixed',
+    tone: TONES.includes(briefSource.tone) ? briefSource.tone : 'professional',
+    requestedFeatures: requestedFeatures.length ? requestedFeatures : ['hero', 'benefits', 'cta'],
+    notes: string(briefSource.notes, 1200), autoApply: briefSource.autoApply !== false,
+  };
   const page = record(source.page);
   const sections = Array.isArray(page.sections) ? page.sections.slice(0, 40).map((item, sectionIndex) => {
     const section = record(item);
@@ -85,11 +101,12 @@ export function normalizeGuideContext(value) {
     };
   }) : [];
   return {
-    page: {id: string(page.id, 80), slug: string(page.slug, 120), title: string(page.title, 240), route: string(page.route, 300), sections},
+    brief, page: {id: string(page.id, 80), slug: string(page.slug, 120), title: string(page.title, 240), route: string(page.route, 300), sections},
     coreContent, renderedOutline, availableMedia,
     recentChanges: stringArray(source.recentChanges, 12, 240),
     constraints: {
       additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4,
+      targetSections: Math.min(7, Math.max(2, brief.requestedFeatures.length)), maxGuideSteps: 32,
       sharedAcrossViewports: true, allowedActions: ACTIONS,
     },
   };
@@ -156,7 +173,7 @@ export function validateGuideProposal(value, contextValue) {
   };
 }
 
-const instructions = `You are a friendly adaptive co-builder inside the NK Electrical visual CMS editor. Analyze the fresh page-structure JSON for every request and return exactly one best next action. Your proposal is shown to the user first and is applied only after they explicitly confirm it.
+const instructions = `You are a friendly adaptive co-builder inside the NK Electrical visual CMS editor. Analyze the entire fresh page-structure JSON for every request and return exactly one best next action. The brief is the user's source of truth for page type, goal, audience, tone, requested features, and notes. The editor may apply your safe proposal automatically, one visible step at a time.
 
 Safety rules:
 - You may only add one section or one component, or return complete. Never delete, replace, hide, move, rename, or overwrite existing content.
@@ -164,13 +181,17 @@ Safety rules:
 - Respect every constraint, current layout pattern, component density, responsive behavior, and the existing dark electrical design language.
 - Avoid duplicating content already present. Prefer complete when no meaningful safe improvement exists.
 - The renderedOutline describes the real live preview and may contain substantial page content even when page.sections is empty. Analyse coreContent, renderedOutline, and builder sections together; never call a page empty solely because builder sections is empty.
-- This workflow visibly teaches page hierarchy one live action at a time. When the canvas is genuinely empty, the first action MUST be insert_section only. Its required component payload is a harmless text placeholder and will not be inserted. Explain that a section is the container that must exist before content.
-- When that first section exists but has no components, propose one heading component. Only after the heading exists, propose one supporting text component. Then prefer an approved image when available and one clear button. Return complete once this first simple flow is built; do not add a second section automatically. Never combine section + heading or heading + content into one visible step.
+- This workflow teaches page hierarchy one live action at a time. When the canvas is genuinely empty, the first action MUST be insert_section only. Its component payload is ignored. Explain why the section is the container for the first brief-requested feature.
+- Build a complete but concise multi-section page that satisfies the brief, normally 2-7 sections. A new section is always inserted alone; fill it with individual components in later actions before creating the next section. Never combine section + heading or multiple visible components into one step.
+- In builder sections, section.title is an internal admin label and is not rendered as page content. If a section has no heading component, add the heading component before supporting text. Never infer a visible heading from section.title alone.
+- Infer which requested features are already represented from section titles, components, renderedOutline, and recentChanges. Do not follow a universal checklist. Choose the next missing feature and the most useful component for the current section.
+- Give each section a clear job. A useful section normally has a heading and concise supporting content; add approved imagery, galleries, benefits, process copy, or a CTA only when they support the selected goal. Use the user's title, audience, tone, and notes in real publishable copy.
+- Return complete only when the brief's requested features and primary goal are adequately represented, or when another additive action would be repetitive. Stay within maxGuideSteps and targetSections.
 - Treat manual editor changes as intentional. Adapt the next proposal to the current hierarchy instead of following a fixed checklist. If a hero or any suggested element already exists, choose the next missing piece.
 - Keep copy concise, useful, and suitable for a polished real page. Do not use tutorial filler as page content.
 - For an image gallery, use 2-8 approved media-library URLs. Place it where it improves the content flow; for example after the second section only when that is genuinely the best location.
 - Explanations must use warm, beginner-friendly language, explicitly connect each step to the previous one, and tell the administrator what will be added, why it follows now, and exactly how they can add/change it themselves, move it, or undo it in the editor.
-- Match the requested explanation language while keeping JSON keys unchanged.`;
+- Match the requested explanation language while keeping JSON keys unchanged. In every explanation, teach what just became possible in the existing editor and mention selection, drag-and-drop, keyboard movement, Properties, or Undo when relevant.`;
 
 function extractOutputText(payload) {
   if (typeof payload?.output_text === 'string') return payload.output_text;
