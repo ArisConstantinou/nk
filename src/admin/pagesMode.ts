@@ -10,6 +10,7 @@ import type {
   Revision,
   SiteForm,
 } from './types';
+import type {CmsGuideAction, CmsGuideContext, CmsGuideLanguage} from './guide/aiGuide';
 
 export const isPagesAdminMode = import.meta.env.MODE === 'github-pages';
 export const PAGES_ADMIN_STORAGE_KEY = 'nk-pages-admin-workspace-v1';
@@ -134,6 +135,73 @@ function searchResults(state: PagesState, query: string): AdminSearchResult[] {
     updatedAt: item.updatedAt, updatedBy: pagesAdminUser.displayName, favorite: state.favorites.includes(`media:${item.id}`), to: `/admin/media?asset=${item.id}`,
   }));
   return [...content, ...media].slice(0, 40);
+}
+
+const guideSectionDefaults: CmsGuideAction['section'] = {
+  type: 'text', eyebrow: '', title: '', body: '', buttonLabel: '', buttonUrl: '', image: '', icon: 'check', layout: 'stack', columns: 1,
+};
+const guideComponentDefaults: CmsGuideAction['component'] = {type: 'text', label: '', text: '', url: '', image: '', alt: '', icon: 'check', images: []};
+
+function planPagesGuideStep(body: Record<string, unknown>): PagesApiResult {
+  const source = body.context && typeof body.context === 'object' ? body.context as Partial<CmsGuideContext> : null;
+  if (!source?.page || !Array.isArray(source.page.sections)) return fail(400, 'guide_context_missing', 'The page structure could not be analysed. No content was changed.');
+  const language: CmsGuideLanguage = body.language === 'el' ? 'el' : 'en';
+  const context: CmsGuideContext = {
+    page: clone(source.page),
+    coreContent: clone(source.coreContent || {}),
+    renderedOutline: clone(Array.isArray(source.renderedOutline) ? source.renderedOutline : []),
+    availableMedia: clone(Array.isArray(source.availableMedia) ? source.availableMedia : []),
+    recentChanges: clone(Array.isArray(source.recentChanges) ? source.recentChanges : []),
+    constraints: {additiveOnly: true, noAutomaticPublish: true, maxSections: 40, maxComponentsPerSection: 80, maxColumns: 4, sharedAcrossViewports: true, allowedActions: ['insert_section', 'insert_component', 'complete']},
+  };
+  const sections = context.page.sections.filter(section => section.enabled !== false);
+  const components = sections.flatMap(section => section.components.filter(component => component.enabled !== false));
+  const media = context.availableMedia.filter(item => item.url);
+  const renderedContent = context.renderedOutline.map(item => `${item.headings.join(' ')} ${item.textSample}`).join(' ').toLowerCase();
+  const renderedImages = context.renderedOutline.reduce((total, item) => total + item.imageCount, 0);
+  const hasRenderedGallery = renderedImages >= 3 || /gallery|projects|portfolio|έργ|συλλογ/.test(renderedContent);
+  const explanation = (en: CmsGuideAction['explanation'], el: CmsGuideAction['explanation']) => language === 'el' ? el : en;
+  const finish = (proposal: CmsGuideAction) => ok({proposal, context, planner: 'on-device'});
+
+  if (!sections.length && context.renderedOutline.length >= 3) return finish({
+    action: 'complete', afterSectionId: '', targetSectionId: '', afterComponentId: '', section: {...guideSectionDefaults}, component: {...guideComponentDefaults},
+    explanation: explanation(
+      {summary: 'No safe addition is needed.', reason: 'The rendered page already has a substantial content flow. Adding another generic section would duplicate the existing design rather than improve it.', howToChange: 'Edit any existing element directly in the preview, or add a specific section manually when you have new content to publish.'},
+      {summary: 'Δεν χρειάζεται ασφαλής προσθήκη.', reason: 'Η σελίδα έχει ήδη ολοκληρωμένη ροή περιεχομένου. Μια ακόμη γενική ενότητα θα επαναλάμβανε το υπάρχον design αντί να το βελτιώσει.', howToChange: 'Επεξεργάσου οποιοδήποτε υπάρχον στοιχείο μέσα στο preview ή πρόσθεσε χειροκίνητα μια συγκεκριμένη ενότητα όταν υπάρχει νέο περιεχόμενο.'},
+    ),
+    designNotes: language === 'el' ? ['Διατηρήθηκε το υπάρχον περιεχόμενο ακριβώς όπως είναι.', 'Δεν έγινε publish ή αλλαγή στο draft.'] : ['Existing content was preserved exactly as-is.', 'Nothing was published or changed in the draft.'],
+  });
+
+  if (!sections.length && media.length >= 2 && !hasRenderedGallery) return finish({
+    action: 'insert_section', afterSectionId: '', targetSectionId: '', afterComponentId: '',
+    section: {...guideSectionDefaults, type: 'media', eyebrow: language === 'el' ? 'ΕΠΙΛΕΓΜΕΝΑ ΕΡΓΑ' : 'SELECTED WORK', title: language === 'el' ? 'Συλλογή έργων' : 'Project gallery', body: language === 'el' ? 'Μια σύντομη οπτική επιλογή από πρόσφατες ηλεκτρολογικές εγκαταστάσεις.' : 'A concise visual selection of recent electrical installations.', layout: 'grid', columns: 2},
+    component: {...guideComponentDefaults, type: 'gallery', label: language === 'el' ? 'Συλλογή έργων' : 'Project gallery', alt: language === 'el' ? 'Έργο της NK Electrical' : 'NK Electrical project', images: media.slice(0, 4).map(item => item.url)},
+    explanation: explanation(
+      {summary: 'A project gallery was added.', reason: 'The page has approved media but no visual gallery, so this adds useful proof without replacing existing content.', howToChange: 'Select the gallery to reorder or replace its images, or use Undo to remove this complete step.'},
+      {summary: 'Προστέθηκε συλλογή έργων.', reason: 'Η σελίδα έχει εγκεκριμένες εικόνες αλλά όχι οπτική συλλογή, οπότε προστέθηκε χρήσιμη απόδειξη έργων χωρίς αντικατάσταση περιεχομένου.', howToChange: 'Επίλεξε τη συλλογή για αλλαγή ή σειρά εικόνων, ή χρησιμοποίησε Undo για αφαίρεση ολόκληρου του βήματος.'},
+    ),
+    designNotes: language === 'el' ? ['Διάταξη δύο στηλών.', 'Μόνο εγκεκριμένες εικόνες της Media Library.'] : ['Two-column responsive layout.', 'Only approved Media Library images were used.'],
+  });
+
+  const target = sections[Math.min(1, Math.max(0, sections.length - 1))];
+  if (target && media.length >= 2 && !hasRenderedGallery && !components.some(component => component.type === 'gallery')) return finish({
+    action: 'insert_component', afterSectionId: '', targetSectionId: target.id, afterComponentId: target.components.at(-1)?.id || '', section: {...guideSectionDefaults},
+    component: {...guideComponentDefaults, type: 'gallery', label: language === 'el' ? 'Συλλογή έργων' : 'Project gallery', alt: language === 'el' ? 'Έργο της NK Electrical' : 'NK Electrical project', images: media.slice(0, 4).map(item => item.url)},
+    explanation: explanation(
+      {summary: 'A gallery was added to the content flow.', reason: 'The second available section is the least disruptive place for visual proof and already follows the page hierarchy.', howToChange: 'Select the gallery to replace or reorder images. Undo removes only this new component.'},
+      {summary: 'Προστέθηκε συλλογή στη ροή περιεχομένου.', reason: 'Η δεύτερη διαθέσιμη ενότητα είναι το λιγότερο παρεμβατικό σημείο για οπτική απόδειξη και ακολουθεί την υπάρχουσα ιεραρχία.', howToChange: 'Επίλεξε τη συλλογή για αντικατάσταση ή αλλαγή σειράς εικόνων. Το Undo αφαιρεί μόνο αυτό το νέο component.'},
+    ),
+    designNotes: language === 'el' ? ['Κοινή διάταξη για όλες τις αναλύσεις.', 'Το υπάρχον περιεχόμενο δεν μετακινήθηκε.'] : ['One shared layout across every resolution.', 'No existing content was moved.'],
+  });
+
+  return finish({
+    action: 'complete', afterSectionId: '', targetSectionId: '', afterComponentId: '', section: {...guideSectionDefaults}, component: {...guideComponentDefaults},
+    explanation: explanation(
+      {summary: 'The page is balanced and complete.', reason: 'The current structure already contains the useful content types available to this safe on-device guide.', howToChange: 'Continue editing existing elements directly, or add a specific component manually when new content is ready.'},
+      {summary: 'Η σελίδα είναι ισορροπημένη και ολοκληρωμένη.', reason: 'Η τρέχουσα δομή περιέχει ήδη τους χρήσιμους τύπους περιεχομένου που μπορεί να προσθέσει με ασφάλεια ο οδηγός της συσκευής.', howToChange: 'Συνέχισε την επεξεργασία των υπαρχόντων στοιχείων ή πρόσθεσε χειροκίνητα ένα συγκεκριμένο component όταν υπάρχει νέο περιεχόμενο.'},
+    ),
+    designNotes: language === 'el' ? ['Καμία καταστροφική ενέργεια.', 'Καμία αυτόματη δημοσίευση.'] : ['No destructive operation was used.', 'No automatic publishing.'],
+  });
 }
 
 export function readPagesPublicPayload() {
@@ -346,7 +414,7 @@ export async function pagesAdminRequest(path: string, init: RequestInit = {}): P
     const key = `${parts[1]}:${parts[2]}`; const active = body.active !== false;
     state.favorites = active ? [...new Set([...state.favorites, key])] : state.favorites.filter(value => value !== key); writeState(state); return ok({active, favorites: dashboard(state).favorites});
   }
-  if (parts[0] === 'guide') return fail(503, 'ai_service_unavailable', 'The AI guide requires an online admin service. Manual editing remains available.');
+  if (parts[0] === 'guide' && parts[1] === 'next' && method === 'POST') return planPagesGuideStep(body);
   return fail(404, 'not_found', 'This action is unavailable in the mobile device workspace.');
 }
 

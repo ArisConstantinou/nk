@@ -3,6 +3,7 @@ import {Bot, CheckCircle2, ChevronRight, Code2, Languages, LoaderCircle, Map, Re
 import {useLocation} from 'react-router-dom';
 import {errorMessage} from '../api';
 import {requestCmsGuideStep, type CmsGuideLanguage, type CmsGuideStepResult} from '../guide/aiGuide';
+import {isPagesAdminMode} from '../pagesMode';
 
 const words = {
   en: {
@@ -36,6 +37,18 @@ export function AdminGuide({open, onClose, onNavigate}: {open: boolean; onClose:
   const dialogRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const text = words[language];
+  const deviceText = language === 'el' ? {
+    title: 'ΕΞΥΠΝΟΣ ΟΔΗΓΟΣ CMS', close: 'Κλείσιμο έξυπνου οδηγού', introTitle: 'Ο οδηγός διαβάζει πρώτα τη σελίδα.',
+    intro: 'Πριν από κάθε βήμα αναλύει το τρέχον JSON της σελίδας στη συσκευή, επιλέγει μία ασφαλή προσθήκη και την εφαρμόζει μόνο στο draft.',
+    analysing: 'Ανάλυση της τρέχουσας σελίδας…', applying: 'Έλεγχος και εφαρμογή μίας ασφαλούς ενέργειας…', safe: 'Στη συσκευή · μόνο προσθήκες · διαθέσιμο Undo',
+    input: 'JSON σελίδας που αναλύθηκε', output: 'Ελεγμένο JSON ενέργειας', step: 'ΕΞΥΠΝΟ ΒΗΜΑ', guard: 'Ο οδηγός δεν μπορεί να διαγράψει, να αντικαταστήσει, να μετακινήσει ή να δημοσιεύσει περιεχόμενο.', analysisComplete: 'Η ΑΝΑΛΥΣΗ ΟΛΟΚΛΗΡΩΘΗΚΕ', saved: 'Αποθηκεύτηκε μόνο στο draft', noChange: 'Δεν χρειάζεται αλλαγή', undo: 'Χρησιμοποίησε Undo στον editor για να αφαιρέσεις ακριβώς αυτό το βήμα.', unchanged: 'Δεν τροποποιήθηκε τίποτα.',
+  } : {
+    title: 'SMART CMS GUIDE', close: 'Close smart guide', introTitle: 'The guide reads the page first.',
+    intro: 'Before every step it analyses the current page JSON on this device, chooses one safe addition, and applies it only to the draft.',
+    analysing: 'Analysing the current page…', applying: 'Validating and applying one safe action…', safe: 'On-device · additive only · Undo available',
+    input: 'Page JSON analysed', output: 'Validated action JSON', step: 'SMART STEP', guard: 'The guide cannot delete, replace, move or publish content.', analysisComplete: 'ANALYSIS COMPLETE', saved: 'Saved to draft only', noChange: 'No change needed', undo: 'Use Undo in the editor to remove this exact step.', unchanged: 'Nothing was modified.',
+  };
+  const guideText = isPagesAdminMode ? {...text, ...deviceText} : {...text, guard: language === 'el' ? 'Το AI δεν μπορεί να διαγράψει, να αντικαταστήσει, να μετακινήσει ή να δημοσιεύσει περιεχόμενο.' : 'The AI cannot call delete, replace, move or publish operations.', analysisComplete: language === 'el' ? 'Η ΑΝΑΛΥΣΗ ΟΛΟΚΛΗΡΩΘΗΚΕ' : 'ANALYSIS COMPLETE', saved: language === 'el' ? 'Αποθηκεύτηκε μόνο στο draft' : 'Saved to draft only', noChange: language === 'el' ? 'Δεν χρειάζεται αλλαγή' : 'No change needed', undo: language === 'el' ? 'Χρησιμοποίησε Undo στον editor για να αφαιρέσεις ακριβώς αυτό το βήμα.' : 'Use Undo in the editor to remove this exact step.', unchanged: language === 'el' ? 'Δεν τροποποιήθηκε τίποτα.' : 'Nothing was modified.'};
   const inEditor = location.pathname === '/admin/pages';
 
   useEffect(() => {localStorage.setItem('nk-admin-guide-language', language);}, [language]);
@@ -72,15 +85,15 @@ export function AdminGuide({open, onClose, onNavigate}: {open: boolean; onClose:
 
   return <div className="nk-admin-guide-overlay nk-admin-ai-guide-overlay" role="presentation">
     <section ref={dialogRef} className="nk-admin-guide nk-admin-ai-guide" role="dialog" aria-modal="true" aria-labelledby="admin-guide-title">
-      <header><div><Bot/><span>{text.title}</span></div><button ref={closeRef} type="button" onClick={onClose} aria-label={text.close}><X/></button></header>
+      <header><div><Bot/><span>{guideText.title}</span></div><button ref={closeRef} type="button" onClick={onClose} aria-label={guideText.close}><X/></button></header>
       <div className="nk-admin-guide-language" aria-label="Guide language"><Languages/><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button><button type="button" className={language === 'el' ? 'active' : ''} aria-pressed={language === 'el'} onClick={() => setLanguage('el')}>Ελληνικά</button></div>
-      <div className="nk-admin-ai-guide-step"><Sparkles/><span>{text.step} {phase === 'explained' ? Math.max(1, step) : step + 1}</span><b>{text.safe}</b></div>
+      <div className="nk-admin-ai-guide-step"><Sparkles/><span>{guideText.step} {phase === 'explained' ? Math.max(1, step) : step + 1}</span><b>{guideText.safe}</b></div>
       <main>
         {!inEditor ? <div className="nk-admin-ai-guide-intro"><Map/><small>ADAPTIVE WORKFLOW</small><h2 id="admin-guide-title">{text.introTitle}</h2><p>{text.editorRequired}</p><button type="button" onClick={() => onNavigate('/admin/pages')}>{text.openEditor}<ChevronRight/></button></div> : <>
-          {phase === 'idle' && <div className="nk-admin-ai-guide-intro"><Bot/><small>FRESH ANALYSIS BEFORE EVERY STEP</small><h2 id="admin-guide-title">{text.introTitle}</h2><p>{text.intro}</p><div className="nk-admin-ai-safety"><ShieldCheck/><span><b>{text.safe}</b><small>The AI cannot call delete, replace, move or publish operations.</small></span></div></div>}
-          {phase === 'analysing' && <div className="nk-admin-ai-guide-loading" aria-live="polite"><LoaderCircle className="nk-admin-spin"/><h2 id="admin-guide-title">{text.analysing}</h2><p>{text.applying}</p><div><i/><i/><i/></div></div>}
+          {phase === 'idle' && <div className="nk-admin-ai-guide-intro"><Bot/><small>FRESH ANALYSIS BEFORE EVERY STEP</small><h2 id="admin-guide-title">{guideText.introTitle}</h2><p>{guideText.intro}</p><div className="nk-admin-ai-safety"><ShieldCheck/><span><b>{guideText.safe}</b><small>{guideText.guard}</small></span></div></div>}
+          {phase === 'analysing' && <div className="nk-admin-ai-guide-loading" aria-live="polite"><LoaderCircle className="nk-admin-spin"/><h2 id="admin-guide-title">{guideText.analysing}</h2><p>{guideText.applying}</p><div><i/><i/><i/></div></div>}
           {phase === 'error' && <div className="nk-admin-ai-guide-error" role="alert"><X/><small>{text.error}</small><h2 id="admin-guide-title">{failure}</h2><p>No draft content was changed.</p></div>}
-          {phase === 'explained' && result && <div className="nk-admin-ai-guide-result"><CheckCircle2/><small>{result.proposal.action === 'complete' ? 'ANALYSIS COMPLETE' : text.result}</small><h2 id="admin-guide-title">{result.proposal.action === 'complete' ? text.complete : result.proposal.explanation.summary}</h2><section><b>{text.why}</b><p>{result.proposal.explanation.reason}</p></section><section><b>{text.change}</b><p>{result.proposal.explanation.howToChange}</p></section>{result.proposal.designNotes.length > 0 && <ul>{result.proposal.designNotes.map(note => <li key={note}>{note}</li>)}</ul>}<div className="nk-admin-ai-safety"><ShieldCheck/><span><b>{result.applied ? 'Saved to draft only' : 'No change needed'}</b><small>{result.applied ? 'Use Undo in the editor to remove this exact step.' : 'Nothing was modified.'}</small></span></div><details><summary><Code2/>{text.input}</summary><pre>{JSON.stringify(result.context, null, 2)}</pre></details><details><summary><Code2/>{text.output}</summary><pre>{JSON.stringify(result.proposal, null, 2)}</pre></details></div>}
+          {phase === 'explained' && result && <div className="nk-admin-ai-guide-result"><CheckCircle2/><small>{result.proposal.action === 'complete' ? guideText.analysisComplete : text.result}</small><h2 id="admin-guide-title">{result.proposal.explanation.summary}</h2><section><b>{text.why}</b><p>{result.proposal.explanation.reason}</p></section><section><b>{text.change}</b><p>{result.proposal.explanation.howToChange}</p></section>{result.proposal.designNotes.length > 0 && <ul>{result.proposal.designNotes.map(note => <li key={note}>{note}</li>)}</ul>}<div className="nk-admin-ai-safety"><ShieldCheck/><span><b>{result.applied ? guideText.saved : guideText.noChange}</b><small>{result.applied ? guideText.undo : guideText.unchanged}</small></span></div><details><summary><Code2/>{guideText.input}</summary><pre>{JSON.stringify(result.context, null, 2)}</pre></details><details><summary><Code2/>{guideText.output}</summary><pre>{JSON.stringify(result.proposal, null, 2)}</pre></details></div>}
         </>}
       </main>
       {inEditor && <footer><button type="button" onClick={() => void runStep()} disabled={phase === 'analysing'}>{phase === 'analysing' ? <LoaderCircle className="nk-admin-spin"/> : phase === 'explained' ? <RefreshCw/> : <Sparkles/>}{phase === 'explained' ? text.again : phase === 'error' ? text.retry : text.analyse}</button></footer>}
