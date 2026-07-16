@@ -90,14 +90,36 @@ function removePathValue(record: ContentRecord, path: string): ContentRecord {
   return next;
 }
 
-function previewSrc(path: string, nonce: string) {
+const previewBasePath = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function publicPreviewUrl(path: string) {
   const url = new URL(path, window.location.origin);
+  const alreadyUnderBase = !previewBasePath || url.pathname === previewBasePath || url.pathname.startsWith(`${previewBasePath}/`);
+  if (url.origin === window.location.origin && !alreadyUnderBase) url.pathname = `${previewBasePath}${url.pathname.startsWith('/') ? url.pathname : `/${url.pathname}`}`;
+  return url;
+}
+
+function logicalPreviewPath(url: URL) {
+  const pathname = previewBasePath && (url.pathname === previewBasePath || url.pathname.startsWith(`${previewBasePath}/`))
+    ? url.pathname.slice(previewBasePath.length) || '/'
+    : url.pathname;
+  return `${pathname}${url.search}${url.hash}`;
+}
+
+function previewHref(path: string) {
+  const url = publicPreviewUrl(path);
+  url.searchParams.delete('visualEditor');
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function previewSrc(path: string, nonce: string) {
+  const url = publicPreviewUrl(path);
   url.searchParams.set('visualEditor', nonce);
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
 function previewDocumentKey(path: string) {
-  const url = new URL(path, window.location.origin);
+  const url = publicPreviewUrl(path);
   url.searchParams.delete('visualEditor');
   return `${url.pathname}${url.search}`;
 }
@@ -524,7 +546,8 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       if (event.data.type === 'nk-visual-editor:ready') {setFrameReady(true); postRecords(); return;}
       if (event.data.type === 'nk-visual-editor:navigate' && typeof event.data.path === 'string') {
         const url = new URL(event.data.path, window.location.origin);
-        if (url.origin === window.location.origin && !url.pathname.startsWith('/admin')) {url.searchParams.delete('visualEditor'); transitionPreview(`${url.pathname}${url.search}${url.hash}`);}
+        const nextPath = logicalPreviewPath(url);
+        if (url.origin === window.location.origin && !nextPath.startsWith('/admin')) {url.searchParams.delete('visualEditor'); transitionPreview(logicalPreviewPath(url));}
         return;
       }
       if (event.data.type === 'nk-visual-editor:blocked-action') {setNotice('Form submissions are disabled inside the editor preview. Open the live page to test a real submission.'); return;}
@@ -813,7 +836,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     <header className="nk-visual-toolbar">
       <div className="nk-visual-document"><span>VISUAL WEBSITE EDITOR</span><details ref={documentMenuRef}><summary aria-label={`Choose ${kindLabels[kind].toLowerCase()}`}><b>{kindLabels[activeRecord.kind]}</b><span>{activeRecord.title}{activeRecord.kind !== kind && ' · global element'}</span><ChevronDown/></summary><div role="listbox" aria-label={`${kindLabels[kind]} records`}>{documentOptions.map(record => <button type="button" role="option" aria-selected={record.id === activeRecord.id} className={record.id === activeRecord.id ? 'active' : ''} onClick={() => {chooseRecord(record.id); if (documentMenuRef.current) documentMenuRef.current.open = false;}} key={record.id}><span>{record.title}</span>{record.kind !== kind && <small>Global element</small>}</button>)}</div></details></div>
       <div className="nk-visual-viewports" aria-label="Preview viewport">{(Object.entries(viewportOptions) as [ViewportName, typeof option][]).map(([name, item]) => <button type="button" className={viewport === name ? 'active' : ''} aria-pressed={viewport === name} onClick={() => setViewport(name)} key={name}><item.icon/><span>{item.label}</span><small>{item.width}</small></button>)}</div>
-      <div className="nk-visual-publish"><div className={`nk-visual-save-state ${phase}`} role="status"><StatusIcon className={phase === 'saving' ? 'nk-admin-spin' : ''}/><span><b>{statusText}</b><small>{activeRecord.title} · v{activeRecord.version}</small></span></div><a href={previewPath} target="_blank" rel="noreferrer">View live <ExternalLink/></a>{canWriteCurrent && <button className="nk-admin-primary" type="button" disabled={publishing || phase === 'saving' || phase === 'error'} onClick={() => void publish()}><Rocket/>{publishing ? 'Publishing…' : 'Publish'}</button>}</div>
+      <div className="nk-visual-publish"><div className={`nk-visual-save-state ${phase}`} role="status"><StatusIcon className={phase === 'saving' ? 'nk-admin-spin' : ''}/><span><b>{statusText}</b><small>{activeRecord.title} · v{activeRecord.version}</small></span></div><a href={previewHref(previewPath)} target="_blank" rel="noreferrer">View live <ExternalLink/></a>{canWriteCurrent && <button className="nk-admin-primary" type="button" disabled={publishing || phase === 'saving' || phase === 'error'} onClick={() => void publish()}><Rocket/>{publishing ? 'Publishing…' : 'Publish'}</button>}</div>
     </header>
     {(saveErrors[activeRecord.id] || notice) && <div className={`nk-visual-notice ${saveErrors[activeRecord.id] ? 'error' : ''}`} role={saveErrors[activeRecord.id] ? 'alert' : 'status'}>{saveErrors[activeRecord.id] ? <AlertTriangle/> : <Check/>}<span>{saveErrors[activeRecord.id] || notice}</span><button type="button" onClick={() => {setNotice(''); setSaveErrors(current => ({...current, [activeRecord.id]: ''}));}}>Dismiss</button></div>}
     <div className="nk-visual-workspace">
