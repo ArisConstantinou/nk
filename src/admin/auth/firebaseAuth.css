@@ -9,3 +9,35 @@
   background: var(--admin-surface-soft);
   border-color: var(--admin-accent);
 }
+
+.nk-admin-firebase-fallback {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface-soft);
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.nk-admin-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--admin-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.nk-admin-auth-divider::before,
+.nk-admin-auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--admin-line);
+}
+
+.nk-admin-auth-divider span {
+  white-space: nowrap;
+}

@@ -22,6 +22,9 @@ const DIST_DIR = resolve(process.env.ADMIN_DIST_PATH || 'dist');
 const SERVE_SITE = process.env.ADMIN_SERVE_SITE === 'true';
 const ALLOWED_ORIGINS = new Set((process.env.ADMIN_ALLOWED_ORIGINS || 'http://127.0.0.1:5191,http://localhost:5191,http://127.0.0.1:5192').split(',').map(value => value.trim()).filter(Boolean));
 const TRUST_LOOPBACK_PROXY = process.env.ADMIN_TRUST_LOOPBACK_PROXY === 'true';
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || '';
+const FIREBASE_ALLOWED_EMAILS = new Set(String(process.env.FIREBASE_ADMIN_EMAILS || process.env.VITE_FIREBASE_ADMIN_EMAILS || '').split(',').map(value => value.trim().toLowerCase()).filter(Boolean));
+const FIREBASE_IDENTITY_LOOKUP_URL = process.env.FIREBASE_IDENTITY_TOOLKIT_URL || 'https://identitytoolkit.googleapis.com/v1/accounts:lookup';
 const ROLES = ['owner', 'editor', 'shop', 'projects', 'sales', 'viewer'];
 const ENQUIRY_TYPES = ['contact', 'quote', 'product', 'catalogue', 'project', 'phone'];
 const ENQUIRY_STATUSES = ['new', 'in_progress', 'waiting', 'won', 'closed', 'spam'];
@@ -271,6 +274,36 @@ function checkLoginRate(req, email) {
 
 function clearLoginRate(req, email) {
   loginAttempts.delete(`${requestIp(req)}|${email}`);
+}
+
+async function verifyFirebaseAdminToken(rawToken) {
+  if (!FIREBASE_API_KEY || !FIREBASE_ALLOWED_EMAILS.size) {
+    throw new ApiError(503, 'firebase_not_configured', 'Firebase Authentication is not configured for the local admin service.');
+  }
+  const idToken = String(rawToken || '').trim();
+  if (!idToken || idToken.length > 20_000) throw new ApiError(401, 'firebase_invalid_token', 'Firebase sign-in could not be verified.');
+  const endpoint = new URL(FIREBASE_IDENTITY_LOOKUP_URL);
+  endpoint.searchParams.set('key', FIREBASE_API_KEY);
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({idToken}),
+      signal: AbortSignal.timeout(7000),
+    });
+  } catch {
+    throw new ApiError(503, 'firebase_unavailable', 'Firebase could not be reached. Use the original local login.');
+  }
+  const payload = await response.json().catch(() => ({}));
+  const firebaseUser = Array.isArray(payload.users) ? payload.users[0] : null;
+  if (!response.ok || !firebaseUser?.localId || !firebaseUser?.email) {
+    throw new ApiError(401, 'firebase_invalid_token', 'Firebase sign-in could not be verified.');
+  }
+  const email = normalizeEmail(firebaseUser.email);
+  if (firebaseUser.emailVerified !== true) throw new ApiError(403, 'firebase_email_unverified', 'Verify this Firebase email address before using the admin panel.');
+  if (!FIREBASE_ALLOWED_EMAILS.has(email)) throw new ApiError(403, 'firebase_account_denied', 'This Firebase account is not authorised for the NK Electrical admin.');
+  return {uid: String(firebaseUser.localId), email};
 }
 
 function checkSubmissionRate(req) {
@@ -764,6 +797,22 @@ async function handleRequest(req, res) {
     transaction(() => {
       session = createSession(user, req);
       audit({userId: user.id, action: 'session.login', entityType: 'session', details: {}, ipAddress: requestIp(req)});
+    });
+    return sendJson(res, 200, {user, csrfToken: session.csrf}, {'Set-Cookie': sessionCookie(session.token, session.expiresAt)});
+  }
+
+  if (req.method === 'POST' && parts[0] === 'firebase-login') {
+    const body = await readJson(req, 50_000);
+    const firebaseUser = await verifyFirebaseAdminToken(body.idToken);
+    checkLoginRate(req, firebaseUser.email);
+    const row = db.prepare('SELECT * FROM admin_users WHERE email = ? COLLATE NOCASE').get(firebaseUser.email);
+    if (!row || !row.active) throw new ApiError(403, 'firebase_account_unlinked', 'This Firebase email is not linked to an active local administrator. Use the original local login.');
+    clearLoginRate(req, firebaseUser.email);
+    const user = publicUser(row);
+    let session;
+    transaction(() => {
+      session = createSession(user, req);
+      audit({userId: user.id, action: 'session.firebase_login', entityType: 'session', details: {firebaseUid: firebaseUser.uid}, ipAddress: requestIp(req)});
     });
     return sendJson(res, 200, {user, csrfToken: session.csrf}, {'Set-Cookie': sessionCookie(session.token, session.expiresAt)});
   }

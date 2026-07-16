@@ -34,6 +34,12 @@ The static GitHub Pages build uses Firebase Authentication instead of the Node s
 
 Firebase web configuration is public by design and is not an administrator credential. Access is established by Firebase Authentication; any future Firestore or Storage data must additionally be protected with Firebase Security Rules and App Check. The current Pages workspace content remains local to the signed-in browser and is not a replacement for the server-backed SQLite CMS.
 
+### Optional localhost Firebase sign-in
+
+The development admin can prefer Firebase Google sign-in while retaining the original local credentials as an offline fallback. Put the `VITE_FIREBASE_*` values plus `FIREBASE_API_KEY` and `FIREBASE_ADMIN_EMAILS` in the ignored `.env.local` file, and add `localhost` and `127.0.0.1` to Firebase Authentication's authorised domains. `npm run dev:admin` passes these values to both Vite and the local API.
+
+After Firebase signs in, the browser sends its short-lived ID token to `/api/admin/firebase-login`. The local API verifies it with the Firebase Identity Toolkit, requires a verified allow-listed email, and maps that email to an existing active SQLite administrator before issuing the normal HttpOnly/CSRF session. Firebase therefore cannot create a local user, change a role or bypass local API permissions. If token verification cannot reach Firebase, the login screen keeps the original local email/password form active.
+
 ## Initial deployment
 
 1. Install exact dependencies with `npm ci`.

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
+import {createServer as createHttpServer} from 'node:http';
 import {createServer as createNetServer} from 'node:net';
 import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -62,10 +63,29 @@ function pageData(overrides = {}) {
 
 test('secure admin lifecycle', async t => {
   const port = await freePort();
+  const firebasePort = await freePort();
+  const firebaseServer = createHttpServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+    const users = body.idToken === 'firebase-owner-token'
+      ? [{localId: 'firebase-owner', email: 'owner@example.com', emailVerified: true}]
+      : body.idToken === 'firebase-outsider-token'
+        ? [{localId: 'firebase-outsider', email: 'outsider@example.com', emailVerified: true}]
+        : [];
+    res.writeHead(users.length ? 200 : 400, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify(users.length ? {users} : {error: {message: 'INVALID_ID_TOKEN'}}));
+  });
+  firebaseServer.listen(firebasePort, '127.0.0.1');
+  await once(firebaseServer, 'listening');
+  t.after(async () => {
+    firebaseServer.close();
+    await once(firebaseServer, 'close');
+  });
   base = `http://127.0.0.1:${port}/api/admin`;
   const child = spawn(process.execPath, ['server/admin-server.mjs'], {
     cwd: root,
-    env: {...process.env, OPENAI_API_KEY: '', ADMIN_API_PORT: String(port), ADMIN_DB_PATH: join(temp, 'admin.sqlite'), ADMIN_MEDIA_PATH: join(temp, 'media'), ADMIN_ALLOWED_ORIGINS: origin, ADMIN_ALLOW_LOOPBACK_SETUP: 'true', NODE_ENV: 'development'},
+    env: {...process.env, OPENAI_API_KEY: '', ADMIN_API_PORT: String(port), ADMIN_DB_PATH: join(temp, 'admin.sqlite'), ADMIN_MEDIA_PATH: join(temp, 'media'), ADMIN_ALLOWED_ORIGINS: origin, ADMIN_ALLOW_LOOPBACK_SETUP: 'true', FIREBASE_API_KEY: 'test-api-key', FIREBASE_ADMIN_EMAILS: 'owner@example.com', FIREBASE_IDENTITY_TOOLKIT_URL: `http://127.0.0.1:${firebasePort}/v1/accounts:lookup`, NODE_ENV: 'development'},
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   t.after(async () => {
@@ -88,6 +108,20 @@ test('secure admin lifecycle', async t => {
   assert.equal(setup.payload.user.role, 'owner');
   let cookie = setup.response.headers.get('set-cookie').split(';')[0];
   let csrf = setup.payload.csrfToken;
+
+  const missingFirebaseToken = await request('/firebase-login', {method: 'POST', body: {}});
+  assert.equal(missingFirebaseToken.response.status, 401);
+  assert.equal(missingFirebaseToken.payload.error.code, 'firebase_invalid_token');
+  const deniedFirebaseAccount = await request('/firebase-login', {method: 'POST', body: {idToken: 'firebase-outsider-token'}});
+  assert.equal(deniedFirebaseAccount.response.status, 403);
+  assert.equal(deniedFirebaseAccount.payload.error.code, 'firebase_account_denied');
+  const firebaseLogin = await request('/firebase-login', {method: 'POST', body: {idToken: 'firebase-owner-token'}});
+  assert.equal(firebaseLogin.response.status, 200);
+  assert.equal(firebaseLogin.payload.user.email, 'owner@example.com');
+  const firebaseCookie = firebaseLogin.response.headers.get('set-cookie').split(';')[0];
+  const firebaseSession = await request('/session', {cookie: firebaseCookie});
+  assert.equal(firebaseSession.response.status, 200);
+  assert.equal(firebaseSession.payload.user.role, 'owner');
 
   const session = await request('/session', {cookie});
   assert.equal(session.response.status, 200);

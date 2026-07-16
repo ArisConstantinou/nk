@@ -2,7 +2,17 @@ import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useS
 import {adminApi, setCsrfToken, setUnauthorizedHandler} from '../api';
 import type {AdminUser} from '../types';
 import {isPagesAdminMode, pagesAdminUser} from '../pagesMode';
-import {currentFirebaseAdmin, loginWithFirebaseEmail, loginWithFirebaseGoogle, logoutFirebaseAdmin, observeFirebaseAdmin} from './firebaseAuth';
+import {
+  currentFirebaseAdmin,
+  currentFirebaseAdminIdToken,
+  isFirebaseAuthConfigured,
+  isFirebaseNetworkAvailable,
+  isFirebaseUnavailableError,
+  loginWithFirebaseEmail,
+  loginWithFirebaseGoogle,
+  logoutFirebaseAdmin,
+  observeFirebaseAdmin,
+} from './firebaseAuth';
 
 type AuthPhase = 'loading' | 'setup' | 'guest' | 'authenticated' | 'unavailable';
 
@@ -10,6 +20,8 @@ type AuthContextValue = {
   phase: AuthPhase;
   user: AdminUser | null;
   error: string;
+  firebaseAvailable: boolean;
+  firebaseFallbackReason: string;
   requiresBootstrapToken: boolean;
   refresh: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
@@ -24,8 +36,26 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
   const [phase, setPhase] = useState<AuthPhase>('loading');
   const [user, setUser] = useState<AdminUser | null>(null);
   const [error, setError] = useState('');
+  const [firebaseAvailable, setFirebaseAvailable] = useState(() => isFirebaseAuthConfigured() && isFirebaseNetworkAvailable());
+  const [firebaseFallbackReason, setFirebaseFallbackReason] = useState('');
   const [requiresBootstrapToken, setRequiresBootstrapToken] = useState(true);
   const initialRefreshStarted = useRef(false);
+
+  const applyServerSession = useCallback((session: {user: AdminUser; csrfToken: string}) => {
+    setCsrfToken(session.csrfToken);
+    setUser(session.user);
+    setPhase('authenticated');
+  }, []);
+
+  const exchangeFirebaseForServerSession = useCallback(async () => {
+    const idToken = await currentFirebaseAdminIdToken();
+    const session = await adminApi<{user: AdminUser; csrfToken: string}>('/firebase-login', {
+      method: 'POST',
+      body: JSON.stringify({idToken}),
+    });
+    applyServerSession(session);
+    return session.user;
+  }, [applyServerSession]);
 
   const refresh = useCallback(async () => {
     if (isPagesAdminMode) {
@@ -48,6 +78,15 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
       }
       return;
     }
+    const configured = isFirebaseAuthConfigured();
+    const online = isFirebaseNetworkAvailable();
+    const canUseFirebase = configured && online;
+    setFirebaseAvailable(canUseFirebase);
+    setFirebaseFallbackReason(!configured
+      ? 'Firebase is not configured on this computer. The original local login is active.'
+      : !online
+        ? 'No internet connection. The original local login is active.'
+        : '');
     setPhase('loading');
     setError('');
     try {
@@ -60,11 +99,22 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
       }
       try {
         const session = await adminApi<{user: AdminUser; csrfToken: string}>('/session');
-        setCsrfToken(session.csrfToken);
-        setUser(session.user);
-        setPhase('authenticated');
+        applyServerSession(session);
       } catch (sessionError) {
         if (sessionError instanceof Error && 'status' in sessionError && sessionError.status === 401) {
+          if (canUseFirebase) {
+            try {
+              const firebaseUser = await currentFirebaseAdmin();
+              if (firebaseUser) {
+                await exchangeFirebaseForServerSession();
+                setFirebaseFallbackReason('');
+                return;
+              }
+            } catch (firebaseError) {
+              setFirebaseAvailable(false);
+              setFirebaseFallbackReason(`${firebaseError instanceof Error ? firebaseError.message : 'Firebase Authentication is unavailable.'} Use the original local login.`);
+            }
+          }
           setUser(null);
           setPhase('guest');
         } else throw sessionError;
@@ -73,7 +123,7 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
       setError(nextError instanceof Error ? nextError.message : 'The admin service is unavailable.');
       setPhase('unavailable');
     }
-  }, []);
+  }, [applyServerSession, exchangeFirebaseForServerSession]);
 
   useEffect(() => {
     if (!isPagesAdminMode) return;
@@ -101,6 +151,26 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
   }, []);
 
   useEffect(() => {
+    if (isPagesAdminMode) return;
+    const updateFirebaseAvailability = () => {
+      const configured = isFirebaseAuthConfigured();
+      const online = isFirebaseNetworkAvailable();
+      setFirebaseAvailable(configured && online);
+      setFirebaseFallbackReason(!configured
+        ? 'Firebase is not configured on this computer. The original local login is active.'
+        : !online
+          ? 'No internet connection. The original local login is active.'
+          : '');
+    };
+    window.addEventListener('online', updateFirebaseAvailability);
+    window.addEventListener('offline', updateFirebaseAvailability);
+    return () => {
+      window.removeEventListener('online', updateFirebaseAvailability);
+      window.removeEventListener('offline', updateFirebaseAvailability);
+    };
+  }, []);
+
+  useEffect(() => {
     setUnauthorizedHandler(() => {
       setCsrfToken('');
       setUser(null);
@@ -124,24 +194,44 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
       return;
     }
     const session = await adminApi<{user: AdminUser; csrfToken: string}>('/login', {method: 'POST', body: JSON.stringify({email, password})});
-    setCsrfToken(session.csrfToken);
-    setUser(session.user);
-    setPhase('authenticated');
+    applyServerSession(session);
   };
 
   const loginWithGoogle = async () => {
-    if (!isPagesAdminMode) throw new Error('Google sign-in is only available on the GitHub Pages admin.');
-    const firebaseUser = await loginWithFirebaseGoogle();
-    Object.assign(pagesAdminUser, firebaseUser);
-    setUser(firebaseUser);
-    setPhase('authenticated');
+    if (!isFirebaseAuthConfigured() || !isFirebaseNetworkAvailable()) {
+      const message = isPagesAdminMode
+        ? 'Firebase cannot be reached. Check the internet connection and try again.'
+        : 'Firebase cannot be reached. Use the original local login.';
+      if (!isPagesAdminMode) {
+        setFirebaseAvailable(false);
+        setFirebaseFallbackReason(message);
+      }
+      throw new Error(message);
+    }
+    try {
+      const firebaseUser = await loginWithFirebaseGoogle();
+      if (isPagesAdminMode) {
+        Object.assign(pagesAdminUser, firebaseUser);
+        setUser(firebaseUser);
+        setPhase('authenticated');
+        return;
+      }
+      await exchangeFirebaseForServerSession();
+      setFirebaseAvailable(true);
+      setFirebaseFallbackReason('');
+    } catch (nextError) {
+      if (!isPagesAdminMode) {
+        if (isFirebaseUnavailableError(nextError)) setFirebaseAvailable(false);
+        setFirebaseFallbackReason(`${nextError instanceof Error ? nextError.message : 'Firebase sign-in is unavailable.'} Use the original local login.`);
+        try { await logoutFirebaseAdmin(); } catch {}
+      }
+      throw nextError;
+    }
   };
 
   const setup = async (values: {displayName: string; email: string; password: string; bootstrapToken?: string}) => {
     const session = await adminApi<{user: AdminUser; csrfToken: string}>('/setup', {method: 'POST', body: JSON.stringify(values)});
-    setCsrfToken(session.csrfToken);
-    setUser(session.user);
-    setPhase('authenticated');
+    applyServerSession(session);
   };
 
   const logout = async () => {
@@ -152,12 +242,15 @@ export function AdminAuthProvider({children}: {children: ReactNode}) {
       return;
     }
     await adminApi('/logout', {method: 'POST'});
+    if (isFirebaseAuthConfigured()) {
+      try { await logoutFirebaseAdmin(); } catch {}
+    }
     setCsrfToken('');
     setUser(null);
     setPhase('guest');
   };
 
-  const value = useMemo(() => ({phase, user, error, requiresBootstrapToken, refresh, login, loginWithGoogle, setup, logout}), [phase, user, error, requiresBootstrapToken, refresh]);
+  const value = useMemo(() => ({phase, user, error, firebaseAvailable, firebaseFallbackReason, requiresBootstrapToken, refresh, login, loginWithGoogle, setup, logout}), [phase, user, error, firebaseAvailable, firebaseFallbackReason, requiresBootstrapToken, refresh]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

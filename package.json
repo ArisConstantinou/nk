@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5191 --strictPort",
-    "dev:admin-api": "node --watch server/admin-server.mjs",
+    "dev:admin-api": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --watch server/admin-server.mjs",
     "dev:admin": "node server/run-admin-dev.mjs",
     "start:admin": "node server/admin-server.mjs",
     "admin:create-owner": "node server/create-owner.mjs",

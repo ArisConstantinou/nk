@@ -27,6 +27,8 @@ Then open <http://127.0.0.1:5191/admin/>. The development runner explicitly perm
 
 Admin data is stored in `.data/admin.sqlite` and uploaded media in `.data/media`; both locations are ignored by Git. The API uses server-side scrypt password hashes, HttpOnly same-site sessions, CSRF and origin checks, role permissions, validation, optimistic record versions, revisions and audit logging.
 
+Localhost can also use Firebase Google sign-in when the public Firebase values and matching server verification values are present in `.env.local`. Firebase proves the email, then the local API maps it to an existing active SQLite administrator and issues the same HttpOnly local session; it never creates or elevates a local account. When Firebase or the internet is unavailable, the original local email/password login remains available automatically. Copy the Firebase section from `.env.example`, use the same administrator email on both sides, and authorise both `localhost` and `127.0.0.1` in Firebase Authentication.
+
 When the API runs behind a reverse proxy on the same host, set `ADMIN_TRUST_LOOPBACK_PROXY=true` only if that proxy overwrites (rather than appends untrusted input to) `X-Forwarded-For`. This keeps login and public-form rate limits per client without trusting arbitrary forwarded headers.
 
 Useful checks:

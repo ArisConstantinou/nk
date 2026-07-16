@@ -1,8 +1,10 @@
 import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {loadEnv} from 'vite';
 
 const viteEntry = fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.meta.url));
-const developmentEnv = {...process.env, NODE_ENV: 'development', ADMIN_ALLOW_LOOPBACK_SETUP: 'true'};
+const localEnv = loadEnv('development', process.cwd(), '');
+const developmentEnv = {...process.env, ...localEnv, NODE_ENV: 'development', ADMIN_ALLOW_LOOPBACK_SETUP: 'true'};
 const children = [
   spawn(process.execPath, ['--watch', 'server/admin-server.mjs'], {stdio: 'inherit', env: developmentEnv}),
   spawn(process.execPath, [viteEntry], {stdio: 'inherit', env: process.env}),

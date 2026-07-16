@@ -33,6 +33,19 @@ function configurationError() {
   return '';
 }
 
+export function isFirebaseAuthConfigured() {
+  return !configurationError();
+}
+
+export function isFirebaseNetworkAvailable() {
+  return typeof navigator === 'undefined' || navigator.onLine !== false;
+}
+
+export function isFirebaseUnavailableError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '');
+  return /not configured|could not be reached|network|offline|unavailable/i.test(message);
+}
+
 function authInstance() {
   const problem = configurationError();
   if (problem) throw new Error(problem);
@@ -76,6 +89,14 @@ export async function currentFirebaseAdmin() {
     await signOut(auth);
     throw error;
   }
+}
+
+export async function currentFirebaseAdminIdToken() {
+  const auth = authInstance();
+  await auth.authStateReady();
+  if (!auth.currentUser) throw new Error('Firebase sign-in did not return an administrator session.');
+  ensureAllowed(auth.currentUser);
+  return auth.currentUser.getIdToken();
 }
 
 export function observeFirebaseAdmin(onUser: (user: AdminUser | null) => void, onError: (error: Error) => void) {
