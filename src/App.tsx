@@ -4,6 +4,7 @@ import {ElectricalLayout} from './components/ElectricalLayout';
 import {ContentProvider} from './context/ContentContext';
 import {AboutPage, ContactPage, ExplorePage, LightingPage, NotFound, ProductPage, ProjectsPage} from './pages/PublicPages';
 import {QuotePage, ServiceDetailPage, ServicesPage, ShopCategoryPage} from './pages/ArchitecturePages';
+import {GuidedDemoPage} from './pages/GuidedDemoPage';
 
 const Admin = lazy(() => import('./pages/Admin'));
 const ElectricalHome = lazy(() => import('./pages/electrical/ElectricalHome'));
@@ -56,6 +57,7 @@ export default function App() {
     <Route path="/about" element={<Public><AboutPage/></Public>}/>
     <Route path="/contact" element={<Public><ContactPage/></Public>}/>
     <Route path="/request-a-quote" element={<Public><QuotePage/></Public>}/>
+    <Route path="/_cms-guide/:slug" element={<GuidedDemoPage/>}/>
     <Route path="/admin/*" element={<Suspense fallback={<div className="route-loader">Opening admin…</div>}><Admin/></Suspense>}/>
 
     <Route path="/electrical-installations" element={<Navigate to="/services/electrical-installations" replace/>}/>
