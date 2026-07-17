@@ -74,7 +74,7 @@ html[data-experience='tech'] body{overflow-x:hidden}
 .ia-footer-lead{display:grid;grid-template-columns:1fr auto;align-items:end;padding-bottom:68px;border-bottom:1px solid rgba(255,255,255,.13)}
 .ia-footer-lead>span{grid-column:1/-1;color:var(--system-live);font-family:var(--mono);font-size:12px;letter-spacing:.13em}
 .ia-footer-lead h2{font-family:var(--display);font-size:clamp(48px,6vw,90px);line-height:.9;letter-spacing:-.065em;margin:28px 0 0}
-.ia-footer-lead>a{min-width:230px;min-height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;background:var(--system-red);font-family:var(--mono);font-size:12px;font-weight:800;text-transform:uppercase}
+.ia-footer-lead>a{min-width:230px;min-height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;background:var(--system-red);color:var(--system-accent-ink);font-family:var(--mono);font-size:12px;font-weight:800;text-transform:uppercase}
 .ia-footer-grid{display:grid;grid-template-columns:1.2fr 1fr .75fr 1.2fr;gap:5vw;padding:42px 0}
 .ia-footer-grid>div{display:flex;flex-direction:column;gap:10px;color:#8596b1;font-size:14px;line-height:1.45}
 .ia-footer-grid b{margin-bottom:8px;color:var(--system-live);font-family:var(--mono);font-size:12px;letter-spacing:.11em;text-transform:uppercase}
@@ -276,6 +276,7 @@ html[data-theme='light'] .ia-brand strong,html[data-theme='light'] .ia-desktop-n
 html[data-theme='light'] .ia-brand small,html[data-theme='light'] .ia-header-phone{color:var(--system-muted)}
 html[data-theme='light'] .ia-brand-depth{display:none}
 html[data-theme='light'] .ia-header{box-shadow:0 12px 34px rgba(29,48,76,.1)}
+html[data-theme='light'] .ia-footer{background:var(--system-surface);border-top-color:var(--system-line)}
 html[data-theme='light'] .ia-mega,html[data-theme='light'] .ia-mobile-menu,html[data-theme='light'] .ia-footer,html[data-theme='light'] .ia-partnerships,html[data-theme='light'] .ia-project-filters,html[data-theme='light'] .ia-shop-toolbar,html[data-theme='light'] .ia-shop-gateway{color:var(--system-ink)}
 html[data-theme='light'] .ia-mega-heading p,html[data-theme='light'] .ia-mega>nav small,html[data-theme='light'] .ia-mega>aside p,html[data-theme='light'] .ia-home-split p,html[data-theme='light'] .ia-service-card p,html[data-theme='light'] .ia-service-summary p,html[data-theme='light'] .ia-shop-gateway p,html[data-theme='light'] .ia-partnerships header p,html[data-theme='light'] .ia-partnerships article p,html[data-theme='light'] .ia-quote-layout li span,html[data-theme='light'] .ia-quote-layout>aside>p{color:var(--system-muted)!important}
 html[data-theme='light'] .ia-service-lists li,html[data-theme='light'] .ia-project-filters button,html[data-theme='light'] .shop-view-controls>button,html[data-theme='light'] .ia-footer-grid>div,html[data-theme='light'] .ia-footer-bottom,html[data-theme='light'] .ia-footer-hours{color:var(--system-muted)}

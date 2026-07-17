@@ -41,40 +41,33 @@ const pageFocusByEyebrow: Record<string, [string, string, string]> = {
   'Electrical enquiry': ['Describe', 'Direct', 'Respond'],
 };
 
-const pageContextByEyebrow: Record<string, {index: string; status: string; brief: string}> = {
+const pageContextByEyebrow: Record<string, {index: string; brief: string}> = {
   'The people behind every installation': {
     index: 'COMPANY / PEOPLE & RESPONSIBILITIES',
-    status: 'FAMILY-FOUNDED SINCE 1985',
     brief: 'Company overview',
   },
   'Complete installed project archive': {
     index: 'PROJECTS / COMPLETED INSTALLATIONS',
-    status: '25 PROJECTS DOCUMENTED',
     brief: 'Archive overview',
   },
   'Electrical installations': {
     index: 'INSTALLATIONS / POWER & PROTECTION',
-    status: 'PLANNING · WIRING · TESTING · MAINTENANCE',
     brief: 'Installation scope',
   },
   'Lighting and appliance discovery': {
     index: 'DISCOVERY / LIGHTING & APPLIANCES',
-    status: 'FILTERED BY REAL USE',
     brief: 'How to browse',
   },
   'Dedicated lighting department': {
     index: 'LIGHTING / DESIGN & SUPPLY',
-    status: 'DEDICATED DEPARTMENT',
     brief: 'Lighting scope',
   },
   'Electrical appliances': {
     index: 'APPLIANCES / SELECT & CONNECT',
-    status: 'PRACTICAL PRODUCT SUPPORT',
     brief: 'Product scope',
   },
   'Electrical enquiry': {
     index: 'CONTACT / DIRECT TO SPECIALIST',
-    status: 'STROVOLOS / CYPRUS',
     brief: 'Enquiry routing',
   },
 };
@@ -90,7 +83,6 @@ export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; titl
   const focus = pageFocusByEyebrow[visibleEyebrow] || ['Scope', 'Coordinate', 'Deliver'];
   const context = pageContextByEyebrow[visibleEyebrow] || {
     index: `${visibleEyebrow.toUpperCase()} / NK ELECTRICAL`,
-    status: 'STROVOLOS · CYPRUS · SINCE 1985',
     brief: 'Page overview',
   };
   const [indexParent, ...indexCurrentParts] = context.index.split(/\s+\/\s+/);
@@ -108,7 +100,6 @@ export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; titl
         <Link to={breadcrumbBackPath} aria-label={`Back to ${indexParent.toLowerCase()}`}>{indexParent}</Link>
         {indexCurrent && <><b aria-hidden="true">/</b><span aria-current="page">{indexCurrent}</span></>}
       </nav>
-      <i>{context.status}</i>
     </div>
     <div className="system-page-title"><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'eyebrow', 'data-visual-edit': 'text', 'data-visual-label': 'Page eyebrow'} : {})}>{visibleEyebrow}</span><h1><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introTitle', 'data-visual-edit': 'text', 'data-visual-label': 'Page title'} : {})}>{visibleTitle}</span>{visibleItalic && <><br/><em {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introAccent', 'data-visual-edit': 'text', 'data-visual-label': 'Page title accent'} : {})}>{visibleItalic}</em></>}</h1></div>
     <aside className="system-page-brief"><small>{context.brief}</small><p {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introBody', 'data-visual-edit': 'text', 'data-visual-label': 'Page introduction', 'data-visual-multiline': 'true'} : {})}>{visibleBody}</p><div aria-label={`${visibleEyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
