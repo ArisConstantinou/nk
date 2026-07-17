@@ -124,6 +124,16 @@ html[data-experience='tech'] body{overflow-x:hidden}
 .ia-shop-toolbar>a,.ia-shop-gateway>a{min-height:52px;padding:0 18px;display:flex;align-items:center;gap:10px;background:var(--system-live);color:var(--system-accent-ink);font-family:var(--mono);font-size:12px;text-transform:uppercase}
 .ia-shop-gateway>div>svg{width:30px;color:var(--system-red);margin-bottom:25px}
 .ia-shop-gateway p{max-width:720px;color:#95a5bd!important;font-size:16px!important}
+.electrical-main .ia-shop-gateway.section{padding-top:clamp(44px,5vw,72px);padding-bottom:clamp(34px,4vw,56px)}
+.electrical-main .ia-shop-gateway+.product-grid.section{padding-top:clamp(24px,3vw,44px)}
+.shop-view-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.shop-view-controls>span{margin-right:8px}
+.shop-view-controls>button{min-height:36px;padding:0 12px;border:1px solid rgba(255,255,255,.22);background:transparent;color:#9aa9c2;font-family:var(--mono);font-size:11px;text-transform:uppercase;cursor:pointer}
+.shop-view-controls>button:hover,.shop-view-controls>button.active{border-color:var(--system-live);background:var(--system-live);color:var(--system-accent-ink)}
+.electrical-main .catalogue-load-more{padding-top:24px;padding-bottom:72px;background:var(--system-bg)}
+.catalogue-load-more>div{display:flex;align-items:center;gap:10px}
+.catalogue-load-more button.secondary{border-color:var(--system-line);background:transparent;color:var(--system-ink)}
+.catalogue-load-more button.secondary:hover{border-color:var(--system-live);color:var(--system-live)}
 
 .ia-project-filters{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;background:var(--system-panel);color:var(--system-white)}
 .ia-project-filters>div:first-child{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;text-transform:uppercase;color:var(--system-live)}
@@ -217,6 +227,12 @@ html[data-experience='tech'] body{overflow-x:hidden}
   .ia-service-card{min-height:320px}
   .ia-service-lists{grid-template-columns:1fr}
   .ia-shop-toolbar,.ia-shop-gateway{align-items:flex-start;flex-direction:column}
+  .shop-view-controls{width:100%;justify-content:flex-start;flex-wrap:wrap}
+  .shop-view-controls>span{width:100%;margin:0 0 3px}
+  .electrical-main .ia-shop-gateway.section{padding-top:46px;padding-bottom:36px}
+  .electrical-main .ia-shop-gateway+.product-grid.section{padding-top:26px}
+  .catalogue-load-more>div{width:100%;flex-direction:column}
+  .catalogue-load-more>div button{width:100%;justify-content:center}
   .ia-partnerships>div{grid-template-columns:1fr}.ia-partnerships article{border-right:0}
   .ia-footer-grid{grid-template-columns:1fr}.ia-footer-bottom{flex-direction:column}
   .ia-mobile-ctas{grid-template-columns:1fr}

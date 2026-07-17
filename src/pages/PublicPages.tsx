@@ -286,7 +286,7 @@ const filterValues = {
 };
 
 function ProductCard({item}: {item: Product}) {
-  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className="product-image"><ResponsiveImage src={item.image} alt={item.name} data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Product season">{item.season}</span></small><h3 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h3><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p></div></Link>;
+  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className="product-image"><ResponsiveImage src={item.image} alt={item.name} loading="lazy" decoding="async" data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Product season">{item.season}</span></small><h3 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h3><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p></div></Link>;
 }
 
 export function ExplorePage() {
@@ -295,17 +295,34 @@ export function ExplorePage() {
   const category = params.get('category') || 'All';
   const season = params.get('season') || 'All';
   const space = params.get('space') || 'All';
+  const viewAll = params.get('view') === 'all';
   const [visibleCount, setVisibleCount] = useState(48);
   const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
+  const setViewAll = (enabled: boolean) => {
+    const next = new URLSearchParams(params);
+    enabled ? next.set('view', 'all') : next.delete('view');
+    setVisibleCount(48);
+    setParams(next);
+  };
   const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
-  const shown = filtered.slice(0, visibleCount);
+  const shown = viewAll ? filtered : filtered.slice(0, visibleCount);
   useEffect(() => setVisibleCount(48), [category, season, space]);
   return <>
     <PageIntro eyebrow="NK Electrical Shop" title="Products organised" italic="for practical browsing." body="Browse products only: lighting, coffee, kitchen, cooling and household equipment. Installation and design expertise remains under Services."/>
-    <section className="filter-shell section"><div className="filter-top"><div><SlidersHorizontal/><b>Refine the collection</b></div><span>{filtered.length} considered matches</span></div>{Object.entries(filterValues).map(([key, values]) => <div className="filter-row" key={key}><b>{key}</b><div>{values.map(value => <button className={(key === 'category' ? category : key === 'season' ? season : space) === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div></div>)}</section>
+    <section className="filter-shell section">
+      <div className="filter-top">
+        <div><SlidersHorizontal/><b>Refine the collection</b></div>
+        <div className="shop-view-controls">
+          <span>{filtered.length} considered matches</span>
+          <button type="button" className={!viewAll ? 'active' : ''} aria-pressed={!viewAll} onClick={() => setViewAll(false)}>48 at a time</button>
+          <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={() => setViewAll(true)}>View all</button>
+        </div>
+      </div>
+      {Object.entries(filterValues).map(([key, values]) => <div className="filter-row" key={key}><b>{key}</b><div>{values.map(value => <button className={(key === 'category' ? category : key === 'season' ? season : space) === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div></div>)}
+    </section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
     <section className="product-grid section">{shown.map(product => <ProductCard item={product} key={product.id}/>)}</section>
-    {shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load more products <ArrowRight/></button></section>}
+    {!viewAll && shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><div><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load 48 more <ArrowRight/></button><button type="button" className="secondary" onClick={() => setViewAll(true)}>View all {filtered.length} products</button></div></section>}
     {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({})}>Clear filters</button></div>}
   </>;
 }
