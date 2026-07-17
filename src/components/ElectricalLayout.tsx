@@ -80,6 +80,12 @@ function PaletteSelector({className = ''}: {className?: string}) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const active = homePaletteOptions.find(option => option.id === palette) || homePaletteOptions[0];
 
+  const selectPalette = (nextPalette: HomePaletteId) => {
+    setPalette(nextPalette);
+    saveHomePalette(nextPalette);
+    detailsRef.current?.removeAttribute('open');
+  };
+
   useEffect(() => {
     const syncPalette = () => setPalette(getHomePalette());
     window.addEventListener(homePaletteChangeEvent, syncPalette);
@@ -95,7 +101,7 @@ function PaletteSelector({className = ''}: {className?: string}) {
         type="button"
         className={palette === option.id ? 'active' : ''}
         aria-pressed={palette === option.id}
-        onClick={() => { setPalette(option.id); saveHomePalette(option.id); detailsRef.current?.removeAttribute('open'); }}
+        onClick={() => selectPalette(option.id)}
         key={option.id}
       ><b>{option.number}</b><span><strong>{option.label}</strong><small>{option.context}</small></span><i>{option.colors.slice(0, 4).map(color => <em style={{backgroundColor: color}} key={color}/>)}</i></button>)}
     </div>

@@ -1,3 +1,5 @@
+import {saveThemePreference} from './theme';
+
 export const homePaletteOptions = [
   {
     id: 'electric-cyan', number: '01', code: 'PAL-01', label: 'Electric clarity', context: 'Signature lighting',
@@ -55,5 +57,6 @@ export function applyHomePalette(palette: HomePaletteId) {
 export function saveHomePalette(palette: HomePaletteId) {
   try { window.localStorage.setItem(storageKey, palette); } catch { /* The page can still use the active selection. */ }
   applyHomePalette(palette);
+  if (document.documentElement.dataset.theme === 'dark') saveThemePreference('light');
   window.dispatchEvent(new Event(homePaletteChangeEvent));
 }
