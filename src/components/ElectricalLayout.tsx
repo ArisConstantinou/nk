@@ -27,8 +27,13 @@ function PrimaryLink({to, children}: {to: string; children: ReactNode}) {
 
 function SocialIcon({link}: {link: SiteSocialLink}) {
   if (link.iconUrl) return <img src={link.iconUrl} alt=""/>;
-  const labels: Record<string, string> = {facebook: 'f', instagram: 'ig', linkedin: 'in', youtube: 'yt', tiktok: 'tt', x: 'x', whatsapp: 'wa', pinterest: 'p', telegram: 'tg', globe: '↗'};
-  return <span aria-hidden="true">{labels[link.icon.toLowerCase()] || link.platform.slice(0, 2).toLowerCase()}</span>;
+  const icon = link.icon.toLowerCase();
+
+  if (icon === 'facebook') return <svg className="ia-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.7 22v-9h3l.45-3.5H13.7V7.26c0-1.01.28-1.7 1.73-1.7h1.85V2.43c-.32-.04-1.42-.14-2.7-.14-2.67 0-4.5 1.63-4.5 4.63V9.5H7.05V13h3.03v9h3.62Z"/></svg>;
+  if (icon === 'instagram') return <svg className="ia-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="17.5" cy="6.5" r="1.15" fill="currentColor"/></svg>;
+  if (icon === 'linkedin') return <svg className="ia-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.5 8.2H3.2V21h3.3V8.2ZM4.85 3A1.9 1.9 0 1 0 4.84 6.8 1.9 1.9 0 0 0 4.85 3ZM21 13.65c0-3.86-2.06-5.65-4.82-5.65-2.22 0-3.22 1.22-3.77 2.08V8.2H9.1V21h3.31v-6.34c0-1.67.32-3.3 2.4-3.3 2.05 0 2.08 1.92 2.08 3.41V21H21v-7.35Z"/></svg>;
+
+  return <svg className="ia-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5h5v5m0-5-9 9m7 0v5H5V7h5"/></svg>;
 }
 
 function SocialLinks({links, placement, className}: {links: SiteSocialLink[]; placement: SiteSocialLink['placements'][number]; className?: string}) {
@@ -117,7 +122,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             ? <button key="shop" type="button" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onClick={() => toggleMega('shop')}><span>{item.label}</span><ChevronDown/></button>
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}>{item.label}</PrimaryLink>)}</nav>
         <div className="ia-header-actions">
-          {settings.header.showSocials && <SocialLinks links={settings.socialLinks} placement="header" className="ia-social-links ia-social-links--header"/>}
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
           <SmartLink className="ia-quote-button" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <LiveSiteEditButton/>
