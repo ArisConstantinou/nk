@@ -2,6 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {ArrowRight, ArrowUpRight, BadgePercent, FileText, Package, Search, SlidersHorizontal, Sparkles} from 'lucide-react';
 import {Link, useParams} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
+import {ProductShareActions} from '../components/ProductShareActions';
 
 export function ModernShopCategoryPage() {
   const {category = ''} = useParams();
@@ -62,10 +63,13 @@ export function ModernShopCategoryPage() {
     </section>
 
     <section className="catalogue-product-grid section" aria-live="polite">
-      {shown.map((product, index) => <Link to={`/shop/product/${product.id}`} className="catalogue-product-card" key={product.id}>
-        <div className="catalogue-product-card__image"><img loading={index < 8 ? 'eager' : 'lazy'} src={product.image} alt={product.name} data-visual-kind="product" data-visual-slug={product.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/>{product.offer && <span className="catalogue-offer-badge"><BadgePercent/> Offer</span>}<i>View details <ArrowUpRight/></i></div>
-        <div className="catalogue-product-card__copy"><small>{product.legacyCategory || product.category}</small><h2 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h2><p>{product.note}</p><span>Product {String(index + 1).padStart(2, '0')} <ArrowRight/></span></div>
-      </Link>)}
+      {shown.map((product, index) => <article className="catalogue-product-card-shell" key={product.id}>
+        <Link to={`/shop/product/${product.id}`} className="catalogue-product-card">
+          <div className="catalogue-product-card__image"><img loading={index < 8 ? 'eager' : 'lazy'} src={product.image} alt={product.name} data-visual-kind="product" data-visual-slug={product.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/>{product.offer && <span className="catalogue-offer-badge"><BadgePercent/> Offer</span>}<i>View details <ArrowUpRight/></i></div>
+          <div className="catalogue-product-card__copy"><small>{product.legacyCategory || product.category}</small><h2 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h2><p>{product.note}</p><span>Product {String(index + 1).padStart(2, '0')} <ArrowRight/></span></div>
+        </Link>
+        <ProductShareActions product={product}/>
+      </article>)}
     </section>
 
     {filtered.length === 0 && <section className="catalogue-empty section"><Search/><h2>No products match that search.</h2><p>Try a shorter name or return to all collections.</p><button type="button" onClick={() => {setQuery(''); setSelectedCategory('All');}}>Clear filters</button></section>}

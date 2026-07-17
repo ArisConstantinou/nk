@@ -29,6 +29,7 @@ import {publicAsset} from '../utils/assets';
 import {CmsSections} from '../components/CmsSections';
 import {ResponsiveImage} from '../components/ResponsiveImage';
 import {ManagedPublicForm} from '../components/ManagedPublicForm';
+import {ProductShareActions} from '../components/ProductShareActions';
 
 const pageFocusByEyebrow: Record<string, [string, string, string]> = {
   'The people behind every installation': ['Engineering', 'Design', 'Installations'],
@@ -321,7 +322,7 @@ export function ExplorePage() {
       {Object.entries(filterValues).map(([key, values]) => <div className="filter-row" key={key}><b>{key}</b><div>{values.map(value => <button className={(key === 'category' ? category : key === 'season' ? season : space) === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div></div>)}
     </section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
-    <section className="product-grid section">{shown.map(product => <ProductCard item={product} key={product.id}/>)}</section>
+    <section className="product-grid section">{shown.map(product => <article className="product-card-share-shell" key={product.id}><ProductCard item={product}/><ProductShareActions product={product}/></article>)}</section>
     {!viewAll && shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><div><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load 48 more <ArrowRight/></button><button type="button" className="secondary" onClick={() => setViewAll(true)}>View all {filtered.length} products</button></div></section>}
     {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({})}>Clear filters</button></div>}
   </>;

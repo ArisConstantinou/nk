@@ -11,6 +11,7 @@ import './styles.css';
 import './typography.css';
 import './navigation-redesign.css';
 import './shop-catalogue.css';
+import './product-sharing.css';
 
 document.documentElement.dataset.theme = 'dark';
 document.documentElement.dataset.experience = 'tech';

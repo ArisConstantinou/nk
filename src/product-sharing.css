@@ -1,0 +1,16 @@
+.product-card-share-shell,.catalogue-product-card-shell{position:relative;min-width:0}
+.product-card-share-shell{display:flex;flex-direction:column}
+.product-card-share-shell>.product-card{height:100%}
+.catalogue-product-card-shell{display:flex;flex-direction:column}
+.catalogue-product-card-shell>.catalogue-product-card{height:100%}
+.product-share{position:absolute;z-index:12;top:10px;right:10px}
+.product-share__trigger{min-width:42px;height:42px;padding:0 11px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid rgba(255,255,255,.22);background:rgba(3,8,15,.9);color:#fff;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(12px);box-shadow:0 8px 22px rgba(0,0,0,.25);transition:border-color .2s,background .2s,color .2s}
+.product-share__trigger svg{width:16px;height:16px;color:var(--system-live)}
+.product-share__trigger:hover,.product-share__trigger:focus-visible,.product-share.is-open .product-share__trigger{border-color:var(--system-live);background:var(--system-live);color:var(--system-accent-ink);outline:0}
+.product-share__trigger:hover svg,.product-share__trigger:focus-visible svg,.product-share.is-open .product-share__trigger svg{color:inherit}
+.product-share__menu{position:absolute;top:50px;right:0;width:210px;padding:8px;display:grid;gap:3px;border:1px solid rgba(59,232,255,.38);background:#07101f;color:#fff;box-shadow:0 18px 48px rgba(0,0,0,.48)}
+.product-share__menu>strong{padding:8px 10px 10px;color:var(--system-live);font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.product-share__menu>a,.product-share__menu>button{width:100%;min-height:40px;padding:0 10px;display:flex;align-items:center;gap:10px;border:0;background:rgba(255,255,255,.045);color:#dce5f4;font:inherit;font-size:12px;text-align:left;cursor:pointer;transition:background .18s,color .18s}
+.product-share__menu>a:hover,.product-share__menu>a:focus-visible,.product-share__menu>button:hover,.product-share__menu>button:focus-visible{background:var(--system-live);color:var(--system-accent-ink);outline:0}
+.product-share__menu svg{width:17px;height:17px;flex:0 0 17px}
+@media(max-width:560px){.product-share{top:7px;right:7px}.product-share__trigger{min-width:38px;width:38px;height:38px;padding:0}.product-share__trigger span{display:none}.product-share__menu{top:45px;width:min(210px,calc(100vw - 28px))}}
