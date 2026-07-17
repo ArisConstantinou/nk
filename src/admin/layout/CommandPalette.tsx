@@ -13,6 +13,7 @@ type CloseReason = 'dismiss' | 'select';
 const commands: Omit<Command, 'id'>[] = [
   {label: 'Dashboard', group: 'Overview', description: 'Content status, drafts, alerts and recent activity', to: '/admin/dashboard'},
   {label: 'Website Editor', group: 'Overview', description: 'Edit website pages and homepage content', to: '/admin/pages'},
+  {label: 'Pages', group: 'Content', description: 'Create, route, publish and connect pages to navigation', to: '/admin/site-pages'},
   {label: 'Services', group: 'Content', description: 'Service descriptions and deliverables', to: '/admin/services'},
   {label: 'Projects', group: 'Content', description: 'Project archive and completion dates', to: '/admin/projects'},
   {label: 'Company', group: 'Content', description: 'Company story and partnerships', to: '/admin/company'},
@@ -22,7 +23,7 @@ const commands: Omit<Command, 'id'>[] = [
   {label: 'Enquiries', group: 'Customers', description: 'Customer requests and lead follow-up', to: '/admin/enquiries'},
   {label: 'Media', group: 'Media', description: 'Images, video and PDF files', to: '/admin/media'},
   {label: 'Site Settings', group: 'Settings', description: 'Global layout, CTAs and contact details', to: '/admin/settings'},
-  {label: 'Navigation', group: 'Settings', description: 'Primary, mega-menu and footer links', to: '/admin/navigation'},
+  {label: 'Navigation', group: 'Content', description: 'Primary, mega-menu and footer links inside Pages', to: '/admin/site-pages?navigation=1'},
   {label: 'SEO', group: 'Settings', description: 'Search titles and route metadata', to: '/admin/seo'},
   {label: 'Users', group: 'Administration', description: 'Team access and permissions', to: '/admin/users'},
   {label: 'Audit Log', group: 'Administration', description: 'Who changed what and when', to: '/admin/audit'},
@@ -32,7 +33,7 @@ const commands: Omit<Command, 'id'>[] = [
 
 function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
   if (isPagesAdminMode && (command.to === '/admin/users' || command.to === '/admin/profile')) return false;
-  if (command.to === '/admin/pages') return canReadKind(role, 'page');
+  if (command.to === '/admin/pages' || command.to === '/admin/site-pages') return canReadKind(role, 'page');
   if (command.to === '/admin/services') return canReadKind(role, 'service');
   if (command.to === '/admin/products') return canReadKind(role, 'product');
   if (command.to === '/admin/catalogues') return canReadKind(role, 'catalogue');
@@ -42,7 +43,7 @@ function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
   if (command.to === '/admin/settings') return canReadKind(role, 'settings');
   if (command.to === '/admin/enquiries') return canManageEnquiries(role);
   if (command.to === '/admin/media') return canReadMedia(role);
-  if (command.to === '/admin/navigation') return canReadNavigation(role);
+  if (command.to === '/admin/site-pages?navigation=1') return canReadNavigation(role);
   if (command.to === '/admin/forms') return canReadForms(role);
   if (command.to === '/admin/users') return canManageUsers(role);
   return true;

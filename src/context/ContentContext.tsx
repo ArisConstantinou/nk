@@ -3,6 +3,7 @@ import {defaultContent} from '../content';
 import legacyProductData from '../data/legacy-products.json';
 import {isPagesAdminMode, PAGES_ADMIN_CHANGED_EVENT, PAGES_ADMIN_STORAGE_KEY, readPagesPublicPayload, savePagesSubmission} from '../admin/pagesMode';
 import type {Catalogue, Product, Project, SiteContent} from '../types';
+import {LIVE_EDITOR_COMMAND_EVENT, LIVE_EDITOR_NONCE} from '../components/liveEditorEvents';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
 const importedProducts = legacyProductData as unknown as Product[];
@@ -32,7 +33,9 @@ export type SiteOpeningHours = {id: string; label: string; hours: string; active
 export type SiteSocialLink = {id: string; platform: string; icon: string; iconUrl: string; url: string; active: boolean; newTab: boolean; placements: Array<'header' | 'footer' | 'mobile' | 'contact'>};
 export type SiteSettings = {address: string; phone: string; email: string; hours: string; mapsUrl: string; mapEmbedUrl: string; brandName: string; brandTagline: string; logoUrl: string; logoAlt: string; faviconUrl: string; defaultSocialImage: string; siteName: string; defaultMetaTitle: string; defaultMetaDescription: string; language: string; locale: string; quoteLabel: string; quoteUrl: string; footerEyebrow: string; footerTitle: string; footerCtaLabel: string; footerCopyright: string; phones: SitePhone[]; emails: SiteEmail[]; locations: SiteLocation[]; openingHours: SiteOpeningHours[]; socialLinks: SiteSocialLink[]; header: {sticky: boolean; showTagline: boolean; showSocials: boolean}; footer: {showSocials: boolean; showContact: boolean; showHours: boolean}};
 export type PublicCompany = {slug: string; title: string; heading: string; introduction: string; history: string[]; partnerships: string[]};
-export type VisualOverrideEntry = {text?: string; src?: string; href?: string; icon?: string; hidden?: boolean; label?: string; x?: number; y?: number};
+export type VisualFontFamily = 'display' | 'body' | 'mono' | 'serif';
+export type VisualTextAlign = 'left' | 'center' | 'right' | 'justify';
+export type VisualOverrideEntry = {text?: string; src?: string; href?: string; icon?: string; hidden?: boolean; label?: string; x?: number; y?: number; fontFamily?: VisualFontFamily; fontSize?: number; textAlign?: VisualTextAlign};
 export type VisualOverrideMap = Record<string, VisualOverrideEntry>;
 export type VisualPlacementMap = Record<string, {target: string; position: 'before' | 'after'}>;
 export type VisualRecord = {kind: string; slug: string; overrides: VisualOverrideMap; placements: VisualPlacementMap};
@@ -126,6 +129,9 @@ const visualOverrides = (value: unknown): VisualOverrideMap => {
     if (typeof entry.label === 'string') mapped.label = entry.label;
     if (typeof entry.x === 'number' && Number.isFinite(entry.x)) mapped.x = Math.max(-4000, Math.min(4000, Math.round(entry.x)));
     if (typeof entry.y === 'number' && Number.isFinite(entry.y)) mapped.y = Math.max(-4000, Math.min(4000, Math.round(entry.y)));
+    if (['display', 'body', 'mono', 'serif'].includes(String(entry.fontFamily))) mapped.fontFamily = entry.fontFamily as VisualFontFamily;
+    if (typeof entry.fontSize === 'number' && Number.isFinite(entry.fontSize)) mapped.fontSize = Math.max(12, Math.min(200, Math.round(entry.fontSize)));
+    if (['left', 'center', 'right', 'justify'].includes(String(entry.textAlign))) mapped.textAlign = entry.textAlign as VisualTextAlign;
     return Object.keys(mapped).length ? [[key, mapped]] : [];
   }));
 };
@@ -349,6 +355,29 @@ export function ContentProvider({children}: {children: ReactNode}) {
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [applyMapped, visualEditorNonce]);
+
+  useEffect(() => {
+    const onLiveEditorCommand = (event: Event) => {
+      if (!(event instanceof CustomEvent) || !isObject(event.detail)) return;
+      const data = event.detail;
+      if (data.type !== 'nk-visual-editor:records' || data.nonce !== LIVE_EDITOR_NONCE || !Array.isArray(data.records)) return;
+      if (data.editingEnabled === false) {
+        previewRecordsRef.current = null;
+        if (basePayloadRef.current) applyMapped(mapPayload(basePayloadRef.current));
+        return;
+      }
+      const records = data.records.filter(isObject).flatMap(record => {
+        if (typeof record.id !== 'string' || typeof record.kind !== 'string' || typeof record.slug !== 'string' || typeof record.title !== 'string' || !isObject(record.data)) return [];
+        return [{id: record.id, kind: record.kind, slug: record.slug, title: record.title, data: record.data, position: typeof record.position === 'number' ? record.position : 0, publishedAt: typeof record.publishedAt === 'string' ? record.publishedAt : ''}];
+      });
+      const current = data.mode === 'patch' ? previewRecordsRef.current || [] : [];
+      const merged = data.mode === 'patch' ? [...current.filter(item => !records.some(record => record.id === item.id)), ...records] : records;
+      previewRecordsRef.current = merged;
+      if (basePayloadRef.current) applyMapped(mapPayload(mergePreviewRecords(basePayloadRef.current, merged)));
+    };
+    window.addEventListener(LIVE_EDITOR_COMMAND_EVENT, onLiveEditorCommand);
+    return () => window.removeEventListener(LIVE_EDITOR_COMMAND_EVENT, onLiveEditorCommand);
+  }, [applyMapped]);
 
   const api = useMemo<ContentApi>(() => ({
     content,

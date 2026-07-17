@@ -1,5 +1,5 @@
 import {Component, useEffect, useState, type ErrorInfo, type ReactNode} from 'react';
-import {Navigate, Outlet, Route, Routes} from 'react-router-dom';
+import {Navigate, Outlet, Route, Routes, useLocation} from 'react-router-dom';
 import {AdminAuthProvider, useAdminAuth} from './auth/AdminAuth';
 import {LoginPage, ServiceUnavailablePage, SetupPage} from './auth/AuthPages';
 import {AdminError, AdminLoading} from './components/AdminStates';
@@ -15,12 +15,12 @@ import {EnquiriesPage} from './pages/EnquiriesPage';
 import {MediaPage} from './pages/MediaPage';
 import {ProfilePage} from './pages/ProfilePage';
 import {UsersPage} from './pages/UsersPage';
-import {NavigationPage} from './pages/NavigationPage';
 import {FormsPage} from './pages/FormsPage';
 import {SettingsPage} from './pages/SettingsPage';
 import './admin.css';
 import './productivity.css';
 import {isPagesAdminMode} from './pagesMode';
+import {AdminLanguageProvider} from './i18n/AdminLanguage';
 
 class AdminErrorBoundary extends Component<{children: ReactNode}, {error: Error | null}> {
   state = {error: null as Error | null};
@@ -54,6 +54,11 @@ function ContentRoute({kind}: {kind: ContentKind}) {
   return user && canReadKind(user.role, kind) ? kind === 'seo' ? <RecordManager kind={kind}/> : <VisualEditor kind={kind}/> : <Navigate to="/admin/dashboard" replace/>;
 }
 
+function PageManagementRoute() {
+  const {user} = useAdminAuth();
+  return user && canReadKind(user.role, 'page') ? <RecordManager kind="page"/> : <Navigate to="/admin/dashboard" replace/>;
+}
+
 function EnquiriesRoute() {
   const {user} = useAdminAuth();
   return user && canManageEnquiries(user.role) ? <EnquiriesPage/> : <Navigate to="/admin/dashboard" replace/>;
@@ -71,7 +76,13 @@ function SettingsRoute() {
 
 function NavigationRoute() {
   const {user} = useAdminAuth();
-  return user && canReadNavigation(user.role) ? <NavigationPage/> : <Navigate to="/admin/dashboard" replace/>;
+  const location = useLocation();
+  if (!user || !canReadNavigation(user.role)) return <Navigate to="/admin/dashboard" replace/>;
+  const current = new URLSearchParams(location.search);
+  const next = new URLSearchParams({navigation: '1'});
+  if (current.get('item')) next.set('navItem', String(current.get('item')));
+  if (current.get('new')) next.set('newNav', String(current.get('new')));
+  return <Navigate to={`/admin/site-pages?${next}`} replace/>;
 }
 
 function FormsRoute() {
@@ -96,6 +107,7 @@ function AdminRoutes() {
         <Route index element={<Navigate to="dashboard" replace/>}/>
         <Route path="dashboard" element={<DashboardPage/>}/>
         <Route path="pages" element={<ContentRoute kind="page"/>}/>
+        <Route path="site-pages" element={<PageManagementRoute/>}/>
         <Route path="services" element={<ContentRoute kind="service"/>}/>
         <Route path="products" element={<ContentRoute kind="product"/>}/>
         <Route path="catalogues" element={<ContentRoute kind="catalogue"/>}/>
@@ -117,5 +129,5 @@ function AdminRoutes() {
 }
 
 export default function AdminApp() {
-  return <AdminErrorBoundary><AdminAuthProvider><AdminRoutes/></AdminAuthProvider></AdminErrorBoundary>;
+  return <AdminErrorBoundary><AdminLanguageProvider><AdminAuthProvider><AdminRoutes/></AdminAuthProvider></AdminLanguageProvider></AdminErrorBoundary>;
 }

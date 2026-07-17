@@ -251,7 +251,9 @@ function applyHistoryValue(record: ContentRecord, entry: VisualHistoryEntry, for
 export function VisualEditor({kind}: {kind: ContentKind}) {
   const {user} = useAdminAuth();
   const editorLocation = useLocation();
-  const siteView = new URLSearchParams(editorLocation.search).get('siteView') === '1';
+  const editorParams = new URLSearchParams(editorLocation.search);
+  const siteView = editorParams.get('siteView') === '1';
+  const startEditing = editorParams.get('editMode') === '1';
   const readableKinds = useMemo(() => user ? allKinds.filter(item => canReadKind(user.role, item)) : [], [user]);
   const editableKinds = useMemo(() => user ? allKinds.filter(item => canWriteKind(user.role, item)) : [], [user]);
   const [records, setRecords] = useState<ContentRecord[]>([]);
@@ -273,6 +275,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const [reusableName, setReusableName] = useState('');
   const nonceRef = useRef(crypto.randomUUID());
   const requestedRecordIdRef = useRef(new URLSearchParams(window.location.search).get('record') || '');
+  const requestedPreviewPathRef = useRef(new URLSearchParams(window.location.search).get('preview') || '');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const documentMenuRef = useRef<HTMLDetailsElement>(null);
@@ -285,9 +288,9 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const historyCommandRef = useRef<(direction: 'undo' | 'redo', objectOnly?: boolean) => void>(() => undefined);
   const historyEchoGuardRef = useRef<{kind: ContentKind; slug: string; path: string; staleValue: unknown; expiresAt: number} | null>(null);
   const [guideSession, setGuideSession] = useState<{session: CmsGuideSession; returnRecordId: string} | null>(null);
-  const [editMode, setEditMode] = useState(() => !siteView);
+  const [editMode, setEditMode] = useState(() => !siteView || startEditing);
   const [inspectorOpen, setInspectorOpen] = useState(() => !siteView);
-  const previousSiteViewRef = useRef(siteView);
+  const previousSiteViewRef = useRef(`${siteView}:${startEditing}`);
   const inspectorRef = useRef<HTMLElement>(null);
   const contextActionRef = useRef<(action: string) => void>(() => undefined);
 
@@ -423,7 +426,9 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       const nextRecords = contentResult.records.map(normalizeLoadedRecord).sort((a, b) => a.kind.localeCompare(b.kind) || a.position - b.position);
       recordsRef.current = nextRecords; setRecords(nextRecords); setSavePhases(Object.fromEntries(nextRecords.map(record => [record.id, 'saved'])));
       const kindRecords = nextRecords.filter(record => record.kind === kind && record.status !== 'archived');
-      const initial = kindRecords.find(record => record.id === requestedRecordIdRef.current) || kindRecords.find(record => record.slug === 'homepage') || kindRecords[0] || nextRecords[0];
+      const requestedRoute = requestedPreviewPathRef.current;
+      const routeRecord = requestedRoute ? nextRecords.find(record => record.status !== 'archived' && previewDocumentKey(previewRoute(record)) === previewDocumentKey(requestedRoute)) : undefined;
+      const initial = kindRecords.find(record => record.id === requestedRecordIdRef.current) || routeRecord || kindRecords.find(record => record.slug === 'homepage') || kindRecords[0] || nextRecords[0];
       if (initial) {setActiveRecordId(initial.id); setPreviewPath(previewRoute(initial));}
       if (user && canReadMedia(user.role)) setMedia((await adminApi<{media: MediaAsset[]}>('/media')).media.filter(asset => asset.active));
     } catch (error) {setLoadError(errorMessage(error));}
@@ -432,12 +437,13 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
 
   useEffect(() => {void load();}, [load]);
   useEffect(() => {
-    if (previousSiteViewRef.current === siteView) return;
-    previousSiteViewRef.current = siteView;
-    setEditMode(!siteView);
+    const presentation = `${siteView}:${startEditing}`;
+    if (previousSiteViewRef.current === presentation) return;
+    previousSiteViewRef.current = presentation;
+    setEditMode(!siteView || startEditing);
     setInspectorOpen(!siteView);
     setSelection(null);
-  }, [siteView]);
+  }, [siteView, startEditing]);
   useEffect(() => {if (frameReady) postRecords();}, [editMode, frameReady, postRecords]);
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -690,6 +696,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     if (!page || !editableKinds.includes('page')) return;
     const sections = sectionsForRecord(page); const section = newSection(); const index = sections.length; sections.push(section);
     mutateSections(page, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'add-section', path: 'sections', before: null, after: {section, index}, meta: {sectionId: section.id}});
+    window.dispatchEvent(new CustomEvent('nk-admin-guide:editor-action', {detail: {recordId: page.id, action: 'section', sectionId: section.id}}));
     setActiveRecordId(page.id); setSelection({kind: 'page', slug: page.slug, path: `sections.${index}`, edit: 'section', label: section.title, linkPath: '', sectionId: section.id, objectType: 'section', objectId: section.id, positionKey: positionKeyForObject('section', section.id), positionX: 0, positionY: 0}); setNotice('Section added. Select it in the preview to position it.');
   };
 
@@ -701,6 +708,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     const component = reusable ? normalizeComponent({...structuredClone(reusable.component), id: crypto.randomUUID(), reusableId: reusable.id, scope: reusable.scope, groupId: ''}) : newComponent(type);
     const index = section.components.length; section.components.push(component);
     mutateSections(page, sections, {objectKey: `component:${component.id}`, objectLabel: component.label, action: 'add-component', path: 'sections', before: null, after: {component, sectionId: section.id, index}, meta: {componentId: component.id, sectionId: section.id}});
+    window.dispatchEvent(new CustomEvent('nk-admin-guide:editor-action', {detail: {recordId: page.id, action: 'component', componentType: type, componentId: component.id}}));
     setActiveRecordId(page.id);
     setSelection({kind: 'page', slug: page.slug, path: pathForObject(sections, 'component', component.id), edit: 'component', label: component.label, linkPath: '', sectionId: section.id, objectType: 'component', objectId: component.id, positionKey: positionKeyForObject('component', component.id), positionX: 0, positionY: 0});
   };
@@ -1049,7 +1057,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       <aside ref={inspectorRef} className={`nk-visual-inspector ${siteView ? inspectorOpen ? 'is-open' : 'is-closed' : ''}`} aria-label="Builder tools and selected element properties" aria-hidden={siteView && !inspectorOpen}>
         {siteView && <div className="nk-visual-drawer-header"><span>ELEMENTS &amp; PROPERTIES</span><button type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}><X/></button></div>}
         <section className="nk-visual-admin-meta"><header><Tags/><span><b>ADMIN ORGANISATION</b><small>Search, filters and work queue</small></span></header><label>Category<input value={activeRecord.category || ''} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('category', event.target.value)} placeholder="e.g. Residential, Campaign"/></label><label>Tags<input value={(activeRecord.tags || []).join(', ')} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('tags', event.target.value.split(',').map(value => value.trim()).filter(Boolean))} placeholder="priority, lighting, showroom"/></label></section>
-        {pageForComponents && editableKinds.includes('page') && <section className="nk-visual-builder-library" data-visual-inspector-section="library"><header><span>ADD TO PAGE</span><button type="button" onClick={addSection}><Plus/>Section</button></header><div className="nk-visual-component-palette">{componentTypes.map(type => <button type="button" onClick={() => addComponent(type)} key={type}><Plus/><span>{componentLabels[type]}</span></button>)}</div>{reusableComponents.length > 0 && <div className="nk-visual-reusable-list"><b>Reusable components</b>{reusableComponents.map(item => <button type="button" onClick={() => addComponent(item.component.type, item)} key={`${item.scope}-${item.id}`}><Plus/><span>{item.name}</span><small>{item.scope}</small></button>)}</div>}</section>}
+        {pageForComponents && editableKinds.includes('page') && <section className="nk-visual-builder-library" data-visual-inspector-section="library"><header><span>ADD TO PAGE</span><button type="button" data-guide="add-section" onClick={addSection}><Plus/>Section</button></header><div className="nk-visual-component-palette">{componentTypes.map(type => <button type="button" data-guide={`add-component-${type}`} onClick={() => addComponent(type)} key={type}><Plus/><span>{componentLabels[type]}</span></button>)}</div>{reusableComponents.length > 0 && <div className="nk-visual-reusable-list"><b>Reusable components</b>{reusableComponents.map(item => <button type="button" onClick={() => addComponent(item.component.type, item)} key={`${item.scope}-${item.id}`}><Plus/><span>{item.name}</span><small>{item.scope}</small></button>)}</div>}</section>}
         <header data-visual-inspector-section="properties"><span>PROPERTIES</span><h2>{selection?.label || 'Select an element'}</h2><p>{selection ? `${kindLabels[selection.kind]} · ${selection.slug}` : 'Click directly on the page. The relevant controls appear here.'}</p></header>
         {!selection && <div className="nk-visual-empty-selection"><MousePointer2/><strong>Edit on the page itself</strong><p>Select an element to reveal its four-arrow move handle. Drag freely, or use the keyboard arrows for precise positioning.</p></div>}
         {selection && selectedRecord && !editableKinds.includes(selectedRecord.kind) && <div className="nk-visual-readonly"><AlertTriangle/><b>Read-only element</b><p>Your role can preview this content but cannot change it.</p></div>}

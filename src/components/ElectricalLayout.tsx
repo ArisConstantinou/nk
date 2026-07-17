@@ -5,8 +5,8 @@ import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../con
 import {serviceLinks, shopLinks} from '../navigation';
 import {publicAsset} from '../utils/assets';
 import {SeoRouteMeta} from './SeoRouteMeta';
-import {VisualEditingBridge} from './VisualEditingBridge';
 import {ResponsiveImage} from './ResponsiveImage';
+import {LiveSiteEditButton} from './LiveSiteEditButton';
 
 type MegaSection = 'services' | 'shop' | null;
 type LinkItem = {label: string; description?: string; to?: string; url?: string};
@@ -107,7 +107,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const toggleMobile = (section: Exclude<MegaSection, null>) => setMobileSection(current => current === section ? null : section);
 
   return <div className="electrical-shell ia-shell">
-    <VisualEditingBridge/>
     <SeoRouteMeta/>
     <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'}`} ref={headerRef}>
       <div className="ia-header-bar">
@@ -121,6 +120,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           {settings.header.showSocials && <SocialLinks links={settings.socialLinks} placement="header" className="ia-social-links ia-social-links--header"/>}
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
           <SmartLink className="ia-quote-button" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
+          <LiveSiteEditButton/>
           <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
         </div>
       </div>

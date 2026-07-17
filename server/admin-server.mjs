@@ -362,7 +362,7 @@ function parseTags(value) {
 }
 
 function contentAdminRoute(kind, id) {
-  const sections = {page: 'pages', service: 'services', product: 'products', catalogue: 'catalogues', project: 'projects', company: 'company', seo: 'seo', settings: 'settings'};
+  const sections = {page: 'site-pages', service: 'services', product: 'products', catalogue: 'catalogues', project: 'projects', company: 'company', seo: 'seo', settings: 'settings'};
   return `/admin/${sections[kind] || 'dashboard'}?record=${encodeURIComponent(id)}`;
 }
 

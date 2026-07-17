@@ -117,7 +117,7 @@ function workItem(record: ContentRecord, favorites: string[]) {
     id: record.id, type: 'content', kind: record.kind, title: record.title, slug: record.slug,
     status: record.status, version: record.version, category: record.category, tags: record.tags,
     updatedAt: record.updatedAt, publishedAt: record.publishedAt, updatedBy: pagesAdminUser.displayName,
-    favorite: favorites.includes(`content:${record.id}`), to: `/admin/${record.kind === 'page' ? 'pages' : record.kind === 'settings' ? 'settings' : record.kind === 'seo' ? 'seo' : `${record.kind}s`}?record=${record.id}`,
+    favorite: favorites.includes(`content:${record.id}`), to: `/admin/${record.kind === 'page' ? 'site-pages' : record.kind === 'settings' ? 'settings' : record.kind === 'seo' ? 'seo' : `${record.kind}s`}?record=${record.id}`,
   };
 }
 

@@ -2,7 +2,7 @@ import {Component, lazy, Suspense, type ErrorInfo, type ReactNode} from 'react';
 import {BrowserRouter, Navigate, Route, Routes, useParams} from 'react-router-dom';
 import {ElectricalLayout} from './components/ElectricalLayout';
 import {ContentProvider} from './context/ContentContext';
-import {AboutPage, ContactPage, ExplorePage, LightingPage, NotFound, ProductPage, ProjectsPage} from './pages/PublicPages';
+import {AboutPage, ContactPage, ExplorePage, LightingPage, ManagedPage, ProductPage, ProjectsPage} from './pages/PublicPages';
 import {QuotePage, ServiceDetailPage, ServicesPage, ShopCategoryPage} from './pages/ArchitecturePages';
 import {GuidedDemoPage} from './pages/GuidedDemoPage';
 
@@ -78,6 +78,6 @@ export default function App() {
     <Route path="/about-1-1" element={<Navigate to="/about" replace/>}/>
     <Route path="/product/:id" element={<LegacyProductIdRedirect/>}/>
     <Route path="/product-page/:slug" element={<LegacyProductRedirect/>}/>
-    <Route path="*" element={<Public><NotFound/></Public>}/>
+    <Route path="*" element={<Public><ManagedPage/></Public>}/>
   </Routes></BrowserRouter></ContentProvider></PublicRenderBoundary>;
 }

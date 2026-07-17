@@ -92,8 +92,23 @@ export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; titl
     status: 'STROVOLOS · CYPRUS · SINCE 1985',
     brief: 'Page overview',
   };
+  const [indexParent, ...indexCurrentParts] = context.index.split(/\s+\/\s+/);
+  const indexCurrent = indexCurrentParts.join(' / ');
+  const breadcrumbBackPath = location.pathname.startsWith('/services/')
+    ? '/services'
+    : location.pathname.startsWith('/shop/')
+      ? '/shop'
+      : location.pathname.startsWith('/projects/')
+        ? '/projects'
+        : '/';
   return <><section className="system-page-intro">
-    <div className="system-page-index"><span>{context.index}</span><i>{context.status}</i></div>
+    <div className="system-page-index">
+      <nav aria-label="Breadcrumb" data-visual-no-edit>
+        <Link to={breadcrumbBackPath} aria-label={`Back to ${indexParent.toLowerCase()}`}>{indexParent}</Link>
+        {indexCurrent && <><b aria-hidden="true">/</b><span aria-current="page">{indexCurrent}</span></>}
+      </nav>
+      <i>{context.status}</i>
+    </div>
     <div className="system-page-title"><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'eyebrow', 'data-visual-edit': 'text', 'data-visual-label': 'Page eyebrow'} : {})}>{visibleEyebrow}</span><h1><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introTitle', 'data-visual-edit': 'text', 'data-visual-label': 'Page title'} : {})}>{visibleTitle}</span>{visibleItalic && <><br/><em {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introAccent', 'data-visual-edit': 'text', 'data-visual-label': 'Page title accent'} : {})}>{visibleItalic}</em></>}</h1></div>
     <aside className="system-page-brief"><small>{context.brief}</small><p {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introBody', 'data-visual-edit': 'text', 'data-visual-label': 'Page introduction', 'data-visual-multiline': 'true'} : {})}>{visibleBody}</p><div aria-label={`${visibleEyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
     <div className="system-page-trace" aria-hidden="true"><i/><i/><i/><b/></div>
@@ -342,6 +357,19 @@ export function ContactPage() {
     <section className="contact-layout section"><div className="contact-details">{locations.map(item => <div key={item.id}><MapPin/><span><b>{item.label}</b>{item.address}<a target="_blank" rel="noreferrer" href={item.mapsUrl}>Open in maps <ArrowUpRight/></a></span></div>)}{phones.map(item => <div key={item.id}><Phone/><span><b>{item.label}</b><a href={`tel:${item.number.replace(/[^+\d]/g, '')}`}>{item.number}</a><small>Electrical installation, fault and maintenance enquiries</small></span></div>)}{emails.map(item => <div key={item.id}><Mail/><span><b>{item.label}</b><a href={`mailto:${item.address}`}>{item.address}</a></span></div>)}{schedules.map(item => <div className="hours" key={item.id}><b>{item.label}</b>{item.hours.split('\n').map(line => <p key={line}>{line}</p>)}</div>)}{socials.length > 0 && <div className="contact-socials"><Share2/><span><b>Follow NK Electrical</b><span>{socials.map(item => <a href={item.url} target={item.newTab ? '_blank' : undefined} rel={item.newTab ? 'noreferrer' : undefined} key={item.id}>{item.iconUrl && <img src={item.iconUrl} alt=""/>}{item.platform}</a>)}</span></span></div>}{settings.mapEmbedUrl && <iframe className="contact-map" title="NK Electrical location map" loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={settings.mapEmbedUrl}/>}</div><ManagedPublicForm slug="contact" eyebrow={project ? 'Project discussion' : 'Electrical enquiry'} title="What needs powering, installing or controlling?" defaults={{subject: project ? 'Project discussion' : 'New electrical project', message}}/></section>
     <section className="ia-conversion-band section"><div><small>READY TO SCOPE THE WORK?</small><h2>Use the structured quote form for project requirements.</h2></div><Link to="/request-a-quote">Request a Quote <ArrowRight/></Link></section>
   </>;
+}
+
+export function ManagedPage() {
+  const location = useLocation();
+  const {pageForRoute} = useContent();
+  const page = pageForRoute(location.pathname);
+  if (!page) return <NotFound/>;
+  return <PageIntro
+    eyebrow={page.eyebrow || page.navigationTitle || page.title}
+    title={page.introTitle || page.heroTitle || page.title}
+    italic={page.introAccent || page.heroAccent}
+    body={page.introBody || page.heroBody || `Learn more about ${page.title}.`}
+  />;
 }
 
 export function NotFound() {
