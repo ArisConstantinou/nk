@@ -53,9 +53,11 @@ html[data-experience='tech'] body{overflow-x:hidden}
 .ia-mega-heading>a{margin-top:24px;display:inline-flex;gap:10px;align-items:center;color:var(--system-live);font-family:var(--mono);font-size:12px;text-transform:uppercase}
 .ia-mega-heading>a svg{width:15px}
 .ia-mega>nav{display:grid;grid-template-columns:1fr 1fr;align-content:start;padding:24px 32px}
-.ia-mega>nav>a{min-height:105px;padding:18px 15px;display:grid;grid-template-columns:34px 1fr 22px;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.11);transition:.2s}
+.ia-mega>nav>a{min-height:105px;padding:18px 15px;display:grid;grid-template-columns:34px 1fr 22px;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.11);transition:background-color .2s ease}
 .ia-mega>nav>a:nth-child(odd){border-right:1px solid rgba(255,255,255,.11)}
-.ia-mega>nav>a:hover{background:rgba(59,232,255,.065);padding-left:22px}
+.ia-mega>nav>a>*{transition:transform .2s ease}
+.ia-mega>nav>a:hover,.ia-mega>nav>a:focus-visible{background:rgba(59,232,255,.065);outline:0}
+.ia-mega>nav>a:hover>*,.ia-mega>nav>a:focus-visible>*{transform:translateX(7px)}
 .ia-mega>nav>a>span{font-family:var(--mono);font-size:12px;color:var(--system-red)}
 .ia-mega>nav>a>div{display:flex;flex-direction:column;gap:7px}
 .ia-mega>nav strong{font-family:var(--display);font-size:18px}
