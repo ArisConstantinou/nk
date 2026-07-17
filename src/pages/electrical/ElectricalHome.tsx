@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {motion} from 'framer-motion';
 import {
   ArrowDownRight,
@@ -7,6 +7,7 @@ import {
   CircuitBoard,
   Gauge,
   Lightbulb,
+  Palette,
   PlugZap,
   ShieldCheck,
   Wrench,
@@ -17,6 +18,7 @@ import {useContent} from '../../context/ContentContext';
 import {publicAsset} from '../../utils/assets';
 import {LedSensitivityPanel} from '../../components/LedSensitivityPanel';
 import {CmsSections} from '../../components/CmsSections';
+import {getHomePalette, homePaletteChangeEvent, homePaletteOptions, saveHomePalette, type HomePaletteId} from '../../homePalettes';
 
 const systems = [
   {
@@ -67,11 +69,22 @@ export default function ElectricalHome() {
   const {content, pageForRoute} = useContent();
   const theme = content.themeContent.tech;
   const homepage = pageForRoute('/');
-  const [activeSystem, setActiveSystem] = useState(0);
-  const active = systems[activeSystem];
-  const ActiveIcon = active.Icon;
+  const [activePaletteId, setActivePaletteId] = useState<HomePaletteId>(() => getHomePalette());
+  const visualPalettes = homePaletteOptions.map(palette => ({...palette, image: palette.image ? publicAsset(palette.image) : content.heroImage}));
+  const activePalette = Math.max(0, visualPalettes.findIndex(palette => palette.id === activePaletteId));
+  const active = visualPalettes[activePalette];
 
-  return <div className="power-home">
+  useEffect(() => {
+    const syncPalette = () => setActivePaletteId(getHomePalette());
+    window.addEventListener(homePaletteChangeEvent, syncPalette);
+    return () => window.removeEventListener(homePaletteChangeEvent, syncPalette);
+  }, []);
+
+  const previewPalette = (palette: HomePaletteId) => {
+    setActivePaletteId(palette);
+  };
+
+  return <div className="power-home" data-home-palette={active.id}>
     <section className="power-hero">
       <div className="power-hero-copy">
         <div className="power-kicker"><span data-visual-kind="page" data-visual-slug="homepage" data-visual-path="eyebrow" data-visual-edit="text" data-visual-label="Hero eyebrow">{theme.eyebrow}</span></div>
@@ -94,29 +107,30 @@ export default function ElectricalHome() {
       </div>
 
       <div className="power-field">
-        <img src={content.heroImage} alt="Completed architectural electrical and lighting installation" data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroImage" data-visual-edit="image" data-visual-label="Hero image"/>
+        <motion.img key={active.id} initial={{opacity: .25, scale: 1.035}} animate={{opacity: 1, scale: 1}} transition={{duration: .55}} src={active.image} alt={active.alt} data-visual-kind="page" data-visual-slug="homepage" data-visual-path="heroImage" data-visual-edit="image" data-visual-label="Hero image"/>
         <div className="power-field-shade"/>
         <div className="power-field-coordinate power-field-coordinate--top">35.165° N / 33.365° E</div>
         <div className="power-field-coordinate power-field-coordinate--bottom">STROVOLOS / CYPRUS</div>
         <div className="power-core" aria-hidden="true"><span/><i/><b/></div>
         <div className="power-system-readout" aria-live="polite">
-          <span><ActiveIcon/> {active.code}</span>
+          <span key={active.id}><Palette/> {`${active.code} / ${active.context}`}</span>
           <h2>{active.label}</h2>
           <p>{active.detail}</p>
-          <small>{active.signal}</small>
-          <Link to={active.route}>Open system <ArrowRight/></Link>
+          <div className="power-palette-swatches" aria-label={`${active.label} colour palette`}>{active.colors.map(color => <i style={{backgroundColor: color}} title={color} key={color}/>)}</div>
+          <small>{active.colors.join(' · ')}</small>
+          <Link to={active.route}>Explore this direction <ArrowRight/></Link>
         </div>
-        <div className="power-node-switcher" aria-label="Electrical disciplines">
-          {systems.map((system, index) => <button
+        <div className="power-palette-switcher" aria-label="Homepage visual palettes" onMouseLeave={() => setActivePaletteId(getHomePalette())}>
+          {visualPalettes.map((palette, index) => <button
             type="button"
-            className={activeSystem === index ? 'active' : ''}
-            aria-pressed={activeSystem === index}
-            aria-label={`Show ${system.label}`}
-            onMouseEnter={() => setActiveSystem(index)}
-            onFocus={() => setActiveSystem(index)}
-            onClick={() => setActiveSystem(index)}
-            key={system.code}
-          ><system.Icon/><span>{system.short}</span><small>{String(index + 1).padStart(2, '0')}</small></button>)}
+            className={activePalette === index ? 'active' : ''}
+            aria-pressed={activePalette === index}
+            aria-label={`Show ${palette.label} palette`}
+            onMouseEnter={() => previewPalette(palette.id)}
+            onFocus={() => previewPalette(palette.id)}
+            onClick={() => saveHomePalette(palette.id)}
+            key={palette.id}
+          ><img src={palette.image} alt=""/><span>{palette.label}</span><small>{String(index + 1).padStart(2, '0')}</small></button>)}
         </div>
       </div>
     </section>
