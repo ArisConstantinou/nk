@@ -8,6 +8,7 @@ import {CONTENT_KINDS, validateContentInput, validatePublishReady} from './conte
 import {NAVIGATION_MENUS, SUBMISSION_STATUSES, validateFormInput, validateNavigationInput, validateSubmission} from './cms-validation.mjs';
 import {ApiError, cleanText, hashPassword, normalizeEmail, randomToken, readCookies, safeEqual, sha256, validatePassword, verifyPassword} from './security.mjs';
 import {requestGuideProposal} from './ai-guide.mjs';
+import {validateInteractiveDocument, validateInteractiveInput} from './interactive-validation.mjs';
 import sharp from 'sharp';
 
 const HOST = process.env.ADMIN_API_HOST || '127.0.0.1';
@@ -238,6 +239,29 @@ function requireMediaRowWrite(user, row) {
 
 function requireSiteStructure(user) {
   if (!['owner', 'editor'].includes(user.role)) throw new ApiError(403, 'permission_denied', 'Content editor access is required.');
+}
+
+function interactiveRecord(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    status: row.status,
+    draft: safeJson(row.draft_data, {}),
+    published: row.published_data ? safeJson(row.published_data, null) : null,
+    version: Number(row.version),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    publishedAt: row.published_at,
+  };
+}
+
+function saveInteractiveRevision(row, action, userId) {
+  db.prepare(`INSERT INTO interactive_revisions
+    (id, experience_id, version, title, status, data, action, created_by, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .run(newId(), row.id, row.version, row.title, row.status, row.draft_data, action, userId, nowIso());
 }
 
 function requireFormsRead(user) {
@@ -723,6 +747,15 @@ async function handleRequest(req, res) {
     return sendJson(res, 200, publicSitePayload(), {'Cache-Control': 'public, max-age=30, stale-while-revalidate=120'});
   }
 
+  if (req.method === 'GET' && parts[0] === 'public' && parts[1] === 'interactive' && parts[2] && parts.length === 3) {
+    const row = db.prepare(`SELECT slug, title, published_data, published_at
+      FROM interactive_experiences WHERE slug = ? AND status = 'published' AND published_data IS NOT NULL`).get(parts[2]);
+    if (!row) throw new ApiError(404, 'not_found', 'This interactive experience is not published.');
+    const experience = safeJson(row.published_data, null);
+    validateInteractiveDocument(experience, row.slug);
+    return sendJson(res, 200, {slug: row.slug, title: row.title, experience, publishedAt: row.published_at}, {'Cache-Control': 'public, max-age=30, stale-while-revalidate=120'});
+  }
+
   if (req.method === 'POST' && parts[0] === 'public' && parts[1] === 'submissions') {
     checkSubmissionRate(req);
     const body = await readJson(req, 250_000);
@@ -841,6 +874,72 @@ async function handleRequest(req, res) {
   }
 
   if (req.method === 'GET' && parts[0] === 'dashboard') return sendJson(res, 200, dashboardPayload(auth.user));
+
+  if (parts[0] === 'interactive' && parts[1] && parts.length === 2 && req.method === 'GET') {
+    requireSiteStructure(auth.user);
+    const row = db.prepare('SELECT * FROM interactive_experiences WHERE slug = ?').get(parts[1]);
+    if (!row) throw new ApiError(404, 'not_found', 'Interactive experience not found.');
+    return sendJson(res, 200, {record: interactiveRecord(row)});
+  }
+
+  if (parts[0] === 'interactive' && parts.length === 1 && req.method === 'POST') {
+    requireSiteStructure(auth.user);
+    const input = validateInteractiveInput(await readJson(req, 4_000_000));
+    if (db.prepare('SELECT 1 FROM interactive_experiences WHERE slug = ?').get(input.slug)) throw new ApiError(409, 'slug_exists', 'An interactive experience already uses this slug.');
+    const id = newId();
+    const createdAt = nowIso();
+    let row;
+    transaction(() => {
+      db.prepare(`INSERT INTO interactive_experiences
+        (id, slug, title, status, draft_data, version, created_by, updated_by, created_at, updated_at)
+        VALUES (?, ?, ?, 'draft', ?, 1, ?, ?, ?, ?)`)
+        .run(id, input.slug, input.title, JSON.stringify(input.document), auth.user.id, auth.user.id, createdAt, createdAt);
+      row = db.prepare('SELECT * FROM interactive_experiences WHERE id = ?').get(id);
+      saveInteractiveRevision(row, 'created', auth.user.id);
+      audit({userId: auth.user.id, action: 'interactive.created', entityType: 'interactive', entityId: id, details: {slug: input.slug, title: input.title}, ipAddress: requestIp(req)});
+    });
+    return sendJson(res, 201, {record: interactiveRecord(row)});
+  }
+
+  if (parts[0] === 'interactive' && parts[1] && parts.length === 2 && req.method === 'PUT') {
+    requireSiteStructure(auth.user);
+    const current = db.prepare('SELECT * FROM interactive_experiences WHERE slug = ?').get(parts[1]);
+    if (!current) throw new ApiError(404, 'not_found', 'Interactive experience not found.');
+    const input = validateInteractiveInput(await readJson(req, 4_000_000), {expectedSlug: current.slug, requireVersion: true});
+    let row;
+    transaction(() => {
+      const result = db.prepare(`UPDATE interactive_experiences
+        SET title = ?, status = CASE WHEN published_data IS NULL THEN 'draft' ELSE 'published' END, draft_data = ?, version = version + 1, updated_by = ?, updated_at = ?
+        WHERE id = ? AND version = ?`)
+        .run(input.title, JSON.stringify(input.document), auth.user.id, nowIso(), current.id, input.expectedVersion);
+      if (result.changes !== 1) throw new ApiError(409, 'version_conflict', 'Another administrator changed this interactive draft. Reload before saving again.');
+      row = db.prepare('SELECT * FROM interactive_experiences WHERE id = ?').get(current.id);
+      saveInteractiveRevision(row, 'updated', auth.user.id);
+      audit({userId: auth.user.id, action: 'interactive.updated', entityType: 'interactive', entityId: current.id, details: {slug: current.slug, version: row.version}, ipAddress: requestIp(req)});
+    });
+    return sendJson(res, 200, {record: interactiveRecord(row)});
+  }
+
+  if (parts[0] === 'interactive' && parts[1] && parts[2] === 'publish' && parts.length === 3 && req.method === 'POST') {
+    requireSiteStructure(auth.user);
+    const current = db.prepare('SELECT * FROM interactive_experiences WHERE slug = ?').get(parts[1]);
+    if (!current) throw new ApiError(404, 'not_found', 'Interactive experience not found.');
+    const version = await expectedVersion(req);
+    validateInteractiveDocument(safeJson(current.draft_data, null), current.slug);
+    const publishedAt = nowIso();
+    let row;
+    transaction(() => {
+      const result = db.prepare(`UPDATE interactive_experiences
+        SET status = 'published', published_data = draft_data, published_at = ?, version = version + 1, updated_by = ?, updated_at = ?
+        WHERE id = ? AND version = ?`)
+        .run(publishedAt, auth.user.id, publishedAt, current.id, version);
+      if (result.changes !== 1) throw new ApiError(409, 'version_conflict', 'Another administrator changed this interactive draft. Reload before publishing.');
+      row = db.prepare('SELECT * FROM interactive_experiences WHERE id = ?').get(current.id);
+      saveInteractiveRevision(row, 'published', auth.user.id);
+      audit({userId: auth.user.id, action: 'interactive.published', entityType: 'interactive', entityId: current.id, details: {slug: current.slug, version: row.version}, ipAddress: requestIp(req)});
+    });
+    return sendJson(res, 200, {record: interactiveRecord(row)});
+  }
 
   if (req.method === 'GET' && parts[0] === 'search') {
     return sendJson(res, 200, searchPayload(auth.user, url.searchParams.get('q') || '', url.searchParams.get('type') || 'all', url.searchParams.get('sort') || 'relevance'));

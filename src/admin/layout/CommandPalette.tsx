@@ -3,7 +3,7 @@ import {ArrowRight, ExternalLink, LoaderCircle, Pin, PinOff, Search, Sparkles, X
 import {useNavigate} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
 import type {AdminRole, AdminSearchResult} from '../types';
-import {canManageEnquiries, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation} from '../permissions';
+import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation} from '../permissions';
 import {isPagesAdminMode} from '../pagesMode';
 
 type Command = {id: string; label: string; group: string; description: string; to: string; external?: boolean};
@@ -22,6 +22,7 @@ const commands: Omit<Command, 'id'>[] = [
   {label: 'Form Submissions', group: 'Customers', description: 'Public forms and stored submissions', to: '/admin/forms'},
   {label: 'Enquiries', group: 'Customers', description: 'Customer requests and lead follow-up', to: '/admin/enquiries'},
   {label: 'Media', group: 'Media', description: 'Images, video and PDF files', to: '/admin/media'},
+  {label: 'Interactive Studio', group: 'Content', description: 'Build frame-based reusable interactive experiences', to: '/admin/interactive'},
   {label: 'Site Settings', group: 'Settings', description: 'Global layout, CTAs and contact details', to: '/admin/settings'},
   {label: 'Navigation', group: 'Content', description: 'Primary, mega-menu and footer links inside Pages', to: '/admin/site-pages?navigation=1'},
   {label: 'SEO', group: 'Settings', description: 'Search titles and route metadata', to: '/admin/seo'},
@@ -43,6 +44,7 @@ function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
   if (command.to === '/admin/settings') return canReadKind(role, 'settings');
   if (command.to === '/admin/enquiries') return canManageEnquiries(role);
   if (command.to === '/admin/media') return canReadMedia(role);
+  if (command.to === '/admin/interactive') return !isPagesAdminMode && canManageInteractive(role);
   if (command.to === '/admin/site-pages?navigation=1') return canReadNavigation(role);
   if (command.to === '/admin/forms') return canReadForms(role);
   if (command.to === '/admin/users') return canManageUsers(role);

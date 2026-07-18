@@ -1,0 +1,277 @@
+.ix-stage-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--stage-background, #111a21);
+}
+
+.ix-stage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+}
+
+.ix-presentation {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  min-height: min(900px, 92svh);
+  color: #eef5f7;
+  background: #07131c;
+  border-block: 1px solid #254552;
+  font-family: "DM Sans", sans-serif;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  isolation: isolate;
+}
+
+.ix-presentation--focus {
+  min-height: 100svh;
+}
+
+.ix-presentation--focus .ix-presentation__viewport {
+  height: calc(100svh - 132px);
+}
+
+.ix-presentation:fullscreen {
+  min-height: 100svh;
+  width: 100vw;
+  margin: 0;
+}
+
+.ix-presentation__bar {
+  min-height: 64px;
+  padding: .65rem clamp(1rem, 3vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #254552;
+  background: rgba(7, 19, 28, .94);
+}
+
+.ix-presentation__bar > div:first-child {
+  display: grid;
+  gap: .15rem;
+}
+
+.ix-presentation__bar small,
+.ix-presentation__caption small {
+  color: #49d6e8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.ix-presentation__bar strong {
+  font-size: clamp(15px, 1.4vw, 20px);
+}
+
+.ix-presentation__modes {
+  display: flex;
+  gap: .35rem;
+}
+
+.ix-presentation button {
+  min-height: 42px;
+  border: 1px solid #365360;
+  color: #dce9ed;
+  background: #0d202c;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ix-presentation button:hover,
+.ix-presentation button:focus-visible,
+.ix-presentation button.active {
+  border-color: #49d6e8;
+  color: #fff;
+  outline: none;
+}
+
+.ix-presentation__modes button {
+  padding: .55rem .75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.ix-presentation__modes svg {
+  width: 17px;
+}
+
+.ix-presentation__viewport {
+  position: relative;
+  min-height: 0;
+  height: clamp(560px, 72svh, 920px);
+  background: #02070a;
+}
+
+.ix-presentation__caption {
+  position: absolute;
+  left: clamp(1rem, 4vw, 4rem);
+  right: clamp(1rem, 4vw, 4rem);
+  bottom: clamp(1rem, 3vw, 2.5rem);
+  max-width: 800px;
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1rem 1.3rem;
+  background: rgba(5, 17, 25, .92);
+  border: 1px solid rgba(93, 152, 172, .5);
+  backdrop-filter: blur(12px);
+}
+
+.ix-presentation__caption > span {
+  color: #ef8b5b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ix-presentation__caption p {
+  margin: .25rem 0 0;
+  color: #bfd0d6;
+  font-size: clamp(14px, 1.25vw, 18px);
+  line-height: 1.45;
+}
+
+.ix-presentation__timeline {
+  min-height: 66px;
+  padding-inline: clamp(.75rem, 2vw, 2rem);
+  display: grid;
+  grid-template-columns: repeat(var(--section-count, 13), 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(56px, 1fr);
+  overflow-x: auto;
+  background: #081722;
+  border-top: 1px solid #254552;
+}
+
+.ix-presentation__timeline button {
+  min-width: 56px;
+  border: 0;
+  border-right: 1px solid #1b3440;
+  background: transparent;
+  display: grid;
+  align-content: center;
+  gap: .35rem;
+}
+
+.ix-presentation__timeline button span {
+  font-size: 12px;
+  font-weight: 800;
+  color: #78909a;
+}
+
+.ix-presentation__timeline button i {
+  width: 100%;
+  height: 2px;
+  background: #203b47;
+}
+
+.ix-presentation__timeline button.active i {
+  background: #49d6e8;
+}
+
+.ix-presentation__timeline button.active span {
+  color: #49d6e8;
+}
+
+.ix-presentation__mobile-nav {
+  display: none;
+}
+
+@media (max-width: 720px), (pointer: coarse) {
+  .ix-presentation {
+    min-height: 100svh;
+  }
+
+  .ix-presentation__bar {
+    padding: .6rem .75rem;
+  }
+
+  .ix-presentation__bar strong {
+    font-size: 14px;
+  }
+
+  .ix-presentation__modes button span {
+    display: none;
+  }
+
+  .ix-presentation__viewport {
+    height: auto;
+    min-height: 0;
+  }
+
+  .ix-presentation__viewport .ix-stage-frame {
+    height: calc(100svh - 218px);
+  }
+
+  .ix-presentation__caption {
+    left: .75rem;
+    right: .75rem;
+    bottom: .75rem;
+    min-height: 96px;
+    padding: .8rem;
+    gap: .75rem;
+  }
+
+  .ix-presentation__caption p {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .ix-presentation__timeline {
+    display: none;
+  }
+
+  .ix-presentation__mobile-nav {
+    min-height: 76px;
+    padding: .65rem .75rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: .6rem;
+    background: #081722;
+    border-top: 1px solid #254552;
+  }
+
+  .ix-presentation__mobile-nav button {
+    padding: .65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+  }
+
+  .ix-presentation__mobile-nav button:last-child {
+    justify-self: stretch;
+  }
+
+  .ix-presentation__mobile-nav button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+
+  .ix-presentation__mobile-nav span {
+    min-width: 48px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ix-presentation *,
+  .ix-presentation *::before,
+  .ix-presentation *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

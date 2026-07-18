@@ -71,6 +71,33 @@ db.exec(`
     created_at TEXT NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS interactive_experiences (
+    id TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','published')),
+    draft_data TEXT NOT NULL,
+    published_data TEXT,
+    version INTEGER NOT NULL DEFAULT 1,
+    created_by TEXT REFERENCES admin_users(id),
+    updated_by TEXT REFERENCES admin_users(id),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    published_at TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS interactive_revisions (
+    id TEXT PRIMARY KEY,
+    experience_id TEXT NOT NULL REFERENCES interactive_experiences(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    status TEXT NOT NULL,
+    data TEXT NOT NULL,
+    action TEXT NOT NULL,
+    created_by TEXT REFERENCES admin_users(id),
+    created_at TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS enquiries (
     id TEXT PRIMARY KEY,
     type TEXT NOT NULL CHECK (type IN ('contact','quote','product','catalogue','project','phone')),
@@ -115,6 +142,8 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON admin_sessions(expires_at);
   CREATE INDEX IF NOT EXISTS idx_content_kind_status ON content_records(kind, status);
   CREATE INDEX IF NOT EXISTS idx_revisions_record ON content_revisions(record_id, version DESC);
+  CREATE INDEX IF NOT EXISTS idx_interactive_slug_status ON interactive_experiences(slug, status);
+  CREATE INDEX IF NOT EXISTS idx_interactive_revisions ON interactive_revisions(experience_id, version DESC);
   CREATE INDEX IF NOT EXISTS idx_enquiries_status ON enquiries(status, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_log(created_at DESC);
 `);
@@ -221,6 +250,7 @@ recordMigration.run(2, 'content-order-and-media-metadata', migrationAppliedAt);
 recordMigration.run(3, 'forms-navigation-and-submissions', migrationAppliedAt);
 recordMigration.run(4, 'content-taxonomy-and-favorites', migrationAppliedAt);
 recordMigration.run(5, 'production-query-indexes', migrationAppliedAt);
+recordMigration.run(6, 'interactive-experience-documents', migrationAppliedAt);
 
 export const nowIso = () => new Date().toISOString();
 export const newId = () => randomUUID();

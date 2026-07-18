@@ -23,3 +23,4 @@ export const canReadNavigation = (role: AdminRole) => ['owner', 'editor', 'viewe
 export const canManageNavigation = (role: AdminRole) => ['owner', 'editor'].includes(role);
 export const canReadForms = (role: AdminRole) => ['owner', 'editor', 'sales', 'viewer'].includes(role);
 export const canManageForms = (role: AdminRole) => ['owner', 'editor'].includes(role);
+export const canManageInteractive = (role: AdminRole) => ['owner', 'editor'].includes(role);

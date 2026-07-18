@@ -7,7 +7,7 @@ export const experienceManifest = [
   {
     id: 'electrical-installations-journey',
     slot: experienceSlots.service('electrical-installations'),
-    version: '3.0.0',
+    version: '4.0.0',
     enabled: enabled('ELECTRICAL_INSTALLATIONS'),
     routes: ['/services/electrical-installations'],
     reducedMotion: 'adapt',

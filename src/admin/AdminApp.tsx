@@ -7,7 +7,7 @@ import {RecordManager} from './content/RecordManager';
 import {VisualEditor} from './content/VisualEditor';
 import {AdminLayout} from './layout/AdminLayout';
 import {ensureAdminSeed} from './seed';
-import {canManageEnquiries, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation} from './permissions';
+import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation} from './permissions';
 import type {ContentKind} from './types';
 import {AuditPage} from './pages/AuditPage';
 import {DashboardPage} from './pages/DashboardPage';
@@ -17,6 +17,7 @@ import {ProfilePage} from './pages/ProfilePage';
 import {UsersPage} from './pages/UsersPage';
 import {FormsPage} from './pages/FormsPage';
 import {SettingsPage} from './pages/SettingsPage';
+import {InteractiveStudioPage} from './pages/InteractiveStudioPage';
 import './admin.css';
 import './productivity.css';
 import {isPagesAdminMode} from './pagesMode';
@@ -95,6 +96,11 @@ function OwnerRoute({children}: {children: ReactNode}) {
   return user && canManageUsers(user.role) ? children : <Navigate to="/admin/dashboard" replace/>;
 }
 
+function InteractiveRoute() {
+  const {user} = useAdminAuth();
+  return user && canManageInteractive(user.role) && !isPagesAdminMode ? <InteractiveStudioPage/> : <Navigate to="/admin/dashboard" replace/>;
+}
+
 function AdminRoutes() {
   const {phase} = useAdminAuth();
   if (phase === 'loading') return <AdminLoading label="Connecting to secure admin…"/>;
@@ -117,6 +123,7 @@ function AdminRoutes() {
         <Route path="settings" element={<SettingsRoute/>}/>
         <Route path="enquiries" element={<EnquiriesRoute/>}/>
         <Route path="media" element={<MediaRoute/>}/>
+        <Route path="interactive" element={<InteractiveRoute/>}/>
         <Route path="navigation" element={<NavigationRoute/>}/>
         <Route path="forms" element={<FormsRoute/>}/>
         <Route path="users" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <OwnerRoute><UsersPage/></OwnerRoute>}/>

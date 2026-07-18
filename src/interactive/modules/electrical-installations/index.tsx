@@ -1,14 +1,13 @@
 import {defineExperienceModule} from '../../core/defineExperienceModule';
 import type {MotionPreference} from '../../core/types';
-import {ElectricalExperienceV3} from './v3/ElectricalExperienceV3';
-import './v3/styles.css';
+import {ElectricalTemplateExperience} from './ElectricalTemplateExperience';
 
 function ExperienceView({motion}: {motion: MotionPreference}) {
-  return <ElectricalExperienceV3 motion={motion}/>;
+  return <ElectricalTemplateExperience motion={motion}/>;
 }
 
 export default defineExperienceModule({
   id: 'electrical-installations-journey',
-  version: '3.0.0',
+  version: '4.0.0',
   View: ExperienceView,
 });

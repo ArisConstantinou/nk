@@ -16,6 +16,14 @@ type LearningDefinition = {
 const c = (en: string, el: string): Copy => ({en, el});
 
 export const adminLearning: Record<string, LearningDefinition> = {
+  '/admin/interactive': {
+    label: c('Interactive Studio', 'Interactive Studio'),
+    purpose: c('Builds reusable frame-by-frame experiences on one fixed 1920 × 1080 stage, with independent layers, asset groups and a live preview.', 'Δημιουργεί επαναχρησιμοποιήσιμες εμπειρίες frame-by-frame σε σταθερή σκηνή 1920 × 1080, με ανεξάρτητα layers, ομάδες assets και live preview.'),
+    need: c('Use it for visual step-by-step stories. The public site receives only the last explicitly published version.', 'Χρησιμοποιήστε το για οπτικές παρουσιάσεις βήμα-βήμα. Το δημόσιο site λαμβάνει μόνο την τελευταία έκδοση που δημοσιεύτηκε ρητά.'),
+    steps: [c('Add, duplicate or reorder frames.', 'Προσθέστε, αντιγράψτε ή αλλάξτε σειρά στα frames.'), c('Draw vector mockups or drag grouped Media assets onto the active frame.', 'Σχεδιάστε vector mockups ή σύρετε ομαδοποιημένα assets από το Media στο ενεργό frame.'), c('Save the draft, preview with Done, then publish.', 'Αποθηκεύστε το draft, ελέγξτε με Done και μετά δημοσιεύστε.')],
+    after: c('Draft edits are private. Publish atomically replaces the public experience while retaining stable internal IDs and an audit trail.', 'Οι αλλαγές draft είναι ιδιωτικές. Η δημοσίευση αντικαθιστά ενιαία τη δημόσια εμπειρία, διατηρώντας σταθερά εσωτερικά IDs και αρχείο ενεργειών.'),
+    example: {title: c('Prepare a wall-installation frame', 'Προετοιμασία frame εγκατάστασης τοίχου'), steps: [c('Duplicate the previous fixed-background frame.', 'Αντιγράψτε το προηγούμενο frame με σταθερό background.'), c('Draw the intended wall routes as rough vector guides.', 'Σχεδιάστε τις προβλεπόμενες διαδρομές ως πρόχειρους vector οδηγούς.'), c('Export SVG or PNG and copy the prepared AI prompt.', 'Εξαγάγετε SVG ή PNG και αντιγράψτε το έτοιμο AI prompt.')], result: c('The mockup can guide future asset creation without calling or charging an AI API.', 'Το mockup καθοδηγεί τη μελλοντική δημιουργία assets χωρίς κλήση ή χρέωση AI API.')},
+  },
   '/admin/dashboard': {
     label: c('Dashboard', 'Πίνακας ελέγχου'),
     purpose: c('A control centre that collects drafts, warnings, recent changes and work that needs attention.', 'Ένα κέντρο ελέγχου που συγκεντρώνει πρόχειρα, προειδοποιήσεις, πρόσφατες αλλαγές και εκκρεμότητες.'),

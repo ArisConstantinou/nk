@@ -61,6 +61,27 @@ function pageData(overrides = {}) {
   };
 }
 
+function interactiveData(sectionName = 'Empty wall') {
+  return {
+    schemaVersion: 1,
+    id: 'experience-test-installation',
+    slug: 'test-installation',
+    title: 'Test installation',
+    description: 'A secure interactive test document.',
+    stage: {width: 1920, height: 1080, background: '#101820'},
+    settings: {transition: 'cut', showProgress: true},
+    assetGroups: [{id: 'group-test-assets', name: 'Test assets', visible: true, collapsed: false, assets: []}],
+    sections: [{
+      id: 'section-test-empty-wall',
+      name: sectionName,
+      description: 'The fixed opening frame.',
+      background: '#dedbd4',
+      focus: {x: 960, y: 540},
+      layers: [],
+    }],
+  };
+}
+
 test('secure admin lifecycle', async t => {
   const port = await freePort();
   const firebasePort = await freePort();
@@ -128,6 +149,34 @@ test('secure admin lifecycle', async t => {
   csrf = session.payload.csrfToken;
   const repeatedSession = await request('/session', {cookie});
   assert.equal(repeatedSession.payload.csrfToken, csrf, 'reading a session must not rotate its CSRF token');
+
+  const unpublishedInteractive = await request('/public/interactive/test-installation');
+  assert.equal(unpublishedInteractive.response.status, 404);
+  const interactiveWithoutSession = await request('/interactive', {method: 'POST', csrf, body: {slug: 'test-installation', title: 'Test installation', document: interactiveData()}});
+  assert.equal(interactiveWithoutSession.response.status, 401);
+  const interactiveWithoutCsrf = await request('/interactive', {method: 'POST', cookie, body: {slug: 'test-installation', title: 'Test installation', document: interactiveData()}});
+  assert.equal(interactiveWithoutCsrf.response.status, 403);
+  const interactiveCreate = await request('/interactive', {method: 'POST', cookie, csrf, body: {slug: 'test-installation', title: 'Test installation', document: interactiveData()}});
+  assert.equal(interactiveCreate.response.status, 201);
+  assert.equal(interactiveCreate.payload.record.status, 'draft');
+  const interactiveRead = await request('/interactive/test-installation', {cookie});
+  assert.equal(interactiveRead.response.status, 200);
+  assert.equal(interactiveRead.payload.record.version, 1);
+  const interactiveUpdate = await request('/interactive/test-installation', {method: 'PUT', cookie, csrf, body: {title: 'Test installation', expectedVersion: 1, document: interactiveData('Marked wall')}});
+  assert.equal(interactiveUpdate.response.status, 200);
+  assert.equal(interactiveUpdate.payload.record.draft.sections[0].name, 'Marked wall');
+  const interactiveStale = await request('/interactive/test-installation', {method: 'PUT', cookie, csrf, body: {title: 'Test installation', expectedVersion: 1, document: interactiveData('Must not overwrite')}});
+  assert.equal(interactiveStale.response.status, 409);
+  const publishInteractive = await request('/interactive/test-installation/publish', {method: 'POST', cookie, csrf, body: {expectedVersion: interactiveUpdate.payload.record.version}});
+  assert.equal(publishInteractive.response.status, 200);
+  assert.equal(publishInteractive.payload.record.status, 'published');
+  const publicInteractive = await request('/public/interactive/test-installation');
+  assert.equal(publicInteractive.response.status, 200);
+  assert.equal(publicInteractive.payload.experience.sections[0].name, 'Marked wall');
+  const postPublishDraft = await request('/interactive/test-installation', {method: 'PUT', cookie, csrf, body: {title: 'Test installation', expectedVersion: publishInteractive.payload.record.version, document: interactiveData('Private next draft')}});
+  assert.equal(postPublishDraft.response.status, 200);
+  const publicStillPublished = await request('/public/interactive/test-installation');
+  assert.equal(publicStillPublished.payload.experience.sections[0].name, 'Marked wall', 'saving a draft must not alter the published experience');
 
   const guideWithoutKey = await request('/guide/next', {method: 'POST', cookie, csrf, body: {language: 'en', context: {page: {id: 'home', slug: 'homepage', title: 'Homepage', route: '/', sections: []}, availableMedia: []}}});
   assert.equal(guideWithoutKey.response.status, 503);
@@ -414,6 +463,8 @@ test('secure admin lifecycle', async t => {
   assert.equal(allowedProducts.response.status, 200);
   const deniedEnquiries = await request('/enquiries', {cookie: shopCookie});
   assert.equal(deniedEnquiries.response.status, 403);
+  const deniedInteractive = await request('/interactive/test-installation', {cookie: shopCookie});
+  assert.equal(deniedInteractive.response.status, 403);
   const shopHistory = await request(`/content/${record.id}/revisions`, {cookie: shopCookie});
   assert.equal(shopHistory.response.status, 403);
   const shopDashboard = await request('/dashboard', {cookie: shopCookie});
@@ -439,6 +490,8 @@ test('secure admin lifecycle', async t => {
   const editorLogin = await request('/login', {method: 'POST', body: {email: 'editor@example.com', password: 'SecureEditor1234'}});
   assert.equal(editorLogin.response.status, 200);
   const editorCookie = editorLogin.response.headers.get('set-cookie').split(';')[0];
+  const editorInteractive = await request('/interactive/test-installation', {cookie: editorCookie});
+  assert.equal(editorInteractive.response.status, 200);
   const editorDeleteNavigation = await request(`/navigation/${navigation.payload.items[0].id}`, {method: 'DELETE', cookie: editorCookie, csrf: editorLogin.payload.csrfToken});
   assert.equal(editorDeleteNavigation.response.status, 403);
 

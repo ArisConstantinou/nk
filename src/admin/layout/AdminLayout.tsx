@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent} from 'react';
-import {Activity, BookOpen, Boxes, BriefcaseBusiness, Building2, ChevronRight, ClipboardList, ExternalLink, FileInput, FileText, FolderKanban, HelpCircle, Image, Languages, LayoutDashboard, LogOut, Menu, Package, Search, Settings, ShieldCheck, ShoppingBag, UserRound, Users, X} from 'lucide-react';
+import {Activity, BookOpen, Boxes, BriefcaseBusiness, Building2, ChevronRight, ClipboardList, Clapperboard, ExternalLink, FileInput, FileText, FolderKanban, HelpCircle, Image, Languages, LayoutDashboard, LogOut, Menu, Package, Search, Settings, ShieldCheck, ShoppingBag, UserRound, Users, X} from 'lucide-react';
 import {NavLink, Outlet as RouterOutlet, useLocation, useNavigate} from 'react-router-dom';
 import {useAdminAuth} from '../auth/AdminAuth';
-import {canManageEnquiries, canManageUsers, canReadForms, canReadKind, canReadMedia} from '../permissions';
+import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia} from '../permissions';
 import {CommandPalette} from './CommandPalette';
 import {BeginnerSiteGuide} from './BeginnerSiteGuide';
 import {publicAsset} from '../../utils/assets';
@@ -143,6 +143,7 @@ export function AdminLayout() {
         {canManageEnquiries(user.role) && <NavItem to="/admin/enquiries" label="Enquiries" icon={ClipboardList} close={close}/>}
 
         {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media" icon={Image} close={close}/>}
+        {!isPagesAdminMode && canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Interactive Studio" icon={Clapperboard} close={close}/>}
 
         {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo')) && <small data-admin-tour="group-system">{text('SETTINGS', 'ΡΥΘΜΙΣΕΙΣ')}</small>}
         {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}
