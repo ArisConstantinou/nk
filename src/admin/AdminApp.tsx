@@ -98,7 +98,7 @@ function OwnerRoute({children}: {children: ReactNode}) {
 
 function InteractiveRoute() {
   const {user} = useAdminAuth();
-  return user && canManageInteractive(user.role) && !isPagesAdminMode ? <InteractiveStudioPage/> : <Navigate to="/admin/dashboard" replace/>;
+  return user && canManageInteractive(user.role) ? <InteractiveStudioPage/> : <Navigate to="/admin/dashboard" replace/>;
 }
 
 function AdminRoutes() {

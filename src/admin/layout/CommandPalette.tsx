@@ -44,7 +44,7 @@ function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
   if (command.to === '/admin/settings') return canReadKind(role, 'settings');
   if (command.to === '/admin/enquiries') return canManageEnquiries(role);
   if (command.to === '/admin/media') return canReadMedia(role);
-  if (command.to === '/admin/interactive') return !isPagesAdminMode && canManageInteractive(role);
+  if (command.to === '/admin/interactive') return canManageInteractive(role);
   if (command.to === '/admin/site-pages?navigation=1') return canReadNavigation(role);
   if (command.to === '/admin/forms') return canReadForms(role);
   if (command.to === '/admin/users') return canManageUsers(role);

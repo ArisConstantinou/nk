@@ -34,6 +34,7 @@ import {copyAiPrompt, exportSectionPng, exportSectionSvg} from '../../interactiv
 import {SectionPanel, LayerPanel} from '../../interactive/studio/StudioPanels';
 import {StudioStage} from '../../interactive/studio/StudioStage';
 import {useInteractiveDraft} from '../../interactive/studio/useInteractiveDraft';
+import {isPagesAdminMode} from '../pagesMode';
 import './interactive-studio.css';
 
 const tools: Array<{id: ExperienceTool; label: string; icon: typeof MousePointer2}> = [
@@ -72,7 +73,7 @@ export function InteractiveStudioPage() {
     }
   }, [activeSectionId, document.sections]);
 
-  if (studio.phase === 'loading') return <AdminLoading label="Loading secure interactive draft…"/>;
+  if (studio.phase === 'loading') return <AdminLoading label={isPagesAdminMode ? 'Loading interactive device workspace…' : 'Loading secure interactive draft…'}/>;
   if (studio.phase === 'error' && !studio.record) return <AdminError message={studio.message} retry={() => window.location.reload()}/>;
   if (!activeSection) return <AdminError message="The draft does not contain a valid frame." retry={() => window.location.reload()}/>;
 
@@ -129,7 +130,7 @@ export function InteractiveStudioPage() {
       <div>
         <span>INTERACTIVE ENGINE / TEMPLATE</span>
         <input value={document.title} onChange={event => change({...document, title: event.target.value})} aria-label="Interactive experience title"/>
-        <small>Generic 1920×1080 frame document · electrical demo data only</small>
+        <small>{isPagesAdminMode ? 'Device workspace · ' : ''}Generic 1920×1080 frame document · electrical demo data only</small>
       </div>
       <div className="ix-studio__save-actions">
         <span className={`ix-save-state ix-save-state--${studio.phase}`} aria-live="polite">{studio.dirty ? '● ' : '✓ '}{studio.message}</span>

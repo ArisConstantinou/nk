@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {AdminApiError, adminApi, errorMessage} from '../../admin/api';
+import {isPagesAdminMode} from '../../admin/pagesMode';
 import type {ExperienceDocument, InteractiveExperienceRecord} from '../engine/schema';
 
 const clone = <T,>(value: T): T => structuredClone(value);
@@ -8,7 +9,7 @@ export function useInteractiveDraft(slug: string, seed: ExperienceDocument) {
   const [record, setRecord] = useState<InteractiveExperienceRecord | null>(null);
   const [document, setDocumentState] = useState<ExperienceDocument>(() => clone(seed));
   const [phase, setPhase] = useState<'loading' | 'ready' | 'saving' | 'publishing' | 'error'>('loading');
-  const [message, setMessage] = useState('Loading secure draft…');
+  const [message, setMessage] = useState(isPagesAdminMode ? 'Loading device draft…' : 'Loading secure draft…');
   const [dirty, setDirty] = useState(false);
   const recordRef = useRef<InteractiveExperienceRecord | null>(null);
   const documentRef = useRef(document);
@@ -70,7 +71,7 @@ export function useInteractiveDraft(slug: string, seed: ExperienceDocument) {
     const currentRecord = recordRef.current;
     if (!currentRecord) throw new Error('The draft has not loaded yet.');
     setPhase('saving');
-    setMessage('Saving secure draft…');
+    setMessage(isPagesAdminMode ? 'Saving draft on this device…' : 'Saving secure draft…');
     try {
       const response = await adminApi<{record: InteractiveExperienceRecord}>(`/interactive/${encodeURIComponent(slug)}`, {
         method: 'PUT',
@@ -100,7 +101,7 @@ export function useInteractiveDraft(slug: string, seed: ExperienceDocument) {
         body: JSON.stringify({expectedVersion: saved.version}),
       });
       const next = applyRecord(response.record);
-      setMessage('Published successfully. Public visitors now receive this version.');
+      setMessage(isPagesAdminMode ? 'Published preview updated on this device.' : 'Published successfully. Public visitors now receive this version.');
       return next;
     } catch (error) {
       setPhase('error');

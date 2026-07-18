@@ -11,6 +11,8 @@ import type {
   SiteForm,
 } from './types';
 import type {CmsGuideAction, CmsGuideBrief, CmsGuideContext, CmsGuideFeature, CmsGuideLanguage} from './guide/aiGuide';
+import type {InteractiveExperienceRecord} from '../interactive/engine/schema';
+import {isExperienceDocument} from '../interactive/engine/documentValidation';
 
 export const isPagesAdminMode = import.meta.env.MODE === 'github-pages';
 export const PAGES_ADMIN_STORAGE_KEY = 'nk-pages-admin-workspace-v1';
@@ -48,6 +50,7 @@ type PagesState = {
   audit: LocalAudit[];
   revisions: Record<string, Revision[]>;
   favorites: string[];
+  interactive: InteractiveExperienceRecord[];
 };
 
 export type PagesApiResult = {status: number; payload: unknown};
@@ -64,6 +67,7 @@ const emptyState = (): PagesState => ({
   audit: [],
   revisions: {},
   favorites: [],
+  interactive: [],
 });
 
 const clone = <T,>(value: T): T => structuredClone(value);
@@ -399,6 +403,12 @@ export function readPagesPublicPayload() {
   };
 }
 
+export function readPagesPublishedInteractive(slug: string) {
+  if (!isPagesAdminMode) return null;
+  const record = readState().interactive.find(item => item.slug === slug);
+  return record?.published && isExperienceDocument(record.published) ? clone(record.published) : null;
+}
+
 function seedWorkspace(state: PagesState, body: Record<string, unknown>) {
   const stamp = now();
   const seedRecords = Array.isArray(body.records) ? body.records as Array<Record<string, unknown>> : [];
@@ -537,6 +547,89 @@ function dashboard(state: PagesState) {
   };
 }
 
+function interactiveRequest(state: PagesState, parts: string[], method: string, body: Record<string, unknown>): PagesApiResult | null {
+  const slug = parts[1] || '';
+  if (parts.length === 1 && method === 'POST') {
+    const requestedSlug = String(body.slug || '');
+    const title = String(body.title || '').trim();
+    const document = body.document;
+    if (!requestedSlug || !title || !isExperienceDocument(document) || document.slug !== requestedSlug) {
+      return fail(400, 'invalid_interactive', 'The interactive title, slug or frame document is invalid.');
+    }
+    if (state.interactive.some(item => item.slug === requestedSlug)) {
+      return fail(409, 'slug_exists', 'An interactive experience already uses this slug.');
+    }
+    const stamp = now();
+    const record: InteractiveExperienceRecord = {
+      id: id(),
+      slug: requestedSlug,
+      title,
+      status: 'draft',
+      draft: clone(document),
+      published: null,
+      version: 1,
+      createdAt: stamp,
+      updatedAt: stamp,
+      publishedAt: null,
+    };
+    state.interactive.push(record);
+    recordAudit(state, 'interactive.created', 'interactive', record.id, {slug: record.slug, title: record.title});
+    writeState(state);
+    return ok({record: clone(record)}, 201);
+  }
+  if (!slug) return null;
+  const index = state.interactive.findIndex(item => item.slug === slug);
+  if (index < 0) return method === 'GET' ? fail(404, 'not_found', 'Interactive experience not found.') : null;
+  const current = state.interactive[index];
+  if (parts.length === 2 && method === 'GET') return ok({record: clone(current)});
+  if (parts.length === 2 && method === 'PUT') {
+    const title = String(body.title || '').trim();
+    const document = body.document;
+    const expectedVersion = Number(body.expectedVersion);
+    if (expectedVersion !== current.version) {
+      return fail(409, 'version_conflict', 'This interactive draft changed. Reload before saving again.');
+    }
+    if (!title || !isExperienceDocument(document) || document.slug !== current.slug) {
+      return fail(400, 'invalid_interactive', 'The interactive title or frame document is invalid.');
+    }
+    const next: InteractiveExperienceRecord = {
+      ...current,
+      title,
+      status: current.published ? 'published' : 'draft',
+      draft: clone(document),
+      version: current.version + 1,
+      updatedAt: now(),
+    };
+    state.interactive[index] = next;
+    recordAudit(state, 'interactive.updated', 'interactive', current.id, {slug: current.slug, version: next.version});
+    writeState(state);
+    return ok({record: clone(next)});
+  }
+  if (parts.length === 3 && parts[2] === 'publish' && method === 'POST') {
+    const expectedVersion = Number(body.expectedVersion);
+    if (expectedVersion !== current.version) {
+      return fail(409, 'version_conflict', 'This interactive draft changed. Reload before publishing.');
+    }
+    if (!isExperienceDocument(current.draft)) {
+      return fail(400, 'invalid_interactive', 'The interactive draft is invalid and cannot be published.');
+    }
+    const stamp = now();
+    const next: InteractiveExperienceRecord = {
+      ...current,
+      status: 'published',
+      published: clone(current.draft),
+      version: current.version + 1,
+      updatedAt: stamp,
+      publishedAt: stamp,
+    };
+    state.interactive[index] = next;
+    recordAudit(state, 'interactive.published', 'interactive', current.id, {slug: current.slug, version: next.version});
+    writeState(state);
+    return ok({record: clone(next)});
+  }
+  return null;
+}
+
 export async function pagesAdminRequest(path: string, init: RequestInit = {}): Promise<PagesApiResult> {
   const method = String(init.method || 'GET').toUpperCase();
   const url = new URL(path, window.location.origin);
@@ -548,6 +641,7 @@ export async function pagesAdminRequest(path: string, init: RequestInit = {}): P
   if (parts[0] === 'session' || parts[0] === 'login') return ok({user: pagesAdminUser, csrfToken: 'pages-device'});
   if (parts[0] === 'logout') return ok({ok: true});
   if (parts[0] === 'dashboard') return ok(dashboard(state));
+  if (parts[0] === 'interactive') return interactiveRequest(state, parts, method, body) || fail(404, 'not_found', 'Interactive action not found.');
   if (parts[0] === 'content') return contentRequest(state, parts, url, method, body) || fail(404, 'not_found', 'Content action not found.');
   if (parts[0] === 'navigation') return collectionRequest(state, 'navigation', parts, method, body) || fail(404, 'not_found', 'Navigation action not found.');
   if (parts[0] === 'forms') return collectionRequest(state, 'forms', parts, method, body) || fail(404, 'not_found', 'Form action not found.');

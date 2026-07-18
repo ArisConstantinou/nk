@@ -143,7 +143,7 @@ export function AdminLayout() {
         {canManageEnquiries(user.role) && <NavItem to="/admin/enquiries" label="Enquiries" icon={ClipboardList} close={close}/>}
 
         {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media" icon={Image} close={close}/>}
-        {!isPagesAdminMode && canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Interactive Studio" icon={Clapperboard} close={close}/>}
+        {canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Interactive Studio" icon={Clapperboard} close={close}/>}
 
         {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo')) && <small data-admin-tour="group-system">{text('SETTINGS', 'ΡΥΘΜΙΣΕΙΣ')}</small>}
         {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}
