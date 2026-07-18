@@ -1,0 +1,52 @@
+.interactive-experience {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+}
+
+.interactive-experience--contained {
+  contain: layout paint style;
+  overflow: clip;
+}
+
+.interactive-experience--deferred {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 40rem;
+}
+
+.interactive-experience__live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.interactive-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.interactive-svg [data-vector-stroke] {
+  vector-effect: non-scaling-stroke;
+}
+
+.interactive-experience[data-motion='reduced'] [data-motion-sensitive] {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive-experience [data-motion-sensitive] {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

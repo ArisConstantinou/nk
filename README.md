@@ -39,6 +39,8 @@ npm.cmd run check:admin
 
 The complete deployment, backup, migration, permissions, publishing and recovery runbook is in [docs/ADMIN_PRODUCTION.md](docs/ADMIN_PRODUCTION.md).
 
+The modular SVG/GSAP/scroll infrastructure and the contract for future service experiences are documented in [docs/INTERACTIVE_EXPERIENCES.md](docs/INTERACTIVE_EXPERIENCES.md).
+
 For a same-origin Node deployment, run the production build and set `ADMIN_SERVE_SITE=true` before `npm.cmd run start:admin`. GitHub Pages can continue hosting the public static build, but it cannot host the authenticated API; a production admin therefore needs the Node service or an equivalent server deployment/reverse proxy.
 
 ## Main routes

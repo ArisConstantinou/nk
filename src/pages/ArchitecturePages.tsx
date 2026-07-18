@@ -6,6 +6,7 @@ import {useContent} from '../context/ContentContext';
 import {serviceLinks} from '../navigation';
 import {ManagedPublicForm} from '../components/ManagedPublicForm';
 import {ModernShopCategoryPage} from './ShopCataloguePage';
+import {ExperienceSlot, experienceSlots} from '../interactive';
 
 // Category routes share the CMS catalogue while keeping their own live filters.
 
@@ -86,6 +87,7 @@ export function ServiceDetailPage() {
   const Icon = item.Icon;
   return <>
     <PageIntro eyebrow={item.title} title={item.shortTitle} body={item.description}/>
+    <ExperienceSlot slot={experienceSlots.service(item.slug)} className="ia-service-experience section" label={`${item.title} interactive experience`}/>
     <section className="ia-service-detail section">
       <div className="ia-service-summary"><span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="code" data-visual-edit="text" data-visual-label="Service code">{item.code}</span><span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="icon" data-visual-edit="icon" data-visual-label="Service icon"><Icon/></span><h2>What this service covers</h2><p data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="intro" data-visual-edit="text" data-visual-label="Service introduction" data-visual-multiline="true">{item.intro}</p><Link className="button copper" to={`/request-a-quote?service=${item.slug}`}>Request a quote <ArrowUpRight/></Link></div>
       <div className="ia-service-lists">

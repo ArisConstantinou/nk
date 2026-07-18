@@ -14,6 +14,7 @@ import './typography.css';
 import './navigation-redesign.css';
 import './shop-catalogue.css';
 import './product-sharing.css';
+import './interactive/styles.css';
 
 document.documentElement.dataset.experience = 'tech';
 applyTheme(getThemePreference());

@@ -5,6 +5,8 @@ import {ContentProvider} from './context/ContentContext';
 import {AboutPage, ContactPage, ExplorePage, LightingPage, ManagedPage, ProductPage, ProjectsPage} from './pages/PublicPages';
 import {QuotePage, ServiceDetailPage, ServicesPage, ShopCategoryPage} from './pages/ArchitecturePages';
 import {GuidedDemoPage} from './pages/GuidedDemoPage';
+import {ExperienceProvider} from './interactive';
+import {experienceManifest} from './interactive/experienceManifest';
 
 const Admin = lazy(() => import('./pages/Admin'));
 const ElectricalHome = lazy(() => import('./pages/electrical/ElectricalHome'));
@@ -45,7 +47,7 @@ function LegacyProductIdRedirect() {
 }
 
 export default function App() {
-  return <PublicRenderBoundary><ContentProvider><BrowserRouter basename={routerBase}><Routes>
+  return <PublicRenderBoundary><ContentProvider><BrowserRouter basename={routerBase}><ExperienceProvider manifest={experienceManifest}><Routes>
     <Route path="/" element={<Public><Suspense fallback={<div className="route-loader">Connecting systems…</div>}><ElectricalHome/></Suspense></Public>}/>
     <Route path="/services" element={<Public><ServicesPage/></Public>}/>
     <Route path="/services/:service" element={<Public><ServiceDetailPage/></Public>}/>
@@ -79,5 +81,5 @@ export default function App() {
     <Route path="/product/:id" element={<LegacyProductIdRedirect/>}/>
     <Route path="/product-page/:slug" element={<LegacyProductRedirect/>}/>
     <Route path="*" element={<Public><ManagedPage/></Public>}/>
-  </Routes></BrowserRouter></ContentProvider></PublicRenderBoundary>;
+  </Routes></ExperienceProvider></BrowserRouter></ContentProvider></PublicRenderBoundary>;
 }
