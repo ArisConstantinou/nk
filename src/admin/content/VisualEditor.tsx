@@ -1,8 +1,9 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {AlertTriangle, Check, ChevronDown, Clapperboard, Cloud, Copy, ExternalLink, Group, Image as ImageIcon, Layers3, Link2, LoaderCircle, Monitor, MousePointer2, Move, PanelRightClose, PanelRightOpen, Pencil, Plus, Redo2, Rocket, Save, Smartphone, Tablet, Tags, Trash2, Type, Undo2, Ungroup, X} from 'lucide-react';
+import {AlertTriangle, Check, ChevronDown, Clapperboard, Cloud, Copy, ExternalLink, Group, History, Image as ImageIcon, Layers3, Link2, LoaderCircle, Monitor, MousePointer2, Move, PanelRightClose, PanelRightOpen, Pencil, Plus, Redo2, Rocket, Save, Smartphone, Tablet, Tags, Trash2, Type, Undo2, Ungroup, X} from 'lucide-react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
+import {useAdminConfirm} from '../components/ConfirmDialog';
 import {canReadKind, canReadMedia, canWriteKind} from '../permissions';
 import type {ContentKind, ContentRecord, MediaAsset, PageComponent, PageComponentType, PageSection, ReusableComponent, VisualHistoryAction, VisualHistoryEntry} from '../types';
 import {componentLabels, historyFrom, newComponent, newSection, normalizeComponent, reusableFrom, sectionsFrom} from './visualEditorModel';
@@ -249,6 +250,7 @@ function applyHistoryValue(record: ContentRecord, entry: VisualHistoryEntry, for
 }
 
 export function VisualEditor({kind}: {kind: ContentKind}) {
+  const confirm = useAdminConfirm();
   const {user} = useAdminAuth();
   const editorLocation = useLocation();
   const navigate = useNavigate();
@@ -290,7 +292,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const historyEchoGuardRef = useRef<{kind: ContentKind; slug: string; path: string; staleValue: unknown; expiresAt: number} | null>(null);
   const [guideSession, setGuideSession] = useState<{session: CmsGuideSession; returnRecordId: string} | null>(null);
   const [editMode, setEditMode] = useState(() => !siteView || startEditing);
-  const [inspectorOpen, setInspectorOpen] = useState(() => !siteView);
+  const [inspectorOpen, setInspectorOpen] = useState(() => !siteView && window.matchMedia('(max-width: 1050px)').matches);
   const previousSiteViewRef = useRef(`${siteView}:${startEditing}`);
   const inspectorRef = useRef<HTMLElement>(null);
   const contextActionRef = useRef<(action: string) => void>(() => undefined);
@@ -442,7 +444,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     if (previousSiteViewRef.current === presentation) return;
     previousSiteViewRef.current = presentation;
     setEditMode(!siteView || startEditing);
-    setInspectorOpen(!siteView);
+    setInspectorOpen(!siteView && window.matchMedia('(max-width: 1050px)').matches);
     setSelection(null);
   }, [siteView, startEditing]);
   useEffect(() => {if (frameReady) postRecords();}, [editMode, frameReady, postRecords]);
@@ -472,15 +474,17 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
         setScale(1);
         return;
       }
-      const widthScale = Math.max(280, stage.clientWidth - 28) / option.width;
+      const desktopEdgeToEdge = viewport === 'desktop'
+        && window.matchMedia('(min-width: 1051px)').matches;
+      const widthScale = Math.max(280, stage.clientWidth - (desktopEdgeToEdge ? 0 : 28)) / option.width;
       const heightScale = Math.max(320, stage.clientHeight - 28) / option.height;
-      setScale(Math.min(1, widthScale, heightScale));
+      setScale(desktopEdgeToEdge ? widthScale : Math.min(1, widthScale, heightScale));
     };
     updateScale();
     const observer = new ResizeObserver(updateScale);
     observer.observe(stage);
     return () => observer.disconnect();
-  }, [loading, viewport]);
+  }, [loading, siteView, viewport]);
 
   const runHistory = useCallback((direction: 'undo' | 'redo', objectOnly = historyMode === 'object') => {
     const record = recordsRef.current.find(item => item.id === activeRecordId);
@@ -617,7 +621,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       const target = recordsRef.current.find(record => record.kind === event.data.kind && record.slug === event.data.slug);
       if (!target) return;
       const nextSelection: VisualSelection = {kind: target.kind, slug: target.slug, path: String(event.data.path || ''), edit: ['text', 'image', 'icon', 'section', 'component'].includes(event.data.edit) ? event.data.edit : 'text', label: String(event.data.label || 'Element'), linkPath: String(event.data.linkPath || ''), sectionId: String(event.data.sectionId || ''), objectType: ['section', 'component', 'auto'].includes(event.data.objectType) ? event.data.objectType : '', objectId: String(event.data.objectId || ''), positionKey: String(event.data.positionKey || event.data.objectId || ''), positionX: Math.round(Number(event.data.positionX) || 0), positionY: Math.round(Number(event.data.positionY) || 0), fallbackValue: String(event.data.fallbackValue || ''), linkFallbackValue: String(event.data.linkFallbackValue || '')};
-      setActiveRecordId(target.id); setSelection(nextSelection); if (event.data.selectOnly || event.data.type === 'nk-visual-editor:select') return;
+      setActiveRecordId(target.id); setSelection(nextSelection); if (!siteView) setInspectorOpen(true); if (event.data.selectOnly || event.data.type === 'nk-visual-editor:select') return;
       if (!editableKinds.includes(target.kind) || typeof event.data.path !== 'string') return;
       const guard = historyEchoGuardRef.current;
       if (guard && guard.expiresAt < Date.now()) historyEchoGuardRef.current = null;
@@ -625,7 +629,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
       patchRecord(target, event.data.path, event.data.value, Boolean(event.data.commit), nextSelection);
     };
     window.addEventListener('message', onMessage); return () => window.removeEventListener('message', onMessage);
-  }, [editableKinds, handleDrop, handlePosition, patchRecord, postRecords, previewPath, transitionPreview]);
+  }, [editableKinds, handleDrop, handlePosition, patchRecord, postRecords, previewPath, siteView, transitionPreview]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -662,7 +666,10 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const reusableComponents = [...(pageForComponents ? reusableFrom(pageForComponents.draft.componentLibrary) : []), ...reusableFrom(settingsRecord?.draft.globalComponents)];
   const activeHistory = activeRecord ? historyFrom(activeRecord.draft.editorHistory) : [];
   const selectedObjectKey = activeRecord && selection ? objectContext(activeRecord, selection.path, selection).objectKey : '';
-  const shownHistory = historyMode === 'object' ? activeHistory.filter(entry => historyAffectsObject(entry, selectedObjectKey)) : activeHistory;
+  const objectHistory = activeHistory.filter(entry => historyAffectsObject(entry, selectedObjectKey));
+  const shownHistory = historyMode === 'object' ? objectHistory : activeHistory;
+  const canUndoObject = Boolean(selection && objectHistory.some(entry => entry.active));
+  const canRedoObject = Boolean(selection && objectHistory.some(entry => !entry.active));
   const hiddenAutomaticItems = activeRecord?.draft.visualOverrides && typeof activeRecord.draft.visualOverrides === 'object' && !Array.isArray(activeRecord.draft.visualOverrides) ? Object.entries(activeRecord.draft.visualOverrides as Record<string, unknown>).flatMap(([key, value]) => value && typeof value === 'object' && !Array.isArray(value) && (value as Record<string, unknown>).hidden === true ? [{key, label: String((value as Record<string, unknown>).label || 'Deleted page element')}] : []) : [];
 
   const chooseRecord = (id: string) => {const record = recordsRef.current.find(item => item.id === id); if (!record) return; setActiveRecordId(id); transitionPreview(previewRoute(record));};
@@ -735,7 +742,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     }
   };
 
-  const deleteSelected = () => {
+  const deleteSelected = async () => {
     if (!activeRecord || !selection) return;
     if (selection.objectType === 'auto' && /^[a-f0-9]{8,16}$/i.test(selection.objectId)) {
       const hiddenPath = `visualOverrides.${selection.objectId}.hidden`;
@@ -748,7 +755,16 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     if (activeRecord.kind !== 'page') return;
     const sections = sectionsForRecord(activeRecord);
     if (selection.objectType === 'section') {
-      const index = sections.findIndex(section => section.id === selection.objectId); if (index < 0 || !window.confirm('Delete this entire section from the draft?')) return;
+      const index = sections.findIndex(section => section.id === selection.objectId);
+      if (index < 0 || !await confirm({
+        eyebrow: 'PAGE STRUCTURE',
+        title: `Delete “${sections[index].title}”?`,
+        description: 'The complete section and every component inside it will be removed from this draft.',
+        detail: 'The published page remains unchanged until you publish the edited draft.',
+        confirmLabel: 'Delete section',
+        cancelLabel: 'Keep section',
+        tone: 'warning',
+      })) return;
       const section = sections[index]; sections.splice(index, 1); mutateSections(activeRecord, sections, {objectKey: `section:${section.id}`, objectLabel: section.title, action: 'delete-section', path: 'sections', before: {section, index}, after: null, meta: {sectionId: section.id}});
     } else if (selection.objectType === 'component' && selectedComponent && selectedSection) {
       const section = sections.find(item => item.id === selectedSection.id); if (!section) return;
@@ -765,9 +781,14 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     setSelection(null); setNotice(`${label} restored to the draft.`);
   };
 
-  const revealInspector = (area: 'library' | 'properties') => {
+  const revealInspector = (area: 'library' | 'properties' | 'history') => {
     setInspectorOpen(true);
     window.setTimeout(() => inspectorRef.current?.querySelector<HTMLElement>(`[data-visual-inspector-section="${area}"]`)?.scrollIntoView({behavior: 'smooth', block: 'start'}), 0);
+  };
+  const openSelectedHistory = () => {
+    if (!selection) {setNotice('Select an object to inspect its history.'); return;}
+    setHistoryMode('object');
+    revealInspector('history');
   };
   const focusSelectedMove = () => {
     iframeRef.current?.contentWindow?.postMessage({type: 'nk-visual-editor:focus-move', nonce: nonceRef.current}, window.location.origin);
@@ -788,8 +809,11 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   contextActionRef.current = action => {
     if (action === 'add') {revealInspector('library'); return;}
     if (action === 'properties') {revealInspector('properties'); return;}
+    if (action === 'undo') {runHistory('undo', true); return;}
+    if (action === 'redo') {runHistory('redo', true); return;}
+    if (action === 'history') {openSelectedHistory(); return;}
     if (action === 'duplicate') {duplicateSelected(); return;}
-    if (action === 'delete') deleteSelected();
+    if (action === 'delete') void deleteSelected();
   };
 
   const groupWith = (otherId: string) => {
@@ -1043,7 +1067,7 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
   const interactiveStudioAvailable = (activeRecord.kind === 'service' && activeRecord.slug === 'electrical-installations')
     || logicalPreviewPath(publicPreviewUrl(previewPath)) === '/services/electrical-installations';
 
-  return <div className={`nk-visual-editor ${siteView ? 'nk-visual-editor--site-view' : ''}`}>
+  return <div className={`nk-visual-editor nk-visual-editor--wide-preview ${siteView ? 'nk-visual-editor--site-view' : ''}`}>
     <header className="nk-visual-toolbar">
       <div className="nk-visual-document"><span>VISUAL WEBSITE EDITOR</span><details ref={documentMenuRef}><summary aria-label={`Choose ${kindLabels[kind].toLowerCase()}`}><b>{kindLabels[activeRecord.kind]}</b><span>{activeRecord.title}{activeRecord.kind !== kind && ' · global element'}</span><ChevronDown/></summary><div role="listbox" aria-label={`${kindLabels[kind]} records`}>{documentOptions.map(record => <button type="button" role="option" aria-selected={record.id === activeRecord.id} className={record.id === activeRecord.id ? 'active' : ''} onClick={() => {chooseRecord(record.id); if (documentMenuRef.current) documentMenuRef.current.open = false;}} key={record.id}><span>{record.title}</span>{record.kind !== kind && <small>Global element</small>}</button>)}</div></details></div>
       <div className="nk-visual-viewports" aria-label="Preview viewport">{(Object.entries(viewportOptions) as [ViewportName, typeof option][]).map(([name, item]) => <button type="button" className={viewport === name ? 'active' : ''} aria-pressed={viewport === name} onClick={() => setViewport(name)} key={name}><item.icon/><span>{item.label}</span><small>{item.width}</small></button>)}</div>
@@ -1052,13 +1076,14 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
     {(saveErrors[activeRecord.id] || notice) && <div className={`nk-visual-notice ${saveErrors[activeRecord.id] ? 'error' : ''}`} role={saveErrors[activeRecord.id] ? 'alert' : 'status'}>{saveErrors[activeRecord.id] ? <AlertTriangle/> : <Check/>}<span>{saveErrors[activeRecord.id] || notice}</span><button type="button" onClick={() => {setNotice(''); setSaveErrors(current => ({...current, [activeRecord.id]: ''}));}}>Dismiss</button></div>}
     <div className={`nk-visual-workspace ${siteView ? 'nk-visual-workspace--site-view' : ''} ${inspectorOpen ? 'inspector-open' : 'inspector-closed'}`}>
       <section className="nk-visual-canvas" aria-label={`${option.label} website preview`}>
+        {!siteView && <button className="nk-visual-inspector-toggle-float" type="button" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen(current => !current)}>{inspectorOpen ? <PanelRightClose/> : <PanelRightOpen/>}<span>Elements &amp; properties</span></button>}
         <div className="nk-visual-canvas-hint">{editMode ? <Move/> : <MousePointer2/>}<span className="nk-visual-hint-full">{!editMode ? 'Navigation is active. Turn on Edit Mode when you want to change the site.' : editableKinds.includes(activeRecord.kind) ? 'Click an element to edit. Ctrl/cmd + click or use Open link to navigate while editing.' : 'Read-only preview.'}</span><span className="nk-visual-hint-mobile">{!editMode ? 'Browse normally · Edit Mode is off' : editableKinds.includes(activeRecord.kind) ? 'Tap an element · use Open to navigate' : 'Read-only preview'}</span><b>{option.width} × {option.height}</b></div>
-        {siteView && editMode && selection && <div className="nk-visual-live-actions" role="toolbar" aria-label="Selected element quick actions"><strong title={selection.label}>{selection.label}</strong><button type="button" onClick={() => revealInspector('properties')}><Pencil/><span>Edit</span></button><button type="button" onClick={() => revealInspector('library')}><Plus/><span>Add</span></button><button type="button" onClick={focusSelectedMove}><Move/><span>Move</span></button>{['section', 'component'].includes(selection.objectType) && <button type="button" onClick={duplicateSelected}><Copy/><span>Copy</span></button>}<button className="danger" type="button" onClick={deleteSelected}><Trash2/><span>Delete</span></button>{Boolean(selectedLinkValue) && <button type="button" onClick={openSelectedLink}><ExternalLink/><span>Open</span></button>}</div>}
+        {siteView && editMode && selection && <div className="nk-visual-live-actions" role="toolbar" aria-label="Selected element quick actions"><strong title={selection.label}>{selection.label}</strong><button type="button" onClick={() => runHistory('undo', true)} disabled={!canUndoObject} title="Undo the last change to this object"><Undo2/><span>Undo</span></button><button type="button" onClick={() => runHistory('redo', true)} disabled={!canRedoObject} title="Redo the next change to this object"><Redo2/><span>Redo</span></button><button type="button" onClick={openSelectedHistory} title="Show this object's history"><History/><span>History</span></button><button type="button" onClick={() => revealInspector('properties')}><Pencil/><span>Edit</span></button><button type="button" onClick={() => revealInspector('library')}><Plus/><span>Add</span></button><button type="button" onClick={focusSelectedMove}><Move/><span>Move</span></button>{['section', 'component'].includes(selection.objectType) && <button type="button" onClick={duplicateSelected}><Copy/><span>Copy</span></button>}<button className="danger" type="button" onClick={() => void deleteSelected()}><Trash2/><span>Delete</span></button>{Boolean(selectedLinkValue) && <button type="button" onClick={openSelectedLink}><ExternalLink/><span>Open</span></button>}</div>}
         <div className="nk-visual-stage" ref={stageRef}><div className="nk-visual-frame-sizer" style={{width: option.width * scale, height: option.height * scale}}><iframe ref={iframeRef} title={`${option.label} live website preview`} src={previewSrc(previewPath, nonceRef.current)} onLoad={handleFrameLoad} style={{width: option.width, height: option.height, transform: `scale(${scale})`}}/>{!frameReady && <div className="nk-visual-frame-loading"><LoaderCircle className="nk-admin-spin"/>Rendering live preview…</div>}</div></div>
       </section>
-      {siteView && inspectorOpen && <button className="nk-visual-inspector-scrim" type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}/>}
-      <aside ref={inspectorRef} className={`nk-visual-inspector ${siteView ? inspectorOpen ? 'is-open' : 'is-closed' : ''}`} aria-label="Builder tools and selected element properties" aria-hidden={siteView && !inspectorOpen}>
-        {siteView && <div className="nk-visual-drawer-header"><span>ELEMENTS &amp; PROPERTIES</span><button type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}><X/></button></div>}
+      {inspectorOpen && <button className="nk-visual-inspector-scrim" type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}/>}
+      <aside ref={inspectorRef} className={`nk-visual-inspector ${inspectorOpen ? 'is-open' : 'is-closed'}`} aria-label="Builder tools and selected element properties" aria-hidden={!inspectorOpen}>
+        <div className="nk-visual-drawer-header"><span>ELEMENTS &amp; PROPERTIES</span><button type="button" aria-label="Close elements panel" onClick={() => setInspectorOpen(false)}><X/></button></div>
         <section className="nk-visual-admin-meta"><header><Tags/><span><b>ADMIN ORGANISATION</b><small>Search, filters and work queue</small></span></header><label>Category<input value={activeRecord.category || ''} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('category', event.target.value)} placeholder="e.g. Residential, Campaign"/></label><label>Tags<input value={(activeRecord.tags || []).join(', ')} disabled={!canWriteCurrent} onChange={event => updateAdminMeta('tags', event.target.value.split(',').map(value => value.trim()).filter(Boolean))} placeholder="priority, lighting, showroom"/></label></section>
         {pageForComponents && editableKinds.includes('page') && <section className="nk-visual-builder-library" data-visual-inspector-section="library"><header><span>ADD TO PAGE</span><button type="button" data-guide="add-section" onClick={addSection}><Plus/>Section</button></header><div className="nk-visual-component-palette">{componentTypes.map(type => <button type="button" data-guide={`add-component-${type}`} onClick={() => addComponent(type)} key={type}><Plus/><span>{componentLabels[type]}</span></button>)}</div>{reusableComponents.length > 0 && <div className="nk-visual-reusable-list"><b>Reusable components</b>{reusableComponents.map(item => <button type="button" onClick={() => addComponent(item.component.type, item)} key={`${item.scope}-${item.id}`}><Plus/><span>{item.name}</span><small>{item.scope}</small></button>)}</div>}</section>}
         <header data-visual-inspector-section="properties"><span>PROPERTIES</span><h2>{selection?.label || 'Select an element'}</h2><p>{selection ? `${kindLabels[selection.kind]} · ${selection.slug}` : 'Click directly on the page. The relevant controls appear here.'}</p></header>
@@ -1073,11 +1098,12 @@ export function VisualEditor({kind}: {kind: ContentKind}) {
           <div className="nk-visual-object-tools nk-visual-position-tools"><p><Move/>Drag the four-arrow control on the selected element. Arrow keys move 1 px; hold Shift to move 10 px.</p><div><span>X <b>{selection.positionX}px</b></span><span>Y <b>{selection.positionY}px</b></span></div><button type="button" disabled={!selection.positionX && !selection.positionY} onClick={() => handlePosition({kind: selection.kind, slug: selection.slug, positionKey: selection.positionKey, x: 0, y: 0, label: selection.label, objectType: selection.objectType, objectId: selection.objectId, sectionId: selection.sectionId})}><Move/>Reset position</button><small>One saved position is shared by Desktop, Tablet and Mobile.</small></div>
           {selectedSection && selection.objectType === 'section' && <div className="nk-visual-object-tools"><label><span><Layers3/>Section layout</span><select value={selectedSection.layout} onChange={event => updateSelection(event.target.value, `${selection.path}.layout`, 'style')}><option value="stack">Stack</option><option value="grid">Grid</option><option value="split">Split</option></select></label><label><span>Columns</span><input type="range" min="1" max="4" value={selectedSection.columns} onChange={event => updateSelection(Number(event.target.value), `${selection.path}.columns`, 'resize')}/><small>{selectedSection.columns} column{selectedSection.columns === 1 ? '' : 's'}</small></label><label className="nk-visual-toggle"><input type="checkbox" checked={selectedSection.enabled} onChange={event => updateSelection(event.target.checked, `${selection.path}.enabled`)}/><span>Visible in this draft</span></label></div>}
           {selectedComponent && <div className="nk-visual-object-tools"><label><span>Component name</span><input value={selectedComponent.label} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.label`)}/></label><label><span>Width</span><input type="range" min="20" max="100" step="5" value={selectedComponent.style.width} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.width`, 'resize')}/><small>{selectedComponent.style.width}%</small></label><div className="nk-visual-property-grid"><label><span>Alignment</span><select value={selectedComponent.style.align} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.align`, 'style')}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option><option value="stretch">Stretch</option></select></label><label><span>Tone</span><select value={selectedComponent.style.tone} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.tone`, 'style')}><option value="default">Default</option><option value="accent">Accent</option><option value="muted">Muted</option><option value="dark">Dark</option></select></label></div><div className="nk-visual-property-grid"><label><span>Padding</span><input type="number" min="0" max="64" value={selectedComponent.style.padding} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.padding`, 'style')}/></label><label><span>Radius</span><input type="number" min="0" max="48" value={selectedComponent.style.radius} onChange={event => updateSelection(Number(event.target.value), `${pathForObject(activeSections, 'component', selectedComponent.id)}.style.radius`, 'style')}/></label></div><label><span>Scope</span><select value={selectedComponent.scope} onChange={event => updateSelection(event.target.value, `${pathForObject(activeSections, 'component', selectedComponent.id)}.scope`, 'scope')}><option value="local">Local to this page</option><option value="global">Global site component</option></select></label><div className="nk-visual-save-reusable"><input value={reusableName} onChange={event => setReusableName(event.target.value)} placeholder="Reusable component name"/><button type="button" onClick={saveReusable}><Save/>{selectedComponent.scope === 'global' ? 'Save & sync global' : 'Save reusable'}</button></div>{selectedComponent.groupId ? <button type="button" onClick={ungroup}><Ungroup/>Ungroup components</button> : selectedSection && selectedSection.components.length > 1 && <label><span><Group/>Group with</span><select value="" onChange={event => groupWith(event.target.value)}><option value="">Choose component…</option>{selectedSection.components.filter(item => item.id !== selectedComponent.id).map(item => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>}</div>}
-          {['section', 'component'].includes(selection.objectType) && <div className="nk-visual-object-actions"><button type="button" onClick={duplicateSelected}><Copy/>Duplicate</button><button className="danger" type="button" onClick={deleteSelected}><Trash2/>Delete</button></div>}
-          {selection.objectType === 'auto' && <div className="nk-visual-object-tools nk-visual-auto-tools"><button className="danger" type="button" onClick={deleteSelected}><Trash2/>Delete this element</button></div>}
+          {['section', 'component'].includes(selection.objectType) && <div className="nk-visual-object-actions"><button type="button" onClick={duplicateSelected}><Copy/>Duplicate</button><button className="danger" type="button" onClick={() => void deleteSelected()}><Trash2/>Delete</button></div>}
+          {selection.objectType === 'auto' && <div className="nk-visual-object-tools nk-visual-auto-tools"><button className="danger" type="button" onClick={() => void deleteSelected()}><Trash2/>Delete this element</button></div>}
+          <div className="nk-visual-object-history-shortcuts" role="toolbar" aria-label={`History controls for ${selection.label}`}><button type="button" onClick={() => runHistory('undo', true)} disabled={!canUndoObject}><Undo2/>Undo</button><button type="button" onClick={() => runHistory('redo', true)} disabled={!canRedoObject}><Redo2/>Redo</button><button type="button" onClick={openSelectedHistory}><History/>History</button></div>
         </div>}
         {hiddenAutomaticItems.length > 0 && <section className="nk-visual-hidden-items"><header><span>DELETED CONTENT</span><b>{hiddenAutomaticItems.length} restorable element{hiddenAutomaticItems.length === 1 ? '' : 's'}</b></header>{hiddenAutomaticItems.map(item => <button type="button" onClick={() => restoreAutomatic(item.key, item.label)} key={item.key}><Undo2/><span><b>{item.label}</b><small>Restore to this draft</small></span></button>)}</section>}
-        {activeRecord && <section className="nk-visual-history"><header><div><span>HISTORY</span><b>{historyMode === 'object' ? selection?.label || 'Selected object' : `Entire ${kindLabels[activeRecord.kind].toLowerCase()}`}</b></div><div><button type="button" className={historyMode === 'object' ? 'active' : ''} onClick={() => setHistoryMode('object')} disabled={!selection}>Object</button><button type="button" className={historyMode === 'page' ? 'active' : ''} onClick={() => setHistoryMode('page')}>Record</button></div></header><div className="nk-visual-history-actions"><button type="button" onClick={() => runHistory('undo')} disabled={!shownHistory.some(entry => entry.active)}><Undo2/>Undo <kbd>Ctrl Z</kbd></button><button type="button" onClick={() => runHistory('redo')} disabled={!shownHistory.some(entry => !entry.active)}><Redo2/>Redo <kbd>Ctrl Shift Z</kbd></button></div>{shownHistory.length ? <ol>{[...shownHistory].reverse().map(entry => <li className={!entry.active ? 'undone' : ''} key={entry.id}><i/><span><b>{actionLabels[entry.action]}</b><small>{entry.objectLabel} · {new Date(entry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}{!entry.active ? ' · undone' : ''}</small></span></li>)}</ol> : <div className="nk-visual-history-empty">{historyMode === 'object' && !selection ? 'Select an object to see its independent history.' : 'No changes recorded yet.'}</div>}</section>}
+        {activeRecord && <section className="nk-visual-history" data-visual-inspector-section="history"><header><div><span>HISTORY</span><b>{historyMode === 'object' ? selection?.label || 'Selected object' : `Entire ${kindLabels[activeRecord.kind].toLowerCase()}`}</b><small>{shownHistory.length} recorded change{shownHistory.length === 1 ? '' : 's'}</small></div><div><button type="button" className={historyMode === 'object' ? 'active' : ''} onClick={() => setHistoryMode('object')} disabled={!selection}>Object</button><button type="button" className={historyMode === 'page' ? 'active' : ''} onClick={() => setHistoryMode('page')}>Record</button></div></header><div className="nk-visual-history-actions"><button type="button" onClick={() => runHistory('undo')} disabled={!shownHistory.some(entry => entry.active)}><Undo2/>Undo <kbd>Ctrl Z</kbd></button><button type="button" onClick={() => runHistory('redo')} disabled={!shownHistory.some(entry => !entry.active)}><Redo2/>Redo <kbd>Ctrl Shift Z</kbd></button></div>{shownHistory.length ? <ol>{[...shownHistory].reverse().map(entry => <li className={!entry.active ? 'undone' : ''} key={entry.id}><i/><span><b>{actionLabels[entry.action]}</b><small>{entry.objectLabel} · {new Date(entry.timestamp).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}{!entry.active ? ' · undone' : ''}</small></span></li>)}</ol> : <div className="nk-visual-history-empty">{historyMode === 'object' && !selection ? 'Select an object to see its independent history.' : 'No changes recorded yet.'}</div>}</section>}
         <footer><Cloud/><span>Drafts save automatically. The public website changes only when you press <b>Publish</b>.</span></footer>
       </aside>
     </div>

@@ -3,6 +3,7 @@ import {Check, Plus, RefreshCw, Shield, UserPlus, X} from 'lucide-react';
 import {useSearchParams} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
 import {PageHeading} from '../components/AdminStates';
+import {useAdminConfirm} from '../components/ConfirmDialog';
 import type {AdminRole, AdminUser} from '../types';
 
 const roles: AdminRole[] = ['editor', 'shop', 'projects', 'sales', 'viewer'];
@@ -16,6 +17,7 @@ const roleMatrix: Array<{role: AdminRole; access: string; rights: string}> = [
 ];
 
 export function UsersPage() {
+  const confirm = useAdminConfirm();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -69,7 +71,15 @@ export function UsersPage() {
   };
 
   const update = async (user: AdminUser, role: AdminRole, active: boolean) => {
-    if (!active && user.active && !window.confirm(`Disable access for ${user.displayName}? Their active sessions will be closed.`)) return;
+    if (!active && user.active && !await confirm({
+      eyebrow: 'ACCOUNT ACCESS',
+      title: `Disable access for ${user.displayName}?`,
+      description: 'This user will no longer be able to enter the administration workspace.',
+      detail: 'Their active sessions will be closed. You can enable the account again later.',
+      confirmLabel: 'Disable access',
+      cancelLabel: 'Keep active',
+      tone: 'warning',
+    })) return;
     setBusy(true);
     setError('');
     try {

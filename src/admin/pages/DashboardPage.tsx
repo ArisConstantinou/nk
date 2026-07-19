@@ -31,6 +31,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { adminApi, errorMessage } from "../api";
 import { useAdminAuth } from "../auth/AdminAuth";
 import { EmptyState, PageHeading } from "../components/AdminStates";
+import { useAdminConfirm } from "../components/ConfirmDialog";
 import {
   canManageEnquiries,
   canManageMedia,
@@ -148,6 +149,7 @@ function actionLabel(action: string) {
 }
 
 export function DashboardPage() {
+  const confirm = useAdminConfirm();
   const { user } = useAdminAuth();
   const [params, setParams] = useSearchParams();
   const [data, setData] = useState<Dashboard | null>(null);
@@ -310,13 +312,20 @@ export function DashboardPage() {
       );
       return;
     }
-    if (
-      ["archive", "unpublish"].includes(bulkAction) &&
-      !window.confirm(
-        `${bulkLabels[bulkAction]} ${selected.size} selected record${selected.size === 1 ? "" : "s"}?`,
-      )
-    )
-      return;
+    if (["archive", "unpublish"].includes(bulkAction)) {
+      const accepted = await confirm({
+        eyebrow: 'BULK CONTENT CHANGE',
+        title: `${bulkLabels[bulkAction]} ${selected.size} selected record${selected.size === 1 ? '' : 's'}?`,
+        description: bulkAction === 'archive'
+          ? 'The selected records will move out of active content and into the archive.'
+          : 'The selected records will no longer be publicly visible.',
+        detail: 'Only the records currently selected in the work queue are affected.',
+        confirmLabel: bulkAction === 'archive' ? 'Archive selected' : 'Take selected offline',
+        cancelLabel: 'Keep current state',
+        tone: 'warning',
+      });
+      if (!accepted) return;
+    }
     const items = data.workQueue
       .filter((item) => selected.has(item.id))
       .map((item) => ({ id: item.id, version: item.version }));

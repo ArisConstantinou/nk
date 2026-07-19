@@ -1,5 +1,7 @@
-import {Copy, Eye, EyeOff, GripVertical, Layers3, Lock, Plus, Trash2, Unlock} from 'lucide-react';
+import {useEffect, useState, type MouseEvent as ReactMouseEvent} from 'react';
+import {ChevronDown, ChevronUp, Copy, Eraser, Eye, EyeOff, FilePlus2, GripVertical, Layers3, ListChecks, Lock, Trash2, Unlock} from 'lucide-react';
 import {cloneSection, createSection, type ExperienceDocument, type ExperienceLayer} from '../engine/schema';
+import {useAdminConfirm} from '../../admin/components/ConfirmDialog';
 
 type SectionsProps = {
   document: ExperienceDocument;
@@ -10,13 +12,48 @@ type SectionsProps = {
 
 export function SectionPanel({document, activeSectionId, onSelect, onChange}: SectionsProps) {
   const activeIndex = Math.max(0, document.sections.findIndex(section => section.id === activeSectionId));
+  const [selectedSectionIds, setSelectedSectionIds] = useState<Set<string>>(() => new Set([activeSectionId]));
+  const confirm = useAdminConfirm();
+
+  const selectOnly = (sectionId: string) => {
+    setSelectedSectionIds(new Set([sectionId]));
+    onSelect(sectionId);
+  };
+
+  const selectFrame = (event: ReactMouseEvent<HTMLElement>, sectionId: string) => {
+    if (event.shiftKey) {
+      setSelectedSectionIds(new Set(document.sections.map(section => section.id)));
+      onSelect(sectionId);
+      return;
+    }
+    if (event.ctrlKey || event.metaKey) {
+      setSelectedSectionIds(current => {
+        const next = new Set(current);
+        if (next.has(sectionId) && next.size > 1) next.delete(sectionId);
+        else next.add(sectionId);
+        return next;
+      });
+      onSelect(sectionId);
+      return;
+    }
+    selectOnly(sectionId);
+  };
+
+  useEffect(() => {
+    const validIds = new Set(document.sections.map(section => section.id));
+    setSelectedSectionIds(current => {
+      const validSelection = new Set([...current].filter(id => validIds.has(id)));
+      if (validSelection.size) return validSelection;
+      return new Set(activeSectionId ? [activeSectionId] : []);
+    });
+  }, [activeSectionId, document.sections]);
 
   const addBlank = () => {
     const next = createSection(`Frame ${document.sections.length + 1}`);
     const sections = [...document.sections];
     sections.splice(activeIndex + 1, 0, next);
     onChange({...document, sections});
-    onSelect(next.id);
+    selectOnly(next.id);
   };
 
   const duplicate = () => {
@@ -26,14 +63,49 @@ export function SectionPanel({document, activeSectionId, onSelect, onChange}: Se
     const sections = [...document.sections];
     sections.splice(activeIndex + 1, 0, next);
     onChange({...document, sections});
-    onSelect(next.id);
+    selectOnly(next.id);
   };
 
-  const remove = () => {
-    if (document.sections.length === 1 || !window.confirm('Remove this frame from the draft timeline? Stable IDs of the remaining frames will not change.')) return;
-    const sections = document.sections.filter(section => section.id !== activeSectionId);
+  const clearAll = async () => {
+    const accepted = await confirm({
+      eyebrow: 'RESET DRAFT TIMELINE',
+      title: 'Start again with one blank frame?',
+      description: `This removes all ${document.sections.length} frames from the current draft and creates a clean Frame 1.`,
+      detail: 'The published experience stays unchanged until you explicitly save and publish this new draft.',
+      confirmLabel: 'Clear draft timeline',
+      cancelLabel: 'Keep all frames',
+      tone: 'danger',
+    });
+    if (!accepted) return;
+    const blank = createSection('Frame 1');
+    onChange({...document, sections: [blank]});
+    selectOnly(blank.id);
+  };
+
+  const removeSelected = async () => {
+    const ids = selectedSectionIds.size ? selectedSectionIds : new Set([activeSectionId]);
+    const accepted = await confirm({
+      eyebrow: 'TIMELINE CHANGE',
+      title: `Remove ${ids.size} selected frame${ids.size === 1 ? '' : 's'}?`,
+      description: 'The selected frames and their own layers will be removed from this draft timeline.',
+      detail: ids.size >= document.sections.length
+        ? 'A new blank Frame 1 will be created automatically so the experience always remains valid.'
+        : 'The remaining frames keep their stable internal IDs and will be renumbered visually.',
+      confirmLabel: ids.size === 1 ? 'Remove frame' : `Remove ${ids.size} frames`,
+      cancelLabel: 'Keep selection',
+      tone: 'warning',
+    });
+    if (!accepted) return;
+    if (ids.size >= document.sections.length) {
+      const blank = createSection('Frame 1');
+      onChange({...document, sections: [blank]});
+      selectOnly(blank.id);
+      return;
+    }
+    const sections = document.sections.filter(section => !ids.has(section.id));
+    const nextActive = sections[Math.max(0, Math.min(activeIndex, sections.length - 1))];
     onChange({...document, sections});
-    onSelect(sections[Math.max(0, activeIndex - 1)].id);
+    selectOnly(nextActive.id);
   };
 
   const drop = (targetId: string, sourceId: string) => {
@@ -46,18 +118,29 @@ export function SectionPanel({document, activeSectionId, onSelect, onChange}: Se
     sections.splice(targetIndex, 0, moved);
     onChange({...document, sections});
   };
+  const move = (sectionId: string, direction: -1 | 1) => {
+    const sections = [...document.sections];
+    const sourceIndex = sections.findIndex(item => item.id === sectionId);
+    const targetIndex = sourceIndex + direction;
+    if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= sections.length) return;
+    const [moved] = sections.splice(sourceIndex, 1);
+    sections.splice(targetIndex, 0, moved);
+    onChange({...document, sections});
+  };
 
   return <section className="ix-section-panel">
-    <header className="ix-panel-heading"><div><Layers3/><span><b>Frames</b><small>Stable IDs · visual order</small></span></div><span>{document.sections.length}</span></header>
-    <div className="ix-section-list">
+    <header className="ix-panel-heading"><div><Layers3/><span><b>Frames</b><small>Shift-click selects all</small></span></div><span>{selectedSectionIds.size > 1 ? `${selectedSectionIds.size}/${document.sections.length}` : document.sections.length}</span></header>
+    <div className="ix-section-list" role="listbox" aria-label="Timeline frames" aria-multiselectable="true">
       {document.sections.map((section, index) => <article
         key={section.id}
         draggable
-        className={section.id === activeSectionId ? 'active' : ''}
+        role="option"
+        aria-selected={selectedSectionIds.has(section.id)}
+        className={`${section.id === activeSectionId ? 'active' : ''} ${selectedSectionIds.has(section.id) ? 'selected' : ''}`.trim()}
         onDragStart={event => event.dataTransfer.setData('application/x-nk-section', section.id)}
         onDragOver={event => event.preventDefault()}
         onDrop={event => drop(section.id, event.dataTransfer.getData('application/x-nk-section'))}
-        onClick={() => onSelect(section.id)}
+        onClick={event => selectFrame(event, section.id)}
       >
         <GripVertical/>
         <span>{String(index + 1).padStart(2, '0')}</span>
@@ -65,15 +148,46 @@ export function SectionPanel({document, activeSectionId, onSelect, onChange}: Se
           value={section.name}
           aria-label={`Frame ${index + 1} name`}
           onClick={event => event.stopPropagation()}
-          onFocus={() => onSelect(section.id)}
+          onFocus={() => selectOnly(section.id)}
           onChange={event => onChange({...document, sections: document.sections.map(item => item.id === section.id ? {...item, name: event.target.value} : item)})}
         />
+        <div className="ix-section-order">
+          <button type="button" disabled={index === 0} onClick={event => {event.stopPropagation(); move(section.id, -1);}} aria-label={`Move ${section.name} earlier`}><ChevronUp/></button>
+          <button type="button" disabled={index === document.sections.length - 1} onClick={event => {event.stopPropagation(); move(section.id, 1);}} aria-label={`Move ${section.name} later`}><ChevronDown/></button>
+        </div>
       </article>)}
     </div>
-    <footer>
-      <button type="button" onClick={addBlank}><Plus/>Blank</button>
-      <button type="button" onClick={duplicate}><Copy/>Duplicate</button>
-      <button type="button" onClick={remove} disabled={document.sections.length === 1}><Trash2/>Remove</button>
+    <footer className="ix-section-actions" aria-label="Frame actions">
+      <button type="button" onClick={addBlank} aria-label="Add blank frame" data-tooltip="Add blank frame" title="Add blank frame">
+        <FilePlus2 aria-hidden="true"/>
+      </button>
+      <button type="button" onClick={duplicate} aria-label="Duplicate active frame" data-tooltip="Duplicate frame" title="Duplicate frame">
+        <Copy aria-hidden="true"/>
+      </button>
+      <button
+        type="button"
+        className={selectedSectionIds.size === document.sections.length ? 'active' : ''}
+        onClick={() => setSelectedSectionIds(new Set(document.sections.map(section => section.id)))}
+        aria-label="Select all frames"
+        aria-pressed={selectedSectionIds.size === document.sections.length}
+        data-tooltip="Select all frames"
+        title="Select all frames"
+      >
+        <ListChecks aria-hidden="true"/>
+      </button>
+      <button
+        type="button"
+        onClick={() => void removeSelected()}
+        aria-label={`Remove ${selectedSectionIds.size || 1} selected frame${selectedSectionIds.size === 1 ? '' : 's'}`}
+        data-tooltip="Remove selection"
+        title="Remove selected frames"
+      >
+        <Trash2 aria-hidden="true"/>
+        {selectedSectionIds.size > 1 && <span className="ix-section-action-count" aria-hidden="true">{selectedSectionIds.size}</span>}
+      </button>
+      <button type="button" className="danger" onClick={() => void clearAll()} aria-label="Erase all frames" data-tooltip="Erase all frames" title="Erase all frames">
+        <Eraser aria-hidden="true"/>
+      </button>
     </footer>
   </section>;
 }

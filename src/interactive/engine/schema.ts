@@ -1,10 +1,23 @@
 export const EXPERIENCE_SCHEMA_VERSION = 1 as const;
 export const DEFAULT_STAGE_WIDTH = 1920;
 export const DEFAULT_STAGE_HEIGHT = 1080;
+export const DEFAULT_ROUTE_BEND_RADIUS_MM = 80;
 
 export type ExperienceViewMode = 'page' | 'focus' | 'fullscreen';
 export type ExperienceTool = 'select' | 'freehand' | 'rectangle' | 'ellipse' | 'line' | 'arrow' | 'text';
-export type ExperienceLayerType = 'asset' | 'placeholder' | 'rectangle' | 'ellipse' | 'line' | 'arrow' | 'path' | 'text';
+export type ExperienceLayerType = 'asset' | 'placeholder' | 'rectangle' | 'ellipse' | 'line' | 'arrow' | 'path' | 'parametric-path' | 'text';
+export type ParametricPathRenderer = 'wall-channel' | 'flex-conduit';
+
+export type ParametricPathSettings = {
+  renderer: ParametricPathRenderer;
+  routeId: string;
+  widthMm: number;
+  depthMm?: number;
+  roughness?: number;
+  corrugationMm?: number;
+  bendRadiusMm?: number;
+  color?: string;
+};
 
 export type ExperiencePoint = {
   x: number;
@@ -30,12 +43,14 @@ export type ExperienceLayer = {
   opacity: number;
   transform: LayerTransform;
   assetId?: string;
+  assetFit?: 'contain' | 'cover';
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
   text?: string;
   fontSize?: number;
   points?: ExperiencePoint[];
+  parametric?: ParametricPathSettings;
   description?: string;
 };
 
@@ -147,15 +162,28 @@ export const cloneLayer = (layer: ExperienceLayer): ExperienceLayer => ({
   id: createStableId('layer'),
   transform: {...layer.transform},
   points: layer.points?.map(point => ({...point})),
+  parametric: layer.parametric ? {...layer.parametric} : undefined,
 });
 
-export const cloneSection = (section: ExperienceSection): ExperienceSection => ({
-  ...section,
-  id: createStableId('section'),
-  name: `${section.name} copy`,
-  focus: {...section.focus},
-  layers: section.layers.map(cloneLayer),
-});
+export const cloneSection = (section: ExperienceSection): ExperienceSection => {
+  const routeIds = new Map<string, string>();
+  const layers = section.layers.map(layer => {
+    const next = cloneLayer(layer);
+    if (next.parametric?.routeId) {
+      const nextRouteId = routeIds.get(next.parametric.routeId) || createStableId('route');
+      routeIds.set(next.parametric.routeId, nextRouteId);
+      next.parametric = {...next.parametric, routeId: nextRouteId};
+    }
+    return next;
+  });
+  return {
+    ...section,
+    id: createStableId('section'),
+    name: `${section.name} copy`,
+    focus: {...section.focus},
+    layers,
+  };
+};
 
 export const findAsset = (document: ExperienceDocument, assetId: string | undefined) => {
   if (!assetId) return null;

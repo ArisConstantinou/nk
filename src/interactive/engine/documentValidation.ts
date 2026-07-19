@@ -6,7 +6,7 @@ import {
   type ExperienceLayerType,
 } from './schema';
 
-const layerTypes = new Set<ExperienceLayerType>(['asset', 'placeholder', 'rectangle', 'ellipse', 'line', 'arrow', 'path', 'text']);
+const layerTypes = new Set<ExperienceLayerType>(['asset', 'placeholder', 'rectangle', 'ellipse', 'line', 'arrow', 'path', 'parametric-path', 'text']);
 const stableId = /^[a-z][a-z0-9-]{2,100}$/i;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -41,8 +41,18 @@ export function isExperienceDocument(value: unknown): value is ExperienceDocumen
       if (!transform || [transform.x, transform.y, transform.width, transform.height, transform.rotation, transform.skewX, transform.skewY].some(number => !Number.isFinite(number))) return false;
       if (transform.width < 1 || transform.height < 1 || transform.width > 7_680 || transform.height > 4_320 || Math.abs(transform.x) > 15_000 || Math.abs(transform.y) > 15_000) return false;
       if (layer.opacity < 0 || layer.opacity > 1 || (layer.points && layer.points.length > 20_000)) return false;
-      if (layer.type === 'asset' && typeof layer.assetId !== 'string') return false;
+      if (layer.type === 'asset' && (typeof layer.assetId !== 'string' || (layer.assetFit != null && !['contain', 'cover'].includes(layer.assetFit)))) return false;
       if (layer.type === 'text' && (typeof layer.text !== 'string' || layer.text.length > 2_000)) return false;
+      if (layer.type === 'parametric-path') {
+        const settings = layer.parametric;
+        if (!settings || !['wall-channel', 'flex-conduit'].includes(settings.renderer) || !stableId.test(settings.routeId)) return false;
+        if (!Array.isArray(layer.points) || layer.points.length < 2 || layer.points.length > 200) return false;
+        if (!Number.isFinite(settings.widthMm) || settings.widthMm < 5 || settings.widthMm > 160) return false;
+        if (settings.depthMm != null && (!Number.isFinite(settings.depthMm) || settings.depthMm < 1 || settings.depthMm > 100)) return false;
+        if (settings.roughness != null && (!Number.isFinite(settings.roughness) || settings.roughness < 0 || settings.roughness > 1)) return false;
+        if (settings.corrugationMm != null && (!Number.isFinite(settings.corrugationMm) || settings.corrugationMm < 1 || settings.corrugationMm > 20)) return false;
+        if (settings.bendRadiusMm != null && (!Number.isFinite(settings.bendRadiusMm) || settings.bendRadiusMm < 10 || settings.bendRadiusMm > 500)) return false;
+      }
     }
   }
   return true;

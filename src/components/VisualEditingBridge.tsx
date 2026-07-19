@@ -399,6 +399,9 @@ export function VisualEditingBridge({localEditing = false}: {localEditing?: bool
     contextToolbar.setAttribute('aria-label', 'Selected element actions');
     contextToolbar.hidden = true;
     contextToolbar.innerHTML = `
+      <button type="button" data-action="undo" title="Undo the last change to this object"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v1"/></svg><span>Undo</span></button>
+      <button type="button" data-action="redo" title="Redo the next change to this object"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0-6 6v1"/></svg><span>Redo</span></button>
+      <button type="button" data-action="history" title="Show this object's history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>History</span></button>
       <button type="button" data-action="properties" title="Edit this element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Edit</span></button>
       <button type="button" data-action="add" title="Add a section or element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></button>
       <button type="button" data-action="move" title="Drag to move this element"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3m3-3 3 3M12 22l-3-3m3 3 3-3M2 12l3-3m-3 3 3 3M22 12l-3-3m3 3-3 3"/></svg><span>Move</span></button>
@@ -587,7 +590,7 @@ export function VisualEditingBridge({localEditing = false}: {localEditing?: bool
     };
 
     const runContextAction = (action: string) => {
-      if (['add', 'duplicate', 'delete'].includes(action)) {
+      if (['add', 'duplicate', 'delete', 'undo', 'redo', 'history'].includes(action)) {
         post({type: 'nk-visual-editor:context-action', action});
         return;
       }

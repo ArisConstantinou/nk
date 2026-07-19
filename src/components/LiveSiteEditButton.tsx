@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent} from 'react';
 import {createPortal} from 'react-dom';
-import {AlignCenter, AlignJustify, AlignLeft, AlignRight, Check, Cloud, History, LoaderCircle, Pencil, Redo2, Rocket, RotateCcw, Type, Undo2, X} from 'lucide-react';
-import {useLocation} from 'react-router-dom';
-import {canWriteKind} from '../admin/permissions';
+import {AlignCenter, AlignJustify, AlignLeft, AlignRight, Check, Clapperboard, Cloud, History, LoaderCircle, Pencil, Redo2, Rocket, RotateCcw, Type, Undo2, X} from 'lucide-react';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {canManageInteractive, canWriteKind} from '../admin/permissions';
 import type {AdminRole, ContentKind, ContentRecord, VisualHistoryAction, VisualHistoryEntry} from '../admin/types';
 import {historyFrom} from '../admin/content/visualEditorModel';
 import {VisualEditingBridge} from './VisualEditingBridge';
@@ -152,6 +152,7 @@ function applyLiveHistory(record: ContentRecord, entry: VisualHistoryEntry, forw
 
 export function LiveSiteEditButton() {
   const location = useLocation();
+  const navigate = useNavigate();
   const insideVisualEditor = new URLSearchParams(location.search).has('visualEditor');
   const requestedLiveEdit = new URLSearchParams(location.search).get('liveEdit') === '1';
   const [role, setRole] = useState<AdminRole | null>(null);
@@ -172,6 +173,11 @@ export function LiveSiteEditButton() {
   const saveQueuesRef = useRef(new Map<string, Promise<void>>());
   const autoStartedRef = useRef(false);
   const canEditWebsite = role ? allKinds.some(kind => canWriteKind(role, kind)) : false;
+  const canOpenInteractiveStudio = Boolean(
+    role
+    && canManageInteractive(role)
+    && /(?:^|\/)electrical-installations\/?$/.test(location.pathname),
+  );
 
   const updateRecords = useCallback((next: ContentRecord[]) => {
     recordsRef.current = next;
@@ -464,7 +470,7 @@ export function LiveSiteEditButton() {
   if (insideVisualEditor) return <VisualEditingBridge/>;
   return <>
     <VisualEditingBridge localEditing={editing}/>
-    {canEditWebsite && <button data-visual-no-edit="true" className={`ia-live-edit-button ${editing ? 'active' : ''}`} type="button" onClick={() => editing ? stopEditing() : void startEditing()} aria-label={editing ? 'Finish editing website' : 'Edit this website'} aria-pressed={editing} title={editing ? 'Finish live editing' : 'Edit this website'} disabled={saveState === 'loading' || restoring}>{saveState === 'loading' ? <LoaderCircle className="ia-live-edit-spin"/> : editing ? <Check/> : <Pencil/>}<span>{editing ? 'Done' : 'Edit'}</span></button>}
+    {canEditWebsite && <button data-visual-no-edit="true" className={`ia-live-edit-button ${editing ? 'active' : ''} ${canOpenInteractiveStudio && !editing ? 'studio' : ''}`} type="button" onClick={() => editing ? stopEditing() : canOpenInteractiveStudio ? navigate('/admin/interactive') : void startEditing()} aria-label={editing ? 'Finish editing website' : canOpenInteractiveStudio ? 'Open Interactive Studio' : 'Edit this website'} aria-pressed={editing} title={editing ? 'Finish live editing' : canOpenInteractiveStudio ? 'Open Interactive Studio' : 'Edit this website'} disabled={saveState === 'loading' || restoring}>{saveState === 'loading' ? <LoaderCircle className="ia-live-edit-spin"/> : editing ? <Check/> : canOpenInteractiveStudio ? <Clapperboard/> : <Pencil/>}<span>{editing ? 'Done' : canOpenInteractiveStudio ? 'Studio' : 'Edit'}</span></button>}
     {canEditWebsite && editing && <button data-visual-no-edit="true" className="ia-live-restore-button" type="button" onClick={() => void restoreAll()} aria-label={`Restore all changes to the Edit start point${restorableIds.length ? ` (${restorableIds.length} ${restorableIds.length === 1 ? 'record' : 'records'})` : ''}`} title={restorableIds.length ? `Restore all changes since Edit started (${restorableIds.length})` : 'No changes since Edit started'} disabled={!restorableIds.length || restoring || saveState === 'loading'}>{restoring ? <LoaderCircle className="ia-live-edit-spin"/> : <RotateCcw/>}</button>}
     {editing && panelOpen && createPortal(<aside data-visual-no-edit="true" className="ia-live-editor-dock" aria-label="Live website editor">
       <header><span><b>LIVE EDIT</b><small>{saveState === 'saving' ? 'Saving…' : saveState === 'error' ? 'Needs attention' : 'Draft autosave'}</small></span><button type="button" onClick={event => {event.currentTarget.blur(); setPanelOpen(false);}} aria-label="Close live editor panel"><X/></button></header>

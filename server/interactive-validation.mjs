@@ -2,7 +2,7 @@ import {ApiError, cleanText} from './security.mjs';
 
 const ID_PATTERN = /^[a-z][a-z0-9-]{2,100}$/i;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const LAYER_TYPES = new Set(['asset', 'placeholder', 'rectangle', 'ellipse', 'line', 'arrow', 'path', 'text']);
+const LAYER_TYPES = new Set(['asset', 'placeholder', 'rectangle', 'ellipse', 'line', 'arrow', 'path', 'parametric-path', 'text']);
 const ASSET_KINDS = new Set(['image', 'svg']);
 
 const invalid = (message = 'The interactive document is invalid.') => {
@@ -56,6 +56,17 @@ export function validateInteractiveDocument(value, expectedSlug) {
       if (transform.width < 1 || transform.height < 1 || transform.width > 7_680 || transform.height > 4_320 || Math.abs(transform.x) > 15_000 || Math.abs(transform.y) > 15_000 || Math.abs(transform.rotation) > 100_000 || Math.abs(transform.skewX) > 89 || Math.abs(transform.skewY) > 89) invalid('A layer transform is outside the supported range.');
       if (layer.type === 'asset' && !validId(layer.assetId)) invalid('An asset layer must reference an asset.');
       if (layer.type === 'text' && !shortString(layer.text || '', 2_000)) invalid('A text layer is too long.');
+      if (layer.type === 'parametric-path') {
+        const settings = layer.parametric;
+        if (!settings || !['wall-channel', 'flex-conduit'].includes(settings.renderer) || !validId(settings.routeId)) invalid('A parametric route identity is invalid.');
+        if (!Array.isArray(layer.points) || layer.points.length < 2 || layer.points.length > 200) invalid('A parametric route needs between 2 and 200 path nodes.');
+        if (!finite(settings.widthMm) || settings.widthMm < 5 || settings.widthMm > 160) invalid('The parametric route width is invalid.');
+        if (settings.depthMm !== undefined && (!finite(settings.depthMm) || settings.depthMm < 1 || settings.depthMm > 100)) invalid('The wall-channel depth is invalid.');
+        if (settings.roughness !== undefined && (!finite(settings.roughness) || settings.roughness < 0 || settings.roughness > 1)) invalid('The wall-channel roughness is invalid.');
+        if (settings.corrugationMm !== undefined && (!finite(settings.corrugationMm) || settings.corrugationMm < 1 || settings.corrugationMm > 20)) invalid('The conduit corrugation is invalid.');
+        if (settings.bendRadiusMm !== undefined && (!finite(settings.bendRadiusMm) || settings.bendRadiusMm < 10 || settings.bendRadiusMm > 500)) invalid('The route bend radius is invalid.');
+        if (settings.color !== undefined && !shortString(settings.color, 100)) invalid('The conduit colour is invalid.');
+      }
       if (layer.points !== undefined) {
         if (!Array.isArray(layer.points) || layer.points.length > 20_000 || layer.points.some(point => !finite(point?.x) || !finite(point?.y))) invalid('A vector path is invalid.');
       }

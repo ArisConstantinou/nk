@@ -52,6 +52,7 @@ export function AdminLayout() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
+  const sidebarNavRef = useRef<HTMLElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const commandTriggerRef = useRef<HTMLButtonElement>(null);
@@ -118,6 +119,9 @@ export function AdminLayout() {
     if (workspaceRef.current) workspaceRef.current.inert = mobileOpen || commandOpen;
   }, [commandOpen, guideOpen, mobileOpen]);
   useEffect(() => {
+    if (sidebarNavRef.current) sidebarNavRef.current.scrollTop = 0;
+  }, [location.pathname, mobileOpen]);
+  useEffect(() => {
     document.title = `${currentLabel} — NK Electrical Admin`;
   }, [currentLabel]);
   if (!user) return null;
@@ -128,7 +132,7 @@ export function AdminLayout() {
     <aside ref={sidebarRef} id="admin-navigation" className={`nk-admin-sidebar ${mobileOpen ? 'open' : ''}`}>
       <div className="nk-admin-logo"><img src={publicAsset('assets/nk-logo-transparent-v2.png')} alt=""/><div><b>NK Electrical</b><small>Administration</small></div><button type="button" onClick={close} aria-label="Close admin navigation"><X/></button></div>
       <button className="nk-admin-sidebar-search" type="button" onClick={openCommand} data-admin-tour="search"><Search/><span>Search admin</span><kbd>Ctrl K</kbd></button>
-      <nav aria-label="Admin navigation">
+      <nav ref={sidebarNavRef} aria-label="Admin navigation">
         <NavItem {...overview[0]} close={close}/>
         {canReadKind(user.role, 'page') && <NavItem {...overview[1]} close={close}/>}
 

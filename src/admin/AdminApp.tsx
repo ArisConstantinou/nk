@@ -2,7 +2,7 @@ import {Component, useEffect, useState, type ErrorInfo, type ReactNode} from 're
 import {Navigate, Outlet, Route, Routes, useLocation} from 'react-router-dom';
 import {AdminAuthProvider, useAdminAuth} from './auth/AdminAuth';
 import {LoginPage, ServiceUnavailablePage, SetupPage} from './auth/AuthPages';
-import {AdminError, AdminLoading} from './components/AdminStates';
+import {AdminError, AdminLoading, PageHeading} from './components/AdminStates';
 import {RecordManager} from './content/RecordManager';
 import {VisualEditor} from './content/VisualEditor';
 import {AdminLayout} from './layout/AdminLayout';
@@ -22,6 +22,7 @@ import './admin.css';
 import './productivity.css';
 import {isPagesAdminMode} from './pagesMode';
 import {AdminLanguageProvider} from './i18n/AdminLanguage';
+import {AdminConfirmProvider} from './components/ConfirmDialog';
 
 class AdminErrorBoundary extends Component<{children: ReactNode}, {error: Error | null}> {
   state = {error: null as Error | null};
@@ -29,6 +30,33 @@ class AdminErrorBoundary extends Component<{children: ReactNode}, {error: Error 
   componentDidCatch(error: Error, info: ErrorInfo) { console.error('Admin UI error', error, info); }
   render() { return this.state.error ? <AdminError message="The admin interface encountered an unexpected error. Reload the page to restore a safe state." retry={() => window.location.reload()}/> : this.props.children; }
 }
+
+const visualEditorHeadings: Partial<Record<ContentKind, {title: string; description: string}>> = {
+  page: {
+    title: 'Website Editor',
+    description: 'Create and edit pages, then place them across every website menu from the same workspace.',
+  },
+  service: {
+    title: 'Services',
+    description: 'Define service-only content, deliverables and suitable applications.',
+  },
+  product: {
+    title: 'Products',
+    description: 'Manage products separately from installation and design services.',
+  },
+  catalogue: {
+    title: 'Catalogues',
+    description: 'Manage official brand PDFs and external catalogue links.',
+  },
+  project: {
+    title: 'Projects',
+    description: 'Maintain the completed project archive, filters and verified dates.',
+  },
+  company: {
+    title: 'Company',
+    description: 'Keep the history and partnership narrative in one accountable source.',
+  },
+};
 
 function ProtectedRoot() {
   const {phase, user} = useAdminAuth();
@@ -52,7 +80,16 @@ function ProtectedRoot() {
 
 function ContentRoute({kind}: {kind: ContentKind}) {
   const {user} = useAdminAuth();
-  return user && canReadKind(user.role, kind) ? kind === 'seo' ? <RecordManager kind={kind}/> : <VisualEditor kind={kind}/> : <Navigate to="/admin/dashboard" replace/>;
+  if (!user || !canReadKind(user.role, kind)) return <Navigate to="/admin/dashboard" replace/>;
+  if (kind === 'seo') return <RecordManager kind={kind}/>;
+  const heading = visualEditorHeadings[kind] || {
+    title: 'Visual editor',
+    description: 'Edit this content directly against the live website preview.',
+  };
+  return <>
+    <PageHeading eyebrow="VISUAL WEBSITE EDITOR" title={heading.title} description={heading.description}/>
+    <VisualEditor kind={kind}/>
+  </>;
 }
 
 function PageManagementRoute() {
@@ -136,5 +173,5 @@ function AdminRoutes() {
 }
 
 export default function AdminApp() {
-  return <AdminErrorBoundary><AdminLanguageProvider><AdminAuthProvider><AdminRoutes/></AdminAuthProvider></AdminLanguageProvider></AdminErrorBoundary>;
+  return <AdminErrorBoundary><AdminLanguageProvider><AdminAuthProvider><AdminConfirmProvider><AdminRoutes/></AdminConfirmProvider></AdminAuthProvider></AdminLanguageProvider></AdminErrorBoundary>;
 }

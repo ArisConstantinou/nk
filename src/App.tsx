@@ -10,6 +10,7 @@ import {experienceManifest} from './interactive/experienceManifest';
 
 const Admin = lazy(() => import('./pages/Admin'));
 const ElectricalHome = lazy(() => import('./pages/electrical/ElectricalHome'));
+const InteractiveEngineReadOnly = lazy(() => import('./interactive/read-only/InteractiveEngineReadOnlyPage'));
 const Public = ({children}: {children: React.ReactNode}) => <ElectricalLayout>{children}</ElectricalLayout>;
 const routerBase = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -61,6 +62,7 @@ export default function App() {
     <Route path="/request-a-quote" element={<Public><QuotePage/></Public>}/>
     <Route path="/pages/:slug" element={<GuidedDemoPage/>}/>
     <Route path="/_cms-guide/:slug" element={<GuidedDemoPage/>}/>
+    <Route path="/interactive/:slug/engine" element={<Suspense fallback={<div className="route-loader">Opening read-only engine…</div>}><InteractiveEngineReadOnly/></Suspense>}/>
     <Route path="/admin/*" element={<Suspense fallback={<div className="route-loader">Opening admin…</div>}><Admin/></Suspense>}/>
 
     <Route path="/electrical-installations" element={<Navigate to="/services/electrical-installations" replace/>}/>

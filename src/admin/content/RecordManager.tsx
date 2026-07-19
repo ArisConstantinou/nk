@@ -5,6 +5,7 @@ import {adminApi, AdminApiError, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
 import {EmptyState, PageHeading} from '../components/AdminStates';
 import {ActionMenu} from '../components/ActionMenu';
+import {useAdminConfirm} from '../components/ConfirmDialog';
 import {canManageNavigation, canWriteKind} from '../permissions';
 import type {ContentRecord, NavigationItem, NavigationMenu, Revision} from '../types';
 import {NavigationPage} from '../pages/NavigationPage';
@@ -31,6 +32,7 @@ const childMenuForNavigationItem = (item: NavigationItem): PageNavigationMenu | 
 
 export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   const config = recordConfigs[kind];
+  const confirm = useAdminConfirm();
   const {user} = useAdminAuth();
   const canWrite = Boolean(user && canWriteKind(user.role, kind));
   const canWriteNavigation = Boolean(user && canManageNavigation(user.role));
@@ -92,9 +94,24 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
     const record = records.find(item => item.id === requested);
     if (record) edit(record);
   }, [editor?.id, params, records]);
-  const close = () => { if (!dirty || window.confirm('Discard the unsaved changes?')) setEditor(null); };
-  const openNavigationWorkspace = (request: NavigationRequest = {}) => {
-    if (dirty && !window.confirm('Discard the unsaved page changes and manage navigation?')) return;
+  const close = async () => {
+    if (dirty && !await confirm({
+      title: 'Discard unsaved changes?',
+      description: 'The edits in this open record have not been saved and will be lost.',
+      confirmLabel: 'Discard changes',
+      cancelLabel: 'Continue editing',
+      tone: 'warning',
+    })) return;
+    setEditor(null);
+  };
+  const openNavigationWorkspace = async (request: NavigationRequest = {}) => {
+    if (dirty && !await confirm({
+      title: 'Leave this unsaved page?',
+      description: 'Opening navigation now will discard the unsaved page changes.',
+      confirmLabel: 'Discard and continue',
+      cancelLabel: 'Stay on page',
+      tone: 'warning',
+    })) return;
     setEditor(null); setDirty(false); setNavigationWorkspaceOpen(true); setNavigationRequest(request);
     const next = new URLSearchParams(params); next.delete('record'); next.delete('new'); next.set('navigation', '1');
     if (request.itemId) next.set('navItem', request.itemId); else next.delete('navItem');
@@ -242,7 +259,15 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
 
   const unpublish = async () => {
-    if (!editor?.id || editor.status !== 'published' || !window.confirm(`Take “${editor.title}” offline? It will remain available as a draft.`)) return;
+    if (!editor?.id || editor.status !== 'published' || !await confirm({
+      eyebrow: 'PUBLIC VISIBILITY',
+      title: `Take “${editor.title}” offline?`,
+      description: 'Visitors will no longer be able to access the published record.',
+      detail: 'Its content remains safely available in the admin as a draft.',
+      confirmLabel: 'Take offline',
+      cancelLabel: 'Keep published',
+      tone: 'warning',
+    })) return;
     setBusy(true); setError('');
     try {
       const result = await adminApi<{record: ContentRecord}>(`/content/${editor.id}/unpublish`, {method: 'POST', body: JSON.stringify({expectedVersion: editor.version})});
@@ -268,7 +293,14 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
 
   const remove = async () => {
-    if (!editor?.id || user?.role !== 'owner' || !window.confirm(`Permanently delete “${editor.title}” and its version history? This cannot be undone.`)) return;
+    if (!editor?.id || user?.role !== 'owner' || !await confirm({
+      title: `Permanently delete “${editor.title}”?`,
+      description: 'The record and its complete version history will be removed.',
+      detail: 'This action cannot be undone.',
+      confirmLabel: 'Delete permanently',
+      cancelLabel: 'Keep record',
+      tone: 'danger',
+    })) return;
     setBusy(true); setError('');
     try {
       const deletingRecord = records.find(item => item.id === editor.id);
@@ -294,7 +326,13 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
 
   const archive = async () => {
-    if (!editor?.id || !window.confirm(`Archive “${editor.title}”?`)) return;
+    if (!editor?.id || !await confirm({
+      title: `Archive “${editor.title}”?`,
+      description: 'The record will be removed from active content and kept in the archive.',
+      confirmLabel: 'Archive record',
+      cancelLabel: 'Keep active',
+      tone: 'warning',
+    })) return;
     setBusy(true); setError('');
     try {
       const result = await adminApi<{record: ContentRecord}>(`/content/${editor.id}/archive`, {method: 'POST', body: JSON.stringify({expectedVersion: editor.version})});
@@ -317,7 +355,15 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
 
   const restore = async (revision: Revision) => {
-    if (!editor?.id || !window.confirm(`Restore version ${revision.version} as a new draft?`)) return;
+    if (!editor?.id || !await confirm({
+      eyebrow: 'VERSION HISTORY',
+      title: `Restore version ${revision.version}?`,
+      description: 'This historical version will become a new editable draft.',
+      detail: 'The currently published version remains live until you publish the restored draft.',
+      confirmLabel: 'Restore as draft',
+      cancelLabel: 'Keep current draft',
+      tone: 'neutral',
+    })) return;
     setBusy(true); setError('');
     try {
       const result = await adminApi<{record: ContentRecord}>(`/content/${editor.id}/revisions/${revision.id}/restore`, {method: 'POST', body: JSON.stringify({expectedVersion: editor.version})});

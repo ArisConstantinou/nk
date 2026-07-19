@@ -5,6 +5,7 @@ import {adminApi, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
 import {EmptyState, PageHeading} from '../components/AdminStates';
 import {ActionMenu} from '../components/ActionMenu';
+import {useAdminConfirm} from '../components/ConfirmDialog';
 import type {NavigationItem, NavigationMenu} from '../types';
 
 const menus: Array<{value: NavigationMenu; label: string}> = [
@@ -15,6 +16,7 @@ const emptyItem = (menu: NavigationMenu): EditState => ({id: '', menu, label: ''
 type NavigationPageProps = {embedded?: boolean; requestedItemId?: string; requestedNewMenu?: NavigationMenu | null; onItemsChange?: (items: NavigationItem[]) => void; onClose?: () => void};
 
 export function NavigationPage({embedded = false, requestedItemId = '', requestedNewMenu = null, onItemsChange, onClose}: NavigationPageProps = {}) {
+  const confirm = useAdminConfirm();
   const {user} = useAdminAuth();
   const [params, setParams] = useSearchParams();
   const canWrite = user?.role === 'owner' || user?.role === 'editor';
@@ -42,7 +44,7 @@ export function NavigationPage({embedded = false, requestedItemId = '', requeste
   };
   const update = async (item: NavigationItem, values: Partial<NavigationItem>) => {setBusy(true); setError(''); try {const result = await adminApi<{item: NavigationItem}>(`/navigation/${item.id}`, {method:'PATCH', body:JSON.stringify({...item,...values})}); setItems(current => current.map(value => value.id === item.id ? result.item : value)); setNotice(result.item.active ? 'Link activated.' : 'Link deactivated.');} catch(nextError){setError(errorMessage(nextError));} finally{setBusy(false);}};
   const duplicate = async (item: NavigationItem) => {setBusy(true); try {const result = await adminApi<{item: NavigationItem}>(`/navigation/${item.id}/duplicate`, {method:'POST'}); setItems(current => [...current,result.item]); setEditing(result.item); setNotice('Inactive copy created.');} catch(nextError){setError(errorMessage(nextError));} finally{setBusy(false);}};
-  const remove = async (item: NavigationItem) => {if(!window.confirm(`Permanently delete “${item.label}” from navigation?`)) return; setBusy(true); try {await adminApi(`/navigation/${item.id}`, {method:'DELETE'}); setItems(current=>current.filter(value=>value.id!==item.id)); if(editing?.id===item.id)setEditing(null); setNotice('Navigation item deleted.');} catch(nextError){setError(errorMessage(nextError));} finally{setBusy(false);}};
+  const remove = async (item: NavigationItem) => {if(!await confirm({title:`Delete “${item.label}” from navigation?`,description:'This link will be permanently removed from its menu.',detail:'The linked page or external destination will not be deleted.',confirmLabel:'Delete link',cancelLabel:'Keep link',tone:'danger'})) return; setBusy(true); try {await adminApi(`/navigation/${item.id}`, {method:'DELETE'}); setItems(current=>current.filter(value=>value.id!==item.id)); if(editing?.id===item.id)setEditing(null); setNotice('Navigation item deleted.');} catch(nextError){setError(errorMessage(nextError));} finally{setBusy(false);}};
   const move = async (item: NavigationItem, direction: -1|1) => {const ordered=items.filter(value=>value.menu===item.menu).sort((a,b)=>a.position-b.position); const index=ordered.findIndex(value=>value.id===item.id); const target=index+direction; if(target<0||target>=ordered.length)return; [ordered[index],ordered[target]]=[ordered[target],ordered[index]]; const next=ordered.map((value,position)=>({...value,position})); setItems(current=>current.map(value=>next.find(item=>item.id===value.id)||value)); setBusy(true); try{await adminApi('/navigation/reorder',{method:'PATCH',body:JSON.stringify({menu:item.menu,ids:next.map(value=>value.id)})});setNotice('Navigation order updated.');}catch(nextError){setError(errorMessage(nextError));void load();}finally{setBusy(false);}};
 
   return <div className={embedded ? 'nk-admin-navigation-embedded' : ''}>

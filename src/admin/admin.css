@@ -8,7 +8,7 @@
 .nk-admin-sidebar nav{min-height:0;flex:1;padding:5px 10px 10px;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#365347 transparent}.nk-admin-sidebar nav>small{font:10px/1.2 ui-monospace,monospace;color:#6f897d;letter-spacing:.14em;margin:7px 11px 2px}.nk-admin-sidebar nav>a{min-height:34px;border:1px solid transparent;border-radius:8px;color:#b0c3ba;display:grid;grid-template-columns:21px 1fr 15px;align-items:center;gap:10px;padding:4px 11px;margin:0;text-decoration:none;font-size:13px;font-weight:520}.nk-admin-sidebar nav>a>svg:first-child{width:17px}.nk-admin-sidebar nav>a>svg:last-child{width:13px;opacity:.25}.nk-admin-sidebar nav>a:hover{background:rgba(255,255,255,.07);color:#fff}.nk-admin-sidebar nav>a.active{background:#e6f5ee;border-color:#e6f5ee;color:#0a5b40;font-weight:720}.nk-admin-sidebar nav>a.active>svg:last-child{opacity:.8}
 .nk-admin-sidebar-user{flex:0 0 auto;border-top:1px solid rgba(255,255,255,.09);padding:10px 10px max(10px,env(safe-area-inset-bottom))}.nk-admin-sidebar-user>a,.nk-admin-device-user{display:flex;align-items:center;gap:10px;padding:9px;border-radius:9px;color:#eff8f3;text-decoration:none}.nk-admin-sidebar-user>a:hover{background:rgba(255,255,255,.06)}.nk-admin-sidebar-user>a>svg,.nk-admin-device-user>svg{width:19px;color:#78d6b3}.nk-admin-sidebar-user>a>span,.nk-admin-device-user>span{display:flex;flex-direction:column;min-width:0}.nk-admin-sidebar-user b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nk-admin-sidebar-user small{font-size:9px;color:#8da69a;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nk-admin-sidebar-user>button{width:100%;height:37px;border:0;border-radius:8px;background:transparent;color:#90a99d;padding:0 9px;display:flex;align-items:center;gap:10px;font-size:11px}.nk-admin-sidebar-user>button svg{width:16px}.nk-admin-sidebar-user>button:hover{background:rgba(255,255,255,.05);color:#ffc4bf}
 .nk-admin-workspace{min-width:0;min-height:100vh}.nk-admin-topbar{height:70px;position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--admin-line);display:flex;align-items:center;padding:0 clamp(22px,3.3vw,52px);gap:18px}.nk-admin-menu-trigger{display:none;background:transparent;border:0;color:var(--admin-text);width:40px;height:40px;place-items:center;border-radius:9px}.nk-admin-topbar>nav{display:flex;align-items:center;gap:7px;min-width:0;font-size:12px;color:var(--admin-muted)}.nk-admin-topbar>nav a{text-decoration:none;color:var(--admin-muted)}.nk-admin-topbar>nav a:hover{color:var(--admin-accent)}.nk-admin-topbar>nav svg{width:13px;color:#a7b5ae}.nk-admin-topbar>nav span{color:#87988f}.nk-admin-topbar>nav b{color:var(--admin-text);font-weight:680;white-space:nowrap}.nk-admin-topbar-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.nk-admin-global-search{height:38px;min-width:160px;border:1px solid var(--admin-line);border-radius:9px;background:var(--admin-surface-soft);color:var(--admin-muted);display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:8px;padding:0 9px;text-align:left;font-size:11px}.nk-admin-global-search:hover{border-color:var(--admin-line-strong);background:#fff}.nk-admin-global-search svg{width:16px}.nk-admin-global-search kbd{border-color:var(--admin-line);background:#fff;color:#7c8e85}.nk-admin-topbar-actions>a:not(.nk-admin-topbar-avatar){height:38px;border:1px solid var(--admin-line);border-radius:9px;background:#fff;padding:0 11px;display:flex;align-items:center;gap:7px;text-decoration:none;font-size:11px;font-weight:650}.nk-admin-topbar-actions>a svg{width:14px}.nk-admin-topbar-avatar{width:38px;height:38px;border-radius:50%;background:var(--admin-sidebar);color:#fff!important;display:grid;place-items:center;text-decoration:none;font-size:10px;font-weight:800;letter-spacing:.03em}
-.nk-admin-workspace>main{padding:26px clamp(22px,3.3vw,52px) 80px;max-width:1600px;margin:0 auto;outline:0}.nk-admin-security-line{height:30px;display:flex;align-items:center;gap:7px;color:#81928a;font-size:10px;margin-bottom:20px}.nk-admin-security-line svg{width:14px;color:var(--admin-accent)}.nk-admin-security-line span{font-weight:700;color:#52665c}.nk-admin-security-line i{width:3px;height:3px;border-radius:50%;background:#a8b6af}
+.nk-admin-workspace>main{width:100%;min-width:0;max-width:none;margin:0;padding:26px clamp(22px,3.3vw,52px) 80px;outline:0}.nk-admin-security-line{height:30px;display:flex;align-items:center;gap:7px;color:#81928a;font-size:10px;margin-bottom:20px}.nk-admin-security-line svg{width:14px;color:var(--admin-accent)}.nk-admin-security-line span{font-weight:700;color:#52665c}.nk-admin-security-line i{width:3px;height:3px;border-radius:50%;background:#a8b6af}
 .nk-admin-security-line--device{height:auto;min-height:36px;padding:7px 11px;border:1px solid #b9dfcf;border-radius:9px;background:#edf8f3;color:#477164}.nk-admin-security-line--device span{color:#176c50}
 .nk-admin-page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;padding-bottom:25px;margin-bottom:22px}.nk-admin-page-heading>div:first-child{max-width:760px}.nk-admin-page-heading span{color:var(--admin-accent);font:700 10px/1.2 ui-monospace,monospace;letter-spacing:.12em}.nk-admin-page-heading h1{font-family:Manrope,Inter,system-ui,sans-serif;font-weight:620;font-size:clamp(38px,4.4vw,56px);letter-spacing:-.055em;line-height:1;margin:10px 0}.nk-admin-page-heading p{font-size:15px;line-height:1.6;color:var(--admin-muted);margin:0}.nk-admin-page-actions{display:flex;gap:8px;flex:0 0 auto}.nk-admin-page-actions button,.nk-admin-page-actions a,.nk-admin-primary{min-height:43px;border:1px solid var(--admin-line-strong);border-radius:9px;background:#fff;color:var(--admin-text);padding:9px 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-size:12px;font-weight:650}.nk-admin-page-actions button:hover,.nk-admin-page-actions a:hover{background:var(--admin-surface-soft)}.nk-admin-page-actions svg,.nk-admin-primary svg{width:16px}.nk-admin-primary{background:var(--admin-accent)!important;border-color:var(--admin-accent)!important;color:#fff!important;font-weight:720;box-shadow:0 7px 18px rgba(20,122,89,.16)}.nk-admin-primary:hover{background:var(--admin-accent-dark)!important}.nk-admin-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
 .nk-admin-state{min-height:100vh;background:var(--admin-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;color:var(--admin-text)}.nk-admin-state>svg{color:var(--admin-accent);width:31px}.nk-admin-state strong{font-size:16px}.nk-admin-state p{color:var(--admin-muted);max-width:480px;text-align:center;line-height:1.6}.nk-admin-state button{border:1px solid var(--admin-line);border-radius:9px;background:#fff;color:var(--admin-text);padding:11px 15px;display:flex;align-items:center;gap:8px}.nk-admin-state button svg{width:16px}.nk-admin-state--error>svg{color:var(--admin-danger)}.nk-admin-spin{animation:nk-admin-spin 1s linear infinite}@keyframes nk-admin-spin{to{transform:rotate(360deg)}}
@@ -343,3 +343,871 @@
 .nk-admin-learning-example>footer>button svg,.nk-admin-learning-close svg{width:14px}.nk-admin-learning-example>footer>.nk-admin-primary{background:var(--admin-accent);border-color:var(--admin-accent);color:#fff}.nk-admin-learning-close{margin:0 16px 14px 16px}
 @media(max-width:900px){.nk-admin-learning-summary{grid-template-columns:32px minmax(0,1fr) 20px}.nk-admin-learning-summary>strong{display:none}.nk-admin-learning-purpose,.nk-admin-learning-steps,.nk-admin-learning-demo-track{grid-template-columns:1fr}.nk-admin-learning-demo-track>article{min-height:74px;border-right:0;border-bottom:1px solid var(--admin-line)}.nk-admin-learning-demo-track>article:last-child{border-bottom:0}}
 @media(max-width:620px){.nk-admin-learning{margin-bottom:13px}.nk-admin-learning-summary{min-height:68px;padding:11px}.nk-admin-learning-summary>span{display:block}.nk-admin-learning-summary b{display:block;line-height:1.35}.nk-admin-learning-summary em{display:none}.nk-admin-learning-tabs{padding:9px;gap:5px}.nk-admin-learning-tabs>button{padding:7px 8px}.nk-admin-learning-content{padding:10px}.nk-admin-learning-purpose{grid-template-columns:1fr}.nk-admin-learning-example>header{align-items:flex-start}.nk-admin-learning-example>header>i{display:none}.nk-admin-learning-example>footer{align-items:stretch;flex-wrap:wrap}.nk-admin-learning-example>footer>p{width:100%;margin:0 0 3px}.nk-admin-learning-example>footer>button{flex:1;justify-content:center}}
+
+/* Keep the supplied NK artwork transparent on admin authentication screens. */
+.nk-admin-auth-mark{width:96px;height:78px;background:transparent;border-radius:0;box-shadow:none}
+.nk-admin-auth-mark img{filter:none}
+
+/* Admin-wide viewport containment: pages never widen the browser viewport. */
+html:has(.nk-admin-shell),html:has(.nk-admin-auth),html:has(.nk-admin-state),
+body:has(.nk-admin-shell),body:has(.nk-admin-auth),body:has(.nk-admin-state),
+#root:has(.nk-admin-shell),#root:has(.nk-admin-auth),#root:has(.nk-admin-state){
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+@supports (overflow:clip){
+  html:has(.nk-admin-shell),html:has(.nk-admin-auth),html:has(.nk-admin-state),
+  body:has(.nk-admin-shell),body:has(.nk-admin-auth),body:has(.nk-admin-state),
+  #root:has(.nk-admin-shell),#root:has(.nk-admin-auth),#root:has(.nk-admin-state){
+    overflow-x:clip;
+  }
+}
+.nk-admin-shell,.nk-admin-auth,.nk-admin-state,.nk-admin-workspace,.nk-admin-workspace>main{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+@supports (overflow:clip){
+  .nk-admin-shell,.nk-admin-auth,.nk-admin-state,.nk-admin-workspace,.nk-admin-workspace>main{
+    overflow-x:clip;
+  }
+}
+.nk-admin-workspace>main>*,
+.nk-admin-topbar>*,
+.nk-admin-page-heading>*,
+.nk-admin-record-workspace>*,
+.nk-admin-navigation-layout>*,
+.nk-admin-forms-layout>*,
+.nk-admin-submissions-layout>*,
+.nk-admin-media-editor-layout>*,
+.nk-settings-workspace>*,
+.nk-visual-toolbar>*,
+.nk-visual-workspace>*,
+.nk-productivity-filters>*,
+.nk-audit-filters>*{
+  min-width:0;
+  max-width:100%;
+}
+.nk-admin-shell img,.nk-admin-shell video,.nk-admin-shell canvas,
+.nk-admin-auth img,.nk-admin-auth video,.nk-admin-auth canvas{
+  max-width:100%;
+}
+.nk-admin-shell input,.nk-admin-shell textarea,.nk-admin-shell select,
+.nk-admin-auth input,.nk-admin-auth textarea,.nk-admin-auth select{
+  min-width:0;
+  max-width:100%;
+}
+.nk-admin-shell :where(p,dd,code,a,small,strong,b),
+.nk-admin-auth :where(p,dd,code,a,small,strong,b){
+  overflow-wrap:anywhere;
+}
+.nk-admin-page-heading,.nk-admin-page-actions,.nk-admin-topbar-actions,
+.nk-admin-navigation-embedded-header,.nk-productivity-workqueue>header{
+  flex-wrap:wrap;
+}
+.nk-admin-audit,.nk-productivity-table,.nk-admin-navigation-tabs,.nk-admin-view-tabs,
+.nk-admin-page-navigation-links,.nk-admin-learning-tabs,.nk-admin-quick-actions{
+  width:100%;
+  max-width:100%;
+  overscroll-behavior-inline:contain;
+}
+.nk-admin-editor-backdrop,.nk-admin-command-backdrop,.nk-admin-guide-overlay,
+.nk-beginner-guide-overlay{
+  max-width:100vw;
+  overflow-x:clip;
+}
+.nk-admin-editor,.nk-admin-command,.nk-admin-guide,.nk-beginner-guide-intro,
+.nk-beginner-guide-coach,.nk-admin-history,.nk-admin-action-popover,
+.nk-visual-editor,.nk-visual-toolbar,.nk-visual-workspace,.nk-visual-stage,
+.nk-visual-inspector{
+  min-width:0;
+  max-width:100%;
+}
+
+@media(max-width:1180px){
+  .nk-admin-record-workspace.editor-open,
+  .nk-admin-navigation-layout,.nk-admin-forms-layout,.nk-admin-submissions-layout,
+  .nk-admin-navigation-embedded .nk-admin-navigation-layout{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .nk-admin-record-workspace>.nk-admin-editor,
+  .nk-admin-side-editor,.nk-admin-form-editor,.nk-admin-submission-detail{
+    position:relative;
+    top:auto;
+    max-height:none;
+  }
+  .nk-admin-record-toolbar,.nk-admin-media-toolbar{
+    grid-template-columns:minmax(0,1fr) minmax(120px,155px);
+  }
+  .nk-admin-record-toolbar>span,.nk-admin-media-toolbar>*:last-child{
+    grid-column:1/-1;
+  }
+}
+
+@media(max-width:760px){
+  .nk-admin-page-heading,.nk-admin-navigation-embedded-header,
+  .nk-productivity-workqueue>header{
+    align-items:stretch;
+  }
+  .nk-admin-page-actions,.nk-admin-page-actions>a,.nk-admin-page-actions>button{
+    width:100%;
+  }
+  .nk-admin-page-actions>a,.nk-admin-page-actions>button{
+    min-width:0;
+  }
+  .nk-admin-record-toolbar,.nk-admin-media-toolbar,
+  .nk-productivity-filters,.nk-audit-filters{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .nk-admin-record-toolbar>*,.nk-admin-media-toolbar>*,
+  .nk-productivity-filters>*,.nk-audit-filters>*{
+    grid-column:1!important;
+    width:100%;
+  }
+  .nk-admin-navigation-list article,.nk-admin-form-list article{
+    grid-template-columns:32px minmax(0,1fr) auto;
+  }
+  .nk-admin-navigation-list article>.nk-admin-switch,
+  .nk-admin-form-list article>.nk-admin-switch{
+    grid-column:2;
+    justify-self:start;
+  }
+  .nk-admin-navigation-list article>.nk-admin-row-tools,
+  .nk-admin-form-list article>.nk-admin-row-tools{
+    grid-column:3;
+    grid-row:1/3;
+  }
+}
+
+@media(max-width:430px){
+  .nk-admin-topbar{gap:7px}
+  .nk-admin-topbar>nav{overflow:hidden}
+  .nk-admin-topbar>nav b{overflow:hidden;text-overflow:ellipsis}
+  .nk-admin-page-heading h1{font-size:clamp(31px,11vw,38px)}
+  .nk-admin-metrics,.nk-productivity-metrics{grid-template-columns:minmax(0,1fr)}
+  .nk-admin-navigation-embedded-header>div:last-child{grid-template-columns:minmax(0,1fr)}
+}
+
+/* Scroll stays functional, but no admin page or internal panel shows overflow rails. */
+html:has(.nk-admin-shell),html:has(.nk-admin-auth),html:has(.nk-admin-state),
+body:has(.nk-admin-shell),body:has(.nk-admin-auth),body:has(.nk-admin-state),
+#root:has(.nk-admin-shell),#root:has(.nk-admin-auth),#root:has(.nk-admin-state),
+.nk-admin-shell,.nk-admin-shell *,
+.nk-admin-auth,.nk-admin-auth *,
+.nk-admin-state,.nk-admin-state *{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+html:has(.nk-admin-shell)::-webkit-scrollbar,
+html:has(.nk-admin-auth)::-webkit-scrollbar,
+html:has(.nk-admin-state)::-webkit-scrollbar,
+body:has(.nk-admin-shell)::-webkit-scrollbar,
+body:has(.nk-admin-auth)::-webkit-scrollbar,
+body:has(.nk-admin-state)::-webkit-scrollbar,
+#root:has(.nk-admin-shell)::-webkit-scrollbar,
+#root:has(.nk-admin-auth)::-webkit-scrollbar,
+#root:has(.nk-admin-state)::-webkit-scrollbar,
+.nk-admin-shell::-webkit-scrollbar,.nk-admin-shell *::-webkit-scrollbar,
+.nk-admin-auth::-webkit-scrollbar,.nk-admin-auth *::-webkit-scrollbar,
+.nk-admin-state::-webkit-scrollbar,.nk-admin-state *::-webkit-scrollbar{
+  width:0;
+  height:0;
+  display:none;
+}
+
+/* The admin navigation is viewport-fixed; only the workspace/page scrolls. */
+.nk-admin-shell{
+  box-sizing:border-box;
+}
+.nk-admin-sidebar{
+  position:fixed;
+  inset:0 auto 0 0;
+  height:100dvh;
+  max-height:100dvh;
+  overscroll-behavior:none;
+}
+.nk-admin-sidebar nav{
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+@media(min-width:1281px){
+  .nk-admin-shell{
+    display:block;
+    padding-left:272px;
+  }
+  .nk-admin-sidebar{
+    width:272px;
+  }
+}
+@media(min-width:841px) and (max-width:1280px){
+  .nk-admin-shell{
+    display:block;
+    padding-left:246px;
+  }
+  .nk-admin-sidebar{
+    width:246px;
+  }
+}
+@media(max-width:840px){
+  .nk-admin-shell{
+    padding-left:0;
+  }
+}
+
+/* Compact the fixed navigation on shorter screens instead of scrolling it. */
+@media(max-height:980px){
+  .nk-admin-logo{
+    height:64px;
+    flex-basis:64px;
+    padding:9px 14px;
+  }
+  .nk-admin-logo>img{
+    width:42px;
+    height:39px;
+    flex-basis:42px;
+  }
+  .nk-admin-sidebar-search{
+    height:36px;
+    margin:8px 10px 2px;
+  }
+  .nk-admin-sidebar nav{
+    padding:2px 8px 4px;
+  }
+  .nk-admin-sidebar nav>small{
+    margin:3px 9px 1px;
+    line-height:1.05!important;
+  }
+  .nk-admin-sidebar nav>a{
+    min-height:29px;
+    padding-block:2px;
+  }
+  .nk-admin-sidebar-language{
+    min-height:34px;
+    margin-block:1px;
+  }
+  .nk-admin-guide-trigger{
+    min-height:36px;
+    margin-block:3px;
+    padding-block:5px;
+  }
+  .nk-admin-sidebar-user{
+    padding-top:5px;
+    padding-bottom:max(5px,env(safe-area-inset-bottom));
+  }
+  .nk-admin-sidebar-user>a,.nk-admin-device-user{
+    padding-block:5px;
+  }
+  .nk-admin-sidebar-user>button{
+    height:31px;
+  }
+}
+@media(max-height:700px){
+  .nk-admin-sidebar-search,.nk-admin-guide-trigger,.nk-admin-sidebar-language,
+  .nk-admin-sidebar nav>small{
+    display:none;
+  }
+  .nk-admin-logo{
+    height:54px;
+    flex-basis:54px;
+    padding-block:6px;
+  }
+  .nk-admin-sidebar nav{
+    justify-content:space-evenly;
+  }
+  .nk-admin-sidebar nav>a{
+    min-height:25px;
+  }
+  .nk-admin-sidebar-user>a,.nk-admin-device-user{
+    display:none;
+  }
+}
+
+/* One compact outer gutter for every admin route and editor. */
+.nk-admin-shell{
+  --nk-admin-page-gutter:14px;
+}
+.nk-admin-topbar{
+  padding-inline:var(--nk-admin-page-gutter);
+}
+.nk-admin-workspace>main,
+.nk-admin-workspace>main:has(.nk-visual-editor){
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:12px var(--nk-admin-page-gutter) 28px;
+}
+.nk-admin-workspace>main>.nk-admin-security-line{
+  margin-bottom:10px;
+}
+
+@media(max-width:840px){
+  .nk-admin-shell{
+    --nk-admin-page-gutter:10px;
+  }
+  .nk-admin-workspace>main,
+  .nk-admin-workspace>main:has(.nk-visual-editor){
+    padding-block:10px 26px;
+  }
+}
+
+@media(max-width:620px){
+  .nk-admin-shell{
+    --nk-admin-page-gutter:8px;
+  }
+  .nk-admin-workspace>main,
+  .nk-admin-workspace>main:has(.nk-visual-editor){
+    padding-block:8px max(22px,env(safe-area-inset-bottom));
+  }
+  .nk-admin-workspace>main>.nk-admin-security-line{
+    margin-bottom:8px;
+  }
+}
+
+/* A single, space-efficient title system for every admin page. */
+.nk-admin-page-heading{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  flex:0 0 auto;
+  gap:10px 18px;
+  padding-bottom:12px;
+  margin-bottom:12px;
+}
+.nk-admin-page-heading>div:first-child{
+  width:100%;
+  max-width:none;
+  min-width:0;
+}
+.nk-admin-page-heading h1{
+  max-width:none;
+  margin:5px 0 4px;
+  font-size:clamp(34px,3vw,46px);
+  line-height:1.03;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+.nk-admin-page-heading p{
+  max-width:1120px;
+  font-size:14px;
+  line-height:1.45;
+}
+.nk-admin-page-actions{
+  align-self:end;
+  justify-self:end;
+  margin:0;
+  flex-wrap:wrap;
+}
+.nk-visual-document>span{
+  display:none;
+}
+.nk-visual-toolbar{
+  min-height:68px;
+}
+
+@media(max-width:900px){
+  .nk-admin-page-heading{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .nk-admin-page-actions{
+    justify-self:start;
+  }
+}
+
+@media(max-width:620px){
+  .nk-admin-page-heading{
+    display:grid;
+    gap:9px;
+    padding-bottom:10px;
+    margin-bottom:10px;
+  }
+  .nk-admin-page-heading h1{
+    margin-block:4px;
+    font-size:clamp(30px,9vw,38px);
+  }
+  .nk-admin-page-actions{
+    width:100%;
+    margin-top:0;
+  }
+  .nk-admin-page-actions>*{
+    flex:1 1 auto;
+  }
+}
+
+/* Give page identity a clear visual hierarchy without increasing the gutters. */
+.nk-admin-page-heading{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  padding:11px 13px 12px;
+  border:1px solid var(--admin-line);
+  border-left:4px solid var(--admin-accent);
+  border-radius:12px;
+  background:
+    linear-gradient(112deg,#fff 0%,#fff 62%,color-mix(in srgb,var(--admin-accent-soft) 72%,#fff) 100%);
+  box-shadow:0 8px 22px rgba(15,45,33,.055);
+}
+.nk-admin-page-heading::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:0;
+  right:0;
+  width:min(230px,24%);
+  height:4px;
+  background:linear-gradient(90deg,transparent,var(--admin-accent));
+}
+.nk-admin-page-heading>div:first-child>span{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:2px 7px;
+  border:1px solid color-mix(in srgb,var(--admin-accent) 28%,var(--admin-line));
+  border-radius:5px;
+  background:var(--admin-accent-soft);
+  color:var(--admin-accent-dark);
+  font-size:10px!important;
+  letter-spacing:.12em;
+}
+.nk-admin-page-heading h1{
+  margin:5px 0 2px;
+  font-size:clamp(32px,2.6vw,42px);
+  font-weight:670;
+  letter-spacing:-.048em;
+  color:#10251d;
+}
+.nk-admin-page-heading p{
+  max-width:none;
+  font-size:13px;
+  line-height:1.4;
+  color:#60736a;
+}
+.nk-admin-page-heading>div,
+.nk-admin-page-heading>.nk-admin-page-actions{
+  position:relative;
+  z-index:1;
+}
+
+@media(max-width:620px){
+  .nk-admin-page-heading{
+    padding:10px 11px 11px;
+    border-left-width:3px;
+    border-radius:10px;
+  }
+  .nk-admin-page-heading h1{
+    font-size:clamp(29px,8.8vw,37px);
+  }
+  .nk-admin-page-heading::after{
+    width:38%;
+  }
+}
+
+/* Selected-object history is available beside its properties, not only at
+   the bottom of the inspector. */
+.nk-visual-object-history-shortcuts{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  padding-top:12px;
+  border-top:1px solid var(--admin-line);
+}
+.nk-visual-object-history-shortcuts button{
+  min-height:40px;
+  border:1px solid var(--admin-line-strong);
+  border-radius:8px;
+  background:#fff;
+  color:var(--admin-text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:8px 9px;
+  font-size:12px;
+  font-weight:750;
+}
+.nk-visual-object-history-shortcuts button:hover:not(:disabled){
+  border-color:var(--admin-accent);
+  background:var(--admin-accent-soft);
+  color:var(--admin-accent-dark);
+}
+.nk-visual-object-history-shortcuts button:disabled,
+.nk-visual-live-actions button:disabled{
+  opacity:.38;
+  cursor:not-allowed;
+}
+.nk-visual-object-history-shortcuts svg{
+  width:16px;
+}
+.nk-visual-history>header>div:first-child>small{
+  color:var(--admin-muted);
+  font-size:11px;
+}
+@media(max-width:430px){
+  .nk-visual-object-history-shortcuts{
+    grid-template-columns:1fr;
+  }
+}
+
+/* Keep the visual canvas wide on desktop. Element controls open on demand
+   as an overlay drawer instead of permanently compressing the preview. */
+.nk-visual-canvas {
+  position: relative;
+}
+
+.nk-visual-inspector-toggle-float {
+  position: absolute;
+  z-index: 17;
+  top: 52px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #4aa88a;
+  border-radius: 9px;
+  background: #0b2119;
+  color: #e5f4ee;
+  box-shadow: 0 10px 28px rgba(4, 25, 18, 0.22);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.nk-visual-inspector-toggle-float:hover {
+  border-color: #65c5a5;
+  background: #103126;
+  transform: translateY(-1px);
+}
+
+.nk-visual-inspector-toggle-float svg {
+  width: 17px;
+  height: 17px;
+}
+
+.nk-visual-inspector-scrim {
+  display: none;
+}
+
+@media (min-width: 1051px) {
+  .nk-visual-editor--wide-preview .nk-visual-workspace {
+    position: relative;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    overflow: hidden;
+  }
+
+  .nk-visual-editor--wide-preview .nk-visual-canvas {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .nk-visual-editor--wide-preview .nk-visual-inspector {
+    position: absolute;
+    z-index: 22;
+    inset: 0 0 0 auto;
+    width: min(350px, calc(100% - 36px));
+    height: 100%;
+    border: 0;
+    border-left: 1px solid var(--admin-line);
+    box-shadow: -18px 0 45px rgba(5, 25, 18, 0.17);
+    transform: translateX(102%);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      transform 220ms ease,
+      visibility 0s linear 220ms;
+  }
+
+  .nk-visual-editor--wide-preview .nk-visual-inspector.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 220ms ease;
+  }
+
+  .nk-visual-editor--wide-preview .nk-visual-inspector-scrim {
+    position: absolute;
+    z-index: 18;
+    inset: 0;
+    display: block;
+    border: 0;
+    background: rgba(5, 20, 14, 0.18);
+    backdrop-filter: blur(1px);
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 1050px) {
+  .nk-visual-editor--wide-preview:not(.nk-visual-editor--site-view)
+    .nk-visual-inspector.is-closed {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .nk-visual-inspector-toggle-float {
+    top: 48px;
+    right: 7px;
+    min-height: 38px;
+    padding: 0 9px;
+  }
+
+  .nk-visual-inspector-toggle-float span {
+    display: none;
+  }
+}
+
+/* Consistent, accessible confirmations replace browser-native alert boxes. */
+.nk-admin-confirm-backdrop {
+  position: fixed;
+  z-index: 2200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 17, 13, 0.58);
+  backdrop-filter: blur(8px) saturate(0.82);
+  animation: nk-admin-confirm-backdrop-in 160ms ease-out both;
+}
+
+.nk-admin-confirm {
+  --confirm-accent: #178760;
+  --confirm-soft: #e8f6f0;
+  width: min(500px, 100%);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--confirm-accent) 38%, #d8e3dd);
+  border-radius: 18px;
+  background: #fff;
+  color: #10251d;
+  box-shadow:
+    0 32px 90px rgba(2, 18, 12, 0.32),
+    0 0 0 5px rgba(255, 255, 255, 0.1);
+  animation: nk-admin-confirm-in 190ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.nk-admin-confirm--warning {
+  --confirm-accent: #b56a16;
+  --confirm-soft: #fff4df;
+}
+
+.nk-admin-confirm--danger {
+  --confirm-accent: #b74436;
+  --confirm-soft: #fff0ed;
+}
+
+.nk-admin-confirm > header {
+  min-height: 74px;
+  padding: 15px 17px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--confirm-accent) 18%, transparent), transparent 42%),
+    linear-gradient(115deg, var(--confirm-soft), #fff);
+  border-bottom: 1px solid color-mix(in srgb, var(--confirm-accent) 18%, #e2e9e5);
+}
+
+.nk-admin-confirm > header > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--confirm-accent) 30%, #fff);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--confirm-accent);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--confirm-accent) 14%, transparent);
+}
+
+.nk-admin-confirm > header svg {
+  width: 21px;
+  height: 21px;
+}
+
+.nk-admin-confirm > header button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d7e1dc;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #60736a;
+  cursor: pointer;
+}
+
+.nk-admin-confirm > main {
+  padding: 23px 25px 20px;
+}
+
+.nk-admin-confirm > main > small {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--confirm-accent);
+  font: 800 10px/1.2 ui-monospace, monospace;
+  letter-spacing: 0.13em;
+}
+
+.nk-admin-confirm h2 {
+  margin: 0;
+  max-width: 430px;
+  color: #10251d;
+  font-size: clamp(25px, 3vw, 32px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.nk-admin-confirm p {
+  margin: 12px 0 0;
+  color: #5b6e65;
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.nk-admin-confirm > main > div {
+  margin-top: 17px;
+  padding: 11px 12px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  border: 1px solid color-mix(in srgb, var(--confirm-accent) 22%, #dce5e0);
+  border-radius: 9px;
+  background: var(--confirm-soft);
+  color: #41574d;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.nk-admin-confirm > main > div svg {
+  width: 17px;
+  color: var(--confirm-accent);
+}
+
+.nk-admin-confirm > footer {
+  padding: 14px 17px 17px;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 9px;
+  border-top: 1px solid #e2e9e5;
+  background: #f8faf9;
+}
+
+.nk-admin-confirm > footer button {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid #cbd8d1;
+  border-radius: 10px;
+  background: #fff;
+  color: #2f463b;
+  font-size: 13px;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.nk-admin-confirm > footer .nk-admin-confirm__accept {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-color: var(--confirm-accent);
+  background: var(--confirm-accent);
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--confirm-accent) 24%, transparent);
+}
+
+.nk-admin-confirm__accept svg {
+  width: 16px;
+}
+
+.nk-admin-confirm button:hover {
+  transform: translateY(-1px);
+}
+
+.nk-admin-confirm button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--confirm-accent) 38%, transparent);
+  outline-offset: 2px;
+}
+
+@keyframes nk-admin-confirm-backdrop-in {
+  from { opacity: 0; }
+}
+
+@keyframes nk-admin-confirm-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+
+@media (max-width: 620px) {
+  .nk-admin-confirm-backdrop {
+    place-items: end center;
+    padding: 10px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .nk-admin-confirm {
+    border-radius: 16px;
+  }
+
+  .nk-admin-confirm > header {
+    min-height: 64px;
+    padding: 11px 12px;
+  }
+
+  .nk-admin-confirm > header > span {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nk-admin-confirm > main {
+    padding: 19px 17px 16px;
+  }
+
+  .nk-admin-confirm > footer {
+    grid-template-columns: 1fr;
+    padding: 11px 12px 13px;
+  }
+
+  .nk-admin-confirm > footer .nk-admin-confirm__accept {
+    grid-row: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-admin-confirm,
+  .nk-admin-confirm-backdrop {
+    animation: none;
+  }
+}
+
+/* Desktop visual editing uses a full drafting-scale workspace. The preview
+   remains proportional; the larger stage simply gives it room to render. */
+@media (min-width: 1051px) {
+  .nk-visual-editor--wide-preview .nk-visual-stage {
+    padding: 0;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .nk-visual-editor--wide-preview .nk-visual-frame-sizer {
+    border-inline: 0;
+    box-shadow: none;
+  }
+
+  .nk-visual-editor--wide-preview:not(.nk-visual-editor--site-view) {
+    min-height: 0;
+    flex: 0 0 auto;
+  }
+
+  .nk-visual-editor--wide-preview:not(.nk-visual-editor--site-view)
+    .nk-visual-workspace {
+    height: auto;
+    min-height: clamp(920px, calc(100dvh - 110px), 1120px);
+    flex: 0 0 auto;
+  }
+
+}

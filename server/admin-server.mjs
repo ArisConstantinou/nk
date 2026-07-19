@@ -29,12 +29,18 @@ const FIREBASE_IDENTITY_LOOKUP_URL = process.env.FIREBASE_IDENTITY_TOOLKIT_URL |
 const ROLES = ['owner', 'editor', 'shop', 'projects', 'sales', 'viewer'];
 const ENQUIRY_TYPES = ['contact', 'quote', 'product', 'catalogue', 'project', 'phone'];
 const ENQUIRY_STATUSES = ['new', 'in_progress', 'waiting', 'won', 'closed', 'spam'];
-const MEDIA_TYPES = {'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'application/pdf': '.pdf', 'video/mp4': '.mp4', 'video/webm': '.webm'};
+const MEDIA_TYPES = {'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/svg+xml': '.svg', 'application/pdf': '.pdf', 'video/mp4': '.mp4', 'video/webm': '.webm'};
 const mediaFamily = mimeType => String(mimeType || '').startsWith('image/') ? 'image' : String(mimeType || '').startsWith('video/') ? 'video' : mimeType === 'application/pdf' ? 'document' : 'unknown';
+const isSafeSvg = value => {
+  const source = value.toString('utf8');
+  if (!/^\s*(?:<\?xml[^>]*>\s*)?<svg(?:\s|>)/i.test(source) || !/<\/svg>\s*$/i.test(source)) return false;
+  return !/(?:<!DOCTYPE|<!ENTITY|<script\b|<foreignObject\b|<iframe\b|<object\b|<embed\b|<link\b|<style\b|<image\b|\son[a-z]+\s*=|(?:href|xlink:href)\s*=\s*(?!["']\s*#)|url\(\s*["']?\s*(?:https?:|\/\/|data:|javascript:)|@import\b)/i.test(source);
+};
 const MEDIA_SIGNATURES = {
   'image/jpeg': value => value.length >= 3 && value[0] === 0xff && value[1] === 0xd8 && value[2] === 0xff,
   'image/png': value => value.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
   'image/webp': value => value.subarray(0, 4).toString('ascii') === 'RIFF' && value.subarray(8, 12).toString('ascii') === 'WEBP',
+  'image/svg+xml': isSafeSvg,
   'application/pdf': value => value.subarray(0, 5).toString('ascii') === '%PDF-',
   'video/mp4': value => value.length >= 12 && value.subarray(4, 8).toString('ascii') === 'ftyp',
   'video/webm': value => value.length >= 4 && value.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3])),
@@ -614,6 +620,7 @@ function serveMediaFile(row, req, res, {publicCache = false, storedName = row?.s
   const size = statSync(file).size;
   const downloadName = encodeURIComponent(filename).replace(/[!'()*]/g, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`);
   const headers = {'Content-Type': mimeType, 'Content-Disposition': `inline; filename*=UTF-8''${downloadName}`, 'Cache-Control': publicCache ? 'public, max-age=300' : 'private, max-age=300', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'SAMEORIGIN', 'Cross-Origin-Resource-Policy': 'same-origin', 'Accept-Ranges': 'bytes'};
+  if (mimeType === 'image/svg+xml') headers['Content-Security-Policy'] = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
   const range = String(req.headers.range || '');
   if (range) {
     const match = range.match(/^bytes=(\d*)-(\d*)$/);
@@ -636,7 +643,7 @@ function serveMediaFile(row, req, res, {publicCache = false, storedName = row?.s
 }
 
 function safeMediaPath(storedName) {
-  if (!/^[a-f0-9-]{36}(?:-[0-9]{2,4})?\.(?:jpg|png|webp|pdf|mp4|webm)$/i.test(String(storedName || ''))) throw new ApiError(500, 'invalid_media_record', 'The stored media record is invalid.');
+  if (!/^[a-f0-9-]{36}(?:-[0-9]{2,4})?\.(?:jpg|png|webp|svg|pdf|mp4|webm)$/i.test(String(storedName || ''))) throw new ApiError(500, 'invalid_media_record', 'The stored media record is invalid.');
   const file = resolve(MEDIA_DIR, storedName);
   if (!file.startsWith(`${MEDIA_DIR}${sep}`)) throw new ApiError(500, 'invalid_media_record', 'The stored media record is invalid.');
   return file;
@@ -658,7 +665,7 @@ function cleanMediaMetadata(value = {}, current = {}) {
 
 function decodeMediaBody(body) {
   const extension = MEDIA_TYPES[body.mimeType];
-  if (!extension) throw new ApiError(400, 'invalid_media_type', 'Upload a JPG, PNG, WEBP, PDF, MP4 or WEBM file.');
+  if (!extension) throw new ApiError(400, 'invalid_media_type', 'Upload a JPG, PNG, WEBP, SVG, PDF, MP4 or WEBM file.');
   const encoded = String(body.base64 || '');
   if (!encoded || encoded.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) throw new ApiError(400, 'invalid_media_encoding', 'The uploaded file is not valid base64 data.');
   const buffer = Buffer.from(encoded, 'base64');
@@ -669,6 +676,7 @@ function decodeMediaBody(body) {
 
 async function prepareMediaFiles(body, storageBase) {
   const decoded = decodeMediaBody(body);
+  if (decoded.mimeType === 'image/svg+xml') return {...decoded, width: null, height: null, variants: []};
   if (!decoded.mimeType.startsWith('image/')) return {...decoded, width: null, height: null, variants: []};
   try {
     const source = sharp(decoded.buffer, {failOn: 'error'}).rotate();

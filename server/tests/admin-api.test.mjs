@@ -7,6 +7,7 @@ import {createServer as createNetServer} from 'node:net';
 import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
+import {validateInteractiveDocument} from '../interactive-validation.mjs';
 
 const root = resolve('.');
 const temp = mkdtempSync(join(tmpdir(), 'nk-admin-api-'));
@@ -81,6 +82,23 @@ function interactiveData(sectionName = 'Empty wall') {
     }],
   };
 }
+
+test('parametric wall channels and conduits share a validated editable route', () => {
+  const document = interactiveData('Parametric route');
+  const transform = {x: 360, y: 230, width: 960, height: 570, rotation: 0, skewX: 0, skewY: 0};
+  const points = [{x: 0, y: 1}, {x: 0, y: .35}, {x: .12, y: 0}, {x: 1, y: 0}];
+  document.sections[0].layers = [
+    {id: 'layer-route-channel', name: 'Wall channel', type: 'parametric-path', visible: true, locked: false, opacity: 1, transform, points, parametric: {renderer: 'wall-channel', routeId: 'route-shared-test', widthMm: 40, depthMm: 25, roughness: .7, bendRadiusMm: 80}},
+    {id: 'layer-route-conduit', name: 'Flexible conduit', type: 'parametric-path', visible: true, locked: false, opacity: 1, transform, points, parametric: {renderer: 'flex-conduit', routeId: 'route-shared-test', widthMm: 20, corrugationMm: 4, bendRadiusMm: 80, color: '#a7aaa6'}},
+  ];
+  assert.equal(validateInteractiveDocument(document, document.slug), document);
+  const invalid = structuredClone(document);
+  invalid.sections[0].layers[1].parametric.widthMm = 250;
+  assert.throws(() => validateInteractiveDocument(invalid, invalid.slug), /width is invalid/i);
+  invalid.sections[0].layers[1].parametric.widthMm = 20;
+  invalid.sections[0].layers[1].parametric.bendRadiusMm = 900;
+  assert.throws(() => validateInteractiveDocument(invalid, invalid.slug), /bend radius is invalid/i);
+});
 
 test('secure admin lifecycle', async t => {
   const port = await freePort();
@@ -364,6 +382,18 @@ test('secure admin lifecycle', async t => {
   assert.equal(usage.payload.count, 0);
   const publicMedia = await fetch(`${base}/media/${upload.payload.media.id}/file`);
   assert.equal(publicMedia.status, 200);
+  const svgBase64 = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><path fill="none" stroke="#21a84a" stroke-width="4" d="M10 70V30Q10 10 30 10h80"/></svg>').toString('base64');
+  const svgUpload = await request('/media', {method: 'POST', cookie, csrf, body: {filename: 'route-guide.svg', mimeType: 'image/svg+xml', base64: svgBase64, title: 'Route guide', altText: 'Editable route guide', caption: ''}});
+  assert.equal(svgUpload.response.status, 201);
+  assert.equal(svgUpload.payload.media.mimeType, 'image/svg+xml');
+  assert.equal(svgUpload.payload.media.variants.length, 0);
+  const publicSvg = await fetch(`${base}/media/${svgUpload.payload.media.id}/file`);
+  assert.equal(publicSvg.status, 200);
+  assert.match(publicSvg.headers.get('content-security-policy') || '', /sandbox/);
+  const unsafeSvgBase64 = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>').toString('base64');
+  const unsafeSvgUpload = await request('/media', {method: 'POST', cookie, csrf, body: {filename: 'unsafe.svg', mimeType: 'image/svg+xml', base64: unsafeSvgBase64, title: 'Unsafe', altText: 'Unsafe', caption: ''}});
+  assert.equal(unsafeSvgUpload.response.status, 400);
+  assert.equal(unsafeSvgUpload.payload.error.code, 'invalid_media_signature');
   const rangedMedia = await fetch(`${base}/media/${upload.payload.media.id}/file`, {headers: {Range: 'bytes=0-0'}});
   assert.equal(rangedMedia.status, 206);
   assert.equal(rangedMedia.headers.get('accept-ranges'), 'bytes');

@@ -30,10 +30,18 @@ export type {
   ExperienceAssetGroup,
   ExperienceDocument,
   ExperienceLayer,
+  ExperiencePoint,
   ExperienceSection,
   ExperienceTool,
   ExperienceViewMode,
   InteractiveExperienceRecord,
   LayerTransform,
+  ParametricPathRenderer,
+  ParametricPathSettings,
 } from './engine/schema';
+export {
+  createElectricalRoutePair,
+  DEFAULT_CHANNEL_WIDTH_MM,
+  DEFAULT_CONDUIT_DIAMETER_MM,
+} from './parametric/electricalRoute';
 export {experienceSlots} from './slots';
