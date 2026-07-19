@@ -1,11 +1,11 @@
 import {useState, type DragEvent} from 'react';
-import {Cable, Check, ChevronDown, ChevronRight, Eye, EyeOff, FolderPlus, ImagePlus, Library, LoaderCircle, Plus, Route, ScanLine, Trash2, Upload, X} from 'lucide-react';
+import {Cable, Check, ChevronDown, ChevronUp, Eye, EyeOff, FolderPlus, ImagePlus, Library, LoaderCircle, Pin, Plus, Route, ScanLine, Trash2, Upload, X} from 'lucide-react';
 import {adminApi, errorMessage} from '../../admin/api';
 import {useAdminAuth} from '../../admin/auth/AdminAuth';
 import {useAdminConfirm} from '../../admin/components/ConfirmDialog';
 import {isPagesAdminMode} from '../../admin/pagesMode';
 import type {MediaAsset} from '../../admin/types';
-import {createStableId, type ExperienceAsset, type ExperienceAssetGroup, type ExperienceDocument} from '../engine/schema';
+import {assetRenderSource, createStableId, type ExperienceAsset, type ExperienceAssetGroup, type ExperienceDocument} from '../engine/schema';
 
 type Props = {
   document: ExperienceDocument;
@@ -13,6 +13,7 @@ type Props = {
   onApplyAsset: (asset: ExperienceAsset, placement: 'object' | 'background') => void;
   onAddParametricRoute: () => void;
   onTraceAssetRoutes: (asset: ExperienceAsset, targetGroupId?: string) => Promise<number>;
+  placementTargetName?: string;
 };
 
 const replaceGroup = (document: ExperienceDocument, groupId: string, change: (group: ExperienceAssetGroup) => ExperienceAssetGroup) => ({
@@ -36,6 +37,8 @@ const mediaToExperienceAsset = (mediaAsset: MediaAsset): ExperienceAsset => ({
   kind: mediaAsset.mimeType === 'image/svg+xml' ? 'svg' : 'image',
   source: mediaAsset.url,
   alt: mediaAsset.altText || mediaAsset.title || mediaAsset.filename,
+  width: mediaAsset.width || undefined,
+  height: mediaAsset.height || undefined,
 });
 const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => {
   const reader = new FileReader();
@@ -44,7 +47,7 @@ const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => {
   reader.readAsDataURL(file);
 });
 
-export function AssetManager({document, onChange, onApplyAsset, onAddParametricRoute, onTraceAssetRoutes}: Props) {
+export function AssetManager({document, onChange, onApplyAsset, onAddParametricRoute, onTraceAssetRoutes, placementTargetName}: Props) {
   const confirm = useAdminConfirm();
   const {user} = useAdminAuth();
   const [mediaOpen, setMediaOpen] = useState(false);
@@ -154,13 +157,7 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
   const attachImportedMedia = (created: MediaAsset[], groupId: string) => {
     if (!created.length) return;
     const existingSources = new Set(document.assetGroups.flatMap(group => group.assets.map(asset => asset.source)));
-    const assets: ExperienceAsset[] = created.filter(item => !existingSources.has(item.url)).map(item => ({
-      id: createStableId('asset'),
-      name: item.title || item.filename,
-      kind: item.mimeType === 'image/svg+xml' ? 'svg' : 'image',
-      source: item.url,
-      alt: item.altText || item.title || item.filename,
-    }));
+    const assets = created.filter(item => !existingSources.has(item.url)).map(mediaToExperienceAsset);
     if (assets.length) onChange(replaceGroup(document, groupId, group => ({...group, assets: [...group.assets, ...assets]})));
     setMedia(current => [...created, ...current.filter(item => !created.some(next => next.id === item.id))]);
   };
@@ -258,7 +255,12 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
 
   const startAssetDrag = (event: DragEvent, group: ExperienceAssetGroup, asset: ExperienceAsset) => {
     event.dataTransfer.effectAllowed = 'copyMove';
-    event.dataTransfer.setData('application/x-nk-experience-asset', JSON.stringify({id: asset.id, name: asset.name}));
+    event.dataTransfer.setData('application/x-nk-experience-asset', JSON.stringify({
+      id: asset.id,
+      name: asset.name,
+      width: asset.width,
+      height: asset.height,
+    }));
     event.dataTransfer.setData('application/x-nk-library-asset', JSON.stringify({id: asset.id, fromGroupId: group.id}));
   };
 
@@ -297,9 +299,6 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
   };
 
   return <section className="ix-library" aria-label="Frame content">
-    <header className="ix-panel-heading ix-library__heading">
-      <div><Plus/><span><b>Frame content</b><small>Choose a route or reusable image</small></span></div>
-    </header>
     <section className="ix-library__routes" aria-label="Electrical routes">
       <header><Route/><span><b>Electrical routes</b><small>How do you want to create the route?</small></span></header>
       <button className="ix-library__route-action ix-library__route-action--trace" type="button" onClick={openTraceMedia}>
@@ -310,7 +309,7 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
       <button className="ix-library__route-action" type="button" onClick={onAddParametricRoute}><Cable/><span><b>Draw route</b><small>40 mm channel + 20 mm flexible conduit</small></span><Plus/></button>
     </section>
     <header className="ix-panel-heading ix-library__media-heading">
-      <div><Library/><span><b>Media assets</b><small>Reusable images organised by group</small></span></div>
+      <div><Library/><span><b>Media assets</b><small>{placementTargetName ? `Placement target · ${placementTargetName}` : 'Reusable images organised by group'}</small></span></div>
       <button type="button" onClick={addGroup} aria-label="Add asset group" title="Add group"><FolderPlus/></button>
     </header>
     <div className="ix-library__groups">
@@ -322,7 +321,7 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
         onDrop={event => dropIntoGroup(event, group.id)}
       >
         <header>
-          <button type="button" onClick={() => onChange(replaceGroup(document, group.id, current => ({...current, collapsed: !current.collapsed})))} aria-label={group.collapsed ? 'Expand group' : 'Collapse group'}>{group.collapsed ? <ChevronRight/> : <ChevronDown/>}</button>
+          <button className="ix-accordion-toggle" type="button" onClick={() => onChange(replaceGroup(document, group.id, current => ({...current, collapsed: !current.collapsed})))} aria-label={`${group.collapsed ? 'Expand' : 'Collapse'} ${group.name}`}>{group.collapsed ? <ChevronDown/> : <ChevronUp/>}</button>
           <input value={group.name} onChange={event => onChange(replaceGroup(document, group.id, current => ({...current, name: event.target.value})))} aria-label="Asset group name"/>
           <span>{group.assets.length}</span>
           <button type="button" onClick={() => onChange(replaceGroup(document, group.id, current => ({...current, visible: !current.visible})))} aria-label={group.visible ? 'Hide group' : 'Show group'}>{group.visible ? <Eye/> : <EyeOff/>}</button>
@@ -342,10 +341,16 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
             onDragOver={event => event.preventDefault()}
             onDrop={event => {event.stopPropagation(); dropIntoGroup(event, group.id, asset.id);}}
           >
-            <div className="ix-asset-card__preview">{asset.source ? <img src={asset.source} alt=""/> : <Library/>}</div>
+            <div className="ix-asset-card__preview">{asset.source ? <img src={assetRenderSource(asset)} alt=""/> : <Library/>}</div>
             <div><b>{asset.name}</b><small>{asset.kind.toUpperCase()}</small></div>
-            <button type="button" onClick={() => onApplyAsset(asset, group.name.toLowerCase().includes('background') ? 'background' : 'object')}>
-              {group.name.toLowerCase().includes('background') ? 'Set background' : 'Apply'}
+            <button
+              type="button"
+              className="ix-asset-card__apply"
+              onClick={() => onApplyAsset(asset, group.name.toLowerCase().includes('background') ? 'background' : 'object')}
+              aria-label={group.name.toLowerCase().includes('background') ? `Set ${asset.name} as background` : placementTargetName ? `Place ${asset.name} on ${placementTargetName}` : `Place ${asset.name} on the canvas`}
+              title={group.name.toLowerCase().includes('background') ? 'Set as background' : placementTargetName ? `Place on ${placementTargetName}` : 'Place on canvas'}
+            >
+              <Pin/>
             </button>
             {!group.name.toLowerCase().includes('background') && <button
               type="button"
@@ -355,7 +360,7 @@ export function AssetManager({document, onChange, onApplyAsset, onAddParametricR
               aria-label={`Auto trace route lines from ${asset.name}`}
               title="Detect route lines and create editable wall channels with corrugated conduit"
             >
-              {tracingAssetId === asset.id ? <LoaderCircle className="nk-admin-spin"/> : <ScanLine/>}<span>Trace</span>
+              {tracingAssetId === asset.id ? <LoaderCircle className="nk-admin-spin"/> : <ScanLine/>}
             </button>}
             <button type="button" onClick={() => void removeAsset(group.id, asset.id)} aria-label={`Remove ${asset.name}`}><X/></button>
           </div>)}

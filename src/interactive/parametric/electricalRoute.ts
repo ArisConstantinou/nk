@@ -47,9 +47,11 @@ export function createElectricalRoutePair(options: {
       routeId,
       widthMm: DEFAULT_CHANNEL_WIDTH_MM,
       depthMm: 25,
+      roughness: .82,
+      chaseStyle: 'hand-broken',
       bendRadiusMm: DEFAULT_ROUTE_BEND_RADIUS_MM,
     },
-    description: 'A clean 40 mm machine-cut wall chase with parallel edges. Its editable route supports straight runs, sharp turns and smooth freeform bends.',
+    description: 'A hand-broken Cyprus masonry chase with uneven edges, width and depth. Switch it to machine-cut when the route was made with a wall chaser.',
   };
   const conduit: ExperienceLayer = {
     id: createStableId('layer'),

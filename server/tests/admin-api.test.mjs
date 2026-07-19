@@ -88,7 +88,7 @@ test('parametric wall channels and conduits share a validated editable route', (
   const transform = {x: 360, y: 230, width: 960, height: 570, rotation: 0, skewX: 0, skewY: 0};
   const points = [{x: 0, y: 1}, {x: 0, y: .35}, {x: .12, y: 0}, {x: 1, y: 0}];
   document.sections[0].layers = [
-    {id: 'layer-route-channel', name: 'Wall channel', type: 'parametric-path', visible: true, locked: false, opacity: 1, transform, points, parametric: {renderer: 'wall-channel', routeId: 'route-shared-test', widthMm: 40, depthMm: 25, roughness: .7, bendRadiusMm: 80}},
+    {id: 'layer-route-channel', name: 'Wall channel', type: 'parametric-path', visible: true, locked: false, opacity: 1, transform, points, parametric: {renderer: 'wall-channel', routeId: 'route-shared-test', widthMm: 40, depthMm: 25, roughness: .7, chaseStyle: 'hand-broken', bendRadiusMm: 80}},
     {id: 'layer-route-conduit', name: 'Flexible conduit', type: 'parametric-path', visible: true, locked: false, opacity: 1, transform, points, parametric: {renderer: 'flex-conduit', routeId: 'route-shared-test', widthMm: 20, corrugationMm: 4, bendRadiusMm: 80, color: '#a7aaa6'}},
   ];
   assert.equal(validateInteractiveDocument(document, document.slug), document);
@@ -98,6 +98,9 @@ test('parametric wall channels and conduits share a validated editable route', (
   invalid.sections[0].layers[1].parametric.widthMm = 20;
   invalid.sections[0].layers[1].parametric.bendRadiusMm = 900;
   assert.throws(() => validateInteractiveDocument(invalid, invalid.slug), /bend radius is invalid/i);
+  invalid.sections[0].layers[1].parametric.bendRadiusMm = 80;
+  invalid.sections[0].layers[0].parametric.chaseStyle = 'laser-cut';
+  assert.throws(() => validateInteractiveDocument(invalid, invalid.slug), /cut style is invalid/i);
 });
 
 test('secure admin lifecycle', async t => {

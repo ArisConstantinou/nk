@@ -4,6 +4,9 @@ const ID_PATTERN = /^[a-z][a-z0-9-]{2,100}$/i;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const LAYER_TYPES = new Set(['asset', 'placeholder', 'rectangle', 'ellipse', 'line', 'arrow', 'path', 'parametric-path', 'text']);
 const ASSET_KINDS = new Set(['image', 'svg']);
+const CALIBRATION_ROLES = new Set(['wall-corner', 'wall-floor', 'floor-depth']);
+const SURFACE_KINDS = new Set(['wall', 'floor', 'ceiling', 'custom']);
+const SURFACE_GEOMETRIES = new Set(['flat', 'curved']);
 
 const invalid = (message = 'The interactive document is invalid.') => {
   throw new ApiError(400, 'invalid_interactive_document', message);
@@ -45,6 +48,28 @@ export function validateInteractiveDocument(value, expectedSlug) {
     addGlobalId(section?.id);
     if (!shortString(section.name, 160) || !section.name.trim() || !shortString(section.description || '', 2_000) || !shortString(section.background || '', 80)) invalid('A frame is invalid.');
     if (!section.focus || !finite(section.focus.x) || !finite(section.focus.y) || !Array.isArray(section.layers) || section.layers.length > 400) invalid('A frame focus or layer collection is invalid.');
+    const surfaceIds = new Set();
+    if (section.surfaces !== undefined) {
+      if (!Array.isArray(section.surfaces) || section.surfaces.length > 40) invalid('A frame surface collection is invalid.');
+      for (const surface of section.surfaces) {
+        if (
+          !surface
+          || !validId(surface.id)
+          || surfaceIds.has(surface.id)
+          || !shortString(surface.name, 120)
+          || !SURFACE_KINDS.has(surface.kind)
+          || !SURFACE_GEOMETRIES.has(surface.geometry)
+          || !Array.isArray(surface.points)
+          || surface.points.length < 3
+          || surface.points.length > 64
+          || surface.points.some(point => !finite(point?.x) || !finite(point?.y))
+          || !Array.isArray(surface.guideLayerIds)
+          || surface.guideLayerIds.length > 16
+          || surface.guideLayerIds.some(id => !validId(id))
+        ) invalid('A calibrated surface is invalid.');
+        surfaceIds.add(surface.id);
+      }
+    }
     const layerIds = new Set();
     for (const layer of section.layers) {
       if (!validId(layer?.id) || layerIds.has(layer.id)) invalid('Layer IDs must be stable and unique inside each frame.');
@@ -55,6 +80,8 @@ export function validateInteractiveDocument(value, expectedSlug) {
       if (!transform || ![transform.x, transform.y, transform.width, transform.height, transform.rotation, transform.skewX, transform.skewY].every(finite)) invalid('A layer transform is invalid.');
       if (transform.width < 1 || transform.height < 1 || transform.width > 7_680 || transform.height > 4_320 || Math.abs(transform.x) > 15_000 || Math.abs(transform.y) > 15_000 || Math.abs(transform.rotation) > 100_000 || Math.abs(transform.skewX) > 89 || Math.abs(transform.skewY) > 89) invalid('A layer transform is outside the supported range.');
       if (layer.type === 'asset' && !validId(layer.assetId)) invalid('An asset layer must reference an asset.');
+      if (layer.calibrationRole !== undefined && !CALIBRATION_ROLES.has(layer.calibrationRole)) invalid('A calibration guide role is invalid.');
+      if (layer.surfaceId !== undefined && !validId(layer.surfaceId)) invalid('An asset surface reference is invalid.');
       if (layer.type === 'text' && !shortString(layer.text || '', 2_000)) invalid('A text layer is too long.');
       if (layer.type === 'parametric-path') {
         const settings = layer.parametric;
@@ -63,6 +90,7 @@ export function validateInteractiveDocument(value, expectedSlug) {
         if (!finite(settings.widthMm) || settings.widthMm < 5 || settings.widthMm > 160) invalid('The parametric route width is invalid.');
         if (settings.depthMm !== undefined && (!finite(settings.depthMm) || settings.depthMm < 1 || settings.depthMm > 100)) invalid('The wall-channel depth is invalid.');
         if (settings.roughness !== undefined && (!finite(settings.roughness) || settings.roughness < 0 || settings.roughness > 1)) invalid('The wall-channel roughness is invalid.');
+        if (settings.chaseStyle !== undefined && !['hand-broken', 'machine-cut'].includes(settings.chaseStyle)) invalid('The wall-channel cut style is invalid.');
         if (settings.corrugationMm !== undefined && (!finite(settings.corrugationMm) || settings.corrugationMm < 1 || settings.corrugationMm > 20)) invalid('The conduit corrugation is invalid.');
         if (settings.bendRadiusMm !== undefined && (!finite(settings.bendRadiusMm) || settings.bendRadiusMm < 10 || settings.bendRadiusMm > 500)) invalid('The route bend radius is invalid.');
         if (settings.color !== undefined && !shortString(settings.color, 100)) invalid('The conduit colour is invalid.');

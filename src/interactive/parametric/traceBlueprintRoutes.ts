@@ -227,7 +227,7 @@ const mergeAlignedPaths = (source: PixelPoint[][], maximumGap = 13) => {
         ];
         for (const [orientedLeft, orientedRight] of orientations) {
           const score = continuationScore(orientedLeft, orientedRight, maximumGap);
-          if (score < .68 || (best && score <= best.score)) continue;
+          if (score < .62 || (best && score <= best.score)) continue;
           best = {leftIndex, rightIndex, left: orientedLeft, right: orientedRight, score};
         }
       }
@@ -291,10 +291,15 @@ export function traceGuideMask(greenMask: Uint8Array, width: number, height: num
   const minimumLength = Math.max(16, Math.min(width, height) * .035);
   const candidates = traceSkeleton(skeleton, width, height)
     .filter(path => path.length >= 2 && pathLength(path) >= minimumLength * .35);
-  return mergeAlignedPaths(candidates)
-    .filter(path => pathLength(path) >= minimumLength)
+  const maximumJoinGap = Math.max(14, Math.min(32, Math.min(width, height) * .065));
+  const merged = mergeAlignedPaths(candidates, maximumJoinGap)
+    .sort((left, right) => pathLength(right) - pathLength(left));
+  const longest = merged.length ? pathLength(merged[0]) : 0;
+  const usableMinimumLength = Math.max(minimumLength, Math.min(minimumLength * 3.5, longest * .1));
+  return merged
+    .filter(path => pathLength(path) >= usableMinimumLength)
     .sort((left, right) => pathLength(right) - pathLength(left))
-    .slice(0, 16)
+    .slice(0, 10)
     .map(path => simplify(path, 1.6))
     .filter(path => path.length >= 2)
     .map(path => path.map(point => ({

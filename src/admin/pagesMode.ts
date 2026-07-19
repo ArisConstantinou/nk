@@ -17,6 +17,11 @@ import {isExperienceDocument} from '../interactive/engine/documentValidation';
 export const isPagesAdminMode = import.meta.env.MODE === 'github-pages';
 export const PAGES_ADMIN_STORAGE_KEY = 'nk-pages-admin-workspace-v1';
 export const PAGES_ADMIN_CHANGED_EVENT = 'nk-pages-admin:changed';
+const PAGES_ADMIN_RECOVERY_KEY = 'nk-pages-admin-interactive-recovery-v1';
+const MAX_RECOVERY_ASSET_SOURCE_LENGTH = 160_000;
+const MAX_RECOVERY_TOTAL_ASSET_SOURCE_LENGTH = 500_000;
+
+type PagesWorkspaceStorageMode = 'persistent' | 'temporary';
 
 const createdAt = '2026-01-01T00:00:00.000Z';
 export const pagesAdminUser: AdminUser = {
@@ -76,25 +81,94 @@ const id = () => typeof crypto.randomUUID === 'function' ? crypto.randomUUID() :
 const ok = (payload: unknown, status = 200): PagesApiResult => ({status, payload});
 const fail = (status: number, code: string, message: string, fields?: Record<string, string>): PagesApiResult => ({status, payload: {error: {code, message, fields}}});
 
+let volatileState: PagesState | null = null;
+let pagesWorkspaceStorageMode: PagesWorkspaceStorageMode = 'persistent';
+
+const compactRecoveryDocument = (document: InteractiveExperienceRecord['draft']) => {
+  const removedAssetIds = new Set<string>();
+  let retainedEmbeddedSourceLength = 0;
+  const assetGroups = document.assetGroups.map(group => ({
+    ...group,
+    assets: group.assets.filter(asset => {
+      const embeddedSource = asset.source.startsWith('data:');
+      const oversizedEmbeddedSource = embeddedSource && (
+        asset.source.length > MAX_RECOVERY_ASSET_SOURCE_LENGTH
+        || retainedEmbeddedSourceLength + asset.source.length > MAX_RECOVERY_TOTAL_ASSET_SOURCE_LENGTH
+      );
+      if (oversizedEmbeddedSource) removedAssetIds.add(asset.id);
+      else if (embeddedSource) retainedEmbeddedSourceLength += asset.source.length;
+      return !oversizedEmbeddedSource;
+    }),
+  }));
+  return {
+    ...document,
+    assetGroups,
+    sections: document.sections.map(section => ({
+      ...section,
+      layers: section.layers.filter(layer => !layer.assetId || !removedAssetIds.has(layer.assetId)),
+    })),
+  };
+};
+
+export const createInteractiveRecoveryRecords = (records: InteractiveExperienceRecord[]) => records.map(record => ({
+  ...record,
+  draft: compactRecoveryDocument(record.draft),
+  published: record.published ? compactRecoveryDocument(record.published) : null,
+}));
+
+const readRecoveryRecords = () => {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(PAGES_ADMIN_RECOVERY_KEY) || '') as {interactive?: InteractiveExperienceRecord[]};
+    if (!Array.isArray(parsed.interactive)) return [];
+    pagesWorkspaceStorageMode = 'temporary';
+    return parsed.interactive.filter(record => record && typeof record.slug === 'string' && isExperienceDocument(record.draft));
+  } catch {
+    return [];
+  }
+};
+
 function readState(): PagesState {
+  if (volatileState) return clone(volatileState);
   try {
     const parsed = JSON.parse(localStorage.getItem(PAGES_ADMIN_STORAGE_KEY) || '') as Partial<PagesState>;
-    if (parsed.schema !== 1 || !Array.isArray(parsed.records)) return emptyState();
-    return {...emptyState(), ...parsed, users: parsed.users?.length ? parsed.users : [pagesAdminUser]};
+    const state = parsed.schema === 1 && Array.isArray(parsed.records)
+      ? {...emptyState(), ...parsed, users: parsed.users?.length ? parsed.users : [pagesAdminUser]}
+      : emptyState();
+    const recoveryRecords = readRecoveryRecords();
+    if (recoveryRecords.length) {
+      const recoveryBySlug = new Map(recoveryRecords.map(record => [record.slug, record]));
+      state.interactive = [
+        ...state.interactive.filter(record => !recoveryBySlug.has(record.slug)),
+        ...recoveryRecords,
+      ];
+    }
+    return state;
   } catch {
-    return emptyState();
+    const state = emptyState();
+    state.interactive = readRecoveryRecords();
+    return state;
   }
 }
 
-function writeState(state: PagesState) {
+function writeState(state: PagesState): PagesWorkspaceStorageMode {
   try {
     localStorage.setItem(PAGES_ADMIN_STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
-    throw new Error(error instanceof DOMException && error.name === 'QuotaExceededError'
-      ? 'This device workspace is full. Remove large media files and try again.'
-      : 'Changes could not be saved in this browser.');
+    sessionStorage.removeItem(PAGES_ADMIN_RECOVERY_KEY);
+    volatileState = null;
+    pagesWorkspaceStorageMode = 'persistent';
+  } catch {
+    volatileState = clone(state);
+    pagesWorkspaceStorageMode = 'temporary';
+    try {
+      sessionStorage.setItem(PAGES_ADMIN_RECOVERY_KEY, JSON.stringify({
+        interactive: createInteractiveRecoveryRecords(state.interactive),
+      }));
+    } catch {
+      // The in-memory copy still keeps the editor usable for the current page session.
+    }
   }
   window.dispatchEvent(new CustomEvent(PAGES_ADMIN_CHANGED_EVENT));
+  return pagesWorkspaceStorageMode;
 }
 
 function bodyOf(init: RequestInit) {
@@ -574,14 +648,14 @@ function interactiveRequest(state: PagesState, parts: string[], method: string, 
     };
     state.interactive.push(record);
     recordAudit(state, 'interactive.created', 'interactive', record.id, {slug: record.slug, title: record.title});
-    writeState(state);
-    return ok({record: clone(record)}, 201);
+    const storageMode = writeState(state);
+    return ok({record: clone(record), storageMode}, 201);
   }
   if (!slug) return null;
   const index = state.interactive.findIndex(item => item.slug === slug);
   if (index < 0) return method === 'GET' ? fail(404, 'not_found', 'Interactive experience not found.') : null;
   const current = state.interactive[index];
-  if (parts.length === 2 && method === 'GET') return ok({record: clone(current)});
+  if (parts.length === 2 && method === 'GET') return ok({record: clone(current), storageMode: pagesWorkspaceStorageMode});
   if (parts.length === 2 && method === 'PUT') {
     const title = String(body.title || '').trim();
     const document = body.document;
@@ -602,8 +676,8 @@ function interactiveRequest(state: PagesState, parts: string[], method: string, 
     };
     state.interactive[index] = next;
     recordAudit(state, 'interactive.updated', 'interactive', current.id, {slug: current.slug, version: next.version});
-    writeState(state);
-    return ok({record: clone(next)});
+    const storageMode = writeState(state);
+    return ok({record: clone(next), storageMode});
   }
   if (parts.length === 3 && parts[2] === 'publish' && method === 'POST') {
     const expectedVersion = Number(body.expectedVersion);
@@ -624,8 +698,8 @@ function interactiveRequest(state: PagesState, parts: string[], method: string, 
     };
     state.interactive[index] = next;
     recordAudit(state, 'interactive.published', 'interactive', current.id, {slug: current.slug, version: next.version});
-    writeState(state);
-    return ok({record: clone(next)});
+    const storageMode = writeState(state);
+    return ok({record: clone(next), storageMode});
   }
   return null;
 }

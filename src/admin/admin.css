@@ -1211,3 +1211,130 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
   }
 
 }
+
+/* Mobile admin uses persistent primary navigation instead of making every
+   destination depend on the hidden desktop sidebar. */
+.nk-admin-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 840px) {
+  .nk-admin-workspace {
+    min-height: 100dvh;
+  }
+
+  .nk-admin-workspace > main,
+  .nk-admin-workspace > main:has(.nk-visual-editor) {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .nk-admin-mobile-nav {
+    position: fixed;
+    z-index: 40;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-height: calc(66px + env(safe-area-inset-bottom));
+    padding: 6px 8px max(6px, env(safe-area-inset-bottom));
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 4px;
+    background: rgba(255, 255, 255, .96);
+    border-top: 1px solid var(--admin-line-strong);
+    box-shadow: 0 -12px 34px rgba(15, 42, 31, .12);
+    backdrop-filter: blur(18px);
+  }
+
+  .nk-admin-mobile-nav > a,
+  .nk-admin-mobile-nav > button {
+    min-width: 0;
+    min-height: 52px;
+    padding: 5px 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--admin-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 10px !important;
+    font-weight: 750;
+  }
+
+  .nk-admin-mobile-nav svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nk-admin-mobile-nav > a.active {
+    color: var(--admin-accent-dark);
+    background: var(--admin-accent-soft);
+    border-color: #c8e6d9;
+  }
+
+  body:has(.ix-studio--focus) .nk-admin-mobile-nav,
+  body:has(.ix-studio:fullscreen) .nk-admin-mobile-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .nk-admin-topbar {
+    height: 56px;
+    gap: 8px;
+  }
+
+  .nk-admin-topbar > nav {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nk-admin-topbar > nav > a,
+  .nk-admin-topbar > nav > svg,
+  .nk-admin-topbar > nav > span {
+    display: none;
+  }
+
+  .nk-admin-topbar > nav > b {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+  }
+
+  .nk-admin-topbar-guide,
+  .nk-admin-site-edit-link {
+    display: none !important;
+  }
+
+  .nk-admin-security-line:not(.nk-admin-security-line--device) {
+    display: none;
+  }
+
+  .nk-admin-security-line--device {
+    min-height: 32px;
+    margin-bottom: 7px !important;
+    padding: 5px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nk-admin-security-line--device svg {
+    flex: 0 0 auto;
+  }
+
+  .nk-admin-page-heading {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .nk-admin-page-heading h1 {
+    margin-top: 3px;
+    font-size: clamp(29px, 9vw, 36px);
+  }
+}

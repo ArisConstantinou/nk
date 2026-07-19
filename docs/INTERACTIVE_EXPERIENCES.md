@@ -78,9 +78,20 @@ Layers belong to one frame. The renderer never merges layers from different fram
 
 Desktop presentation advances one frame per wheel action while the experience can move in that direction. At the first/last frame, normal page scrolling continues. Touch layouts expose large Previous/Next buttons. Reduced-motion users receive the same information without dependent continuous animation.
 
+## Surface calibration
+
+The Studio can turn simple editable guide lines into semantic placement targets:
+
+1. Draw or select a horizontal wall–floor line and a vertical wall-corner line.
+2. Add a diagonal floor-depth line when the frame includes a side wall.
+3. Choose **Detect surfaces** in the Surface calibration panel.
+4. Select the resulting main wall, side wall or floor before applying an asset, or drag an asset directly over the intended surface.
+
+Detected guides are tagged with stable roles. Moving a tagged guide recalculates the affected surface polygons automatically. Walls can be marked flat or curved, surfaces can be renamed independently, and asset layers keep their surface reference for later refitting. Calibration guides and Studio-only surface overlays are excluded from public presentation and exported mockups.
+
 ## Asset policy
 
-The template ships without generated photographic assets. Asset groups contain references to the secure CMS Media library:
+Asset groups may contain version-controlled public site assets or references to the secure CMS Media library:
 
 - no base64/data-URL content in the document;
 - no automatic AI generation;

@@ -166,6 +166,7 @@ const lowerShelf = layer({id: 'shelf-lower', name: 'Long lower shelf', type: 'pl
 
 export const electricalInstallationTemplate: ExperienceDocument = {
   schemaVersion: EXPERIENCE_SCHEMA_VERSION,
+  bundledAssetRevision: 11,
   id: 'experience-electrical-installations',
   slug: 'electrical-installations',
   title: 'How an installation is built',
@@ -180,10 +181,50 @@ export const electricalInstallationTemplate: ExperienceDocument = {
     showProgress: true,
   },
   assetGroups: [
-    {id: 'group-backgrounds', name: 'Backgrounds', visible: true, collapsed: false, assets: []},
+    {
+      id: 'group-backgrounds',
+      name: 'Backgrounds',
+      visible: true,
+      collapsed: false,
+      assets: [
+        {
+          id: 'asset-construction-room-rough',
+          name: 'Construction room · rough plaster',
+          kind: 'image',
+          source: '/assets/interactive/construction-room-rough-v2.png',
+          alt: 'Unfinished construction room with rough plaster walls and a raw concrete floor',
+          width: 1920,
+          height: 1080,
+        },
+        {
+          id: 'asset-construction-room-finished-painted',
+          name: 'Construction room · finished painted',
+          kind: 'image',
+          source: '/assets/interactive/construction-room-finished-painted-v1.png',
+          alt: 'Finished construction room with smooth painted walls and a clean concrete floor',
+          width: 1920,
+          height: 1080,
+        },
+      ],
+    },
     {id: 'group-people', name: 'People', visible: true, collapsed: false, assets: []},
     {id: 'group-first-fix', name: 'First fix', visible: true, collapsed: false, assets: []},
     {id: 'group-second-fix', name: 'Second fix & lighting', visible: true, collapsed: false, assets: []},
+    {
+      id: 'group-objects',
+      name: 'Objects',
+      visible: true,
+      collapsed: false,
+      assets: [{
+        id: 'asset-wood-structure-no-led',
+        name: 'Wood structure · no LEDs',
+        kind: 'image',
+        source: '/assets/interactive/wood-structure-no-led-wide-v2.png',
+        alt: 'Wide built-in wooden shelving and cabinet structure without LED lighting',
+        width: 1596,
+        height: 847,
+      }],
+    },
   ],
   sections: [
     section('section-empty-wall', 'Empty room', 'The fixed wall and finished-floor datum establish one consistent layout for every following frame.'),
