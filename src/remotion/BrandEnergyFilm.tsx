@@ -15,19 +15,20 @@ const clamp = {
 export function BrandEnergyFilm() {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const cycleFrames = Math.round(2.4 * fps);
+  const cycleFrames = Math.round(6 * fps);
   const cycleFrame = frame % cycleFrames;
-  const phase = cycleFrame / cycleFrames;
   const travel = interpolate(
     cycleFrame,
     [0, cycleFrames],
-    [0, -92],
+    [0, -184],
     {...clamp, easing: Easing.linear},
   );
-  const primarySpark = Math.pow((Math.sin(phase * Math.PI * 8 - Math.PI / 2) + 1) / 2, 10);
-  const secondarySpark = Math.pow((Math.sin(phase * Math.PI * 8 + Math.PI / 3) + 1) / 2, 14) * .56;
-  const spark = .16 + Math.max(primarySpark, secondarySpark) * .84;
-  const sparkRotation = phase * 360;
+  const sparkAt = (second: number, spread: number) => Math.exp(-Math.pow((cycleFrame - second * fps) / (spread * fps), 2));
+  const spark = Math.max(
+    sparkAt(.86, .055),
+    sparkAt(3.58, .045) * .74,
+    sparkAt(4.92, .06) * .48,
+  );
 
   return <AbsoluteFill style={{overflow: 'visible', background: 'transparent'}}>
     <svg width="100%" height="100%" viewBox="0 0 180 62" preserveAspectRatio="none" aria-hidden="true">
@@ -36,7 +37,7 @@ export function BrandEnergyFilm() {
           <feDropShadow dx="0" dy="1.2" stdDeviation="1.25" floodColor="#020611" floodOpacity=".48"/>
         </filter>
         <filter id="brand-wire-glow" x="-80%" y="-160%" width="280%" height="420%">
-          <feGaussianBlur stdDeviation="1.8" result="blur"/>
+          <feGaussianBlur stdDeviation=".72" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
@@ -53,18 +54,18 @@ export function BrandEnergyFilm() {
         d={wire.path}
         fill="none"
         stroke={index === 1 ? '#fff4d5' : '#dffbff'}
-        strokeWidth={index === 2 ? 1.05 : 1.3}
+        strokeWidth={index === 2 ? .5 : .65}
         strokeLinecap="round"
-        strokeDasharray="10 36"
-        strokeDashoffset={travel - index * 11.5}
+        strokeDasharray="4 88"
+        strokeDashoffset={travel - index * 19}
         filter="url(#brand-wire-glow)"
-        opacity={.8}
+        opacity={.28}
         key={`energy-${wire.color}`}
       />)}
 
-      <g transform={`translate(176 34) rotate(${sparkRotation})`} opacity={spark} filter="url(#brand-wire-glow)">
-        <circle r={2.2 + spark * 2.1} fill="#fff" opacity=".94"/>
-        <path d="M-2-4 0-11 2-4M4-2 10-5 5 1M4 3 9 8 1 5M-4 2-9 6-5-1" fill="none" stroke="#c9fbff" strokeWidth="1.35" strokeLinecap="round"/>
+      <g transform="translate(176 34)" opacity={spark} filter="url(#brand-wire-glow)">
+        <circle r={.65 + spark * .7} fill="#f4feff" opacity=".72"/>
+        <path d="M0-1-3-3-6 0M1 0 4 2 7 0M-1 2-4 5" fill="none" stroke="#dffcff" strokeWidth=".72" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
     </svg>
   </AbsoluteFill>;

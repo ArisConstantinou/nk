@@ -31,7 +31,7 @@ export function BrandEnergyMark({src, alt, energized}: BrandEnergyMarkProps) {
       <Player
         ref={playerRef}
         component={BrandEnergyFilm}
-        durationInFrames={72}
+        durationInFrames={180}
         compositionWidth={180}
         compositionHeight={62}
         fps={30}
@@ -45,6 +45,5 @@ export function BrandEnergyMark({src, alt, energized}: BrandEnergyMarkProps) {
       />
     </span>
     <ResponsiveImage className="ia-brand-logo" src={src} alt={alt}/>
-    <span className="ia-brand-contact-glow" aria-hidden="true"/>
   </span>;
 }
