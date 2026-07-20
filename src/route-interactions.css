@@ -245,55 +245,227 @@
 .ia-quote-button[data-route-profile]:is(:hover,:focus-visible)::after,
 .ia-footer-lead>[data-route-profile]:is(:hover,:focus-visible)::after{transform:translateX(0);opacity:.23}
 
-/* Page-level actions inherit a motion signature from their subject. */
-.ia-shell[data-interaction-profile] .ia-main :is(
-  a.button,
-  button:not(.ia-live-edit-button),
-  .ia-service-card,
-  .product-card,
-  .project-archive-item,
-  .catalogue-card,
-  .back-link
+/*
+ * One public button system, with a distinct colour identity per route.
+ * Geometry, type, hierarchy and interaction stay consistent; only the
+ * route-owned deep/accent colours change to make each page easy to scan.
+ */
+.ia-shell[data-interaction-profile]{
+  --route-action-height:58px;
+  --route-action-radius:12px;
+  --route-action-ease:cubic-bezier(.16,1,.3,1);
+}
+.ia-shell[data-interaction-profile] :is(
+  .ia-quote-button,
+  .ia-mobile-ctas>a:last-child,
+  .ia-footer-lead>a,
+  .ia-main a.button,
+  .ia-main .ia-service-action,
+  .ia-main .ia-boundary>a,
+  .ia-main .ia-conversion-band>a,
+  .ia-main .ia-shop-toolbar>a,
+  .ia-main .ia-shop-gateway>a,
+  .ia-main .catalogue-load-more button:not(.secondary),
+  .ia-main .catalogue-empty button,
+  .ia-main .empty-state>button,
+  .ia-main .cms-section--cta>a,
+  .ia-main .cms-builder-component--button a,
+  .ia-main .managed-project-form button,
+  .ia-main .contact-router-next,
+  .ia-main .contact-router-submit,
+  .ia-main .quote-builder-next,
+  .ia-main .quote-builder-submit
 ){
-  --action-motion-accent:var(--route-accent);
+  --action-deep:var(--route-deep);
+  --action-accent:var(--route-accent);
+  position:relative;
+  isolation:isolate;
+  min-height:var(--route-action-height)!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  overflow:hidden!important;
+  border:1px solid color-mix(in srgb,var(--route-accent) 58%,var(--route-deep))!important;
+  border-radius:var(--route-action-radius)!important;
+  clip-path:none!important;
+  background:
+    linear-gradient(
+      108deg,
+      color-mix(in srgb,var(--route-deep) 78%,var(--route-accent)) 0%,
+      var(--route-deep) 58%,
+      color-mix(in srgb,var(--route-deep) 70%,var(--route-accent)) 100%
+    )!important;
+  color:#fff!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.055),
+    0 11px 25px color-mix(in srgb,var(--route-deep) 24%,transparent)!important;
+  filter:none!important;
+  font-family:Manrope,"DM Sans",Arial,sans-serif!important;
+  font-size:15px!important;
+  font-weight:750!important;
+  line-height:1.15!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+  text-shadow:none!important;
   transition:
-    transform .38s cubic-bezier(.16,1,.3,1),
-    border-color .25s ease,
-    box-shadow .35s ease,
-    background-color .25s ease;
+    transform .22s var(--route-action-ease),
+    border-color .22s ease,
+    box-shadow .22s ease,
+    background .22s ease!important;
 }
-.ia-shell[data-interaction-motion='circuit'] .ia-main :is(a.button,.ia-service-card):is(:hover,:focus-visible){
-  box-shadow:inset 5px 0 0 var(--route-accent),inset 10px 0 0 color-mix(in srgb,var(--route-secondary) 55%,transparent),0 15px 34px color-mix(in srgb,var(--route-deep) 18%,transparent)!important;
-}
-.ia-shell[data-interaction-motion='scan'] .ia-main :is(a.button,.product-card,.catalogue-card):is(:hover,:focus-visible){
-  box-shadow:inset 0 3px 0 var(--route-accent),0 15px 34px color-mix(in srgb,var(--route-deep) 18%,transparent)!important;
-}
-.ia-shell[data-interaction-motion='frame'] .ia-main :is(a.button,.project-archive-item,.catalogue-card):is(:hover,:focus-visible){
-  outline:1px solid var(--route-accent);
-  outline-offset:-7px;
-}
-.ia-shell[data-interaction-motion='timeline'] .ia-main :is(a.button,.back-link):is(:hover,:focus-visible){
-  box-shadow:inset 0 -4px 0 var(--route-accent)!important;
-}
-.ia-shell[data-interaction-motion='radar'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
-  box-shadow:0 0 0 4px color-mix(in srgb,var(--route-accent) 15%,transparent),0 0 0 9px color-mix(in srgb,var(--route-accent) 6%,transparent)!important;
-}
-.ia-shell[data-interaction-motion='connector'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
+.ia-shell[data-interaction-profile] :is(
+  .ia-quote-button,
+  .ia-mobile-ctas>a:last-child,
+  .ia-footer-lead>a,
+  .ia-main a.button,
+  .ia-main .ia-service-action,
+  .ia-main .ia-boundary>a,
+  .ia-main .ia-conversion-band>a,
+  .ia-main .ia-shop-toolbar>a,
+  .ia-main .ia-shop-gateway>a,
+  .ia-main .catalogue-load-more button:not(.secondary),
+  .ia-main .catalogue-empty button,
+  .ia-main .empty-state>button,
+  .ia-main .cms-section--cta>a,
+  .ia-main .cms-builder-component--button a,
+  .ia-main .managed-project-form button,
+  .ia-main .contact-router-next,
+  .ia-main .contact-router-submit,
+  .ia-main .quote-builder-next,
+  .ia-main .quote-builder-submit
+):is(:hover,:focus-visible){
+  transform:translateY(-2px)!important;
   border-color:var(--route-accent)!important;
-  box-shadow:inset 11px 0 0 color-mix(in srgb,var(--route-accent) 45%,transparent)!important;
+  background:
+    linear-gradient(
+      108deg,
+      color-mix(in srgb,var(--route-deep) 68%,var(--route-accent)) 0%,
+      var(--route-deep) 52%,
+      color-mix(in srgb,var(--route-deep) 58%,var(--route-accent)) 100%
+    )!important;
+  color:#fff!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    0 17px 34px color-mix(in srgb,var(--route-deep) 30%,transparent)!important;
+  filter:none!important;
 }
-.ia-shell[data-interaction-motion='lighting'] .ia-main :is(a.button,.product-card):is(:hover,:focus-visible){
-  box-shadow:0 0 0 1px var(--route-accent),0 13px 34px color-mix(in srgb,var(--route-accent) 20%,transparent)!important;
+.ia-shell[data-interaction-profile] :is(
+  .ia-quote-button,
+  .ia-mobile-ctas>a:last-child,
+  .ia-footer-lead>a,
+  .ia-main a.button,
+  .ia-main .ia-service-action,
+  .ia-main .ia-boundary>a,
+  .ia-main .ia-conversion-band>a,
+  .ia-main .ia-shop-toolbar>a,
+  .ia-main .ia-shop-gateway>a,
+  .ia-main .catalogue-load-more button:not(.secondary),
+  .ia-main .catalogue-empty button,
+  .ia-main .empty-state>button,
+  .ia-main .cms-section--cta>a,
+  .ia-main .cms-builder-component--button a,
+  .ia-main .managed-project-form button,
+  .ia-main .contact-router-next,
+  .ia-main .contact-router-submit,
+  .ia-main .quote-builder-next,
+  .ia-main .quote-builder-submit
+):active{
+  transform:translateY(0)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.07),
+    0 7px 17px color-mix(in srgb,var(--route-deep) 25%,transparent)!important;
 }
-.ia-shell[data-interaction-motion='automation'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
-  box-shadow:inset 0 0 0 2px var(--route-accent),inset 0 -7px 0 color-mix(in srgb,var(--route-secondary) 38%,transparent)!important;
+.ia-shell[data-interaction-profile] :is(
+  .ia-quote-button,
+  .ia-mobile-ctas>a:last-child,
+  .ia-footer-lead>a,
+  .ia-main a.button,
+  .ia-main .ia-service-action,
+  .ia-main .ia-boundary>a,
+  .ia-main .ia-conversion-band>a,
+  .ia-main .ia-shop-toolbar>a,
+  .ia-main .ia-shop-gateway>a,
+  .ia-main .catalogue-load-more button:not(.secondary),
+  .ia-main .catalogue-empty button,
+  .ia-main .empty-state>button,
+  .ia-main .cms-section--cta>a,
+  .ia-main .cms-builder-component--button a,
+  .ia-main .managed-project-form button,
+  .ia-main .contact-router-next,
+  .ia-main .contact-router-submit,
+  .ia-main .quote-builder-next,
+  .ia-main .quote-builder-submit
+):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--route-accent) 76%,#fff)!important;
+  outline-offset:4px!important;
 }
-.ia-shell[data-interaction-motion='security'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
-  box-shadow:inset 0 0 0 2px var(--route-accent),0 0 0 5px color-mix(in srgb,var(--route-secondary) 10%,transparent)!important;
+.ia-shell[data-interaction-profile] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-main a.button,
+  .ia-main .ia-boundary>a,
+  .ia-main .ia-conversion-band>a,
+  .ia-main .ia-shop-toolbar>a,
+  .ia-main .ia-shop-gateway>a,
+  .ia-main .catalogue-load-more button:not(.secondary),
+  .ia-main .cms-section--cta>a,
+  .ia-main .managed-project-form button
+)>svg:last-child{
+  background:var(--route-accent)!important;
+  color:var(--route-deep)!important;
+  box-shadow:none!important;
+  filter:none!important;
 }
-.ia-shell[data-interaction-motion='diagnostic'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
-  border-color:var(--route-accent)!important;
-  box-shadow:inset 0 -4px 0 var(--route-accent),0 12px 28px color-mix(in srgb,var(--route-deep) 16%,transparent)!important;
+.ia-shell[data-interaction-profile] :is(
+  .ia-main .button.outline,
+  .ia-main .catalogue-load-more button.secondary,
+  .ia-main .contact-router-back,
+  .ia-main .quote-builder-back,
+  .ia-main .quote-draft-clear
+){
+  min-height:54px!important;
+  overflow:hidden!important;
+  border:2px solid color-mix(in srgb,var(--route-accent) 72%,var(--route-deep))!important;
+  border-radius:var(--route-action-radius)!important;
+  clip-path:none!important;
+  background:var(--system-surface)!important;
+  color:var(--route-deep)!important;
+  box-shadow:none!important;
+  font-family:Manrope,"DM Sans",Arial,sans-serif!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+  transition:transform .22s var(--route-action-ease),background-color .22s ease,color .22s ease,border-color .22s ease!important;
+}
+.ia-shell[data-interaction-profile] :is(
+  .ia-main .button.outline,
+  .ia-main .catalogue-load-more button.secondary,
+  .ia-main .contact-router-back,
+  .ia-main .quote-builder-back,
+  .ia-main .quote-draft-clear
+):is(:hover,:focus-visible){
+  transform:translateY(-2px)!important;
+  border-color:var(--route-deep)!important;
+  background:var(--route-deep)!important;
+  color:#fff!important;
+}
+.ia-shell[data-interaction-profile] :is(
+  .ia-main button,
+  .ia-main a.button,
+  .ia-main .ia-service-action,
+  .ia-main .ia-conversion-band>a
+):disabled{
+  opacity:.5!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:720px){
+  .ia-shell[data-interaction-profile]{
+    --route-action-height:54px;
+    --route-action-radius:11px;
+  }
 }
 
 @media(max-width:900px){
