@@ -535,6 +535,10 @@ export function StudioStage({
       height: document.stage.height / stageView.scale,
     };
   }, [document.stage.height, document.stage.width, stageView, stageViewport]);
+  const stageFit = stageViewport.width > 0
+    && stageViewport.height > stageViewport.width * document.stage.height / document.stage.width
+    ? 'contain'
+    : 'cover';
 
   useEffect(() => {
     if (!selectedSurfaceId) {
@@ -1477,7 +1481,7 @@ export function StudioStage({
       <ExperienceStage
         document={document}
         section={renderedSection}
-        fit="cover"
+        fit={stageFit}
         viewBox={stageViewBox}
         selectedLayerIds={selectedLayerIds}
         contentHiddenLayerIds={editingTextLayerId ? [editingTextLayerId] : []}

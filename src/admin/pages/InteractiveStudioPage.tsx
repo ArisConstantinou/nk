@@ -101,6 +101,7 @@ export function InteractiveStudioPage() {
   const [focus, setFocus] = useState(true);
   const [copyStatus, setCopyStatus] = useState('');
   const [mobilePanel, setMobilePanel] = useState<'canvas' | 'sections' | 'assets'>('canvas');
+  const [mobileInspectorOpen, setMobileInspectorOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyScope, setHistoryScope] = useState<'all' | 'selected'>('all');
   const [toolbarMenu, setToolbarMenu] = useState<'draw' | 'view' | 'export' | 'project' | null>(null);
@@ -163,6 +164,10 @@ export function InteractiveStudioPage() {
       setSelectedLayerIds([]);
     }
   }, [activeSectionId, document.sections]);
+
+  useEffect(() => {
+    setMobileInspectorOpen(false);
+  }, [activeSectionId, selectedLayerId]);
 
   useEffect(() => {
     if (selectedSurfaceId && !activeSection?.surfaces?.some(surface => surface.id === selectedSurfaceId)) {
@@ -864,10 +869,10 @@ export function InteractiveStudioPage() {
           <span><b>Fine move:</b> 1 px · Shift = 10 px</span>
         </div>
         {selectedLayerIds.length > 1 && <div className="ix-selected-strip ix-selected-strip--multiple">
-          <div><Check/><span><b>{selectedLayerIds.length} objects selected</b><small>Drag any selected object to move the group · Shift-click toggles an object · Delete removes the selection</small></span></div>
+          <div className="ix-selected-strip__summary"><Check/><span><b>{selectedLayerIds.length} objects selected</b><small>Drag any selected object to move the group · Shift-click toggles an object · Delete removes the selection</small></span></div>
         </div>}
-        {selectedLayer && selectedLayerIds.length === 1 && <div className="ix-selected-strip">
-          <div>
+        {selectedLayer && selectedLayerIds.length === 1 && <div className={`ix-selected-strip ${mobileInspectorOpen ? 'is-mobile-open' : ''}`}>
+          <div className="ix-selected-strip__summary">
             <Check/>
             <span>
               <b>{selectedLayer.name}</b>
@@ -877,6 +882,16 @@ export function InteractiveStudioPage() {
               </small>
             </span>
           </div>
+          <button
+            className="ix-selected-strip__mobile-toggle"
+            type="button"
+            onClick={() => setMobileInspectorOpen(open => !open)}
+            aria-label={mobileInspectorOpen ? 'Hide object controls' : 'Show object controls'}
+            aria-expanded={mobileInspectorOpen}
+          >
+            {mobileInspectorOpen ? <ChevronDown/> : <ChevronUp/>}
+            <span>{mobileInspectorOpen ? 'Hide' : 'Edit'}</span>
+          </button>
           {selectedLayer.type === 'text' && <label>Text<input type="text" value={selectedLayer.text || ''} onChange={event => {
             const value = event.target.value;
             updateLayer(selectedLayer.id, {text: value, name: value.trim() || 'Text note'});

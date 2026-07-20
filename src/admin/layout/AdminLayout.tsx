@@ -130,7 +130,7 @@ export function AdminLayout() {
     <AdminTranslationLayer/>
     <a className="nk-admin-skip" href="#admin-main">{text('Skip to main content', 'Μετάβαση στο κύριο περιεχόμενο')}</a>
     <aside ref={sidebarRef} id="admin-navigation" className={`nk-admin-sidebar ${mobileOpen ? 'open' : ''}`}>
-      <div className="nk-admin-logo"><img src={publicAsset('assets/nk-logo-transparent-v2.png')} alt=""/><div><b>NK Electrical</b><small>Administration</small></div><button type="button" onClick={close} aria-label="Close admin navigation"><X/></button></div>
+      <div className="nk-admin-logo"><img src={publicAsset('assets/nk-logo-transparent-v2.png')} alt=""/><div><b><span className="nk-admin-logo__desktop-title">NK Electrical</span><span className="nk-admin-logo__mobile-title">{text('All admin areas', 'Όλες οι περιοχές')}</span></b><small>Administration</small></div><button type="button" onClick={close} aria-label="Close admin navigation"><X/></button></div>
       <button className="nk-admin-sidebar-search" type="button" onClick={openCommand} data-admin-tour="search"><Search/><span>Search admin</span><kbd>Ctrl K</kbd></button>
       <nav ref={sidebarNavRef} aria-label="Admin navigation">
         <NavItem {...overview[0]} close={close}/>
