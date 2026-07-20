@@ -1,0 +1,308 @@
+/*
+ * Destination-aware interaction language.
+ * Navigation identifies where a link goes; page actions inherit the visual
+ * grammar of the page they live on. Remotion owns the route-loading signal.
+ */
+.ia-shell[data-interaction-profile]{
+  --interaction-accent:var(--route-accent,#42ddff);
+  --interaction-secondary:var(--route-secondary,#ff7957);
+  --interaction-deep:var(--route-deep,#071421);
+}
+
+.ia-route-signal{
+  position:fixed;
+  z-index:221;
+  top:84px;
+  left:0;
+  width:100%;
+  height:7px;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:1;
+  animation:iaRouteSignalShell 1.82s linear both;
+}
+.ia-route-signal>div{background:transparent!important}
+@keyframes iaRouteSignalShell{
+  0%,72%{opacity:1}
+  100%{opacity:0}
+}
+
+.ia-shell :is(
+  .ia-desktop-nav,
+  .ia-mega,
+  .ia-mobile-menu,
+  .ia-footer-lead
+) [data-route-profile]{
+  --route-link-accent:#42ddff;
+  --route-link-secondary:#ff7957;
+  position:relative;
+  isolation:isolate;
+}
+
+.ia-shell [data-route-profile='home']{--route-link-accent:#42ddff;--route-link-secondary:#ff7957}
+.ia-shell [data-route-profile='services'],
+.ia-shell [data-route-profile='installations']{--route-link-accent:#31d8f5;--route-link-secondary:#ff6a3d}
+.ia-shell [data-route-profile='lighting'],
+.ia-shell [data-route-profile='shop-lighting']{--route-link-accent:#ffc14a;--route-link-secondary:#b35cff}
+.ia-shell [data-route-profile='automation']{--route-link-accent:#3ce4f5;--route-link-secondary:#9667ff}
+.ia-shell [data-route-profile='security']{--route-link-accent:#34d3bf;--route-link-secondary:#ff465b}
+.ia-shell [data-route-profile='maintenance']{--route-link-accent:#d3ef48;--route-link-secondary:#4b6fff}
+.ia-shell [data-route-profile='shop'],
+.ia-shell [data-route-profile='shop-appliances'],
+.ia-shell [data-route-profile='product']{--route-link-accent:#38d4c4;--route-link-secondary:#ff6b54}
+.ia-shell [data-route-profile='shop-offers']{--route-link-accent:#ffb038;--route-link-secondary:#ff3192}
+.ia-shell [data-route-profile='shop-catalogues']{--route-link-accent:#36d7ff;--route-link-secondary:#ffc250}
+.ia-shell [data-route-profile='projects']{--route-link-accent:#d6a15f;--route-link-secondary:#67b47a}
+.ia-shell [data-route-profile='about']{--route-link-accent:#ff9d69;--route-link-secondary:#e35f58}
+.ia-shell [data-route-profile='contact']{--route-link-accent:#42d8ca;--route-link-secondary:#ff704f}
+.ia-shell [data-route-profile='quote']{--route-link-accent:#cce94b;--route-link-secondary:#ff684d}
+
+.ia-desktop-nav>[data-route-profile]{
+  overflow:hidden;
+  border-bottom-color:color-mix(in srgb,var(--route-link-accent) 28%,transparent);
+}
+.ia-desktop-nav>[data-route-profile]::before,
+.ia-desktop-nav>[data-route-profile]::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  transition:transform .42s cubic-bezier(.16,1,.3,1),opacity .3s ease,background-size .42s cubic-bezier(.16,1,.3,1);
+}
+.ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active)::before,
+.ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active)::after{opacity:1}
+.ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active){
+  border-bottom-color:var(--route-link-accent);
+  color:#fff;
+}
+
+/* Home: parallel energized conductors arrive from the left. */
+.ia-desktop-nav>[data-route-motion='conductor']::before{
+  inset:auto 12% 10px 12%;
+  height:8px;
+  opacity:.18;
+  background:linear-gradient(var(--route-link-secondary) 0 0) 0 0/72% 1px no-repeat,
+    linear-gradient(var(--route-link-accent) 0 0) 30% 3px/70% 2px no-repeat,
+    linear-gradient(#c9f9ff 0 0) 8% 7px/82% 1px no-repeat;
+  transform:translateX(-115%);
+}
+.ia-desktop-nav>[data-route-motion='conductor']:is(:hover,:focus-visible,.active)::before{transform:none}
+
+/* Services: branching circuit trace. */
+.ia-desktop-nav>[data-route-motion='circuit']::before{
+  inset:12px 7px 10px;
+  opacity:.12;
+  background:
+    linear-gradient(90deg,var(--route-link-accent),var(--route-link-accent)) 0 55%/0 1px no-repeat,
+    linear-gradient(135deg,transparent 46%,var(--route-link-secondary) 48% 52%,transparent 54%) 55% 0/18px 18px no-repeat,
+    radial-gradient(circle,var(--route-link-accent) 0 2px,transparent 2.5px) 100% 55%/7px 7px no-repeat;
+}
+.ia-desktop-nav>[data-route-motion='circuit']:is(:hover,:focus-visible,.active)::before{background-size:78% 1px,18px 18px,7px 7px}
+
+/* Shop: a single deliberate scanner pass. */
+.ia-desktop-nav>[data-route-motion='scan']::before{
+  top:9px;
+  bottom:9px;
+  left:-9px;
+  width:24px;
+  opacity:.22;
+  background:linear-gradient(90deg,transparent,var(--route-link-accent),#fff,var(--route-link-accent),transparent);
+  filter:blur(.2px);
+  transform:translateX(0);
+}
+.ia-desktop-nav>[data-route-motion='scan']:is(:hover,:focus-visible,.active)::before{transform:translateX(calc(100% + 150px))}
+
+/* Projects and catalogues: precise framing corners build in. */
+.ia-desktop-nav>[data-route-motion='frame']::before{
+  inset:10px 7px 8px;
+  opacity:.16;
+  background:
+    linear-gradient(var(--route-link-accent) 0 0) 0 0/0 1px no-repeat,
+    linear-gradient(var(--route-link-accent) 0 0) 0 0/1px 0 no-repeat,
+    linear-gradient(var(--route-link-secondary) 0 0) 100% 100%/0 1px no-repeat,
+    linear-gradient(var(--route-link-secondary) 0 0) 100% 100%/1px 0 no-repeat;
+}
+.ia-desktop-nav>[data-route-motion='frame']:is(:hover,:focus-visible,.active)::before{background-size:24px 1px,1px 18px,24px 1px,1px 18px}
+
+/* About: a measured timeline marker, not a generic underline. */
+.ia-desktop-nav>[data-route-motion='timeline']::before{
+  left:12%;
+  right:12%;
+  bottom:12px;
+  height:4px;
+  opacity:.16;
+  background:radial-gradient(circle,var(--route-link-secondary) 0 2px,transparent 2.5px) 0 50%/25% 4px repeat-x;
+  transform:scaleX(.15);
+}
+.ia-desktop-nav>[data-route-motion='timeline']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+
+/* Contact: calm signal rings. */
+.ia-desktop-nav>[data-route-motion='radar']::before{
+  right:10px;
+  top:50%;
+  width:42px;
+  height:42px;
+  opacity:.08;
+  border:1px solid var(--route-link-accent);
+  border-radius:50%;
+  box-shadow:0 0 0 7px color-mix(in srgb,var(--route-link-accent) 18%,transparent),0 0 0 14px color-mix(in srgb,var(--route-link-accent) 8%,transparent);
+  transform:translateY(-50%) scale(.2);
+}
+.ia-desktop-nav>[data-route-motion='radar']:is(:hover,:focus-visible,.active)::before{transform:translateY(-50%) scale(1)}
+
+/* Quote/offers: connector segments fill toward the destination. */
+.ia-shell [data-route-motion='connector']::before{
+  background:repeating-linear-gradient(90deg,var(--route-link-accent) 0 9px,transparent 9px 14px);
+}
+.ia-desktop-nav>[data-route-motion='connector']::before{
+  left:12%;
+  right:12%;
+  bottom:11px;
+  height:3px;
+  opacity:.15;
+  transform:scaleX(0);
+  transform-origin:left;
+}
+.ia-desktop-nav>[data-route-motion='connector']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+
+/* Lighting, automation, security and diagnostics get their own instruments. */
+.ia-desktop-nav>[data-route-motion='lighting']::before{
+  left:18%;
+  right:18%;
+  bottom:9px;
+  height:7px;
+  opacity:.15;
+  background:radial-gradient(circle,var(--route-link-accent) 0 2px,transparent 3px) 0 50%/25% 7px repeat-x;
+  transform:scale(.35);
+}
+.ia-desktop-nav>[data-route-motion='lighting']:is(:hover,:focus-visible,.active)::before{transform:scale(1);filter:drop-shadow(0 0 5px var(--route-link-accent))}
+.ia-desktop-nav>[data-route-motion='automation']::before{
+  inset:auto 12% 10px;
+  height:5px;
+  opacity:.14;
+  background:repeating-linear-gradient(90deg,var(--route-link-accent) 0 12px,transparent 12px 17px,var(--route-link-secondary) 17px 22px,transparent 22px 28px);
+  transform:scaleX(0);
+  transform-origin:left;
+}
+.ia-desktop-nav>[data-route-motion='automation']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+.ia-desktop-nav>[data-route-motion='security']::before{
+  top:8px;
+  bottom:8px;
+  left:50%;
+  width:60%;
+  opacity:.1;
+  background:conic-gradient(from 220deg at 0 50%,transparent,var(--route-link-accent),transparent 42%);
+  transform:scaleX(.1);
+  transform-origin:left;
+}
+.ia-desktop-nav>[data-route-motion='security']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+.ia-desktop-nav>[data-route-motion='diagnostic']::before{
+  left:12%;
+  right:12%;
+  bottom:9px;
+  height:8px;
+  opacity:.14;
+  background:repeating-linear-gradient(90deg,var(--route-link-accent) 0 3px,transparent 3px 7px);
+  transform:scaleY(.2);
+}
+.ia-desktop-nav>[data-route-motion='diagnostic']:is(:hover,:focus-visible,.active)::before{transform:scaleY(1)}
+
+/* Mega, mobile and primary page actions keep the same destination identity. */
+.ia-shell :is(.ia-mega>nav,.ia-mobile-menu) [data-route-profile]{
+  overflow:hidden;
+  border-color:color-mix(in srgb,var(--route-link-accent) 22%,transparent);
+}
+.ia-shell :is(.ia-mega>nav,.ia-mobile-menu) [data-route-profile]::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  opacity:0;
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--route-link-accent) 16%,transparent),transparent 68%),
+    repeating-linear-gradient(90deg,transparent 0 28px,color-mix(in srgb,var(--route-link-secondary) 13%,transparent) 28px 29px);
+  transform:translateX(-18%);
+  transition:opacity .25s ease,transform .42s cubic-bezier(.16,1,.3,1);
+}
+.ia-shell :is(.ia-mega>nav,.ia-mobile-menu) [data-route-profile]:is(:hover,:focus-visible)::before{opacity:1;transform:none}
+
+.ia-quote-button[data-route-profile],
+.ia-footer-lead>[data-route-profile]{
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--route-link-accent) 58%,transparent)!important;
+}
+.ia-quote-button[data-route-profile]::after,
+.ia-footer-lead>[data-route-profile]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  opacity:.14;
+  background:repeating-linear-gradient(90deg,var(--route-link-accent) 0 10px,transparent 10px 18px);
+  transform:translateX(-105%);
+  transition:transform .62s cubic-bezier(.16,1,.3,1),opacity .25s ease;
+}
+.ia-quote-button[data-route-profile]:is(:hover,:focus-visible)::after,
+.ia-footer-lead>[data-route-profile]:is(:hover,:focus-visible)::after{transform:translateX(0);opacity:.23}
+
+/* Page-level actions inherit a motion signature from their subject. */
+.ia-shell[data-interaction-profile] .ia-main :is(
+  a.button,
+  button:not(.ia-live-edit-button),
+  .ia-service-card,
+  .product-card,
+  .project-archive-item,
+  .catalogue-card,
+  .back-link
+){
+  --action-motion-accent:var(--route-accent);
+  transition:
+    transform .38s cubic-bezier(.16,1,.3,1),
+    border-color .25s ease,
+    box-shadow .35s ease,
+    background-color .25s ease;
+}
+.ia-shell[data-interaction-motion='circuit'] .ia-main :is(a.button,.ia-service-card):is(:hover,:focus-visible){
+  box-shadow:inset 5px 0 0 var(--route-accent),inset 10px 0 0 color-mix(in srgb,var(--route-secondary) 55%,transparent),0 15px 34px color-mix(in srgb,var(--route-deep) 18%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='scan'] .ia-main :is(a.button,.product-card,.catalogue-card):is(:hover,:focus-visible){
+  box-shadow:inset 0 3px 0 var(--route-accent),0 15px 34px color-mix(in srgb,var(--route-deep) 18%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='frame'] .ia-main :is(a.button,.project-archive-item,.catalogue-card):is(:hover,:focus-visible){
+  outline:1px solid var(--route-accent);
+  outline-offset:-7px;
+}
+.ia-shell[data-interaction-motion='timeline'] .ia-main :is(a.button,.back-link):is(:hover,:focus-visible){
+  box-shadow:inset 0 -4px 0 var(--route-accent)!important;
+}
+.ia-shell[data-interaction-motion='radar'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--route-accent) 15%,transparent),0 0 0 9px color-mix(in srgb,var(--route-accent) 6%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='connector'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
+  border-color:var(--route-accent)!important;
+  box-shadow:inset 11px 0 0 color-mix(in srgb,var(--route-accent) 45%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='lighting'] .ia-main :is(a.button,.product-card):is(:hover,:focus-visible){
+  box-shadow:0 0 0 1px var(--route-accent),0 13px 34px color-mix(in srgb,var(--route-accent) 20%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='automation'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
+  box-shadow:inset 0 0 0 2px var(--route-accent),inset 0 -7px 0 color-mix(in srgb,var(--route-secondary) 38%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='security'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
+  box-shadow:inset 0 0 0 2px var(--route-accent),0 0 0 5px color-mix(in srgb,var(--route-secondary) 10%,transparent)!important;
+}
+.ia-shell[data-interaction-motion='diagnostic'] .ia-main :is(a.button,button):is(:hover,:focus-visible){
+  border-color:var(--route-accent)!important;
+  box-shadow:inset 0 -4px 0 var(--route-accent),0 12px 28px color-mix(in srgb,var(--route-deep) 16%,transparent)!important;
+}
+
+@media(max-width:900px){
+  .ia-route-signal{top:70px;height:6px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ia-route-signal{display:none}
+  .ia-shell [data-route-profile]::before,
+  .ia-shell [data-route-profile]::after,
+  .ia-shell[data-interaction-profile] .ia-main :is(a,button){transition:none!important}
+}
