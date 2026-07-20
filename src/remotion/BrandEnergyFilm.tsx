@@ -1,10 +1,10 @@
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 
 const wires = [
-  {color: '#2f6fb7', path: 'M-4 8 C18 7 31 10 43 18 S69 25 94 25'},
-  {color: '#74412a', path: 'M-4 23 C17 21 28 24 42 29 S68 31 94 31'},
-  {color: '#111820', path: 'M-4 38 C16 35 29 34 43 35 S69 37 94 37'},
-  {color: '#8b9298', path: 'M-4 53 C18 50 30 44 43 42 S70 43 94 43'},
+  {color: '#2f6fb7', path: 'M-8 8 C34 7 57 9 82 16 S132 24 178 25'},
+  {color: '#74412a', path: 'M-8 23 C33 21 56 23 82 28 S132 30 178 31'},
+  {color: '#111820', path: 'M-8 38 C31 35 56 34 83 35 S133 36 178 37'},
+  {color: '#8b9298', path: 'M-8 53 C34 50 57 44 83 42 S134 42 178 43'},
 ];
 
 const clamp = {
@@ -15,28 +15,22 @@ const clamp = {
 export function BrandEnergyFilm() {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
+  const cycleFrames = Math.round(2.4 * fps);
+  const cycleFrame = frame % cycleFrames;
+  const phase = cycleFrame / cycleFrames;
   const travel = interpolate(
-    frame,
-    [0, 1.55 * fps],
-    [76, -34],
-    {...clamp, easing: Easing.bezier(0.45, 0, 0.55, 1)},
+    cycleFrame,
+    [0, cycleFrames],
+    [0, -92],
+    {...clamp, easing: Easing.linear},
   );
-  const firstSpark = interpolate(
-    frame,
-    [0, .18 * fps, .26 * fps, .42 * fps, .52 * fps],
-    [0, 0, 1, .35, 0],
-    clamp,
-  );
-  const secondSpark = interpolate(
-    frame,
-    [.72 * fps, .9 * fps, .98 * fps, 1.14 * fps, 1.24 * fps],
-    [0, 0, .9, .28, 0],
-    clamp,
-  );
-  const spark = Math.max(firstSpark, secondSpark);
+  const primarySpark = Math.pow((Math.sin(phase * Math.PI * 8 - Math.PI / 2) + 1) / 2, 10);
+  const secondarySpark = Math.pow((Math.sin(phase * Math.PI * 8 + Math.PI / 3) + 1) / 2, 14) * .56;
+  const spark = .16 + Math.max(primarySpark, secondarySpark) * .84;
+  const sparkRotation = phase * 360;
 
   return <AbsoluteFill style={{overflow: 'visible', background: 'transparent'}}>
-    <svg width="100%" height="100%" viewBox="0 0 96 62" preserveAspectRatio="none" aria-hidden="true">
+    <svg width="100%" height="100%" viewBox="0 0 180 62" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <filter id="brand-wire-shadow" x="-30%" y="-80%" width="170%" height="260%">
           <feDropShadow dx="0" dy="1.2" stdDeviation="1.25" floodColor="#020611" floodOpacity=".48"/>
@@ -61,15 +55,15 @@ export function BrandEnergyFilm() {
         stroke={index === 1 ? '#fff4d5' : '#dffbff'}
         strokeWidth={index === 2 ? 1.05 : 1.3}
         strokeLinecap="round"
-        strokeDasharray="9 92"
-        strokeDashoffset={travel - index * 7}
+        strokeDasharray="10 36"
+        strokeDashoffset={travel - index * 11.5}
         filter="url(#brand-wire-glow)"
-        opacity={.72}
+        opacity={.8}
         key={`energy-${wire.color}`}
       />)}
 
-      <g transform="translate(92 34)" opacity={spark} filter="url(#brand-wire-glow)">
-        <circle r={2.6 + spark * 1.7} fill="#fff" opacity=".92"/>
+      <g transform={`translate(176 34) rotate(${sparkRotation})`} opacity={spark} filter="url(#brand-wire-glow)">
+        <circle r={2.2 + spark * 2.1} fill="#fff" opacity=".94"/>
         <path d="M-2-4 0-11 2-4M4-2 10-5 5 1M4 3 9 8 1 5M-4 2-9 6-5-1" fill="none" stroke="#c9fbff" strokeWidth="1.35" strokeLinecap="round"/>
       </g>
     </svg>

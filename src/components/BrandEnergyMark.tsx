@@ -31,8 +31,8 @@ export function BrandEnergyMark({src, alt, energized}: BrandEnergyMarkProps) {
       <Player
         ref={playerRef}
         component={BrandEnergyFilm}
-        durationInFrames={48}
-        compositionWidth={96}
+        durationInFrames={72}
+        compositionWidth={180}
         compositionHeight={62}
         fps={30}
         loop
