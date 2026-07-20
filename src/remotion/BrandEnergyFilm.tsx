@@ -37,7 +37,7 @@ export function BrandEnergyFilm() {
           <feDropShadow dx="0" dy="1.2" stdDeviation="1.25" floodColor="#020611" floodOpacity=".48"/>
         </filter>
         <filter id="brand-wire-glow" x="-80%" y="-160%" width="280%" height="420%">
-          <feGaussianBlur stdDeviation=".72" result="blur"/>
+          <feGaussianBlur stdDeviation="1.05" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
@@ -54,13 +54,25 @@ export function BrandEnergyFilm() {
         d={wire.path}
         fill="none"
         stroke={index === 1 ? '#fff4d5' : '#dffbff'}
-        strokeWidth={index === 2 ? .5 : .65}
+        strokeWidth={index === 2 ? 1.8 : 2.2}
         strokeLinecap="round"
-        strokeDasharray="4 88"
+        strokeDasharray="20 72"
         strokeDashoffset={travel - index * 19}
         filter="url(#brand-wire-glow)"
-        opacity={.28}
-        key={`energy-${wire.color}`}
+        opacity={.34}
+        key={`energy-halo-${wire.color}`}
+      />)}
+
+      {wires.map((wire, index) => <path
+        d={wire.path}
+        fill="none"
+        stroke={index === 1 ? '#fff1b8' : '#c8faff'}
+        strokeWidth={index === 2 ? 1 : 1.2}
+        strokeLinecap="round"
+        strokeDasharray="20 72"
+        strokeDashoffset={travel - index * 19}
+        opacity={.96}
+        key={`energy-core-${wire.color}`}
       />)}
 
       <g transform="translate(176 34)" opacity={spark} filter="url(#brand-wire-glow)">
