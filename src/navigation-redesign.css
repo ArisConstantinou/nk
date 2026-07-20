@@ -8,7 +8,16 @@ html[data-experience='tech'] body{overflow-x:hidden}
 .ia-header{position:sticky;z-index:220;top:0;background:rgba(5,8,20,.97);border-bottom:1px solid var(--system-line);box-shadow:0 16px 50px rgba(0,0,0,.22);backdrop-filter:blur(18px)}
 .ia-header-bar{height:86px;display:grid;grid-template-columns:minmax(210px,1fr) auto minmax(280px,1fr);align-items:center;gap:26px;padding:0 clamp(22px,4vw,72px)}
 .ia-brand{justify-self:start;display:flex;align-items:center;gap:12px;min-width:0}
-.ia-brand img{width:66px;height:58px;padding:0;object-fit:contain;background:transparent;border:0;filter:drop-shadow(0 0 15px rgba(128,100,255,.2))}
+.ia-brand-mark{position:relative;z-index:0;width:66px;height:58px;flex:0 0 66px;display:grid;place-items:center;isolation:isolate;background:transparent!important;border:0!important;box-shadow:none!important}
+.ia-brand-mark picture{display:contents!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.ia-brand img,.ia-brand-logo{position:relative;z-index:2;width:66px;height:58px;padding:0;display:block;object-fit:contain;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;filter:drop-shadow(0 0 15px rgba(128,100,255,.2))}
+.ia-brand-wires{position:absolute;z-index:0;right:calc(100% - 10px);top:50%;width:76px;height:50px;overflow:visible;pointer-events:none;transform:translateY(-50%)}
+.ia-brand-wires>div{overflow:visible!important;background:transparent!important}
+.ia-brand-contact-glow{position:absolute;z-index:1;left:-3px;top:50%;width:11px;height:11px;border-radius:50%;background:#dffbff;opacity:0;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 8px #fff,0 0 18px #3be8ff}
+.ia-brand:hover .ia-brand-logo,.ia-brand:focus-visible .ia-brand-logo,.ia-brand-mark.is-energized .ia-brand-logo{animation:iaBrandLogoCharge 1.6s cubic-bezier(.16,1,.3,1) infinite}
+.ia-brand:hover .ia-brand-contact-glow,.ia-brand:focus-visible .ia-brand-contact-glow,.ia-brand-mark.is-energized .ia-brand-contact-glow{animation:iaBrandContactFlash 1.6s steps(1,end) infinite}
+@keyframes iaBrandLogoCharge{0%,12%,100%{filter:drop-shadow(0 0 15px rgba(128,100,255,.2))}18%{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 15px #3be8ff) drop-shadow(0 0 24px rgba(255,39,50,.85))}28%{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px rgba(255,39,50,.68))}42%,72%{filter:drop-shadow(0 0 15px rgba(128,100,255,.3))}78%{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 13px #3be8ff)}}
+@keyframes iaBrandContactFlash{0%,14%,31%,74%,88%,100%{opacity:0}18%,27%,78%,84%{opacity:1}}
 .ia-brand>span{display:flex;flex-direction:column;gap:5px;min-width:0}
 .ia-brand strong,.ia-brand small{position:relative;display:inline-block;align-self:flex-start}
 .ia-brand strong{font-family:var(--display);font-size:19px;font-weight:500;letter-spacing:-.02em;color:#eef2f7}
@@ -199,7 +208,7 @@ html[data-experience='tech'] body{overflow-x:hidden}
   html[data-experience='tech']{--command-height:72px}
   .ia-header{backdrop-filter:none}
   .ia-header-bar{height:72px;grid-template-columns:minmax(0,1fr) auto;padding:0 14px}
-  .ia-brand img{width:54px;height:48px}.ia-brand strong{font-size:17px}.ia-brand small{font-size:12px!important}
+  .ia-brand-mark{width:54px;height:48px;flex-basis:54px}.ia-brand img,.ia-brand-logo{width:54px;height:48px}.ia-brand-wires{right:calc(100% - 8px);width:44px;height:42px}.ia-brand strong{font-size:17px}.ia-brand small{font-size:12px!important}
   .ia-desktop-nav,.ia-header-phone,.ia-quote-button{display:none}
   .ia-mobile-trigger{display:grid}
   .ia-live-editor-dock{top:84px;right:8px;width:min(360px,calc(100vw - 16px));max-height:calc(100dvh - 92px)}
@@ -294,3 +303,4 @@ html[data-theme='light'] .cms-section{border-color:var(--system-line);background
   .ia-palette-selector--mobile{height:46px}.ia-palette-selector--mobile summary{width:100%;height:46px;grid-template-columns:18px 1fr 14px}.ia-palette-selector--mobile summary strong{max-width:none}.ia-palette-selector--mobile .ia-palette-menu{position:fixed;z-index:240;left:12px;right:12px;top:86px;width:auto;max-height:calc(100dvh - 104px);overflow:auto}
 }
 @media(max-width:560px){.ia-mobile-appearance{grid-template-columns:1fr}.ia-palette-menu{width:min(330px,calc(100vw - 24px))}}
+@media(prefers-reduced-motion:reduce){.ia-brand:hover .ia-brand-logo,.ia-brand:focus-visible .ia-brand-logo,.ia-brand:hover .ia-brand-contact-glow,.ia-brand:focus-visible .ia-brand-contact-glow,.ia-brand-mark.is-energized .ia-brand-logo,.ia-brand-mark.is-energized .ia-brand-contact-glow{animation:none}.ia-brand:hover .ia-brand-logo,.ia-brand:focus-visible .ia-brand-logo,.ia-brand-mark.is-energized .ia-brand-logo{filter:drop-shadow(0 0 15px rgba(128,100,255,.2))}.ia-brand:hover .ia-brand-contact-glow,.ia-brand:focus-visible .ia-brand-contact-glow,.ia-brand-mark.is-energized .ia-brand-contact-glow{opacity:.42}}

@@ -1,0 +1,50 @@
+import {useEffect, useRef} from 'react';
+import {Player, type PlayerRef} from '@remotion/player';
+import {BrandEnergyFilm} from '../remotion/BrandEnergyFilm';
+import {useMotionPreference} from '../interactive/react/useMotionPreference';
+import {ResponsiveImage} from './ResponsiveImage';
+
+type BrandEnergyMarkProps = {
+  src: string;
+  alt: string;
+  energized: boolean;
+};
+
+export function BrandEnergyMark({src, alt, energized}: BrandEnergyMarkProps) {
+  const playerRef = useRef<PlayerRef>(null);
+  const motionPreference = useMotionPreference();
+  const shouldAnimate = energized && motionPreference === 'full';
+
+  useEffect(() => {
+    if (shouldAnimate) {
+      playerRef.current?.seekTo(0);
+      playerRef.current?.play();
+      return;
+    }
+
+    playerRef.current?.pause();
+    playerRef.current?.seekTo(0);
+  }, [shouldAnimate]);
+
+  return <span className={`ia-brand-mark${energized ? ' is-energized' : ''}`}>
+    <span className="ia-brand-wires" aria-hidden="true">
+      <Player
+        ref={playerRef}
+        component={BrandEnergyFilm}
+        durationInFrames={48}
+        compositionWidth={96}
+        compositionHeight={62}
+        fps={30}
+        loop
+        autoPlay={false}
+        initiallyMuted
+        controls={false}
+        clickToPlay={false}
+        acknowledgeRemotionLicense
+        style={{width: '100%', height: '100%', overflow: 'visible', background: 'transparent'}}
+      />
+    </span>
+    <ResponsiveImage className="ia-brand-logo" src={src} alt={alt}/>
+    <span className="ia-brand-contact-glow" aria-hidden="true"/>
+  </span>;
+}
