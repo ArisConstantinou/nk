@@ -12,6 +12,7 @@ import {applyTheme, getThemePreference, saveThemePreference, themeChangeEvent, w
 import {getHomePalette, homePaletteChangeEvent, homePaletteOptions, saveHomePalette, type HomePaletteId} from '../homePalettes';
 
 type MegaSection = 'services' | 'shop' | null;
+type MegaOpenMode = 'hover' | 'click' | null;
 type LinkItem = {label: string; description?: string; to?: string; url?: string};
 
 const isInternalUrl = (url: string) => url.startsWith('/') && !url.startsWith('//');
@@ -118,6 +119,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const headerRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const megaOpenModeRef = useRef<MegaOpenMode>(null);
+  const megaOpenTimerRef = useRef<number | null>(null);
+  const megaCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
   const menu = (name: PublicNavigationItem['menu']) => navigation.filter(item => item.menu === name && item.active).sort((a, b) => a.position - b.position);
   const linkTo = (item: LinkItem) => item.url || item.to || '/';
@@ -131,7 +135,51 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const footerCompany: LinkItem[] = menu('footer-company').length ? menu('footer-company') : [{label: 'Projects', url: '/projects'}, {label: 'About', url: '/about'}, {label: 'Contact', url: '/contact'}, {label: 'Request a Quote', url: '/request-a-quote'}];
   const tel = settings.phone.replace(/[^+\d]/g, '');
 
+  const clearMegaTimers = () => {
+    if (megaOpenTimerRef.current !== null) window.clearTimeout(megaOpenTimerRef.current);
+    if (megaCloseTimerRef.current !== null) window.clearTimeout(megaCloseTimerRef.current);
+    megaOpenTimerRef.current = null;
+    megaCloseTimerRef.current = null;
+  };
+
+  const supportsMenuHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  const openMegaOnHover = (section: Exclude<MegaSection, null>) => {
+    if (!supportsMenuHover()) return;
+    clearMegaTimers();
+    megaOpenTimerRef.current = window.setTimeout(() => {
+      megaOpenModeRef.current = 'hover';
+      setMegaOpen(section);
+      megaOpenTimerRef.current = null;
+    }, 175);
+  };
+
+  const keepMegaOpenOnHover = () => {
+    if (!supportsMenuHover() || megaCloseTimerRef.current === null) return;
+    window.clearTimeout(megaCloseTimerRef.current);
+    megaCloseTimerRef.current = null;
+  };
+
+  const closeMegaOnHover = () => {
+    if (!supportsMenuHover()) return;
+    if (megaOpenTimerRef.current !== null) {
+      window.clearTimeout(megaOpenTimerRef.current);
+      megaOpenTimerRef.current = null;
+    }
+    if (megaOpenModeRef.current !== 'hover') return;
+    if (megaCloseTimerRef.current !== null) window.clearTimeout(megaCloseTimerRef.current);
+    megaCloseTimerRef.current = window.setTimeout(() => {
+      if (megaOpenModeRef.current === 'hover') {
+        megaOpenModeRef.current = null;
+        setMegaOpen(null);
+      }
+      megaCloseTimerRef.current = null;
+    }, 275);
+  };
+
   useEffect(() => {
+    clearMegaTimers();
+    megaOpenModeRef.current = null;
     setMegaOpen(null);
     setMobileOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
@@ -140,6 +188,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
+      clearMegaTimers();
+      megaOpenModeRef.current = null;
       setMegaOpen(null);
       if (mobileOpen) {
         setMobileOpen(false);
@@ -170,13 +220,33 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   useEffect(() => {
     if (!megaOpen) return;
     const close = (event: MouseEvent) => {
-      if (headerRef.current && !headerRef.current.contains(event.target as Node)) setMegaOpen(null);
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        clearMegaTimers();
+        megaOpenModeRef.current = null;
+        setMegaOpen(null);
+      }
     };
     document.addEventListener('mousedown', close);
     return () => document.removeEventListener('mousedown', close);
   }, [megaOpen]);
 
-  const toggleMega = (section: Exclude<MegaSection, null>) => setMegaOpen(current => current === section ? null : section);
+  useEffect(() => () => clearMegaTimers(), []);
+
+  const toggleMega = (section: Exclude<MegaSection, null>) => {
+    clearMegaTimers();
+    setMegaOpen(current => {
+      if (current !== section) {
+        megaOpenModeRef.current = 'click';
+        return section;
+      }
+      if (megaOpenModeRef.current === 'hover') {
+        megaOpenModeRef.current = 'click';
+        return current;
+      }
+      megaOpenModeRef.current = null;
+      return null;
+    });
+  };
   const toggleMobile = (section: Exclude<MegaSection, null>) => setMobileSection(current => current === section ? null : section);
 
   return <div className="electrical-shell ia-shell">
@@ -185,9 +255,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       <div className="ia-header-bar">
         <Link className="ia-brand" to="/" aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined} onPointerEnter={() => setBrandEnergized(true)} onPointerLeave={() => setBrandEnergized(false)} onFocus={() => setBrandEnergized(true)} onBlur={() => setBrandEnergized(false)}><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} energized={brandEnergized}/><span><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong>{settings.header.showTagline && <small><span className="ia-brand-depth" aria-hidden="true">{settings.brandTagline}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span></small>}</span></Link>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
-          ? <button key="services" type="button" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onClick={() => toggleMega('services')}><span>{item.label}</span><ChevronDown/></button>
+          ? <button key="services" type="button" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><span>{item.label}</span><ChevronDown/></button>
           : linkTo(item) === '/shop'
-            ? <button key="shop" type="button" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onClick={() => toggleMega('shop')}><span>{item.label}</span><ChevronDown/></button>
+            ? <button key="shop" type="button" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><span>{item.label}</span><ChevronDown/></button>
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}>{item.label}</PrimaryLink>)}</nav>
         <div className="ia-header-actions">
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
@@ -198,7 +268,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
         </div>
       </div>
-      {megaOpen && <div className={`ia-mega ia-mega--${megaOpen}`} id={`${megaOpen}-mega-menu`}>
+      {megaOpen && <div className={`ia-mega ia-mega--${megaOpen}`} id={`${megaOpen}-mega-menu`} onMouseEnter={keepMegaOpenOnHover} onMouseLeave={closeMegaOnHover}>
         <div className="ia-mega-heading"><span>{megaOpen === 'services' ? 'SERVICES / EXPERTISE' : 'SHOP / PRODUCTS'}</span><h2>{megaOpen === 'services' ? 'Work performed by our team.' : 'Products available through NK Electrical.'}</h2><p>{megaOpen === 'services' ? 'Planning, installation, integration and support. No product categories are mixed into this path.' : 'Lighting, appliances and official PDF catalogues. Service enquiries remain under Services.'}</p><Link to={megaOpen === 'services' ? '/services' : '/shop'}><span>{megaOpen === 'services' ? 'View all services' : 'Browse all products'}</span><ArrowRight/></Link></div>
         <nav aria-label={`${megaOpen === 'services' ? 'Services' : 'Shop'} menu`}>{(megaOpen === 'services' ? serviceMenu : shopMenu).map((item, index) => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{item.label}</strong><small>{item.description}</small></div><ArrowRight/></SmartLink>)}</nav>
         <aside>{megaOpen === 'services' ? <><CircuitBoard/><small>SERVICE PATH</small><strong>From survey to tested handover.</strong><p>Start with the requirement and the building. Equipment selection follows the scope.</p></> : <><FileText/><small>PRODUCT PATH</small><strong>Products, specifications and downloads.</strong><p>Find the item first, then ask about availability, supply or installation.</p></>}</aside>
