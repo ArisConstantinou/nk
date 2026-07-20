@@ -2358,6 +2358,34 @@
     font-size: 13px;
   }
 
+  .ix-frame-meta {
+    position: relative;
+  }
+
+  .ix-frame-meta__zoom {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + .5rem);
+    right: .55rem;
+    min-width: 0;
+    width: auto;
+    pointer-events: auto;
+  }
+
+  .ix-frame-meta__zoom .ix-stage-zoom-controls--header {
+    position: static;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .38);
+  }
+
+  .ix-frame-meta__zoom .ix-stage-zoom-controls button {
+    min-width: 40px;
+    min-height: 42px;
+  }
+
+  .ix-frame-meta__zoom .ix-stage-zoom-controls__value {
+    min-width: 56px;
+  }
+
   .ix-stage-shell {
     min-height: 0;
     height: 100%;
