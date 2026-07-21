@@ -7,9 +7,10 @@ import {ResponsiveImage} from './ResponsiveImage';
 type BrandEnergyMarkProps = {
   src: string;
   alt: string;
+  showWires?: boolean;
 };
 
-export function BrandEnergyMark({src, alt}: BrandEnergyMarkProps) {
+export function BrandEnergyMark({src, alt, showWires = true}: BrandEnergyMarkProps) {
   const playerRef = useRef<PlayerRef>(null);
   const motionPreference = useMotionPreference();
   const shouldAnimate = motionPreference === 'full';
@@ -26,7 +27,7 @@ export function BrandEnergyMark({src, alt}: BrandEnergyMarkProps) {
   }, [shouldAnimate]);
 
   return <span className="ia-brand-mark">
-    <span className="ia-brand-wires" aria-hidden="true">
+    {showWires && <span className="ia-brand-wires" aria-hidden="true">
       <Player
         ref={playerRef}
         component={BrandEnergyFilm}
@@ -42,7 +43,7 @@ export function BrandEnergyMark({src, alt}: BrandEnergyMarkProps) {
         acknowledgeRemotionLicense
         style={{width: '100%', height: '100%', overflow: 'visible', background: 'transparent'}}
       />
-    </span>
+    </span>}
     <ResponsiveImage className="ia-brand-logo" src={src} alt={alt}/>
   </span>;
 }

@@ -286,6 +286,7 @@ test('secure admin lifecycle', async t => {
     kind: 'settings', slug: 'global-settings-test', title: 'Global settings test', data: {
       address: '72 Test Avenue, Nicosia', phone: '+357 22000000', email: 'info@example.com', hours: 'Monday to Friday, 08:00-17:00',
       mapsUrl: 'https://maps.google.com/', enquiryRecipient: 'info@example.com',
+      header: {showBrandWires: false, showDinRail: false},
       globalComponents: [{
         id: 'global-cta-test', name: 'Global CTA test', scope: 'global', updatedAt: new Date().toISOString(),
         component: {id: 'global-template', type: 'button', enabled: true, label: 'Global CTA', text: 'Published global label', url: '/contact', image: '', alt: '', icon: 'check', scope: 'global', reusableId: 'global-cta-test', groupId: '', style: {width: 100, align: 'stretch', tone: 'accent', padding: 0, radius: 0}},
@@ -293,6 +294,8 @@ test('secure admin lifecycle', async t => {
     },
   }});
   assert.equal(globalSettings.response.status, 201);
+  assert.equal(globalSettings.payload.record.draft.header.showBrandWires, false);
+  assert.equal(globalSettings.payload.record.draft.header.showDinRail, false);
   const publishedSettings = await request(`/content/${globalSettings.payload.record.id}/publish`, {method: 'POST', cookie, csrf, body: {expectedVersion: globalSettings.payload.record.version}});
   assert.equal(publishedSettings.response.status, 200);
 
@@ -314,6 +317,8 @@ test('secure admin lifecycle', async t => {
   assert.equal(publicGlobalPage.data.editorHistory, undefined);
   assert.equal(publicGlobalPage.data.componentLibrary, undefined);
   assert.equal(publicGlobalSettings.data.globalComponents, undefined);
+  assert.equal(publicGlobalSettings.data.header.showBrandWires, false);
+  assert.equal(publicGlobalSettings.data.header.showDinRail, false);
 
   const duplicate = await request(`/content/${record.id}/duplicate`, {method: 'POST', cookie, csrf});
   assert.equal(duplicate.response.status, 201);

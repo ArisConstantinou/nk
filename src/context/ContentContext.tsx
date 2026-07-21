@@ -31,7 +31,7 @@ export type SiteEmail = {id: string; label: string; address: string; active: boo
 export type SiteLocation = {id: string; label: string; address: string; mapsUrl: string; active: boolean; primary: boolean};
 export type SiteOpeningHours = {id: string; label: string; hours: string; active: boolean};
 export type SiteSocialLink = {id: string; platform: string; icon: string; iconUrl: string; url: string; active: boolean; newTab: boolean; placements: Array<'header' | 'footer' | 'mobile' | 'contact'>};
-export type SiteSettings = {address: string; phone: string; email: string; hours: string; mapsUrl: string; mapEmbedUrl: string; brandName: string; brandTagline: string; logoUrl: string; logoAlt: string; faviconUrl: string; defaultSocialImage: string; siteName: string; defaultMetaTitle: string; defaultMetaDescription: string; language: string; locale: string; quoteLabel: string; quoteUrl: string; footerEyebrow: string; footerTitle: string; footerCtaLabel: string; footerCopyright: string; phones: SitePhone[]; emails: SiteEmail[]; locations: SiteLocation[]; openingHours: SiteOpeningHours[]; socialLinks: SiteSocialLink[]; header: {sticky: boolean; showTagline: boolean; showSocials: boolean}; footer: {showSocials: boolean; showContact: boolean; showHours: boolean}};
+export type SiteSettings = {address: string; phone: string; email: string; hours: string; mapsUrl: string; mapEmbedUrl: string; brandName: string; brandTagline: string; logoUrl: string; logoAlt: string; faviconUrl: string; defaultSocialImage: string; siteName: string; defaultMetaTitle: string; defaultMetaDescription: string; language: string; locale: string; quoteLabel: string; quoteUrl: string; footerEyebrow: string; footerTitle: string; footerCtaLabel: string; footerCopyright: string; phones: SitePhone[]; emails: SiteEmail[]; locations: SiteLocation[]; openingHours: SiteOpeningHours[]; socialLinks: SiteSocialLink[]; header: {sticky: boolean; showTagline: boolean; showSocials: boolean; showBrandWires: boolean; showDinRail: boolean}; footer: {showSocials: boolean; showContact: boolean; showHours: boolean}};
 export type PublicCompany = {slug: string; title: string; heading: string; introduction: string; history: string[]; partnerships: string[]};
 export type VisualFontFamily = 'display' | 'body' | 'mono' | 'serif';
 export type VisualTextAlign = 'left' | 'center' | 'right' | 'justify';
@@ -78,7 +78,7 @@ const defaultSettings: SiteSettings = {
     {id: 'instagram-lighting', platform: 'Instagram Lighting', icon: 'instagram', iconUrl: '', url: 'https://www.instagram.com/nk_electrical/', active: true, newTab: true, placements: ['header', 'footer', 'mobile', 'contact']},
     {id: 'instagram-appliances', platform: 'Instagram Appliances', icon: 'instagram', iconUrl: '', url: 'https://www.instagram.com/nk.electrical.ltd/', active: true, newTab: true, placements: ['header', 'footer', 'mobile', 'contact']},
   ],
-  header: {sticky: true, showTagline: true, showSocials: true},
+  header: {sticky: true, showTagline: true, showSocials: true, showBrandWires: true, showDinRail: true},
   footer: {showSocials: true, showContact: true, showHours: false},
 };
 
@@ -159,7 +159,7 @@ function mapSettings(value: Record<string, unknown>): SiteSettings {
     locations: locations.length ? locations : defaultSettings.locations.map(item => ({...item, address: stringValue(value.address, item.address), mapsUrl: stringValue(value.mapsUrl, item.mapsUrl)})),
     openingHours: openingHours.length ? openingHours : defaultSettings.openingHours.map(item => ({...item, hours: stringValue(value.hours, item.hours)})),
     socialLinks: socialLinks.length ? socialLinks : defaultSettings.socialLinks,
-    header: {sticky: headerValue.sticky !== false, showTagline: headerValue.showTagline !== false, showSocials: headerValue.showSocials !== false},
+    header: {sticky: headerValue.sticky !== false, showTagline: headerValue.showTagline !== false, showSocials: headerValue.showSocials !== false, showBrandWires: headerValue.showBrandWires !== false, showDinRail: headerValue.showDinRail !== false},
     footer: {showSocials: footerValue.showSocials !== false, showContact: footerValue.showContact !== false, showHours: footerValue.showHours === true},
   } as SiteSettings;
 }

@@ -139,7 +139,7 @@ function structuredSettings(data) {
     locations: objectList(data.locations ?? [{id: 'primary-location', label: 'Main store', address, mapsUrl, active: true, primary: true}], 'locations', item => ({label: required(item.label, 'location label', 100), address: required(item.address, 'location address', 500), mapsUrl: validUrl(item.mapsUrl, 'location maps URL'), active: item.active !== false, primary: item.primary === true})),
     openingHours: objectList(data.openingHours ?? [{id: 'store-hours', label: 'Store', hours, active: true}], 'openingHours', item => ({label: required(item.label, 'hours label', 100), hours: required(item.hours, 'opening hours', 1200), active: item.active !== false})),
     socialLinks: objectList(data.socialLinks, 'socialLinks', item => ({platform: required(item.platform, 'social platform', 100), icon: optional(item.icon, 'social icon', 80) || 'globe', iconUrl: optionalUrl(item.iconUrl, 'social icon URL', {relative: true}), url: validUrl(item.url, 'social URL'), active: item.active !== false, newTab: item.newTab !== false, placements: socialPlacements(item.placements)}), 50),
-    header: {sticky: header.sticky !== false, showTagline: header.showTagline !== false, showSocials: header.showSocials === true},
+    header: {sticky: header.sticky !== false, showTagline: header.showTagline !== false, showSocials: header.showSocials === true, showBrandWires: header.showBrandWires !== false, showDinRail: header.showDinRail !== false},
     footer: {showSocials: footer.showSocials !== false, showContact: footer.showContact !== false, showHours: footer.showHours === true},
     globalComponents: reusableComponents(data.globalComponents, 'global'),
     visualOverrides: visualOverrides(data.visualOverrides),

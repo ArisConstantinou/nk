@@ -22,7 +22,7 @@
 .ia-shell .ia-brand-rail{
   position:absolute;
   z-index:0;
-  top:27px;
+  top:calc(50% - 4px);
   left:23px;
   right:0;
   height:17px;
@@ -130,6 +130,15 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
   letter-spacing:-.012em;
   text-transform:none;
   text-shadow:0 1px 0 rgba(255,255,255,.68);
+}
+
+.ia-shell .ia-brand.ia-brand--no-rail .ia-brand-copy::before{content:none}
+
+.ia-shell .ia-brand.ia-brand--no-rail strong,
+html[data-theme='light'] .ia-shell .ia-brand.ia-brand--no-rail strong,
+html[data-theme='dark'] .ia-shell .ia-brand.ia-brand--no-rail strong{
+  color:#f3f0e8;
+  text-shadow:none;
 }
 
 @media(max-width:900px){
