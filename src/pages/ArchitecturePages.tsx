@@ -8,6 +8,7 @@ import {ServiceSignature} from '../components/ServiceSignature';
 import {QuoteScopeComposer} from '../components/QuoteScopeComposer';
 import {ModernShopCategoryPage} from './ShopCataloguePage';
 import {ExperienceSlot, experienceSlots} from '../interactive';
+import {ElectricalInstallationsScrollPage} from './electrical/ElectricalInstallationsScrollPage';
 
 // Category routes share the CMS catalogue while keeping their own live filters.
 
@@ -92,11 +93,17 @@ export function ServicesPage() {
 
 export function ServiceDetailPage() {
   const {service = ''} = useParams();
+  const [serviceParams] = useSearchParams();
   const {services} = useContent();
   const base = serviceDefinitions.find(entry => entry.slug === service);
   const managed = services.find(entry => entry.slug === service);
   const item = base ? {...base, ...managed, Icon: managed ? serviceIconMap[managed.icon] || base.Icon : base.Icon} : undefined;
   if (!item) return <section className="not-found"><span>Service not found</span><h1>This service route has moved.</h1><Link to="/services">View all services</Link></section>;
+  if (item.slug === 'electrical-installations' && serviceParams.get('view') !== 'classic') return <ElectricalInstallationsScrollPage
+    title={item.title}
+    description={item.description}
+    actionLabel={item.actionLabel}
+  />;
   const Icon = item.Icon;
   const ActionIcon = base?.Icon || item.Icon;
   return <>
