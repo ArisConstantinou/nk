@@ -358,12 +358,3 @@ html[data-theme='dark'] .quote-builder>header{border-color:rgba(216,164,103,.2)}
 html[data-theme='dark'] .quote-builder>header li button{border-color:rgba(216,164,103,.22);color:#b8c2be}
 html[data-theme='dark'] .quote-builder>header li.active button{border-color:#d8a467;background:#d8a467;color:#101719}
 html[data-theme='dark'] .quote-builder-back{color:#f3f0e8;background:#19272b}
-
-@media(max-width:900px){
-  .ia-shell .ia-brand{left:auto}
-  .ia-shell .ia-brand-wires{width:42px;opacity:.72}
-  .ia-mobile-appearance{grid-template-columns:1fr}
-  .ia-theme-selector--mobile{width:100%;height:46px}
-  .ia-theme-selector--mobile summary{width:100%;height:46px}
-  .ia-theme-selector--mobile .ia-theme-menu{position:fixed;z-index:260;top:86px;right:12px;left:12px;width:auto}
-}

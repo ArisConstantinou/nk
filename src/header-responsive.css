@@ -1,0 +1,35 @@
+/* Compact appearance access and a readable mobile energy mark. */
+.ia-theme-selector--header summary{
+  width:36px;
+  min-width:36px;
+  padding:0;
+  grid-template-columns:1fr;
+  place-items:center;
+}
+
+.ia-theme-selector--header summary span,
+.ia-theme-selector--header summary svg:last-child{display:none}
+
+@media(max-width:900px){
+  .ia-shell .ia-brand{left:auto}
+  .ia-shell .ia-header-bar{padding-left:78px}
+  .ia-shell .ia-brand-mark{width:52px;height:52px;flex-basis:52px}
+  .ia-shell .ia-brand img,
+  .ia-shell .ia-brand-logo{width:50px;height:50px}
+  .ia-shell .ia-brand-wires{
+    left:-74px;
+    right:auto;
+    width:126px;
+    height:50px;
+    opacity:.94;
+  }
+  .ia-theme-selector--header{height:42px}
+  .ia-theme-selector--header summary{width:42px;min-width:42px;height:42px}
+  .ia-theme-selector--header .ia-theme-menu{top:calc(100% + 8px);right:0;width:174px}
+}
+
+@media(max-width:480px){
+  .ia-shell .ia-brand-copy{display:none}
+  .ia-shell .ia-header-bar{padding-right:10px}
+  .ia-shell .ia-header-actions{gap:6px}
+}

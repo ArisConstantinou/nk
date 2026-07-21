@@ -302,7 +302,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
         <div>
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
-          <ThemeSwitcher className="ia-theme-switcher--desktop"/>
         </div>
       </div>
       <div className="ia-header-bar">
@@ -314,6 +313,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
         <div className="ia-header-actions">
           <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
+          <ThemeSwitcher className="ia-theme-selector--header"/>
           <LiveSiteEditButton/>
           <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
         </div>
@@ -324,7 +324,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <aside>{megaOpen === 'services' ? <><CircuitBoard/><small>SERVICE PATH</small><strong>From survey to tested handover.</strong><p>Start with the requirement and the building. Equipment selection follows the scope.</p></> : <><FileText/><small>PRODUCT PATH</small><strong>Products, specifications and downloads.</strong><p>Find the item first, then ask about availability, supply or installation.</p></>}</aside>
       </div>}
       {mobileOpen && <nav ref={mobileNavRef} className="ia-mobile-menu" id="mobile-navigation" aria-label="Mobile navigation">
-        <div className="ia-mobile-appearance"><div><span>Appearance</span><ThemeSwitcher className="ia-theme-switcher--mobile"/></div></div>
         <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'services'} aria-controls="mobile-services" onClick={() => toggleMobile('services')}><span>Services</span><ChevronDown/></button>{mobileSection === 'services' && <div id="mobile-services">{serviceMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
         <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'shop'} aria-controls="mobile-shop" onClick={() => toggleMobile('shop')}><span>Shop</span><ChevronDown/></button>{mobileSection === 'shop' && <div id="mobile-shop">{shopMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
         {primary.filter(item => !['/services', '/shop'].includes(linkTo(item))).map(item => <SmartLink className="ia-mobile-primary" to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{item.label}</span><ArrowRight/></SmartLink>)}
