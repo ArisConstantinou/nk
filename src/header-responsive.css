@@ -12,15 +12,15 @@
 
 @media(max-width:900px){
   .ia-shell .ia-brand{left:auto}
-  .ia-shell .ia-header-bar{padding-left:48px}
+  .ia-shell .ia-header-bar{padding-left:64px}
   .ia-shell .ia-brand-mark{width:52px;height:52px;flex-basis:52px}
   .ia-shell .ia-brand img,
   .ia-shell .ia-brand-logo{width:50px;height:50px}
   .ia-shell .ia-brand-wires{
     left:auto;
-    right:calc(100% - 2px);
-    width:50px;
-    height:50px;
+    right:calc(100% + 4px);
+    width:60px;
+    height:58px;
     opacity:.94;
   }
   .ia-theme-selector--header{height:42px}

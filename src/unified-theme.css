@@ -9,7 +9,7 @@ html[data-experience='tech']{
   --system-panel:#e4ded3;
   --system-panel-2:#d5ccbe;
   --system-ink:#172d32;
-  --system-muted:#637174;
+  --system-muted:#4b5c60;
   --system-line:rgba(23,45,50,.18);
   --system-red:#e06b4d;
   --system-live:#b57942;
@@ -61,7 +61,7 @@ html[data-theme='dark'][data-experience='tech']{
   --page-panel:#e4ded3;
   --page-panel-2:#d5ccbe;
   --page-ink:#172d32;
-  --page-muted:#637174;
+  --page-muted:#4b5c60;
   --page-line:rgba(23,45,50,.18);
   --page-accent:#b57942;
   --page-pop:#e06b4d;
@@ -282,7 +282,7 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
   --contact-paper:#f2eee6;
   --contact-cream:#fbf4e8;
   --contact-ink:#172d32;
-  --contact-muted:#637174;
+  --contact-muted:#4b5c60;
   --contact-line:rgba(23,45,50,.18);
   --contact-teal:#b57942;
   --contact-coral:#e06b4d;
@@ -358,3 +358,149 @@ html[data-theme='dark'] .quote-builder>header{border-color:rgba(216,164,103,.2)}
 html[data-theme='dark'] .quote-builder>header li button{border-color:rgba(216,164,103,.22);color:#b8c2be}
 html[data-theme='dark'] .quote-builder>header li.active button{border-color:#d8a467;background:#d8a467;color:#101719}
 html[data-theme='dark'] .quote-builder-back{color:#f3f0e8;background:#19272b}
+
+/* Light-mode readability: shared tokens and labels must remain legible on every route. */
+html[data-theme='light'][data-experience='tech'],
+html[data-theme='light'] .ia-shell[data-page-theme]{
+  --system-muted:#4b5c60;
+  --page-muted:#4b5c60;
+  --muted:#4b5c60;
+}
+
+html[data-theme='light'] .ia-shell .ia-main :is(
+  .ia-home-split>a>span,
+  .ia-service-card b,
+  .ia-service-summary>span,
+  .ia-service-lists small,
+  .ia-shop-toolbar span,
+  .ia-shop-gateway span,
+  .ia-partnerships header>span,
+  .ia-partnerships article small,
+  .electrical-main .solution-detail-heading span,
+  .electrical-main .installation-delivery-grid article>span,
+  .electrical-main .product-info small,
+  .electrical-main .project-archive-copy time
+){color:#7d4b27!important}
+
+/* Heroes stay dark in both modes, so their annotation palette is deliberately bright. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] :is(
+  .system-page-title>span,
+  .system-page-brief small,
+  .system-page-brief>div,
+  .system-page-art figcaption strong,
+  .system-page-ornament span
+){color:#e4b675!important;opacity:1}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] :is(
+  .system-page-index,
+  .system-page-index nav,
+  .system-page-index nav a,
+  .system-page-index nav>span,
+  .system-page-brief p,
+  .system-page-art figcaption small
+){color:#f5f2ea!important;opacity:1}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index nav b{
+  color:#e4b675!important;
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index__serial{
+  color:#11191c!important;
+  background:#d8a467!important;
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] :is(
+  .system-page-index__serial,
+  .system-page-art figcaption strong,
+  .system-page-ornament span
+){font-size:11px!important;line-height:1.4!important}
+
+html[data-theme='light'] .ia-shell[data-page-theme='contact'] :is(
+  .contact-router-form>header p,
+  .contact-router-step-copy p,
+  .contact-router-review>p
+),
+html[data-theme='light'] .ia-shell[data-page-theme='quote'] :is(
+  .quote-scope-intro>p,
+  .quote-stage-copy p,
+  .quote-builder-success p,
+  .quote-submit-note
+){color:#43575c!important}
+
+html[data-theme='light'] .ia-shell :is(
+  .contact-router-form>header ol button,
+  .contact-router-field>span,
+  .contact-router-review span,
+  .quote-choice-grid button>span,
+  .quote-field>span,
+  .quote-builder>footer button,
+  .catalogue-product-card__copy>span
+){font-size:11px!important;line-height:1.35!important}
+
+@media(max-width:560px){
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index nav{
+    gap:7px;
+    font-size:11px!important;
+    line-height:1.55!important;
+    letter-spacing:.08em;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art figcaption strong,
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-ornament span,
+  .ia-shell[data-page-theme] .ia-route-band-action small,
+  .ia-service-action__copy small{font-size:11px!important;line-height:1.4!important}
+  .service-signature__heading>span{font-size:12px;line-height:1.35}
+}
+
+/* Interactive dark panels use stronger secondary text in either appearance mode. */
+.service-signature__heading>span{font-size:12px;line-height:1.35}
+.service-signature__heading p{color:rgba(255,255,255,.82)!important}
+.lighting-controls label span,
+.lighting-temperature button,
+.lighting-study__legend span,
+.automation-scenes button,
+.automation-readout small,
+.security-zones button,
+.security-plan__room,
+.security-status small,
+.diagnostic-route>div,
+.diagnostic-meter small,
+.diagnostic-meter p,
+.installation-route>span{color:rgba(255,255,255,.76)!important}
+.lighting-temperature button,
+.lighting-study__legend span,
+.automation-readout small,
+.security-plan__room,
+.security-status small,
+.diagnostic-meter small,
+.installation-route small{font-size:11px!important;line-height:1.4!important}
+.security-plan__room{color:rgba(255,255,255,.68)!important}
+.diagnostic-route>div{color:rgba(255,255,255,.68)!important}
+
+/* Bespoke Shop and About annotations follow the same minimum readable scale. */
+.ia-shell .catalogue-hero__ornament span,
+.ia-shell .catalogue-hero__campaign figcaption strong,
+.catalogue-offer-badge{font-size:11px!important;line-height:1.35!important}
+.catalogue-product-card__image>i{font-size:12px!important;line-height:1.35!important}
+
+.about-page :is(
+  .about-history__header,
+  .about-history__title>span,
+  .about-history__title>a,
+  .about-history__era-card small,
+  .about-history__era-card>span,
+  .about-history__era-nav button>span,
+  .about-story__index,
+  .about-story__copy>span,
+  .about-story__facts article>span,
+  .about-team__heading span,
+  .about-team__portrait figcaption,
+  .about-team__filters button span,
+  .about-team__signal,
+  .about-team__detail li span,
+  .about-team__member-rail span,
+  .about-team__member-rail small
+){font-size:11px!important;line-height:1.45!important}
+.about-page .about-history__era-card p{color:rgba(244,240,231,.82)!important;font-size:13px!important}
+.about-page .about-history__era-nav button{color:rgba(244,240,231,.78)!important}
+.about-page .about-team__role{font-size:12px!important;line-height:1.45!important}
+.about-page .about-team__actions a{font-size:12px!important}

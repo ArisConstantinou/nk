@@ -105,7 +105,7 @@ export function AboutHeritageFilm({images}: AboutHeritageFilmProps) {
       fontFamily: 'Arial, sans-serif',
       fontSize: 13,
       letterSpacing: '.2em',
-      color: 'rgba(255,255,255,.62)',
+      color: 'rgba(255,255,255,.82)',
       textTransform: 'uppercase',
     }}>Continuity / 1985 → now → next</div>
   </AbsoluteFill>;
