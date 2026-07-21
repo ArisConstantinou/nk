@@ -1,5 +1,6 @@
 import {ArrowRight, ArrowUpRight, Check, FileText, Lightbulb, ShieldCheck, SlidersHorizontal, Wrench, Zap} from 'lucide-react';
 import type {LucideIcon} from 'lucide-react';
+import {lazy, Suspense} from 'react';
 import {Link, useParams, useSearchParams} from 'react-router-dom';
 import {PageIntro} from './PublicPages';
 import {useContent} from '../context/ContentContext';
@@ -8,7 +9,9 @@ import {ServiceSignature} from '../components/ServiceSignature';
 import {QuoteScopeComposer} from '../components/QuoteScopeComposer';
 import {ModernShopCategoryPage} from './ShopCataloguePage';
 import {ExperienceSlot, experienceSlots} from '../interactive';
-import {ElectricalInstallationsScrollPage} from './electrical/ElectricalInstallationsScrollPage';
+
+const ElectricalInstallationsScrollPage = lazy(() => import('./electrical/ElectricalInstallationsScrollPage')
+  .then(module => ({default: module.ElectricalInstallationsScrollPage})));
 
 // Category routes share the CMS catalogue while keeping their own live filters.
 
@@ -99,11 +102,16 @@ export function ServiceDetailPage() {
   const managed = services.find(entry => entry.slug === service);
   const item = base ? {...base, ...managed, Icon: managed ? serviceIconMap[managed.icon] || base.Icon : base.Icon} : undefined;
   if (!item) return <section className="not-found"><span>Service not found</span><h1>This service route has moved.</h1><Link to="/services">View all services</Link></section>;
-  if (item.slug === 'electrical-installations' && serviceParams.get('view') !== 'classic') return <ElectricalInstallationsScrollPage
-    title={item.title}
-    description={item.description}
-    actionLabel={item.actionLabel}
-  />;
+  if (item.slug === 'electrical-installations' && serviceParams.get('view') !== 'classic') return <Suspense fallback={<section
+    aria-label="Loading installation story"
+    style={{minHeight: 'calc(100svh - var(--command-height, 90px))', background: '#080d0e'}}
+  />}>
+    <ElectricalInstallationsScrollPage
+      title={item.title}
+      description={item.description}
+      actionLabel={item.actionLabel}
+    />
+  </Suspense>;
   const Icon = item.Icon;
   const ActionIcon = base?.Icon || item.Icon;
   return <>
