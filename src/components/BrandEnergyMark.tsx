@@ -31,8 +31,8 @@ export function BrandEnergyMark({src, alt}: BrandEnergyMarkProps) {
         ref={playerRef}
         component={BrandEnergyFilm}
         durationInFrames={180}
-        compositionWidth={180}
-        compositionHeight={62}
+        compositionWidth={64}
+        compositionHeight={48}
         fps={30}
         autoPlay={shouldAnimate}
         loop

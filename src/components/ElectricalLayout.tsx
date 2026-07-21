@@ -169,6 +169,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const footerShop: LinkItem[] = managedFooterShop.length ? [...managedFooterShop, ...shopLinks.filter(fallback => !managedFooterShop.some(item => linkTo(item) === fallback.to))] : shopMenu;
   const footerCompany: LinkItem[] = menu('footer-company').length ? menu('footer-company') : [{label: 'Projects', url: '/projects'}, {label: 'About', url: '/about'}, {label: 'Contact', url: '/contact'}, {label: 'Request a Quote', url: '/request-a-quote'}];
   const tel = settings.phone.replace(/[^+\d]/g, '');
+  const railBrandLabel = settings.brandName.replace(/^NK(?:\s+|[-–—/|·:]*)/i, '').trim() || 'Electrical';
 
   const clearMegaTimers = () => {
     if (megaOpenTimerRef.current !== null) window.clearTimeout(megaOpenTimerRef.current);
@@ -305,7 +306,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         </div>
       </div>
       <div className="ia-header-bar">
-        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong></span></Link>
+        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><span className="ia-brand-rail" aria-hidden="true"/><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
           ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
           : linkTo(item) === '/shop'

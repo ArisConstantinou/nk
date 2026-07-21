@@ -1,4 +1,4 @@
-/* Compact appearance access and a readable mobile energy mark. */
+/* Compact appearance access and the DIN-rail brand assembly. */
 .ia-theme-selector--header summary{
   width:36px;
   min-width:36px;
@@ -10,26 +10,140 @@
 .ia-theme-selector--header summary span,
 .ia-theme-selector--header summary svg:last-child{display:none}
 
+.ia-shell .ia-brand{
+  left:clamp(24px,2.6vw,48px);
+  min-width:158px;
+  gap:0;
+  padding:0 12px 0 0;
+  overflow:visible;
+  isolation:isolate;
+}
+
+.ia-shell .ia-brand-rail{
+  position:absolute;
+  z-index:0;
+  top:27px;
+  left:23px;
+  right:0;
+  height:17px;
+  border-top:1px solid #e1e6e4;
+  border-bottom:1px solid #55656a;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 15px,rgba(22,34,38,.33) 15px 21px,transparent 21px 34px),
+    linear-gradient(180deg,#dce3e2 0 16%,#78868a 17% 33%,#bdc7c7 34% 66%,#657378 67% 83%,#e2e7e5 84% 100%);
+  box-shadow:0 2px 4px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.18);
+  clip-path:polygon(0 0,100% 0,100% 24%,calc(100% - 4px) 24%,calc(100% - 4px) 76%,100% 76%,100% 100%,0 100%,0 76%,4px 76%,4px 24%,0 24%);
+  pointer-events:none;
+}
+
+.ia-shell .ia-brand-mark{
+  position:relative;
+  z-index:3;
+  width:50px;
+  height:48px;
+  flex:0 0 50px;
+  overflow:visible;
+}
+
+.ia-shell .ia-brand-mark::before{
+  content:"";
+  position:absolute;
+  z-index:1;
+  top:10px;
+  right:1px;
+  bottom:0;
+  left:1px;
+  border:1px solid #647378;
+  background:linear-gradient(145deg,#26383d 0%,#122328 48%,#091519 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.32),inset 0 0 0 1px rgba(255,255,255,.035);
+  clip-path:polygon(8% 0,92% 0,100% 11%,100% 100%,0 100%,0 11%);
+}
+
+.ia-shell .ia-brand-mark::after{
+  content:"";
+  position:absolute;
+  z-index:4;
+  top:8px;
+  left:4px;
+  width:42px;
+  height:7px;
+  background:
+    radial-gradient(circle at 5px 50%,#d5dcdb 0 1px,#536268 1.2px 2.5px,transparent 2.7px),
+    radial-gradient(circle at 16px 50%,#d5dcdb 0 1px,#536268 1.2px 2.5px,transparent 2.7px),
+    radial-gradient(circle at 27px 50%,#d5dcdb 0 1px,#536268 1.2px 2.5px,transparent 2.7px),
+    radial-gradient(circle at 38px 50%,#d5dcdb 0 1px,#536268 1.2px 2.5px,transparent 2.7px);
+  pointer-events:none;
+}
+
+.ia-shell .ia-brand img,
+.ia-shell .ia-brand-logo{
+  z-index:3;
+  width:44px;
+  height:38px;
+  transform:translateY(6px);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.36));
+}
+
+.ia-shell .ia-brand-wires{
+  z-index:0;
+  top:-10px;
+  right:auto;
+  left:1px;
+  width:48px;
+  height:36px;
+  opacity:1;
+  transform:none;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.48));
+}
+
+.ia-shell .ia-brand-copy{
+  position:relative;
+  z-index:2;
+  min-width:96px;
+  min-height:24px;
+  height:24px;
+  margin:9px 0 0 -1px;
+  padding:0 13px 0 9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+}
+
+.ia-shell .ia-brand-copy::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:3px 6px 3px 3px;
+  border:1px solid rgba(33,47,51,.32);
+  background:#e9edeb;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.54);
+}
+
+.ia-shell .ia-brand strong,
+html[data-theme='light'] .ia-shell .ia-brand strong,
+html[data-theme='dark'] .ia-shell .ia-brand strong{
+  color:#17282d;
+  font-family:var(--display);
+  font-size:13px;
+  font-weight:720;
+  letter-spacing:-.012em;
+  text-transform:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.68);
+}
+
 @media(max-width:900px){
   .ia-shell .ia-brand{left:auto}
-  .ia-shell .ia-header-bar{padding-left:64px}
-  .ia-shell .ia-brand-mark{width:52px;height:52px;flex-basis:52px}
-  .ia-shell .ia-brand img,
-  .ia-shell .ia-brand-logo{width:50px;height:50px}
-  .ia-shell .ia-brand-wires{
-    left:auto;
-    right:calc(100% - 1px);
-    width:65px;
-    height:58px;
-    opacity:.94;
-  }
+  .ia-shell .ia-header-bar{padding-left:14px}
   .ia-theme-selector--header{height:42px}
   .ia-theme-selector--header summary{width:42px;min-width:42px;height:42px}
   .ia-theme-selector--header .ia-theme-menu{top:calc(100% + 8px);right:0;width:174px}
 }
 
 @media(max-width:480px){
-  .ia-shell .ia-brand-copy{display:none}
   .ia-shell .ia-header-bar{padding-right:10px}
   .ia-shell .ia-header-actions{gap:6px}
+  .ia-shell .ia-brand{min-width:148px;padding-right:4px}
+  .ia-shell .ia-brand-copy{min-width:92px;padding-right:8px}
+  .ia-shell .ia-brand strong{font-size:12px;letter-spacing:-.01em}
 }
