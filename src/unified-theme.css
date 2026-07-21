@@ -1,0 +1,369 @@
+/*
+ * NK Electrical unified material system.
+ * Page-specific layouts and interactions stay distinct; colour no longer
+ * changes identity between routes.
+ */
+html[data-experience='tech']{
+  --system-bg:#f2eee6;
+  --system-surface:#fbf9f4;
+  --system-panel:#e4ded3;
+  --system-panel-2:#d5ccbe;
+  --system-ink:#172d32;
+  --system-muted:#637174;
+  --system-line:rgba(23,45,50,.18);
+  --system-red:#e06b4d;
+  --system-live:#b57942;
+  --system-white:#172d32;
+  --system-accent-ink:#11191c;
+  --paper:var(--system-bg);
+  --paper-2:var(--system-surface);
+  --white:var(--system-surface);
+  --ink:var(--system-ink);
+  --muted:var(--system-muted);
+  --line:var(--system-line);
+  --copper:var(--system-red);
+  --copper-dark:#b94f36;
+  --acid:var(--system-live);
+  --panel-dark:var(--system-panel);
+  --panel-dark-2:var(--system-panel-2);
+  --panel-dark-text:var(--system-white);
+}
+
+html[data-theme='dark'][data-experience='tech']{
+  --system-bg:#0c1416;
+  --system-surface:#121d20;
+  --system-panel:#19272b;
+  --system-panel-2:#22343a;
+  --system-ink:#f3f0e8;
+  --system-muted:#b8c2be;
+  --system-line:rgba(216,164,103,.22);
+  --system-red:#ff7957;
+  --system-live:#d8a467;
+  --system-white:#f5f1e8;
+  --system-accent-ink:#101719;
+  --paper:var(--system-bg);
+  --paper-2:var(--system-surface);
+  --white:var(--system-surface);
+  --ink:var(--system-ink);
+  --muted:var(--system-muted);
+  --line:var(--system-line);
+  --copper:var(--system-red);
+  --copper-dark:var(--system-red);
+  --acid:var(--system-live);
+  --panel-dark:var(--system-panel);
+  --panel-dark-2:var(--system-panel-2);
+  --panel-dark-text:var(--system-white);
+}
+
+.ia-shell[data-page-theme]{
+  --page-bg:#f2eee6;
+  --page-surface:#fbf9f4;
+  --page-panel:#e4ded3;
+  --page-panel-2:#d5ccbe;
+  --page-ink:#172d32;
+  --page-muted:#637174;
+  --page-line:rgba(23,45,50,.18);
+  --page-accent:#b57942;
+  --page-pop:#e06b4d;
+  --page-deep:#17343a;
+  --page-dark-bg:#0c1416;
+  --page-dark-surface:#121d20;
+  --page-dark-panel:#19272b;
+  --page-dark-panel-2:#22343a;
+  --system-bg:var(--page-bg);
+  --system-surface:var(--page-surface);
+  --system-panel:var(--page-panel);
+  --system-panel-2:var(--page-panel-2);
+  --system-ink:var(--page-ink);
+  --system-muted:var(--page-muted);
+  --system-line:var(--page-line);
+  --system-red:var(--page-pop);
+  --system-live:var(--page-accent);
+  --system-white:var(--page-ink);
+  --system-accent-ink:#11191c;
+}
+
+html[data-theme='dark'] .ia-shell[data-page-theme]{
+  --system-bg:#0c1416;
+  --system-surface:#121d20;
+  --system-panel:#19272b;
+  --system-panel-2:#22343a;
+  --system-ink:#f3f0e8;
+  --system-muted:#b8c2be;
+  --system-line:rgba(216,164,103,.22);
+  --system-red:#ff7957;
+  --system-live:#d8a467;
+  --system-white:#f5f1e8;
+  --system-accent-ink:#101719;
+}
+
+html[data-home-palette='nk-copper']{
+  --system-live:#b57942;
+  --system-red:#e06b4d;
+}
+
+html[data-theme='dark'][data-home-palette='nk-copper']{
+  --system-live:#d8a467;
+  --system-red:#ff7957;
+}
+
+.power-home[data-home-palette='nk-copper']{
+  --home-accent:#d8a467;
+  --home-secondary:#e06b4d;
+  --home-accent-ink:#11191c;
+}
+
+/* Keep every route hero recognisably different in layout, not in colour cast. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]{
+  background-color:#17343a!important;
+  border-bottom-color:#e06b4d!important;
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title__accent{
+  color:#d8a467!important;
+  -webkit-text-stroke-color:#d8a467!important;
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]::before,
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]::after{
+  opacity:.24!important;
+  filter:grayscale(1) sepia(.28) saturate(.55);
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art__wash{
+  background:linear-gradient(90deg,rgba(12,20,22,.91),rgba(12,20,22,.28) 34%,transparent 68%),linear-gradient(0deg,rgba(12,20,22,.64),transparent 52%)!important;
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief,
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-ornament{
+  border-color:#d8a467!important;
+}
+
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief small,
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief>div,
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-ornament span{
+  color:#d8a467!important;
+}
+
+.ia-shell[data-page-theme='contact'] .contact-signal-player{
+  opacity:.13!important;
+  filter:sepia(.8) saturate(.72) hue-rotate(345deg);
+}
+
+html[data-theme='light'] .power-home[data-home-palette='nk-copper']{
+  --home-accent:#a96b35;
+  --home-secondary:#c9563d;
+}
+
+/* One professional header material in both appearance modes. */
+.ia-shell .ia-header-utility,
+html[data-theme='light'] .ia-shell .ia-header-utility,
+html[data-theme='dark'] .ia-shell .ia-header-utility{
+  border-bottom-color:rgba(216,164,103,.18);
+  background:
+    linear-gradient(90deg,rgba(216,164,103,.055),transparent 34%,rgba(224,107,77,.035)),
+    #13282d;
+}
+
+.ia-shell .ia-header-utility .ia-header-phone,
+html[data-theme='light'] .ia-shell .ia-header-utility .ia-header-phone,
+html[data-theme='dark'] .ia-shell .ia-header-utility .ia-header-phone{
+  color:#eee8dc;
+}
+
+.ia-shell .ia-brand{
+  left:clamp(112px,7.8vw,150px);
+  color:#f3f0e8;
+}
+
+.ia-shell .ia-brand strong,
+html[data-theme='light'] .ia-shell .ia-brand strong,
+html[data-theme='dark'] .ia-shell .ia-brand strong{
+  color:#f3f0e8;
+}
+
+.ia-shell .ia-brand-wires{
+  z-index:1;
+  right:calc(100% - 10px);
+  width:clamp(112px,7.4vw,146px);
+  height:44px;
+  opacity:.88;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.22));
+}
+
+.ia-shell .ia-brand-logo{z-index:2}
+
+/* A single appearance control replaces the competing palette and mode rows. */
+.ia-theme-selector{
+  position:relative;
+  height:34px;
+  color:#f3f0e8;
+}
+
+.ia-theme-selector summary{
+  min-width:86px;
+  height:34px;
+  padding:0 10px;
+  display:grid;
+  grid-template-columns:15px 1fr 12px;
+  align-items:center;
+  gap:7px;
+  border:1px solid rgba(216,164,103,.24);
+  background:rgba(255,255,255,.025);
+  color:inherit;
+  list-style:none;
+  cursor:pointer;
+}
+
+.ia-theme-selector summary::-webkit-details-marker{display:none}
+.ia-theme-selector summary svg{width:14px;height:14px}
+.ia-theme-selector summary svg:first-child{color:#d8a467}
+.ia-theme-selector summary svg:last-child{width:12px;color:#9eaaa6;transition:transform .18s ease}
+.ia-theme-selector summary span{font:700 9px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase}
+.ia-theme-selector[open] summary svg:last-child{transform:rotate(180deg)}
+.ia-theme-selector summary:hover,
+.ia-theme-selector summary:focus-visible{border-color:#d8a467;background:rgba(216,164,103,.08);outline:0}
+
+.ia-theme-menu{
+  position:absolute;
+  z-index:250;
+  top:calc(100% + 9px);
+  right:0;
+  width:166px;
+  padding:6px;
+  border:1px solid rgba(216,164,103,.28);
+  background:#13282d;
+  color:#f3f0e8;
+  box-shadow:0 20px 45px rgba(3,10,12,.3);
+}
+
+.ia-theme-menu button{
+  width:100%;
+  min-height:42px;
+  padding:0 11px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:0;
+  border-top:1px solid rgba(255,255,255,.08);
+  background:transparent;
+  color:inherit;
+  font:700 10px var(--mono);
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
+.ia-theme-menu button:first-child{border-top:0}
+.ia-theme-menu button svg{width:15px;color:#d8a467}
+.ia-theme-menu button:hover,
+.ia-theme-menu button:focus-visible{background:rgba(216,164,103,.1);outline:0}
+.ia-theme-menu button.active{background:#d8a467;color:#101719}
+.ia-theme-menu button.active svg{color:#101719}
+
+/* The route layouts remain unique, while their material colours stay related. */
+.about-page{
+  --about-ink:#f3f0e8;
+  --about-night:#0c1416;
+  --about-night-2:#121d20;
+  --about-line:rgba(216,164,103,.2);
+  --about-amber:#d8a467;
+  --about-coral:#e06b4d;
+  --about-cyan:#d8a467;
+}
+
+.about-team{background:#101a1d}
+.about-team__portrait{background:#142125}
+.about-team__portrait:after{
+  background:linear-gradient(0deg,rgba(5,14,16,.84),transparent 45%),linear-gradient(90deg,rgba(216,164,103,.055) 1px,transparent 1px),linear-gradient(rgba(216,164,103,.055) 1px,transparent 1px);
+  background-size:auto,44px 44px,44px 44px;
+}
+
+.ia-shell[data-page-theme='contact']{
+  --contact-paper:#f2eee6;
+  --contact-cream:#fbf4e8;
+  --contact-ink:#172d32;
+  --contact-muted:#637174;
+  --contact-line:rgba(23,45,50,.18);
+  --contact-teal:#b57942;
+  --contact-coral:#e06b4d;
+  --contact-amber:#d8a467;
+  --contact-blue:#17343a;
+  --contact-violet:#8d5a3c;
+}
+
+html[data-theme='dark'] .ia-shell[data-page-theme='contact']{
+  --contact-paper:#0c1416;
+  --contact-cream:#19231f;
+  --contact-ink:#f3f0e8;
+  --contact-muted:#b8c2be;
+  --contact-line:rgba(216,164,103,.22);
+  --contact-teal:#d8a467;
+}
+
+.contact-intent-card--project,
+.contact-intent-card--product{color:#f3f0e8;background:#17343a}
+.contact-intent-card--fault{color:#2a1712;background:#e06b4d}
+.contact-intent-card--visit{color:#2b2115;background:#d8a467}
+.contact-intent-card--project .contact-intent-icon,
+.contact-intent-card--product .contact-intent-icon{border-color:#d8a467;color:#d8a467}
+.contact-intent-card--project:before{background:linear-gradient(rgba(216,164,103,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(216,164,103,.075) 1px,transparent 1px);background-size:25px 25px}
+.ia-shell[data-page-theme='contact'] .contact-briefing{background:#ded7cb}
+html[data-theme='dark'] .ia-shell[data-page-theme='contact'] .contact-briefing{background:#101a1d}
+
+.service-signature,
+.service-signature--lighting,
+.service-signature--automation,
+.service-signature--security,
+.service-signature--maintenance,
+.service-signature--installation{
+  --signature-accent:#d8a467;
+  background:#10191c;
+}
+
+.quote-scope-loading,
+.quote-composer,
+.quote-pricing-anatomy{background-color:#10191c;color:#f3f0e8}
+.quote-scope-loading>svg,
+.quote-scope-loading>span,
+.quote-scope-loading>small,
+.quote-dossier-media>span,
+.quote-dossier-ticket small,
+.quote-pricing-anatomy header small,
+.quote-pricing-anatomy article>svg{color:#d8a467}
+.quote-scope-intro{color:#172d32;background:radial-gradient(circle at 78% 20%,rgba(216,164,103,.13),transparent 25%),linear-gradient(120deg,#fbf9f4,#eee8dc)}
+.quote-scope-intro h2 em,
+.quote-pricing-anatomy h2 em,
+.quote-builder>header small{color:#e06b4d}
+.quote-composer{background-image:linear-gradient(rgba(216,164,103,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(216,164,103,.045) 1px,transparent 1px);background-size:38px 38px}
+.quote-dossier-ticket{border-top-color:#e06b4d;background:#17343a}
+.quote-dossier-ticket header>span{border-color:#d8a467;color:#d8a467}
+.quote-readiness>div span{background:linear-gradient(90deg,#d8a467,#e06b4d)}
+.quote-builder{color:#172d32;background:#fbf9f4}
+.quote-builder>header li.complete button{border-color:#b57942;color:#8b592f}
+.quote-pricing-anatomy article{background:#17343a}
+.quote-pricing-anatomy>aside{color:#172d32;background:#d8a467}
+
+html[data-theme='dark'] .quote-scope-intro,
+html[data-theme='dark'] .quote-builder{
+  color:#f3f0e8;
+  background:#121d20;
+}
+
+html[data-theme='dark'] .quote-scope-intro>p,
+html[data-theme='dark'] .quote-stage-copy p,
+html[data-theme='dark'] .quote-builder-success p{color:#b8c2be}
+html[data-theme='dark'] .quote-scope-promises{border-color:rgba(216,164,103,.18);background:rgba(216,164,103,.18)}
+html[data-theme='dark'] .quote-scope-promises span{color:#f3f0e8;background:#19272b}
+html[data-theme='dark'] .quote-builder>header{border-color:rgba(216,164,103,.2)}
+html[data-theme='dark'] .quote-builder>header li button{border-color:rgba(216,164,103,.22);color:#b8c2be}
+html[data-theme='dark'] .quote-builder>header li.active button{border-color:#d8a467;background:#d8a467;color:#101719}
+html[data-theme='dark'] .quote-builder-back{color:#f3f0e8;background:#19272b}
+
+@media(max-width:900px){
+  .ia-shell .ia-brand{left:auto}
+  .ia-shell .ia-brand-wires{width:42px;opacity:.72}
+  .ia-mobile-appearance{grid-template-columns:1fr}
+  .ia-theme-selector--mobile{width:100%;height:46px}
+  .ia-theme-selector--mobile summary{width:100%;height:46px}
+  .ia-theme-selector--mobile .ia-theme-menu{position:fixed;z-index:260;top:86px;right:12px;left:12px;width:auto}
+}

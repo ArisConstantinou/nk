@@ -120,7 +120,7 @@ export default function ElectricalHome() {
           <small>{active.colors.join(' · ')}</small>
           <Link to={active.route}>Explore this direction <ArrowRight/></Link>
         </div>
-        <div className="power-palette-switcher" aria-label="Homepage visual palettes" onMouseLeave={() => setActivePaletteId(getHomePalette())}>
+        {visualPalettes.length > 1 && <div className="power-palette-switcher" aria-label="Homepage visual palettes" onMouseLeave={() => setActivePaletteId(getHomePalette())}>
           {visualPalettes.map((palette, index) => <button
             type="button"
             className={activePalette === index ? 'active' : ''}
@@ -131,7 +131,7 @@ export default function ElectricalHome() {
             onClick={() => saveHomePalette(palette.id)}
             key={palette.id}
           ><img src={palette.image} alt=""/><span>{palette.label}</span><small>{String(index + 1).padStart(2, '0')}</small></button>)}
-        </div>
+        </div>}
       </div>
     </section>
 

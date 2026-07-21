@@ -24,6 +24,7 @@ import './quote-experience.css';
 import './action-system.css';
 import './route-interactions.css';
 import './navigation-panels.css';
+import './unified-theme.css';
 
 document.documentElement.dataset.experience = 'tech';
 applyTheme(getThemePreference());

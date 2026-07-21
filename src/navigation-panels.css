@@ -178,17 +178,12 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 }
 
 .ia-shell .ia-header .ia-desktop-nav>:not(:last-child) .ia-nav-panel__shade::after{
-  content:"";
-  position:absolute;
-  z-index:2;
-  top:-8px;
-  right:1px;
-  width:1px;
-  height:calc(100% + 16px);
-  background:rgba(207,224,222,.2);
-  transform:skewX(-8deg);
-  transform-origin:center;
-  pointer-events:none;
+  content:none;
+  display:none;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>:not(:last-child){
+  border-right:1px solid rgba(216,164,103,.2)!important;
 }
 
 .ia-shell .ia-header .ia-desktop-nav>a:hover,

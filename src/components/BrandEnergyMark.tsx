@@ -7,13 +7,12 @@ import {ResponsiveImage} from './ResponsiveImage';
 type BrandEnergyMarkProps = {
   src: string;
   alt: string;
-  energized: boolean;
 };
 
-export function BrandEnergyMark({src, alt, energized}: BrandEnergyMarkProps) {
+export function BrandEnergyMark({src, alt}: BrandEnergyMarkProps) {
   const playerRef = useRef<PlayerRef>(null);
   const motionPreference = useMotionPreference();
-  const shouldAnimate = energized && motionPreference === 'full';
+  const shouldAnimate = motionPreference === 'full';
 
   useEffect(() => {
     if (shouldAnimate) {
@@ -26,16 +25,15 @@ export function BrandEnergyMark({src, alt, energized}: BrandEnergyMarkProps) {
     playerRef.current?.seekTo(0);
   }, [shouldAnimate]);
 
-  return <span className={`ia-brand-mark${energized ? ' is-energized' : ''}`}>
+  return <span className="ia-brand-mark">
     <span className="ia-brand-wires" aria-hidden="true">
       <Player
         ref={playerRef}
         component={BrandEnergyFilm}
-        durationInFrames={180}
+        durationInFrames={54}
         compositionWidth={180}
         compositionHeight={62}
         fps={30}
-        loop
         autoPlay={false}
         initiallyMuted
         controls={false}

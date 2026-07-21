@@ -1,14 +1,14 @@
 import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
-import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Palette, Phone, Sun, X} from 'lucide-react';
+import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Phone, Sun, X} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../context/ContentContext';
 import {serviceLinks, shopLinks} from '../navigation';
 import {publicAsset} from '../utils/assets';
 import {SeoRouteMeta} from './SeoRouteMeta';
 import {ResponsiveImage} from './ResponsiveImage';
+import {BrandEnergyMark} from './BrandEnergyMark';
 import {LiveSiteEditButton} from './LiveSiteEditButton';
 import {applyTheme, getThemePreference, saveThemePreference, themeChangeEvent, watchSystemTheme, type ThemePreference} from '../theme';
-import {getHomePalette, homePaletteChangeEvent, homePaletteOptions, saveHomePalette, type HomePaletteId} from '../homePalettes';
 import {pageVisualForPath} from '../pageVisuals';
 import {routeInteractionForPath} from '../routeInteractions';
 
@@ -110,6 +110,9 @@ const themeOptions = [
 
 function ThemeSwitcher({className = ''}: {className?: string}) {
   const [preference, setPreference] = useState<ThemePreference>(() => getThemePreference());
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const active = themeOptions.find(option => option.value === preference) || themeOptions[0];
+  const ActiveIcon = active.Icon;
 
   useEffect(() => {
     const syncPreference = () => setPreference(getThemePreference());
@@ -121,47 +124,22 @@ function ThemeSwitcher({className = ''}: {className?: string}) {
     if (preference === 'system') applyTheme('system');
   }), [preference]);
 
-  return <div className={`ia-theme-switcher ${className}`.trim()} role="group" aria-label="Colour theme">
-    {themeOptions.map(({value, label, Icon}) => <button
-      type="button"
-      aria-label={`${label} theme`}
-      aria-pressed={preference === value}
-      title={`${label} theme`}
-      onClick={() => { setPreference(value); saveThemePreference(value); }}
-      key={value}
-    ><Icon/><span>{label}</span></button>)}
-  </div>;
-}
-
-function PaletteSelector({className = ''}: {className?: string}) {
-  const [palette, setPalette] = useState<HomePaletteId>(() => getHomePalette());
-  const detailsRef = useRef<HTMLDetailsElement>(null);
-  const active = homePaletteOptions.find(option => option.id === palette) || homePaletteOptions[0];
-
-  const selectPalette = (nextPalette: HomePaletteId) => {
-    setPalette(nextPalette);
-    saveHomePalette(nextPalette);
-    detailsRef.current?.removeAttribute('open');
-  };
-
-  useEffect(() => {
-    const syncPalette = () => setPalette(getHomePalette());
-    window.addEventListener(homePaletteChangeEvent, syncPalette);
-    return () => window.removeEventListener(homePaletteChangeEvent, syncPalette);
-  }, []);
-
-  return <details className={`ia-palette-selector ${className}`.trim()} ref={detailsRef}>
-    <summary aria-label={`Choose homepage palette. Current palette ${active.number}: ${active.label}`}>
-      <Palette/><span><small>Palette</small><strong>{active.number} / {active.label}</strong></span><ChevronDown/>
+  return <details className={`ia-theme-selector ${className}`.trim()} ref={detailsRef}>
+    <summary aria-label={`Choose appearance. Current mode: ${active.label}`}>
+      <ActiveIcon/><span>{active.label}</span><ChevronDown/>
     </summary>
-    <div className="ia-palette-menu" role="group" aria-label="Homepage colour palettes">
-      {homePaletteOptions.map(option => <button
+    <div className="ia-theme-menu" role="group" aria-label="Website appearance">
+      {themeOptions.map(({value, label, Icon}) => <button
         type="button"
-        className={palette === option.id ? 'active' : ''}
-        aria-pressed={palette === option.id}
-        onClick={() => selectPalette(option.id)}
-        key={option.id}
-      ><b>{option.number}</b><span><strong>{option.label}</strong><small>{option.context}</small></span><i>{option.colors.slice(0, 4).map(color => <em style={{backgroundColor: color}} key={color}/>)}</i></button>)}
+        className={preference === value ? 'active' : ''}
+        aria-pressed={preference === value}
+        onClick={() => {
+          setPreference(value);
+          saveThemePreference(value);
+          detailsRef.current?.removeAttribute('open');
+        }}
+        key={value}
+      ><Icon/><span>{label}</span></button>)}
     </div>
   </details>;
 }
@@ -324,12 +302,11 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
         <div>
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
-          <PaletteSelector className="ia-palette-selector--desktop"/>
           <ThemeSwitcher className="ia-theme-switcher--desktop"/>
         </div>
       </div>
       <div className="ia-header-bar">
-        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><span className="ia-brand-mark"><ResponsiveImage className="ia-brand-logo" src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/></span><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong></span></Link>
+        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong></span></Link>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
           ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
           : linkTo(item) === '/shop'
@@ -347,7 +324,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <aside>{megaOpen === 'services' ? <><CircuitBoard/><small>SERVICE PATH</small><strong>From survey to tested handover.</strong><p>Start with the requirement and the building. Equipment selection follows the scope.</p></> : <><FileText/><small>PRODUCT PATH</small><strong>Products, specifications and downloads.</strong><p>Find the item first, then ask about availability, supply or installation.</p></>}</aside>
       </div>}
       {mobileOpen && <nav ref={mobileNavRef} className="ia-mobile-menu" id="mobile-navigation" aria-label="Mobile navigation">
-        <div className="ia-mobile-appearance"><div><span>Colour palette</span><PaletteSelector className="ia-palette-selector--mobile"/></div><div><span>Brightness</span><ThemeSwitcher className="ia-theme-switcher--mobile"/></div></div>
+        <div className="ia-mobile-appearance"><div><span>Appearance</span><ThemeSwitcher className="ia-theme-switcher--mobile"/></div></div>
         <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'services'} aria-controls="mobile-services" onClick={() => toggleMobile('services')}><span>Services</span><ChevronDown/></button>{mobileSection === 'services' && <div id="mobile-services">{serviceMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
         <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'shop'} aria-controls="mobile-shop" onClick={() => toggleMobile('shop')}><span>Shop</span><ChevronDown/></button>{mobileSection === 'shop' && <div id="mobile-shop">{shopMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
         {primary.filter(item => !['/services', '/shop'].includes(linkTo(item))).map(item => <SmartLink className="ia-mobile-primary" to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{item.label}</span><ArrowRight/></SmartLink>)}
