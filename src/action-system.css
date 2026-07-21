@@ -1,0 +1,853 @@
+/*
+ * Public action and legibility system
+ * Strong contrast is structural: route colours decorate the powered edge,
+ * while labels always sit on a dependable dark or light reading surface.
+ */
+.ia-shell{
+  --action-deep:var(--page-deep,#0b1c35);
+  --action-accent:var(--page-accent,#d4ec47);
+  --action-ink:#fff;
+  --action-accent-ink:#071421;
+  --action-focus:color-mix(in srgb,var(--action-accent) 72%,#fff);
+}
+
+/* Primary CTA: a legible label plus an independent powered arrow cell. */
+.ia-shell :is(
+  .ia-quote-button,
+  .electrical-main .button,
+  .ia-footer-lead>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .ia-shop-toolbar>a,
+  .ia-shop-gateway>a,
+  .catalogue-load-more button:not(.secondary),
+  .catalogue-empty button,
+  .cms-section--cta>a,
+  .cms-builder-component--button a,
+  .managed-project-form button
+){
+  min-height:60px;
+  padding:0 22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--action-accent) 28%,transparent)!important;
+  border-radius:14px!important;
+  clip-path:none!important;
+  background:
+    linear-gradient(115deg,color-mix(in srgb,var(--action-accent) 8%,transparent),transparent 46%),
+    var(--action-deep)!important;
+  color:var(--action-ink)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    0 12px 30px color-mix(in srgb,var(--action-deep) 24%,transparent)!important;
+  font-family:Manrope,"DM Sans",Arial,sans-serif!important;
+  font-size:15px!important;
+  font-weight:750!important;
+  line-height:1.15!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background-color .2s ease;
+}
+.ia-shell :is(
+  .ia-quote-button,
+  .electrical-main .button,
+  .ia-footer-lead>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .ia-shop-toolbar>a,
+  .ia-shop-gateway>a,
+  .catalogue-load-more button:not(.secondary),
+  .catalogue-empty button,
+  .cms-section--cta>a,
+  .cms-builder-component--button a,
+  .managed-project-form button
+)::before{
+  content:"";
+  width:8px;
+  height:8px;
+  flex:0 0 8px;
+  border-radius:50%;
+  background:var(--action-accent);
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--action-accent) 15%,transparent);
+}
+.ia-shell :is(
+  .ia-quote-button,
+  .electrical-main .button,
+  .ia-footer-lead>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .ia-shop-toolbar>a,
+  .ia-shop-gateway>a,
+  .catalogue-load-more button:not(.secondary),
+  .catalogue-empty button,
+  .cms-section--cta>a,
+  .cms-builder-component--button a,
+  .managed-project-form button
+):has(>svg){
+  padding-right:0;
+}
+.ia-shell :is(
+  .ia-quote-button,
+  .electrical-main .button,
+  .ia-footer-lead>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .ia-shop-toolbar>a,
+  .ia-shop-gateway>a,
+  .catalogue-load-more button:not(.secondary),
+  .catalogue-empty button,
+  .cms-section--cta>a,
+  .cms-builder-component--button a,
+  .managed-project-form button
+)>svg{
+  width:58px!important;
+  height:58px!important;
+  padding:19px;
+  flex:0 0 58px;
+  align-self:stretch;
+  border-left:1px solid rgba(255,255,255,.13);
+  /*
+   * The parent owns the outer curve. Rounding the SVG as well exposed the
+   * dark button background as small wedges around the coloured arrow cell.
+   */
+  border-radius:0!important;
+  background:var(--action-accent);
+  color:var(--action-accent-ink);
+  transition:background-color .2s ease,color .2s ease;
+}
+.ia-shell :is(
+  .ia-quote-button,
+  .electrical-main .button,
+  .ia-footer-lead>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .ia-shop-toolbar>a,
+  .ia-shop-gateway>a,
+  .catalogue-load-more button:not(.secondary),
+  .catalogue-empty button,
+  .cms-section--cta>a,
+  .cms-builder-component--button a,
+  .managed-project-form button
+):hover{
+  transform:translateY(-2px)!important;
+  border-color:color-mix(in srgb,var(--action-accent) 66%,transparent)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.07),
+    0 18px 38px color-mix(in srgb,var(--action-deep) 32%,transparent)!important;
+}
+.ia-shell :is(
+  .ia-quote-button,
+  .electrical-main .button,
+  .ia-footer-lead>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .ia-shop-toolbar>a,
+  .ia-shop-gateway>a,
+  .catalogue-load-more button:not(.secondary),
+  .catalogue-empty button,
+  .cms-section--cta>a,
+  .cms-builder-component--button a,
+  .managed-project-form button
+):hover>svg{
+  background:#fff;
+  color:var(--action-deep);
+}
+.ia-shell :is(a,button):focus-visible{
+  outline:3px solid var(--action-focus)!important;
+  outline-offset:4px!important;
+}
+.ia-shell .ia-header .ia-header-actions .ia-quote-button{
+  min-height:54px;
+  padding-left:16px!important;
+  gap:12px!important;
+  font-size:15px!important;
+  white-space:nowrap;
+}
+.ia-shell .ia-header .ia-header-actions .ia-quote-button::before{
+  width:7px;
+  height:7px;
+  flex-basis:7px;
+}
+.ia-shell .ia-header .ia-header-actions .ia-quote-button>svg{
+  width:48px!important;
+  height:52px!important;
+  flex-basis:48px;
+  padding:16px;
+}
+
+/* Secondary actions stay calm but never disappear into the surface. */
+.ia-shell :is(
+  .electrical-main .button.outline,
+  .catalogue-load-more button.secondary
+){
+  min-height:54px;
+  padding:0 20px!important;
+  border:2px solid color-mix(in srgb,var(--system-ink) 58%,transparent)!important;
+  border-radius:12px!important;
+  background:var(--system-surface)!important;
+  color:var(--system-ink)!important;
+  box-shadow:none!important;
+  font-family:Manrope,"DM Sans",Arial,sans-serif!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+}
+.ia-shell :is(
+  .electrical-main .button.outline,
+  .catalogue-load-more button.secondary
+)::before{display:none}
+.ia-shell :is(
+  .electrical-main .button.outline,
+  .catalogue-load-more button.secondary
+):hover{
+  border-color:var(--action-deep)!important;
+  background:var(--action-deep)!important;
+  color:#fff!important;
+}
+
+/* Filters are readable selector pills, not tiny terminal keys. */
+.ia-shell :is(
+  .filter-row button,
+  .catalogue-controls button,
+  .catalogue-filter-chips button,
+  .appliance-controls button,
+  .shop-view-controls>button,
+  .ia-project-filters button
+){
+  min-height:44px!important;
+  padding:0 17px!important;
+  border:1px solid color-mix(in srgb,var(--system-ink) 28%,transparent)!important;
+  border-radius:999px!important;
+  clip-path:none!important;
+  background:var(--system-surface)!important;
+  color:var(--system-ink)!important;
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:14px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+  box-shadow:none!important;
+}
+.ia-shell :is(
+  .filter-row button,
+  .catalogue-controls button,
+  .catalogue-filter-chips button,
+  .appliance-controls button,
+  .shop-view-controls>button,
+  .ia-project-filters button
+):hover{
+  border-color:var(--action-accent)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--action-accent) 14%,transparent)!important;
+  color:var(--system-ink)!important;
+}
+.ia-shell :is(
+  .filter-row button,
+  .catalogue-controls button,
+  .catalogue-filter-chips button,
+  .appliance-controls button,
+  .shop-view-controls>button,
+  .ia-project-filters button
+).active{
+  border-color:var(--action-accent)!important;
+  background:var(--action-accent)!important;
+  color:var(--action-accent-ink)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.24)!important;
+}
+
+/* Product-collection utility strip receives real secondary buttons. */
+.ia-shell .catalogue-help-strip>a{
+  min-height:48px;
+  padding:0 17px;
+  display:inline-flex;
+  align-items:center;
+  gap:11px;
+  border:2px solid currentColor;
+  border-radius:12px;
+  background:color-mix(in srgb,var(--action-accent-ink) 5%,transparent);
+  color:var(--action-accent-ink);
+  font-family:Manrope,"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  font-weight:750;
+  line-height:1.15;
+  letter-spacing:-.01em;
+}
+.ia-shell .catalogue-help-strip>a:hover{
+  background:var(--action-accent-ink);
+  color:#fff;
+}
+.ia-shell .catalogue-help-strip>a svg{width:18px}
+
+/* Public metadata: readable supporting labels without terminal-small type. */
+.ia-shell .ia-main :is(
+  .ia-home-split small,
+  .ia-service-card>span,
+  .ia-boundary small,
+  .ia-service-summary>span,
+  .ia-service-lists small,
+  .ia-conversion-band small,
+  .ia-shop-toolbar span,
+  .ia-shop-gateway span,
+  .ia-partnerships header>span,
+  .ia-partnerships article small,
+  .ia-quote-layout aside>small,
+  .catalogue-filter-heading span,
+  .catalogue-filter-heading b,
+  .catalogue-product-card__copy>small,
+  .catalogue-load-more>span
+){
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  line-height:1.35!important;
+  letter-spacing:.09em!important;
+  text-transform:uppercase;
+}
+html[data-theme='light'] .ia-shell .ia-main :is(
+  .ia-home-split small,
+  .ia-service-card>span,
+  .ia-boundary small,
+  .ia-service-summary>span,
+  .ia-service-lists small,
+  .ia-conversion-band small,
+  .ia-shop-toolbar span,
+  .ia-shop-gateway span,
+  .ia-partnerships header>span,
+  .ia-partnerships article small,
+  .ia-quote-layout aside>small,
+  .catalogue-filter-heading span,
+  .catalogue-filter-heading b,
+  .catalogue-product-card__copy>small,
+  .catalogue-load-more>span
+){
+  color:var(--action-deep)!important;
+}
+.ia-shell .catalogue-product-card__copy>small{
+  color:#fff!important;
+}
+html[data-theme='light'] .ia-shell .ia-main .catalogue-product-card__copy>small{
+  color:#071421!important;
+}
+.ia-shell :is(.ia-boundary,.ia-conversion-band){
+  background:var(--action-accent)!important;
+  color:var(--action-accent-ink)!important;
+}
+.ia-shell :is(.ia-boundary,.ia-conversion-band) :is(small,h2){
+  color:var(--action-accent-ink)!important;
+}
+
+/* The footer is a deliberate dark destination in both themes. */
+.ia-shell .ia-footer,
+html[data-theme='light'] .ia-shell .ia-footer{
+  background:
+    radial-gradient(circle at 88% 10%,color-mix(in srgb,var(--action-accent) 12%,transparent),transparent 24rem),
+    var(--action-deep)!important;
+  color:#fff!important;
+  border-top:6px solid var(--action-accent)!important;
+}
+.ia-shell .ia-footer-lead{
+  border-bottom-color:rgba(255,255,255,.2)!important;
+}
+.ia-shell .ia-footer-lead>span{
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  padding:9px 12px;
+  border-left:5px solid var(--action-accent);
+  background:rgba(255,255,255,.07);
+  color:#fff!important;
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:14px!important;
+  font-weight:800;
+  line-height:1.25;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.ia-shell .ia-footer-lead h2{color:#fff}
+.ia-shell .ia-footer-lead>a{
+  min-width:250px;
+  min-height:64px;
+}
+.ia-shell .ia-footer-grid>div,
+html[data-theme='light'] .ia-shell .ia-footer-grid>div{
+  gap:12px;
+  color:rgba(255,255,255,.76)!important;
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:15px!important;
+  line-height:1.5!important;
+}
+.ia-shell .ia-footer-grid b{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  color:#fff!important;
+  font-family:Manrope,"DM Sans",Arial,sans-serif!important;
+  font-size:15px!important;
+  font-weight:800;
+  line-height:1.2;
+  letter-spacing:.02em;
+  text-transform:none;
+}
+.ia-shell .ia-footer-grid b::before{
+  content:"";
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--action-accent);
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--action-accent) 14%,transparent);
+}
+.ia-shell .ia-footer-grid a{
+  color:rgba(255,255,255,.76)!important;
+  font-size:15px;
+}
+.ia-shell .ia-footer-grid a:hover{color:#fff!important}
+.ia-shell .ia-footer-grid svg{color:var(--action-accent)!important}
+.ia-shell .ia-footer-hours{color:rgba(255,255,255,.72)!important}
+.ia-shell .ia-footer-bottom,
+html[data-theme='light'] .ia-shell .ia-footer-bottom{
+  border-top-color:rgba(255,255,255,.18)!important;
+  color:rgba(255,255,255,.7)!important;
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:13px!important;
+}
+.ia-shell .ia-footer-bottom a{color:#fff}
+.ia-shell .ia-social-links--footer{
+  gap:10px;
+  border-color:rgba(255,255,255,.18)!important;
+}
+.ia-shell .ia-social-links--footer>a{
+  width:46px;
+  height:46px;
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:50%;
+  background:rgba(255,255,255,.07);
+  color:#fff!important;
+}
+.ia-shell .ia-social-links--footer>a:hover{
+  border-color:var(--action-accent)!important;
+  background:var(--action-accent);
+  color:var(--action-accent-ink)!important;
+  transform:translateY(-2px);
+}
+
+/* Floating socials feel like one powered rail, with high-contrast icons. */
+.ia-shell .ia-social-links--dock{
+  gap:5px;
+}
+.ia-shell .ia-social-links--dock a{
+  width:52px;
+  height:52px;
+  border:1px solid rgba(255,255,255,.18);
+  border-right:0;
+  border-radius:13px 0 0 13px;
+  background:var(--action-deep);
+  color:#fff;
+}
+.ia-shell .ia-social-links--dock a:after{
+  height:52px;
+  border-radius:12px 0 0 12px;
+  background:var(--action-deep);
+  color:#fff;
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:13px;
+}
+.ia-shell .ia-social-links--dock a:hover,
+.ia-shell .ia-social-links--dock a:focus-visible,
+.ia-shell .ia-social-links--dock a:hover:after,
+.ia-shell .ia-social-links--dock a:focus-visible:after{
+  border-color:var(--action-accent);
+  background:var(--action-accent);
+  color:var(--action-accent-ink);
+}
+
+/* Appearance controls remain compact, but their selected state is unmistakable. */
+.ia-shell .ia-theme-switcher button[aria-pressed=true]{
+  background:var(--action-deep);
+  color:#fff;
+}
+.ia-shell .ia-palette-selector summary{
+  font-family:"DM Sans",Arial,sans-serif;
+}
+.ia-shell .ia-live-edit-button{
+  min-width:54px;
+  border-radius:11px;
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:11px;
+}
+
+/* Home hero actions remain a three-way control deck, but read like real actions. */
+.ia-shell .power-primary-actions{
+  gap:8px;
+  padding:8px;
+  background:rgba(5,15,29,.9);
+}
+.ia-shell .ia-main .power-action{
+  min-height:64px;
+  padding:0 16px 0 19px;
+  border:1px solid rgba(255,255,255,.15)!important;
+  border-radius:12px;
+  background:var(--action-deep)!important;
+  color:#fff!important;
+  font-family:Manrope,"DM Sans",Arial,sans-serif;
+  font-size:15px!important;
+  font-weight:750;
+  line-height:1.2;
+  letter-spacing:-.01em;
+  text-transform:none;
+}
+.ia-shell .ia-main .power-action:first-child{
+  border-color:var(--action-accent)!important;
+  background:var(--action-accent)!important;
+  color:var(--action-accent-ink)!important;
+}
+.ia-shell .ia-main .power-action:last-child{
+  border-color:color-mix(in srgb,var(--action-accent) 62%,transparent)!important;
+  color:#fff!important;
+}
+.ia-shell .power-action svg{width:20px;color:currentColor}
+.ia-shell .ia-main .power-action:hover{
+  border-color:#fff;
+  background:#fff!important;
+  color:var(--action-deep)!important;
+  transform:translateY(-2px);
+}
+
+/* The route-specific service controls keep their distinct instrumentation. */
+.ia-shell[data-page-theme] :is(.ia-service-action__copy,.ia-route-band-action>span) :is(small,strong){
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+}
+.ia-shell[data-page-theme] .ia-service-action__copy small{
+  overflow:visible;
+  text-overflow:clip;
+  white-space:normal;
+}
+html[data-theme='light'] .ia-shell[data-page-theme] .ia-route-band-action>span>small{
+  color:var(--action-accent)!important;
+}
+
+/*
+ * Service CTAs need a calm reading surface. Their identity comes from shape,
+ * accent and icon treatment—not from bright flares behind the copy.
+ */
+.ia-shell[data-page-theme] .ia-service-summary .ia-service-action,
+.ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action{
+  overflow:hidden!important;
+  border-radius:14px!important;
+  clip-path:none!important;
+  border-color:color-mix(in srgb,var(--page-accent) 58%,var(--page-deep))!important;
+  background:
+    linear-gradient(
+      112deg,
+      color-mix(in srgb,var(--page-deep) 88%,#000) 0%,
+      var(--page-deep) 64%,
+      color-mix(in srgb,var(--page-deep) 86%,var(--page-accent)) 100%
+    )!important;
+  color:#fff!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    0 12px 24px color-mix(in srgb,var(--page-deep) 20%,transparent)!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+.ia-shell[data-page-theme] .ia-service-action__copy small,
+.ia-shell[data-page-theme] .ia-route-band-action>span>small{
+  color:var(--page-accent)!important;
+  font-size:14px!important;
+  font-weight:800!important;
+}
+.ia-shell[data-page-theme] .ia-service-action__copy strong{
+  color:#fff!important;
+  font-size:15px!important;
+  font-weight:750!important;
+}
+.ia-shell[data-page-theme] .ia-service-summary .ia-service-action .ia-service-action__copy>strong{
+  font-size:16px!important;
+}
+.ia-shell[data-page-theme] .ia-route-band-action>span>strong{
+  color:#fff!important;
+  font-size:16px!important;
+  font-weight:750!important;
+}
+.ia-shell[data-page-theme] .ia-service-action__glyph{
+  border-color:color-mix(in srgb,var(--page-accent) 62%,transparent)!important;
+  background:color-mix(in srgb,var(--page-deep) 84%,var(--page-accent))!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+.ia-shell[data-page-theme] :is(
+  .ia-service-action__glyph svg,
+  .ia-service-action__go svg,
+  .ia-conversion-band>a.ia-route-band-action>svg,
+  .ia-conversion-band>a.ia-route-band-action:hover>svg,
+  .ia-conversion-band>a.ia-route-band-action:focus-visible>svg
+){
+  border:0!important;
+  background:transparent!important;
+  color:var(--page-accent)!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+/*
+ * Contact routes are visually distinct through colour and content, not by
+ * mixing clipped polygons, arches and one-off corner radii on controls.
+ */
+.ia-shell[data-page-theme='contact'] :is(
+  .contact-intent-card,
+  .contact-router-form>footer button,
+  .contact-travel-mode button,
+  .contact-route-actions button,
+  .contact-full-directions,
+  .contact-map-toolbar button,
+  .contact-map-address button,
+  .contact-direct-card
+){
+  overflow:hidden!important;
+  border-radius:14px!important;
+  clip-path:none!important;
+}
+
+.ia-shell[data-page-theme] :is(
+  .ia-service-summary .ia-service-action:hover,
+  .ia-service-summary .ia-service-action:focus-visible,
+  .ia-conversion-band>a.ia-route-band-action:hover,
+  .ia-conversion-band>a.ia-route-band-action:focus-visible
+){
+  border-color:var(--page-accent)!important;
+  background:
+    linear-gradient(
+      112deg,
+      color-mix(in srgb,var(--page-deep) 84%,#000) 0%,
+      var(--page-deep) 60%,
+      color-mix(in srgb,var(--page-deep) 78%,var(--page-accent)) 100%
+    )!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.065),
+    0 15px 28px color-mix(in srgb,var(--page-deep) 25%,transparent)!important;
+  filter:none!important;
+}
+.ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action{
+  min-width:360px;
+  min-height:82px;
+}
+
+/* Page-coloured primary buttons use the same glare-free surface. */
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+){
+  /*
+   * Older page identities supplied a mixture of pill, square and clipped
+   * CTA silhouettes. Keep the colour identity, but use one clean outline so
+   * the header, forms and footer never combine an oval with angular edges.
+   */
+  overflow:hidden!important;
+  border-radius:14px!important;
+  clip-path:none!important;
+  background:
+    linear-gradient(
+      112deg,
+      color-mix(in srgb,var(--page-deep) 88%,#000) 0%,
+      var(--page-deep) 68%,
+      color-mix(in srgb,var(--page-deep) 86%,var(--page-accent)) 100%
+    )!important;
+  color:#fff!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    0 10px 22px color-mix(in srgb,var(--page-deep) 18%,transparent)!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+):is(:hover,:focus-visible){
+  background:
+    linear-gradient(
+      112deg,
+      color-mix(in srgb,var(--page-deep) 84%,#000) 0%,
+      var(--page-deep) 62%,
+      color-mix(in srgb,var(--page-deep) 78%,var(--page-accent)) 100%
+    )!important;
+  color:#fff!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.065),
+    0 13px 26px color-mix(in srgb,var(--page-deep) 22%,transparent)!important;
+  filter:none!important;
+}
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+)>svg,
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+):is(:hover,:focus-visible)>svg{
+  background:var(--page-accent)!important;
+  color:var(--action-accent-ink)!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+.ia-shell :is(.ia-home-split>a>span,.ia-service-card b){
+  font-family:"DM Sans",Arial,sans-serif!important;
+  font-size:14px!important;
+  font-weight:750!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+}
+.ia-shell .ia-project-filters>div:first-child,
+.ia-shell .ia-project-filters>b{
+  color:var(--system-ink);
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  font-weight:750;
+  letter-spacing:0;
+  text-transform:none;
+}
+
+/* Navigation and sharing utilities use the same readable UI voice. */
+.ia-shell .ia-header-phone{
+  color:var(--system-ink);
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  font-weight:700;
+}
+.ia-shell :is(.ia-mega-heading>span,.ia-mega aside small,.ia-mega>nav>a>span){
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:13px;
+  font-weight:750;
+}
+.ia-shell .ia-mega-heading>a{
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  font-weight:750;
+  text-transform:none;
+}
+.ia-shell .product-share__trigger{
+  min-width:46px;
+  height:46px;
+  border-radius:12px;
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  font-weight:750;
+  letter-spacing:0;
+  text-transform:none;
+}
+.ia-shell .product-share__menu :is(strong,button){
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  letter-spacing:0;
+  text-transform:none;
+}
+.ia-shell .catalogue-search button{
+  min-height:40px;
+  padding:0 14px;
+  border:1px solid color-mix(in srgb,var(--system-ink) 30%,transparent);
+  border-radius:999px;
+  background:var(--system-surface);
+  color:var(--system-ink);
+  font-family:"DM Sans",Arial,sans-serif;
+  font-size:14px;
+  font-weight:750;
+}
+
+@media(max-width:1740px){
+  .ia-shell .ia-header-phone{display:none}
+}
+@media(max-width:1500px){
+  .ia-shell .ia-palette-selector--desktop{display:none}
+  .ia-shell .ia-header-actions:has(.ia-live-edit-button) .ia-theme-switcher{display:none}
+}
+@media(max-width:1180px){
+  .ia-shell .ia-header-actions .ia-theme-switcher{display:none}
+}
+
+@media(max-width:900px){
+  /*
+   * This stylesheet is loaded after the navigation stylesheet, so its CTA
+   * display rule must not revive the desktop quote button on the home page.
+   */
+  .ia-shell .ia-header .ia-quote-button{display:none!important}
+  .ia-shell :is(
+    .electrical-main .button,
+    .ia-footer-lead>a,
+    .ia-boundary>a,
+    .ia-conversion-band>a,
+    .ia-shop-toolbar>a,
+    .ia-shop-gateway>a,
+    .catalogue-load-more button:not(.secondary),
+    .catalogue-empty button
+  ){
+    min-height:58px;
+    font-size:15px!important;
+  }
+  .ia-shell .ia-mobile-ctas>a{
+    min-height:54px;
+    border-radius:12px;
+    font-family:Manrope,"DM Sans",Arial,sans-serif;
+    font-size:14px;
+    font-weight:750;
+    letter-spacing:0;
+    text-transform:none;
+  }
+  .ia-shell .ia-mobile-ctas>a:last-child{
+    border-color:var(--action-accent);
+    background:var(--action-deep);
+    color:#fff;
+  }
+  .ia-shell .ia-footer-lead>a{width:100%;max-width:390px}
+}
+
+@media(max-width:560px){
+  .ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action{
+    min-width:0;
+    min-height:78px;
+  }
+  .ia-shell[data-page-theme] .ia-route-band-action>span>strong{
+    font-size:15px!important;
+  }
+  .ia-shell :is(
+    .electrical-main .button,
+    .ia-footer-lead>a,
+    .ia-boundary>a,
+    .ia-conversion-band>a,
+    .ia-shop-toolbar>a,
+    .ia-shop-gateway>a,
+    .catalogue-load-more button:not(.secondary),
+    .catalogue-empty button
+  ){
+    width:100%;
+    max-width:100%;
+  }
+  .ia-shell :is(
+    .filter-row button,
+    .catalogue-controls button,
+    .catalogue-filter-chips button,
+    .appliance-controls button,
+    .shop-view-controls>button,
+    .ia-project-filters button
+  ){
+    min-height:43px!important;
+    padding-inline:15px!important;
+    font-size:14px!important;
+  }
+  .ia-shell .ia-footer-lead h2{font-size:clamp(45px,14vw,58px)}
+}

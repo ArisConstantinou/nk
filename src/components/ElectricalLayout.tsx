@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode} from 'react';
+import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
 import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Palette, Phone, Sun, X} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../context/ContentContext';
@@ -7,10 +7,9 @@ import {publicAsset} from '../utils/assets';
 import {SeoRouteMeta} from './SeoRouteMeta';
 import {ResponsiveImage} from './ResponsiveImage';
 import {LiveSiteEditButton} from './LiveSiteEditButton';
-import {BrandEnergyMark} from './BrandEnergyMark';
-import {RouteSignalPlayer} from './RouteSignalPlayer';
 import {applyTheme, getThemePreference, saveThemePreference, themeChangeEvent, watchSystemTheme, type ThemePreference} from '../theme';
 import {getHomePalette, homePaletteChangeEvent, homePaletteOptions, saveHomePalette, type HomePaletteId} from '../homePalettes';
+import {pageVisualForPath} from '../pageVisuals';
 import {routeInteractionForPath} from '../routeInteractions';
 
 type MegaSection = 'services' | 'shop' | null;
@@ -29,10 +28,55 @@ const routeLinkAttributes = (to: string) => {
   };
 };
 
-function SmartLink({to, className, children}: {to: string; className?: string; children: ReactNode}) {
+const navigationPanelMedia = {
+  services: {
+    image: 'assets/generated/navigation-tabs/services-v2.webp',
+    detail: 'Design · Install · Test',
+  },
+  shop: {
+    image: 'assets/generated/navigation-tabs/shop-v2.webp',
+    detail: 'Lighting · Controls · Supply',
+  },
+  projects: {
+    image: 'assets/generated/navigation-tabs/projects.webp',
+    detail: 'Built · Tested · Delivered',
+  },
+  about: {
+    image: 'assets/generated/navigation-tabs/about-v2.webp',
+    detail: 'Experience · Standards · Craft',
+  },
+  contact: {
+    image: 'assets/generated/navigation-tabs/contact.webp',
+    detail: 'Enquire · Plan · Visit',
+  },
+} as const;
+
+const navigationPanelForPath = (to: string) => {
+  const segment = to.split('/').filter(Boolean)[0] as keyof typeof navigationPanelMedia | undefined;
+  return segment ? navigationPanelMedia[segment] : undefined;
+};
+
+function NavigationPanelContent({to, label, hasMenu = false}: {to: string; label: string; hasMenu?: boolean}) {
+  const media = navigationPanelForPath(to);
+  const panelKey = to.split('/').filter(Boolean)[0];
+
+  return <>
+    {media && <span className="ia-nav-panel__media" data-nav-panel={panelKey} aria-hidden="true">
+      <img src={publicAsset(media.image)} alt=""/>
+    </span>}
+    <span className="ia-nav-panel__shade" aria-hidden="true"/>
+    <span className="ia-nav-panel__copy">
+      {media && <small>{media.detail}</small>}
+      <strong>{label}</strong>
+    </span>
+    {hasMenu && <ChevronDown className="ia-nav-panel__chevron" aria-hidden="true"/>}
+  </>;
+}
+
+function SmartLink({to, className, id, children}: {to: string; className?: string; id?: string; children: ReactNode}) {
   return isInternalUrl(to)
-    ? <Link className={className} to={to} {...routeLinkAttributes(to)}>{children}</Link>
-    : <a className={className} href={to} rel={to.startsWith('http') ? 'noreferrer' : undefined}>{children}</a>;
+    ? <Link className={className} id={id} to={to} {...routeLinkAttributes(to)}>{children}</Link>
+    : <a className={className} id={id} href={to} rel={to.startsWith('http') ? 'noreferrer' : undefined}>{children}</a>;
 }
 
 function PrimaryLink({to, children}: {to: string; children: ReactNode}) {
@@ -127,7 +171,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState<MegaSection>('services');
-  const [brandEnergized, setBrandEnergized] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
@@ -135,8 +178,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const megaOpenTimerRef = useRef<number | null>(null);
   const megaCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
+  const pageVisual = pageVisualForPath(location.pathname);
   const interactionProfile = routeInteractionForPath(location.pathname);
-  const [routeSignal, setRouteSignal] = useState({path: location.pathname, key: 0});
   const menu = (name: PublicNavigationItem['menu']) => navigation.filter(item => item.menu === name && item.active).sort((a, b) => a.position - b.position);
   const linkTo = (item: LinkItem) => item.url || item.to || '/';
   const primary: LinkItem[] = menu('primary').length ? menu('primary') : [{label: 'Services', url: '/services'}, {label: 'Shop', url: '/shop'}, {label: 'Projects', url: '/projects'}, {label: 'About', url: '/about'}, {label: 'Contact', url: '/contact'}];
@@ -198,12 +241,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     setMobileOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
   }, [location.pathname, location.search]);
-
-  useEffect(() => {
-    setRouteSignal(current => current.path === location.pathname
-      ? current
-      : {path: location.pathname, key: current.key + 1});
-  }, [location.pathname]);
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
@@ -268,13 +305,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     });
   };
   const toggleMobile = (section: Exclude<MegaSection, null>) => setMobileSection(current => current === section ? null : section);
-  const signalRouteIntent = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const target = (event.target as HTMLElement).closest<HTMLElement>('[data-route-path]');
-    const path = target?.dataset.routePath;
-    if (!path || path === `${location.pathname}${location.search}`) return;
-    setRouteSignal(current => ({path, key: current.key + 1}));
-  };
   const interactionStyle = {
     '--route-accent': interactionProfile.accent,
     '--route-secondary': interactionProfile.secondary,
@@ -283,25 +313,30 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
 
   return <div
     className="electrical-shell ia-shell"
+    data-page-theme={pageVisual?.id}
     data-interaction-profile={interactionProfile.id}
     data-interaction-motion={interactionProfile.motion}
     style={interactionStyle}
-    onClickCapture={signalRouteIntent}
   >
     <SeoRouteMeta/>
     <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'}`} ref={headerRef}>
-      <div className="ia-header-bar">
-        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined} onPointerEnter={() => setBrandEnergized(true)} onPointerLeave={() => setBrandEnergized(false)} onFocus={() => setBrandEnergized(true)} onBlur={() => setBrandEnergized(false)}><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} energized={brandEnergized}/><span><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong>{settings.header.showTagline && <small><span className="ia-brand-depth" aria-hidden="true">{settings.brandTagline}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span></small>}</span></Link>
-        <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
-          ? <button key="services" type="button" data-route-profile="services" data-route-motion="circuit" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><span>{item.label}</span><ChevronDown/></button>
-          : linkTo(item) === '/shop'
-            ? <button key="shop" type="button" data-route-profile="shop" data-route-motion="scan" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><span>{item.label}</span><ChevronDown/></button>
-            : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}>{item.label}</PrimaryLink>)}</nav>
-        <div className="ia-header-actions">
+      <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
+        {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
+        <div>
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
           <PaletteSelector className="ia-palette-selector--desktop"/>
           <ThemeSwitcher className="ia-theme-switcher--desktop"/>
-          <SmartLink className="ia-quote-button" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
+        </div>
+      </div>
+      <div className="ia-header-bar">
+        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><span className="ia-brand-mark"><ResponsiveImage className="ia-brand-logo" src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/></span><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong></span></Link>
+        <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
+          ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
+          : linkTo(item) === '/shop'
+            ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
+            : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
+        <div className="ia-header-actions">
+          <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <LiveSiteEditButton/>
           <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
         </div>
@@ -320,7 +355,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <SocialLinks links={settings.socialLinks} placement="mobile" className="ia-social-links ia-social-links--mobile"/>
       </nav>}
     </header>
-    <RouteSignalPlayer path={routeSignal.path} signalKey={routeSignal.key}/>
     <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>
     <div className="electrical-stage ia-stage" inert={mobileOpen || undefined} aria-hidden={mobileOpen || undefined}>
       <main className="electrical-main ia-main">{children}</main>

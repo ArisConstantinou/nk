@@ -1,11 +1,19 @@
 import {useEffect, useMemo, useState} from 'react';
 import {ArrowRight, ArrowUpRight, BadgePercent, FileText, Package, Search, SlidersHorizontal, Sparkles} from 'lucide-react';
-import {Link, useParams} from 'react-router-dom';
+import {Link, useLocation, useParams} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import {ProductShareActions} from '../components/ProductShareActions';
+import {pageVisualForPath} from '../pageVisuals';
+import {publicAsset} from '../utils/assets';
+
+function CatalogueHeroWords({text}: {text: string}) {
+  const words = text.trim().split(/\s+/);
+  return <>{words.map((word, index) => <span className="catalogue-hero__word" data-word-index={index} key={`${word}-${index}`}>{word}{index < words.length - 1 ? ' ' : null}</span>)}</>;
+}
 
 export function ModernShopCategoryPage() {
   const {category = ''} = useParams();
+  const location = useLocation();
   const {content} = useContent();
   const isLighting = category === 'lighting';
   const isAppliances = category === 'appliances';
@@ -14,6 +22,7 @@ export function ModernShopCategoryPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [visibleCount, setVisibleCount] = useState(36);
   const mode = isOffers ? 'offers' : isLighting ? 'lighting' : 'appliances';
+  const pageVisual = pageVisualForPath(location.pathname);
 
   const collection = useMemo(() => content.products.filter(product => {
     const department = product.department || (product.category === 'Lighting' ? 'lighting' : 'appliances');
@@ -43,17 +52,18 @@ export function ModernShopCategoryPage() {
       : 'Cooling, kitchen, cleaning, coffee, heating, beauty and home products grouped where you expect to find them.';
 
   return <>
-    <section className={`catalogue-hero catalogue-hero--${mode} section`}>
+    <section className={`catalogue-hero catalogue-hero--${mode} section`} data-hero-composition={pageVisual?.composition}>
       <div className="catalogue-hero__copy">
-        <span><Sparkles/> SHOP / {isOffers ? 'LIVE OFFERS' : mode.toUpperCase()}</span>
-        <h1>{title}<em>{accent}</em></h1>
+        <span><Sparkles/> {pageVisual?.serial || `SHOP / ${isOffers ? 'LIVE OFFERS' : mode.toUpperCase()}`}</span>
+        <h1 aria-label={`${title} ${accent}`}><span className="catalogue-hero__title-line"><CatalogueHeroWords text={title}/></span><em><CatalogueHeroWords text={accent}/></em></h1>
         <p>{intro}</p>
         <div className="catalogue-hero__facts"><strong>{collection.length}<small>{isOffers ? 'active offers' : 'products'}</small></strong><strong>{Math.max(0, categories.length - 1)}<small>collections</small></strong><strong>01<small>local showroom</small></strong></div>
       </div>
       <div className="catalogue-hero__visual">
-        {collection.slice(0, 3).map((product, index) => <div className={`catalogue-hero__image catalogue-hero__image--${index + 1}`} key={product.id}><img src={product.image} alt=""/><span>{product.legacyCategory || product.category}</span></div>)}
+        {pageVisual && <figure className="catalogue-hero__campaign"><img src={publicAsset(pageVisual.image)} alt={pageVisual.alt} fetchPriority="high" style={{objectPosition: pageVisual.position}}/><figcaption><small>{pageVisual.label}</small><strong>{pageVisual.signal}</strong></figcaption></figure>}
         <div className="catalogue-hero__seal">{isOffers ? <BadgePercent/> : <Package/>}<b>NK</b><small>CURATED<br/>COLLECTION</small></div>
       </div>
+      {pageVisual && <div className="catalogue-hero__ornament" aria-hidden="true"><span>{pageVisual.serial}</span><i/><i/><b/></div>}
     </section>
 
     <section className="catalogue-controls section" aria-label="Product filters">

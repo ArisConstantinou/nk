@@ -1,0 +1,467 @@
+/* Diagonal content navigation. This intentionally replaces the previous
+   architectural-surface and route-trace header treatment. */
+html[data-experience='tech']{
+  --command-height:130px;
+}
+
+.ia-shell .ia-header{
+  overflow:visible;
+  color:#f8f4ea;
+  background:#0d2831;
+  border:0;
+  box-shadow:0 10px 30px rgba(8,25,31,.2);
+}
+
+.ia-shell .ia-header::before{
+  content:none!important;
+  background:none!important;
+}
+
+.ia-shell .ia-header::after{
+  z-index:6;
+  height:1px;
+  background:rgba(241,107,81,.68);
+}
+
+.ia-shell .ia-header-utility{
+  z-index:7;
+  height:52px;
+  padding:0 clamp(220px,18vw,300px) 0 clamp(220px,17vw,285px);
+  justify-content:flex-end;
+  border-bottom:1px solid rgba(17,47,57,.16);
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.16),transparent 28%,rgba(17,47,57,.035)),
+    #d8d0bf;
+}
+
+.ia-shell .ia-header-utility>span{
+  display:none;
+}
+
+.ia-shell .ia-header-utility .ia-header-phone{
+  height:34px;
+  color:#173a44;
+}
+
+.ia-shell .ia-header-utility .ia-theme-switcher,
+.ia-shell .ia-header-utility .ia-palette-selector summary{
+  border-color:rgba(17,47,57,.2);
+  color:#173a44;
+}
+
+.ia-shell .ia-header-utility .ia-theme-switcher button,
+.ia-shell .ia-header-utility .ia-palette-selector summary,
+.ia-shell .ia-header-utility .ia-palette-selector summary strong{
+  color:#173a44;
+}
+
+.ia-shell .ia-header-utility .ia-theme-switcher button:hover,
+.ia-shell .ia-header-utility .ia-theme-switcher button:focus-visible{
+  color:#071f27;
+  background:rgba(17,47,57,.09);
+}
+
+.ia-shell .ia-header-bar{
+  z-index:8;
+  height:78px;
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+  padding:0;
+  background:#102f39;
+}
+
+.ia-shell .ia-brand{
+  position:absolute;
+  z-index:9;
+  top:-52px;
+  left:clamp(18px,2.6vw,48px);
+  height:52px;
+  padding:0;
+  gap:10px;
+  color:#123641;
+  background:transparent;
+}
+
+.ia-shell .ia-brand::after,
+.ia-shell .ia-brand-copy::before{
+  content:none;
+}
+
+.ia-shell .ia-brand-mark{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+}
+
+.ia-shell .ia-brand img,
+.ia-shell .ia-brand-logo{
+  width:43px;
+  height:43px;
+  filter:drop-shadow(0 2px 3px rgba(17,47,57,.22));
+}
+
+.ia-shell .ia-brand-copy{
+  min-height:0;
+  padding:0;
+}
+
+.ia-shell .ia-brand strong,
+html[data-theme='light'] .ia-shell .ia-brand strong,
+html[data-theme='dark'] .ia-shell .ia-brand strong{
+  color:#123641;
+  font-size:16px;
+  letter-spacing:-.025em;
+}
+
+.ia-shell .ia-desktop-nav{
+  grid-column:1;
+  align-self:stretch;
+  min-width:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  overflow:hidden;
+  clip-path:none;
+  border-inline:1px solid rgba(255,255,255,.09);
+  isolation:isolate;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a,
+.ia-shell .ia-header .ia-desktop-nav>button,
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]{
+  position:relative;
+  isolation:isolate;
+  flex:1 1 0;
+  min-width:84px;
+  min-height:0!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  display:block;
+  border:0;
+  border-radius:0;
+  background:#173e49!important;
+  color:#f8f4ea!important;
+  clip-path:none;
+  box-shadow:none!important;
+  cursor:pointer;
+  transition:filter .28s ease,background-color .28s ease!important;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:first-child,
+.ia-shell .ia-header .ia-desktop-nav>button:first-child{
+  clip-path:none;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:last-child,
+.ia-shell .ia-header .ia-desktop-nav>button:last-child{
+  margin-right:0!important;
+  clip-path:none;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a::before,
+.ia-shell .ia-header .ia-desktop-nav>button::before,
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]::before{
+  content:none!important;
+  display:none!important;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a::after,
+.ia-shell .ia-header .ia-desktop-nav>button::after,
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]::after{
+  content:none!important;
+  display:none!important;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>:not(:last-child) .ia-nav-panel__shade::after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  top:-8px;
+  right:1px;
+  width:1px;
+  height:calc(100% + 16px);
+  background:rgba(207,224,222,.2);
+  transform:skewX(-8deg);
+  transform-origin:center;
+  pointer-events:none;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:hover,
+.ia-shell .ia-header .ia-desktop-nav>a:focus-visible,
+.ia-shell .ia-header .ia-desktop-nav>button:hover,
+.ia-shell .ia-header .ia-desktop-nav>button:focus-visible{
+  z-index:3;
+  outline:0;
+  filter:saturate(1.02) brightness(1.03);
+  background:#173e49!important;
+  color:#fff!important;
+  letter-spacing:0!important;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a.active,
+.ia-shell .ia-header .ia-desktop-nav>button.active,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true']{
+  z-index:2;
+  background:#173e49!important;
+  color:#fff!important;
+  box-shadow:inset 0 -2px #f16b51,inset -1px 0 rgba(255,255,255,.18)!important;
+}
+
+.ia-nav-panel__media,
+.ia-nav-panel__shade{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.ia-nav-panel__media{
+  z-index:-2;
+  background:#173e49;
+}
+
+.ia-nav-panel__media img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  opacity:.17;
+  filter:saturate(.45) contrast(1.05);
+  transform:scale(1.035);
+  transition:opacity .3s ease,filter .34s ease,transform .48s cubic-bezier(.16,1,.3,1);
+}
+
+.ia-nav-panel__media[data-nav-panel='services'] img{object-position:58% 52%}
+.ia-nav-panel__media[data-nav-panel='shop'] img{object-position:50% 52%}
+.ia-nav-panel__media[data-nav-panel='projects'] img{object-position:50% 42%}
+.ia-nav-panel__media[data-nav-panel='about'] img{object-position:54% 52%}
+.ia-nav-panel__media[data-nav-panel='contact'] img{object-position:50% 66%}
+
+.ia-nav-panel__shade{
+  z-index:-1;
+  background:
+    linear-gradient(180deg,rgba(7,25,31,.18),rgba(7,25,31,.88)),
+    linear-gradient(90deg,rgba(18,54,64,.66),rgba(18,54,64,.08));
+  transition:background .34s ease;
+}
+
+.ia-nav-panel__copy{
+  position:absolute;
+  z-index:2;
+  right:16px;
+  bottom:12px;
+  left:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+  text-align:left;
+  white-space:nowrap;
+  transform:translateY(11px);
+  transition:transform .34s cubic-bezier(.16,1,.3,1);
+}
+
+.ia-nav-panel__copy small{
+  max-width:100%;
+  overflow:hidden;
+  color:#f6b180;
+  font:700 8px/1.2 var(--mono);
+  letter-spacing:.11em;
+  text-overflow:ellipsis;
+  text-transform:uppercase;
+  opacity:0;
+  transform:translateY(5px);
+  transition:opacity .25s ease,transform .38s cubic-bezier(.16,1,.3,1);
+}
+
+.ia-nav-panel__copy strong{
+  color:#fffdf7;
+  font:720 clamp(12px,1vw,15px)/1 var(--display);
+  letter-spacing:-.015em;
+  text-shadow:0 2px 9px rgba(0,0,0,.34);
+}
+
+.ia-nav-panel__chevron{
+  position:absolute;
+  z-index:3;
+  top:12px;
+  right:21px;
+  width:14px!important;
+  color:rgba(255,255,255,.72);
+  transition:transform .3s cubic-bezier(.16,1,.3,1);
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__media img,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__media img,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__media img{
+  opacity:1;
+  filter:saturate(.88) contrast(1.02);
+  transform:scale(1);
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__shade,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__shade,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__shade{
+  background:
+    linear-gradient(180deg,rgba(7,22,27,.06),rgba(7,22,27,.78)),
+    linear-gradient(90deg,rgba(7,22,27,.42),rgba(7,22,27,.02));
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__copy,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__copy,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__copy{
+  transform:translateY(0);
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__copy small,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__copy small,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__copy small{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__chevron{
+  transform:rotate(180deg);
+}
+
+.ia-shell .ia-header-actions{
+  position:absolute;
+  z-index:10;
+  top:-52px;
+  right:clamp(18px,2.6vw,48px);
+  gap:8px;
+  height:52px;
+  justify-content:flex-end;
+  padding:0;
+  background:transparent;
+}
+
+.ia-shell #ia-primary-quote{
+  min-height:36px!important;
+  height:36px!important;
+  padding:0 18px 0 20px!important;
+  border:0!important;
+  background:#f16b51!important;
+  color:#112e36!important;
+  clip-path:polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%);
+  box-shadow:none!important;
+  font-size:12px!important;
+  text-transform:none!important;
+  transition:background-color .2s ease,color .2s ease!important;
+}
+
+.ia-shell #ia-primary-quote:hover,
+.ia-shell #ia-primary-quote:focus-visible{
+  transform:none!important;
+  background:#ff8468!important;
+  color:#0c2830!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:1px solid rgba(255,255,255,.68);
+  outline-offset:3px;
+}
+
+.ia-shell .ia-live-edit-button{
+  border-color:rgba(255,255,255,.24);
+  background:rgba(255,255,255,.04);
+  color:#f5b09d;
+}
+
+.ia-shell .ia-live-edit-button:hover,
+.ia-shell .ia-live-edit-button:focus-visible{
+  background:rgba(255,255,255,.1);
+  color:#fff;
+}
+
+html[data-theme='light'] .ia-shell .ia-header,
+html[data-theme='dark'] .ia-shell .ia-header{
+  color:#f8f4ea;
+  background:#0d2831;
+}
+
+html[data-theme='light'] .ia-shell .ia-header-bar,
+html[data-theme='dark'] .ia-shell .ia-header-bar{
+  background:#102f39;
+}
+
+@media(max-width:1400px){
+  .ia-shell .ia-header-bar{
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    padding:0;
+  }
+
+  .ia-shell .ia-header-utility{padding-right:220px;padding-left:210px}
+  .ia-shell .ia-brand{padding:0}
+  .ia-shell .ia-header-actions{padding:0}
+
+  .ia-shell .ia-header .ia-desktop-nav>a,
+  .ia-shell .ia-header .ia-desktop-nav>button,
+  .ia-shell .ia-header .ia-desktop-nav>[data-route-profile]{min-width:74px}
+  .ia-nav-panel__copy{right:13px;left:18px}
+  .ia-nav-panel__copy strong{font-size:12px}
+  .ia-shell #ia-primary-quote{padding-inline:18px}
+}
+
+@media(max-width:1120px){
+  .ia-shell .ia-header-bar{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .ia-shell .ia-header-utility{padding-right:145px;padding-left:86px}
+  .ia-shell .ia-brand{padding:0}
+  .ia-shell .ia-header-actions{padding:0}
+  .ia-shell .ia-brand-copy{display:none}
+  .ia-shell .ia-header .ia-desktop-nav>a,
+  .ia-shell .ia-header .ia-desktop-nav>button,
+  .ia-shell .ia-header .ia-desktop-nav>[data-route-profile]{min-width:66px}
+  .ia-nav-panel__copy{right:10px;left:15px}
+  .ia-nav-panel__copy small{display:none}
+  .ia-shell #ia-primary-quote span{display:none}
+  .ia-shell #ia-primary-quote{width:50px;padding:0!important;justify-content:center}
+}
+
+@media(max-width:900px){
+  html[data-experience='tech']{--command-height:74px}
+  .ia-shell .ia-header-utility{display:none}
+  .ia-shell .ia-header-bar{
+    height:74px;
+    grid-template-columns:minmax(0,1fr) auto;
+    padding:0 12px 0 30px;
+    background:#102f39;
+  }
+  .ia-shell .ia-brand{position:relative;top:auto;left:auto;height:100%;padding:0;}
+  .ia-shell .ia-brand strong,
+  html[data-theme='light'] .ia-shell .ia-brand strong,
+  html[data-theme='dark'] .ia-shell .ia-brand strong{color:#f7f1e5}
+  .ia-shell .ia-header-actions{position:relative;z-index:auto;top:auto;right:auto;height:auto;padding:0;background:transparent}
+  .ia-shell .ia-brand{gap:8px}
+  .ia-shell .ia-brand-copy{display:flex}
+  .ia-shell .ia-brand-mark{width:48px;height:48px;flex-basis:48px}
+  .ia-shell .ia-brand img,.ia-shell .ia-brand-logo{width:46px;height:46px}
+  .ia-shell .ia-brand strong{font-size:15px}
+  .ia-shell .ia-desktop-nav,
+  .ia-shell .ia-header-phone,
+  .ia-shell #ia-primary-quote{display:none!important}
+  .ia-shell .ia-mobile-trigger{
+    display:grid;
+    border-color:rgba(255,255,255,.26);
+    background:rgba(255,255,255,.05);
+    color:#fff;
+  }
+  .ia-shell .ia-mobile-menu{top:74px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ia-shell .ia-header .ia-desktop-nav>a,
+  .ia-shell .ia-header .ia-desktop-nav>button,
+  .ia-nav-panel__media img,
+  .ia-nav-panel__copy,
+  .ia-nav-panel__copy small{
+    transition-duration:.01ms!important;
+  }
+}

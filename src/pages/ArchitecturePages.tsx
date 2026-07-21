@@ -4,7 +4,8 @@ import {Link, useParams, useSearchParams} from 'react-router-dom';
 import {PageIntro} from './PublicPages';
 import {useContent} from '../context/ContentContext';
 import {serviceLinks} from '../navigation';
-import {ManagedPublicForm} from '../components/ManagedPublicForm';
+import {ServiceSignature} from '../components/ServiceSignature';
+import {QuoteScopeComposer} from '../components/QuoteScopeComposer';
 import {ModernShopCategoryPage} from './ShopCataloguePage';
 import {ExperienceSlot, experienceSlots} from '../interactive';
 
@@ -18,6 +19,8 @@ type ServiceDefinition = {
   shortTitle: string;
   description: string;
   intro: string;
+  actionSignal: string;
+  actionLabel: string;
   Icon: LucideIcon;
   deliverables: string[];
   applications: string[];
@@ -30,6 +33,8 @@ const serviceDefinitions: ServiceDefinition[] = [
     slug: 'electrical-installations', code: 'SRV-01', title: 'Electrical installations', shortTitle: 'Power planned and installed safely.', Icon: Zap,
     description: 'Complete electrical planning and installation for residential, commercial, retail and hospitality projects.',
     intro: 'We coordinate loads, distribution, containment, wiring, protection, testing and handover as one accountable installation path.',
+    actionSignal: 'LOAD / ROUTE / TEST',
+    actionLabel: 'Start an installation brief',
     deliverables: ['Load and circuit planning', 'Distribution boards and protection', 'Containment, cabling and final connections', 'Inspection, testing and handover'],
     applications: ['Private residences', 'Offices and workplaces', 'Retail and hospitality', 'Renovations and extensions'],
   },
@@ -37,6 +42,8 @@ const serviceDefinitions: ServiceDefinition[] = [
     slug: 'lighting-design', code: 'SRV-02', title: 'Lighting design & specification', shortTitle: 'Light shaped around the architecture.', Icon: Lightbulb,
     description: 'Lighting concepts, fixture specification and practical coordination for interior, exterior and architectural applications.',
     intro: 'Lighting is treated as a design and technical service—not mixed into the product shop—so ambience, glare, control and installation remain coordinated.',
+    actionSignal: 'MOOD / LAYER / SPECIFY',
+    actionLabel: 'Shape the lighting brief',
     deliverables: ['Lighting layers and layouts', 'Luminaire specification', 'Colour temperature and glare review', 'Control scenes and installation coordination'],
     applications: ['Homes and apartments', 'Restaurants and hospitality', 'Retail and showrooms', 'Outdoor and landscape areas'],
   },
@@ -44,6 +51,8 @@ const serviceDefinitions: ServiceDefinition[] = [
     slug: 'smart-home-automation', code: 'SRV-03', title: 'Smart home & automation', shortTitle: 'Control that remains simple to use.', Icon: SlidersHorizontal,
     description: 'KNX and connected-control systems coordinated with power, lighting, shading, security and daily routines.',
     intro: 'The system is planned around how the building is used, with clear controls, dependable scenes and room for future changes.',
+    actionSignal: 'SENSE / SCENE / CONTROL',
+    actionLabel: 'Map the control strategy',
     deliverables: ['KNX system planning', 'Lighting and shading control', 'Scenes, schedules and sensors', 'Commissioning and user handover'],
     applications: ['New smart homes', 'High-spec renovations', 'Workplaces and meeting areas', 'Energy-aware control upgrades'],
   },
@@ -51,6 +60,8 @@ const serviceDefinitions: ServiceDefinition[] = [
     slug: 'security-systems', code: 'SRV-04', title: 'Security & low-voltage systems', shortTitle: 'Connected protection without fragmented contractors.', Icon: ShieldCheck,
     description: 'CCTV, alarm, access-control, sound and vision systems integrated with the electrical project.',
     intro: 'Low-voltage systems are planned early so cameras, sensors, panels, data points and user interfaces land in the right places.',
+    actionSignal: 'WATCH / VERIFY / RESPOND',
+    actionLabel: 'Define the protection brief',
     deliverables: ['CCTV and recording systems', 'Alarm and detection systems', 'Access control and entry systems', 'Sound, vision and structured cabling'],
     applications: ['Private residences', 'Retail and stock areas', 'Offices and shared buildings', 'Remote monitoring requirements'],
   },
@@ -58,6 +69,8 @@ const serviceDefinitions: ServiceDefinition[] = [
     slug: 'maintenance', code: 'SRV-05', title: 'Maintenance & fault support', shortTitle: 'Find the fault. Restore the system.', Icon: Wrench,
     description: 'Electrical fault diagnosis, corrective work and planned maintenance for existing installations.',
     intro: 'Start with the symptoms, equipment and property context. The enquiry is routed to the right technical person before the visit.',
+    actionSignal: 'TRACE / REPAIR / PREVENT',
+    actionLabel: 'Describe the fault',
     deliverables: ['Fault diagnosis', 'Corrective electrical work', 'Planned maintenance', 'Upgrade and replacement advice'],
     applications: ['Power and circuit faults', 'Lighting failures', 'Control-system issues', 'Existing installation upgrades'],
   },
@@ -85,17 +98,40 @@ export function ServiceDetailPage() {
   const item = base ? {...base, ...managed, Icon: managed ? serviceIconMap[managed.icon] || base.Icon : base.Icon} : undefined;
   if (!item) return <section className="not-found"><span>Service not found</span><h1>This service route has moved.</h1><Link to="/services">View all services</Link></section>;
   const Icon = item.Icon;
+  const ActionIcon = base?.Icon || item.Icon;
   return <>
     <PageIntro eyebrow={item.title} title={item.shortTitle} body={item.description}/>
-    <ExperienceSlot slot={experienceSlots.service(item.slug)} className="ia-service-experience section" label={`${item.title} interactive experience`}/>
+    {item.slug === 'electrical-installations'
+      ? <ExperienceSlot
+          slot={experienceSlots.service(item.slug)}
+          className="ia-service-experience section"
+          label={`${item.title} interactive experience`}
+          fallback={<ServiceSignature slug={item.slug}/>}
+        />
+      : <ServiceSignature slug={item.slug}/>}
     <section className="ia-service-detail section">
-      <div className="ia-service-summary"><span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="code" data-visual-edit="text" data-visual-label="Service code">{item.code}</span><span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="icon" data-visual-edit="icon" data-visual-label="Service icon"><Icon/></span><h2>What this service covers</h2><p data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="intro" data-visual-edit="text" data-visual-label="Service introduction" data-visual-multiline="true">{item.intro}</p><Link className="button copper" to={`/request-a-quote?service=${item.slug}`}>Request a quote <ArrowUpRight/></Link></div>
+      <div className="ia-service-summary">
+        <span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="code" data-visual-edit="text" data-visual-label="Service code">{item.code}</span>
+        <span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="icon" data-visual-edit="icon" data-visual-label="Service icon"><Icon/></span>
+        <h2>What this service covers</h2>
+        <p data-visual-kind="service" data-visual-slug={item.slug} data-visual-path="intro" data-visual-edit="text" data-visual-label="Service introduction" data-visual-multiline="true">{item.intro}</p>
+        <Link className="ia-service-action" to={`/request-a-quote?service=${item.slug}`} aria-label={`${item.actionLabel} for ${item.title}`}>
+          <span className="ia-service-action__glyph"><ActionIcon/></span>
+          <span className="ia-service-action__copy"><small>{item.actionSignal}</small><strong>{item.actionLabel}</strong></span>
+          <span className="ia-service-action__go"><i/><ArrowUpRight/></span>
+        </Link>
+      </div>
       <div className="ia-service-lists">
         <article><small>DELIVERABLES</small><h3>A clear scope before site work.</h3><ul>{item.deliverables.map((point, index) => <li key={`${point}-${index}`}><Check/><span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path={`deliverables.${index}`} data-visual-edit="text" data-visual-label={`Deliverable ${index + 1}`}>{point}</span></li>)}</ul></article>
         <article><small>SUITABLE FOR</small><h3>Projects and existing properties.</h3><ul>{item.applications.map((point, index) => <li key={`${point}-${index}`}><Check/><span data-visual-kind="service" data-visual-slug={item.slug} data-visual-path={`applications.${index}`} data-visual-edit="text" data-visual-label={`Application ${index + 1}`}>{point}</span></li>)}</ul></article>
       </div>
     </section>
-    <section className="ia-conversion-band section"><div><small>NEXT STEP</small><h2>Define the requirement before choosing the equipment.</h2></div><Link to="/request-a-quote">Request a Quote <ArrowRight/></Link></section>
+    <section className="ia-conversion-band section">
+      <div><small>NEXT STEP</small><h2>Define the requirement before choosing the equipment.</h2></div>
+      <Link className="ia-route-band-action" to={`/request-a-quote?service=${item.slug}`}>
+        <ActionIcon/><span><small>{item.code} / NEXT</small><strong>{item.actionLabel}</strong></span><ArrowRight/>
+      </Link>
+    </section>
   </>;
 }
 
@@ -122,7 +158,7 @@ export function QuotePage() {
   const requestedService = params.get('service');
   const defaultWorkType = requestedService === 'lighting-design' ? 'Lighting design' : requestedService === 'smart-home-automation' ? 'Smart home & automation' : requestedService === 'security-systems' ? 'Security & low voltage' : requestedService === 'maintenance' ? 'Maintenance or fault' : 'Electrical installation';
   return <>
-    <PageIntro eyebrow="Request a quote" title="Give us the useful details." italic="We will route the request." body="Share the property, location, requirement and preferred timing. NK Electrical will direct the request to the appropriate specialist."/>
-    <section className="ia-quote-layout section"><aside><small>WHAT HAPPENS NEXT</small><h2>A practical first response.</h2><ol><li><b>01</b><span>We review the requirement and route it internally.</span></li><li><b>02</b><span>We identify missing drawings, site details or product information.</span></li><li><b>03</b><span>The appropriate specialist continues the conversation.</span></li></ol><p>For urgent electrical faults, call <a href="tel:+35722494145">+357 22 494145</a>.</p></aside><ManagedPublicForm slug="quote" eyebrow="PROJECT INTAKE" title="Request a Quote" defaults={{'work-type': defaultWorkType}}/></section>
+    <PageIntro eyebrow="Project scope builder" title="Define the work." italic="Build a priceable brief." body="Choose the project route, add the site context and review every useful detail before the request enters the NK Electrical workflow."/>
+    <QuoteScopeComposer defaultWorkType={defaultWorkType} preferDefault={Boolean(requestedService)}/>
   </>;
 }

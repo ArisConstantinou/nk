@@ -1,0 +1,1915 @@
+/*
+ * Route identities
+ * Each public route owns a palette and a hero-art composition. The existing
+ * component library consumes these variables, so the whole page changes with
+ * the subject instead of applying one shared accent to every screen.
+ */
+.ia-shell[data-page-theme]{
+  --system-bg:var(--page-bg);
+  --system-surface:var(--page-surface);
+  --system-panel:var(--page-panel);
+  --system-panel-2:var(--page-panel-2);
+  --system-ink:var(--page-ink);
+  --system-muted:var(--page-muted);
+  --system-line:var(--page-line);
+  --system-red:var(--page-pop);
+  --system-live:var(--page-accent);
+  --system-white:var(--page-ink);
+  --system-accent-ink:var(--page-accent-ink,#071421);
+  --paper:var(--system-bg);
+  --paper-2:var(--system-surface);
+  --white:var(--system-surface);
+  --ink:var(--system-ink);
+  --muted:var(--system-muted);
+  --line:var(--system-line);
+  --copper:var(--system-red);
+  --copper-dark:var(--system-red);
+  --acid:var(--system-live);
+  --panel-dark:var(--system-panel);
+  --panel-dark-2:var(--system-panel-2);
+  --panel-dark-text:var(--system-white);
+  background:var(--system-bg);
+  color:var(--system-ink);
+  transition:background-color .35s ease,color .35s ease;
+}
+
+.ia-shell[data-page-theme='services']{
+  --page-bg:#edf4ff;--page-surface:#fff;--page-panel:#dbe8ff;--page-panel-2:#c9dcff;--page-ink:#10213f;--page-muted:#526784;--page-line:rgba(25,69,135,.2);--page-accent:#31d8f5;--page-pop:#ff5b36;--page-deep:#0c2e73;--page-dark-bg:#07152e;--page-dark-surface:#0d2144;--page-dark-panel:#123164;--page-dark-panel-2:#173d77;--page-image-shape:polygon(5% 0,100% 0,100% 100%,0 100%,0 10%);
+}
+.ia-shell[data-page-theme='installations']{
+  --page-bg:#eaf1f8;--page-surface:#f9fcff;--page-panel:#d6e4f2;--page-panel-2:#c5d8ea;--page-ink:#12243c;--page-muted:#53667c;--page-line:rgba(24,65,111,.22);--page-accent:#40c7ff;--page-pop:#ff6a24;--page-deep:#12366f;--page-dark-bg:#081528;--page-dark-surface:#10223b;--page-dark-panel:#17355d;--page-dark-panel-2:#1d4474;--page-image-shape:polygon(8% 0,100% 0,100% 90%,90% 100%,0 100%,0 9%);
+}
+.ia-shell[data-page-theme='lighting-design']{
+  --page-bg:#fff3e3;--page-surface:#fffaf3;--page-panel:#f7dfc5;--page-panel-2:#efd0ae;--page-ink:#331b38;--page-muted:#775e70;--page-line:rgba(88,37,89,.19);--page-accent:#ffc14a;--page-pop:#b35cff;--page-deep:#351345;--page-dark-bg:#1c0d24;--page-dark-surface:#2a1233;--page-dark-panel:#3d174a;--page-dark-panel-2:#51215e;--page-image-shape:ellipse(88% 74% at 84% 50%);
+}
+.ia-shell[data-page-theme='automation']{
+  --page-bg:#eef0ff;--page-surface:#fafaff;--page-panel:#dcddfa;--page-panel-2:#cacbf3;--page-ink:#171a46;--page-muted:#5c6084;--page-line:rgba(52,56,132,.2);--page-accent:#3ce4f5;--page-pop:#9667ff;--page-deep:#171848;--page-dark-bg:#0b0c26;--page-dark-surface:#141536;--page-dark-panel:#20204e;--page-dark-panel-2:#292a62;--page-image-shape:polygon(12% 0,100% 0,100% 100%,0 100%);
+}
+.ia-shell[data-page-theme='security']{
+  --page-bg:#e9f5f1;--page-surface:#f8fffc;--page-panel:#cee8e2;--page-panel-2:#b9dbd4;--page-ink:#0a3439;--page-muted:#4e6e70;--page-line:rgba(11,83,89,.2);--page-accent:#34d3bf;--page-pop:#ff465b;--page-deep:#082f36;--page-dark-bg:#061a1d;--page-dark-surface:#0b292d;--page-dark-panel:#0e3a40;--page-dark-panel-2:#124a51;--page-image-shape:polygon(0 0,100% 0,100% 88%,88% 100%,0 100%);
+}
+.ia-shell[data-page-theme='maintenance']{
+  --page-bg:#f3f6dd;--page-surface:#fbfced;--page-panel:#e4e9bd;--page-panel-2:#d3dba3;--page-ink:#172c59;--page-muted:#59677a;--page-line:rgba(39,66,126,.22);--page-accent:#d3ef48;--page-pop:#3d63ff;--page-deep:#172e67;--page-dark-bg:#09152c;--page-dark-surface:#102142;--page-dark-panel:#172f5c;--page-dark-panel-2:#1f3d73;--page-image-shape:polygon(0 0,100% 0,100% 100%,7% 100%);
+}
+.ia-shell[data-page-theme='shop']{
+  --page-bg:#ffefe9;--page-surface:#fff9f5;--page-panel:#f5d8d0;--page-panel-2:#ebc2ba;--page-ink:#4b252e;--page-muted:#7b5d62;--page-line:rgba(111,46,60,.19);--page-accent:#38d4c4;--page-pop:#ff6b54;--page-deep:#6d2930;--page-dark-bg:#261016;--page-dark-surface:#35161e;--page-dark-panel:#4d2028;--page-dark-panel-2:#622833;--page-image-shape:polygon(6% 0,100% 0,100% 100%,0 100%,0 12%);
+}
+.ia-shell[data-page-theme='shop-lighting']{
+  --page-bg:#edf1ff;--page-surface:#f9faff;--page-panel:#d6dfff;--page-panel-2:#c2d0fb;--page-ink:#102d65;--page-muted:#52698d;--page-line:rgba(31,72,151,.2);--page-accent:#d8f34c;--page-pop:#4770ff;--page-deep:#103b8d;--page-dark-bg:#07183b;--page-dark-surface:#0c2658;--page-dark-panel:#113775;--page-dark-panel-2:#17478f;--page-image-shape:polygon(10% 0,100% 0,100% 100%,0 100%);
+}
+.ia-shell[data-page-theme='shop-appliances']{
+  --page-bg:#eaf7f1;--page-surface:#f8fffb;--page-panel:#d1eadf;--page-panel-2:#bce0d2;--page-ink:#24564e;--page-muted:#56766f;--page-line:rgba(48,109,97,.2);--page-accent:#8addc7;--page-pop:#f05a43;--page-deep:#275f55;--page-dark-bg:#102822;--page-dark-surface:#17372f;--page-dark-panel:#214a40;--page-dark-panel-2:#2b5b4f;--page-image-shape:inset(0 0 0 5% round 42px 0 0 42px);
+}
+.ia-shell[data-page-theme='shop-offers']{
+  --page-bg:#fff0f6;--page-surface:#fff9fb;--page-panel:#f7d5e5;--page-panel-2:#efbdd5;--page-ink:#551438;--page-muted:#815f73;--page-line:rgba(135,34,86,.2);--page-accent:#ffb038;--page-pop:#ff3192;--page-deep:#5d123d;--page-dark-bg:#28081b;--page-dark-surface:#3a0d27;--page-dark-panel:#521139;--page-dark-panel-2:#6a174a;--page-image-shape:polygon(0 0,100% 0,100% 90%,90% 100%,0 100%);
+}
+.ia-shell[data-page-theme='shop-catalogues']{
+  --page-bg:#f0edff;--page-surface:#fbfaff;--page-panel:#ddd5f7;--page-panel-2:#cbc0ed;--page-ink:#241755;--page-muted:#665d83;--page-line:rgba(67,45,130,.2);--page-accent:#36d7ff;--page-pop:#ffc250;--page-deep:#231166;--page-dark-bg:#10082d;--page-dark-surface:#1b1042;--page-dark-panel:#28175d;--page-dark-panel-2:#342072;--page-image-shape:polygon(8% 0,100% 0,100% 100%,0 100%);
+}
+.ia-shell[data-page-theme='projects']{
+  --page-bg:#eef0e5;--page-surface:#fafbf4;--page-panel:#dce2cb;--page-panel-2:#ccd5b7;--page-ink:#243a2c;--page-muted:#61705f;--page-line:rgba(50,89,58,.2);--page-accent:#d6a15f;--page-pop:#4b8b60;--page-deep:#244d36;--page-dark-bg:#0e2117;--page-dark-surface:#173022;--page-dark-panel:#20452f;--page-dark-panel-2:#2a583d;--page-image-shape:polygon(0 0,100% 0,100% 100%,9% 100%);
+}
+.ia-shell[data-page-theme='about']{
+  --page-bg:#fff0e9;--page-surface:#fff9f5;--page-panel:#f3d5c8;--page-panel-2:#e9c0af;--page-ink:#53252b;--page-muted:#806064;--page-line:rgba(117,53,61,.2);--page-accent:#ff9d69;--page-pop:#c04f4b;--page-deep:#672733;--page-dark-bg:#2a0e16;--page-dark-surface:#3b161f;--page-dark-panel:#54212c;--page-dark-panel-2:#6a2a37;--page-image-shape:polygon(0 0,100% 0,100% 100%,10% 100%);
+}
+.ia-shell[data-page-theme='contact']{
+  --page-bg:#e8f6f5;--page-surface:#f7fffe;--page-panel:#cae9e6;--page-panel-2:#b2ddd8;--page-ink:#073c46;--page-muted:#4e7075;--page-line:rgba(10,91,102,.2);--page-accent:#42d8ca;--page-pop:#ff704f;--page-deep:#063d48;--page-dark-bg:#051d22;--page-dark-surface:#082b32;--page-dark-panel:#0b3e47;--page-dark-panel-2:#10515b;--page-image-shape:inset(0 0 0 4% round 56px 0 0 56px);
+}
+.ia-shell[data-page-theme='quote']{
+  --page-bg:#f0f5df;--page-surface:#fbfdef;--page-panel:#dfe8bf;--page-panel-2:#cedaa3;--page-ink:#12284c;--page-muted:#59697c;--page-line:rgba(31,66,122,.21);--page-accent:#cce94b;--page-pop:#ff684d;--page-deep:#10274f;--page-dark-bg:#071326;--page-dark-surface:#0d1e39;--page-dark-panel:#132c52;--page-dark-panel-2:#1a3966;--page-image-shape:polygon(12% 0,100% 0,100% 100%,0 100%);
+}
+.ia-shell[data-page-theme='product']{
+  --page-bg:#edf3ff;--page-surface:#fff;--page-panel:#dbe5fa;--page-panel-2:#c7d5f0;--page-ink:#18284b;--page-muted:#5d6c86;--page-line:rgba(44,71,129,.2);--page-accent:#76dfd0;--page-pop:#ff7157;--page-deep:#283c76;--page-dark-bg:#0c1730;--page-dark-surface:#142241;--page-dark-panel:#1d315d;--page-dark-panel-2:#274074;
+}
+.ia-shell[data-page-theme='editorial']{
+  --page-bg:#edf1f6;--page-surface:#fafcff;--page-panel:#d8e0eb;--page-panel-2:#c5d1df;--page-ink:#1b2b40;--page-muted:#5d6d80;--page-line:rgba(42,67,96,.2);--page-accent:#38dcf1;--page-pop:#ef5c43;--page-deep:#1b344c;--page-dark-bg:#0b1825;--page-dark-surface:#112435;--page-dark-panel:#19354d;--page-dark-panel-2:#21455f;--page-image-shape:polygon(8% 0,100% 0,100% 100%,0 100%);
+}
+
+html[data-theme='dark'] .ia-shell[data-page-theme]{
+  --system-bg:var(--page-dark-bg);
+  --system-surface:var(--page-dark-surface);
+  --system-panel:var(--page-dark-panel);
+  --system-panel-2:var(--page-dark-panel-2);
+  --system-ink:#f4f7fb;
+  --system-muted:#c5cfdb;
+  --system-line:color-mix(in srgb,var(--page-accent) 24%,transparent);
+  --system-white:#f8fbff;
+  --paper:var(--system-bg);
+  --paper-2:var(--system-surface);
+  --white:var(--system-surface);
+  --ink:var(--system-ink);
+  --muted:var(--system-muted);
+  --line:var(--system-line);
+  --panel-dark-text:var(--system-white);
+}
+
+.ia-shell[data-page-theme] .ia-header{
+  border-bottom-color:color-mix(in srgb,var(--page-accent) 38%,transparent);
+  box-shadow:0 14px 42px color-mix(in srgb,var(--page-deep) 22%,transparent);
+}
+.ia-shell[data-page-theme] .ia-header:after{
+  content:"";
+  position:absolute;
+  right:0;
+  bottom:-1px;
+  width:clamp(90px,18vw,280px);
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--page-pop) 42%,var(--page-accent));
+  pointer-events:none;
+}
+.ia-shell[data-page-theme] .ia-main{
+  background:
+    radial-gradient(circle at 92% 16%,color-mix(in srgb,var(--page-accent) 9%,transparent),transparent 25rem),
+    var(--system-bg);
+}
+
+/* Full visual page introduction */
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-intro{
+  min-height:720px;
+  padding:38px 0 48px clamp(30px,6vw,96px);
+  display:grid;
+  grid-template-columns:minmax(410px,.82fr) minmax(520px,1.18fr);
+  grid-template-rows:auto 1fr auto;
+  gap:34px clamp(38px,5vw,82px);
+  align-items:center;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border-bottom:4px solid var(--page-pop);
+  background:var(--page-deep);
+  color:#f8fbff;
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-intro:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0 44% 0 0;
+  background:
+    linear-gradient(color-mix(in srgb,var(--page-accent) 10%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--page-accent) 10%,transparent) 1px,transparent 1px);
+  background-size:38px 38px;
+  mask-image:linear-gradient(90deg,#000,transparent);
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-intro:after{
+  content:"";
+  position:absolute;
+  z-index:3;
+  left:0;
+  bottom:0;
+  width:32%;
+  height:4px;
+  background:var(--page-accent);
+  box-shadow:36px 0 0 var(--page-pop);
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-index{
+  grid-column:1;
+  grid-row:1;
+  align-self:start;
+  margin:0;
+  color:rgba(248,251,255,.68);
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-index nav{
+  padding:10px 13px;
+  border:1px solid color-mix(in srgb,var(--page-accent) 32%,transparent);
+  background:color-mix(in srgb,var(--page-deep) 78%,transparent);
+  backdrop-filter:blur(12px);
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-index nav b{color:var(--page-pop)}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title{
+  grid-column:1;
+  grid-row:2;
+  align-self:center;
+  position:relative;
+  z-index:4;
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title>span{
+  margin-bottom:25px;
+  color:var(--page-accent);
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title h1{
+  max-width:720px;
+  color:#fff;
+  font-size:clamp(54px,5.6vw,92px);
+  line-height:.89;
+  letter-spacing:-.07em;
+  text-wrap:balance;
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title h1 em{
+  color:var(--page-pop)!important;
+  text-shadow:0 0 28px color-mix(in srgb,var(--page-pop) 24%,transparent);
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-brief{
+  grid-column:1;
+  grid-row:3;
+  max-width:650px;
+  margin:0;
+  padding:18px 20px;
+  border:1px solid color-mix(in srgb,var(--page-accent) 24%,transparent);
+  border-left:4px solid var(--page-pop);
+  background:color-mix(in srgb,var(--page-deep) 76%,transparent);
+  backdrop-filter:blur(14px);
+  position:relative;
+  z-index:4;
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-brief small{color:var(--page-accent)}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-brief p{
+  margin:10px 0 0;
+  color:rgba(248,251,255,.78);
+  line-height:1.6;
+}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-brief>div{margin-top:15px;color:rgba(248,251,255,.67)}
+html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-brief>div i{background:color-mix(in srgb,var(--page-accent) 35%,transparent)}
+
+.system-page-art{
+  grid-column:2;
+  grid-row:1/4;
+  align-self:stretch;
+  min-width:0;
+  min-height:720px;
+  margin:-38px 0 -48px;
+  position:relative;
+  overflow:hidden;
+  clip-path:var(--page-image-shape,none);
+  background:var(--page-panel);
+}
+.system-page-art:before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--page-accent) 34%,transparent);
+  pointer-events:none;
+}
+.system-page-art img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:saturate(1.08) contrast(1.04);
+  transform:scale(1.005);
+}
+.system-page-art__wash{
+  position:absolute;
+  z-index:1;
+  inset:0;
+  background:
+    linear-gradient(90deg,var(--page-deep) 0%,color-mix(in srgb,var(--page-deep) 50%,transparent) 8%,transparent 27%),
+    linear-gradient(0deg,color-mix(in srgb,var(--page-deep) 58%,transparent),transparent 34%);
+  pointer-events:none;
+}
+.system-page-art figcaption{
+  position:absolute;
+  z-index:3;
+  left:clamp(25px,4vw,68px);
+  right:clamp(25px,4vw,68px);
+  bottom:42px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:24px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.45);
+  color:#fff;
+  text-shadow:0 2px 18px rgba(0,0,0,.5);
+}
+.system-page-art figcaption small,.system-page-art figcaption strong{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.system-page-art figcaption small{max-width:210px;color:rgba(255,255,255,.78)}
+.system-page-art figcaption strong{color:var(--page-accent);text-align:right}
+
+/* The catalogue routes use their own campaign composition. */
+.ia-shell[data-page-theme] .catalogue-hero{
+  min-height:720px;
+  grid-template-columns:minmax(390px,.84fr) minmax(510px,1.16fr);
+  gap:clamp(42px,6vw,100px);
+  background:var(--page-deep);
+  color:#fff;
+  border-bottom:4px solid var(--page-pop);
+}
+.ia-shell[data-page-theme] .catalogue-hero:before{
+  background:
+    linear-gradient(color-mix(in srgb,var(--page-accent) 13%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--page-accent) 13%,transparent) 1px,transparent 1px);
+  background-size:42px 42px;
+}
+.ia-shell[data-page-theme] .catalogue-hero:after{
+  border-color:color-mix(in srgb,var(--page-accent) 45%,transparent);
+  box-shadow:0 0 0 86px color-mix(in srgb,var(--page-accent) 4%,transparent),0 0 0 172px color-mix(in srgb,var(--page-pop) 3%,transparent);
+}
+.ia-shell[data-page-theme] .catalogue-hero__copy>span{color:var(--page-accent)}
+.ia-shell[data-page-theme] .catalogue-hero__copy h1 em{color:var(--page-pop)}
+.ia-shell[data-page-theme] .catalogue-hero__copy>p{color:rgba(255,255,255,.74)}
+.ia-shell[data-page-theme] .catalogue-hero__facts{background:color-mix(in srgb,var(--page-accent) 25%,transparent)}
+.ia-shell[data-page-theme] .catalogue-hero__facts strong{background:color-mix(in srgb,var(--page-deep) 83%,#000)}
+.catalogue-hero__visual{min-height:560px}
+.catalogue-hero__campaign{
+  position:absolute;
+  inset:-8% -10% -8% 0;
+  margin:0;
+  overflow:hidden;
+  clip-path:var(--page-image-shape,none);
+  box-shadow:0 34px 85px rgba(0,0,0,.34);
+}
+.catalogue-hero__campaign:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--page-deep) 55%,transparent),transparent 28%),linear-gradient(0deg,rgba(0,0,0,.42),transparent 42%);
+  pointer-events:none;
+}
+.catalogue-hero__campaign img{width:100%;height:100%;object-fit:cover;filter:saturate(1.07) contrast(1.03)}
+.catalogue-hero__campaign figcaption{
+  position:absolute;
+  z-index:2;
+  left:34px;
+  right:34px;
+  bottom:30px;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding-top:13px;
+  border-top:1px solid rgba(255,255,255,.5);
+  color:#fff;
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  text-shadow:0 2px 16px rgba(0,0,0,.55);
+}
+.catalogue-hero__campaign figcaption small{max-width:190px}
+.catalogue-hero__campaign figcaption strong{color:var(--page-accent);text-align:right}
+.ia-shell[data-page-theme] .catalogue-hero__seal{z-index:4;background:var(--page-accent);color:var(--page-accent-ink,#071421)}
+.ia-shell[data-page-theme] .catalogue-controls,
+.ia-shell[data-page-theme] .catalogue-product-grid{background:var(--system-bg)}
+.ia-shell[data-page-theme] .catalogue-filter-chips button.active{background:var(--page-deep);border-color:var(--page-deep);color:#fff}
+.ia-shell[data-page-theme] .catalogue-help-strip{background:var(--page-accent);color:var(--page-accent-ink,#071421)}
+
+/* Product pages already have unique product photography; give it a distinct stage. */
+.ia-shell[data-page-theme='product'] .product-detail{
+  background:
+    linear-gradient(135deg,color-mix(in srgb,var(--page-accent) 17%,transparent),transparent 36%),
+    linear-gradient(315deg,color-mix(in srgb,var(--page-pop) 13%,transparent),transparent 38%),
+    var(--system-bg);
+}
+.ia-shell[data-page-theme='product'] .product-detail-image{
+  position:relative;
+  border:1px solid var(--system-line);
+  box-shadow:22px 22px 0 var(--page-panel);
+}
+.ia-shell[data-page-theme='product'] .product-detail-image:before{
+  content:"PRODUCT / FOCUS";
+  position:absolute;
+  z-index:2;
+  left:18px;
+  top:18px;
+  padding:8px 10px;
+  background:var(--page-deep);
+  color:#fff;
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:.12em;
+}
+
+@media(max-width:1100px){
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-intro{
+    grid-template-columns:minmax(350px,.9fr) minmax(430px,1.1fr);
+    gap:30px 38px;
+  }
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title h1{font-size:clamp(50px,6vw,72px)}
+  .ia-shell[data-page-theme] .catalogue-hero{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:820px){
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-intro{
+    min-height:auto;
+    padding:32px 0 0 22px;
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto auto;
+    gap:30px;
+  }
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-index{grid-column:1;grid-row:1;margin-right:22px}
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title{grid-column:1;grid-row:2;padding-right:22px}
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title>span{margin-bottom:20px}
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-title h1{font-size:clamp(49px,14vw,76px)}
+  html[data-experience='tech'] .ia-shell[data-page-theme] .system-page-brief{
+    grid-column:1;
+    grid-row:4;
+    max-width:none;
+    margin:0 22px 42px 0;
+  }
+  .system-page-art{
+    grid-column:1;
+    grid-row:3;
+    min-height:430px;
+    margin:0;
+    margin-left:-22px;
+    clip-path:none;
+  }
+  .system-page-art__wash{background:linear-gradient(0deg,color-mix(in srgb,var(--page-deep) 62%,transparent),transparent 48%)}
+  .system-page-art figcaption{left:22px;right:22px;bottom:24px}
+  .ia-shell[data-page-theme] .catalogue-hero{
+    grid-template-columns:1fr;
+    padding-top:74px;
+    gap:46px;
+  }
+  .catalogue-hero__visual{min-height:500px}
+  .catalogue-hero__campaign{inset:0 -22px 0 0;clip-path:none}
+}
+
+@media(max-width:560px){
+  .system-page-art{min-height:350px}
+  .system-page-art figcaption{display:block}
+  .system-page-art figcaption strong{display:block;margin-top:8px;text-align:left}
+  .catalogue-hero__visual{min-height:355px}
+  .catalogue-hero__campaign figcaption{left:18px;right:18px;bottom:18px;display:block}
+  .catalogue-hero__campaign figcaption strong{display:block;margin-top:7px;text-align:left}
+  .ia-shell[data-page-theme='product'] .product-detail-image{box-shadow:10px 10px 0 var(--page-panel)}
+}
+
+/* --------------------------------------------------------------------------
+   Independent hero compositions
+   Every route below owns its typography, hierarchy, annotation language and
+   image stage. Shared markup remains accessible while the art direction does
+   not collapse back into one reusable "box + headline + image" template.
+   -------------------------------------------------------------------------- */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]{
+  --hero-pad:clamp(28px,5vw,82px);
+  padding-inline:var(--hero-pad);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index nav{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:0;
+  border:0;
+  background:transparent;
+  backdrop-filter:none;
+}
+.system-page-index__serial{
+  display:inline-flex;
+  margin-right:10px;
+  padding:6px 8px;
+  background:var(--page-accent);
+  color:var(--page-deep);
+  font-weight:800;
+}
+.system-page-title__line,
+.system-page-title__accent{
+  display:block;
+}
+.system-page-title__word,
+.catalogue-hero__word{
+  display:inline-block;
+  white-space:nowrap;
+}
+.system-page-title__word:not(:last-child),
+.catalogue-hero__word:not(:last-child){
+  margin-right:.18em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title h1{
+  max-width:none;
+  overflow:visible;
+  text-wrap:wrap;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title h1 em{
+  margin:0;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief{
+  max-width:none;
+  padding:0;
+  border:0;
+  background:transparent;
+  backdrop-filter:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief small{
+  display:block;
+  font-family:var(--mono);
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.system-page-ornament,
+.catalogue-hero__ornament{
+  position:absolute;
+  z-index:3;
+  pointer-events:none;
+}
+.system-page-ornament span,
+.catalogue-hero__ornament span{
+  font:700 8px/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+/* Services — a full-system constellation, with disciplines mapped as nodes. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation']{
+  min-height:760px;
+  grid-template-columns:minmax(440px,.85fr) minmax(500px,1.15fr);
+  grid-template-rows:auto 1fr auto;
+  background:#07162f;
+  border-bottom-color:#ff5b36;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation']:before{
+  inset:0;
+  background:
+    radial-gradient(circle at 15% 29%,rgba(49,216,245,.8) 0 3px,transparent 4px),
+    radial-gradient(circle at 28% 74%,rgba(255,91,54,.9) 0 4px,transparent 5px),
+    linear-gradient(117deg,transparent 13%,rgba(49,216,245,.2) 13.1%,transparent 13.3%),
+    linear-gradient(32deg,transparent 22%,rgba(49,216,245,.13) 22.1%,transparent 22.3%);
+  mask-image:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-art{
+  position:absolute;
+  z-index:0;
+  inset:0 0 0 34%;
+  min-height:0;
+  margin:0;
+  clip-path:polygon(11% 0,100% 0,100% 100%,0 100%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-art__wash{
+  background:linear-gradient(90deg,#07162f 0%,rgba(7,22,47,.92) 13%,rgba(7,22,47,.25) 54%,rgba(7,22,47,.08)),linear-gradient(0deg,rgba(7,22,47,.62),transparent 50%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-title{
+  grid-column:1 / 3;
+  width:min(850px,64vw);
+  align-self:end;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-title h1{
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(72px,7.6vw,128px);
+  font-weight:750;
+  line-height:.79;
+  letter-spacing:-.075em;
+  text-transform:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-title__accent{
+  padding-left:12vw;
+  color:#31d8f5!important;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-brief{
+  grid-column:1 / 3;
+  display:grid;
+  grid-template-columns:150px minmax(280px,500px) minmax(250px,1fr);
+  align-items:end;
+  gap:28px;
+  padding-top:17px;
+  border-top:1px solid rgba(255,255,255,.38);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-brief p{margin:0}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-brief>div{margin:0;justify-self:end}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-art figcaption{display:none}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-ornament{
+  right:4vw;
+  top:74px;
+  width:150px;
+  height:150px;
+  border:1px solid rgba(49,216,245,.45);
+  border-radius:50%;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-ornament:before,
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-ornament:after{
+  content:"";
+  position:absolute;
+  inset:31px;
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:50%;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-ornament:after{inset:69px;background:#ff5b36;border:0}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-ornament span{position:absolute;right:0;top:-18px;color:#31d8f5}
+
+/* Installations — technical blueprint, measured and certified. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint']{
+  min-height:740px;
+  grid-template-columns:minmax(420px,.76fr) minmax(560px,1.24fr);
+  background:#0a316c;
+  border-bottom:9px solid #40c7ff;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint']:before{
+  inset:0;
+  opacity:.72;
+  background:
+    linear-gradient(rgba(64,199,255,.12) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(64,199,255,.12) 1px,transparent 1px),
+    linear-gradient(rgba(64,199,255,.18) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(64,199,255,.18) 1px,transparent 1px);
+  background-size:20px 20px,20px 20px,100px 100px,100px 100px;
+  mask-image:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-title h1{
+  font-family:"Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  font-size:clamp(72px,7vw,116px);
+  font-weight:900;
+  line-height:.8;
+  letter-spacing:-.045em;
+  text-transform:uppercase;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-title__accent{
+  color:transparent!important;
+  -webkit-text-stroke:2px #40c7ff;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-art{
+  margin:-38px calc(var(--hero-pad) * -1) -48px 0;
+  clip-path:polygon(13% 0,100% 0,100% 100%,0 100%,8% 52%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-art__wash{
+  background:linear-gradient(90deg,#0a316c 0%,rgba(10,49,108,.36) 17%,transparent 43%),linear-gradient(0deg,rgba(6,25,58,.76),transparent 48%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-brief{
+  padding-top:14px;
+  border-top:2px solid #40c7ff;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-brief small:before{content:"MEASURE  /  "}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-ornament{
+  left:calc(var(--hero-pad) - 18px);
+  bottom:22px;
+  width:42%;
+  height:9px;
+  border:1px solid rgba(64,199,255,.72);
+  background:repeating-linear-gradient(90deg,transparent 0 19px,#40c7ff 20px 21px);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='blueprint'] .system-page-ornament span{position:absolute;right:0;bottom:15px;color:#40c7ff}
+
+/*
+ * Lighting design — an open architectural studio.
+ * The image cuts into an independent typographic field instead of sitting
+ * inside a framed, full-width photo box.
+ */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery']{
+  min-height:760px;
+  grid-template-columns:minmax(430px,.78fr) minmax(620px,1.22fr);
+  grid-template-rows:auto 1fr auto;
+  gap:28px 48px;
+  background:
+    radial-gradient(circle at 39% 48%,rgba(255,193,74,.11),transparent 19rem),
+    linear-gradient(108deg,#190b20 0 41.5%,#2a1233 41.6% 100%);
+  border-bottom:4px solid #ffc14a;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery']:before{
+  inset:0 58% 0 0;
+  opacity:.72;
+  background:
+    linear-gradient(rgba(255,193,74,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,193,74,.08) 1px,transparent 1px);
+  background-size:46px 46px;
+  mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.45) 72%,transparent);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery']:after{
+  left:41.5%;
+  top:9%;
+  bottom:auto;
+  width:1px;
+  height:82%;
+  background:linear-gradient(transparent,#ffc14a 18% 82%,transparent);
+  box-shadow:0 0 28px rgba(255,193,74,.32);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-art{
+  position:absolute;
+  z-index:0;
+  inset:-38px calc(var(--hero-pad) * -1) -48px 39%;
+  min-height:0;
+  margin:0;
+  clip-path:polygon(8% 0,100% 0,100% 100%,0 100%,6% 62%,2% 38%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-art:before{
+  box-shadow:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-art__wash{
+  background:
+    linear-gradient(90deg,rgba(25,11,32,.96),rgba(25,11,32,.46) 16%,transparent 42%),
+    linear-gradient(0deg,rgba(25,11,32,.72),transparent 39%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-index{
+  grid-column:1;
+  justify-self:start;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-index__serial{
+  background:transparent;
+  color:#ffc14a;
+  border:1px solid rgba(255,193,74,.58);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title{
+  z-index:4;
+  grid-column:1;
+  grid-row:2;
+  align-self:center;
+  width:min(650px,45vw);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title>span{
+  color:#ffc14a;
+  letter-spacing:.18em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title h1{
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(68px,6.1vw,108px);
+  font-weight:420;
+  line-height:.87;
+  letter-spacing:-.072em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__line{
+  display:block;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:not(:last-child){
+  margin-right:0;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:nth-child(1){
+  font-weight:720;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:nth-child(2){
+  margin-left:.16em;
+  font-weight:320;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:nth-child(3){
+  margin-left:clamp(34px,4.4vw,78px);
+  color:#d5a2ff;
+  font-weight:300;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:nth-child(4){
+  margin-left:.16em;
+  color:#d5a2ff;
+  font-weight:300;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:nth-child(5){
+  margin-left:clamp(16px,2vw,38px);
+  color:#fff7e9;
+  font-weight:650;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__accent{
+  padding-left:clamp(34px,4.4vw,78px);
+  color:#ffc14a!important;
+  font-style:normal;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-brief{
+  z-index:4;
+  grid-column:1;
+  grid-row:3;
+  width:min(540px,42vw);
+  justify-self:start;
+  padding-top:16px;
+  border-top:1px solid rgba(255,193,74,.62);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-brief p{
+  max-width:500px;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-art figcaption{
+  left:auto;
+  right:var(--hero-pad);
+  width:300px;
+  top:auto;
+  bottom:48px;
+  display:block;
+  padding-left:18px;
+  border-left:1px solid #ffc14a;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-art figcaption strong{display:block;margin-top:7px;text-align:left}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-ornament{
+  right:auto;
+  left:calc(41.5% - 31px);
+  top:50%;
+  width:62px;
+  height:62px;
+  transform:translateY(-50%);
+  border:1px solid #ffc14a;
+  border-radius:50%;
+  background:#1d0c26;
+  box-shadow:0 0 0 10px rgba(255,193,74,.08),0 0 38px rgba(179,92,255,.18);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-ornament:before{
+  content:"";
+  position:absolute;
+  inset:20px;
+  border-radius:50%;
+  background:#ffc14a;
+  box-shadow:0 0 18px rgba(255,193,74,.74);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-ornament span{
+  position:absolute;
+  left:50%;
+  top:-19px;
+  width:max-content;
+  transform:translateX(-50%);
+  color:#ffc14a;
+}
+
+/* Smart automation — a live control console. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console']{
+  min-height:730px;
+  grid-template-columns:minmax(430px,.92fr) minmax(520px,1.08fr);
+  background:#11133d;
+  border-bottom:1px solid #3ce4f5;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console']:before{
+  inset:0 52% 0 0;
+  background:linear-gradient(rgba(60,228,245,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(60,228,245,.1) 1px,transparent 1px);
+  background-size:24px 24px;
+  mask-image:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-title h1{
+  font-family:"Courier New",monospace;
+  font-size:clamp(58px,5.9vw,96px);
+  font-weight:700;
+  line-height:.87;
+  letter-spacing:-.055em;
+  text-transform:uppercase;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-title__accent{
+  color:#3ce4f5!important;
+  text-shadow:5px 5px 0 rgba(150,103,255,.66)!important;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-title>span:before{content:"●  ";color:#3ce4f5}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-brief{
+  display:grid;
+  grid-template-columns:130px 1fr;
+  gap:18px;
+  padding:16px 0;
+  border-top:1px solid rgba(60,228,245,.6);
+  border-bottom:1px solid rgba(60,228,245,.22);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-brief p{margin:0}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-brief>div{grid-column:2;margin-top:6px}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-art{
+  margin:-38px calc(var(--hero-pad) * -1) -48px 0;
+  clip-path:polygon(8% 0,100% 0,100% 100%,8% 100%,0 92%,0 8%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-ornament{
+  right:calc(var(--hero-pad) + 14px);
+  top:74px;
+  display:grid;
+  grid-template-columns:repeat(4,7px);
+  gap:5px;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-ornament i{height:28px;background:#3ce4f5}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-ornament i:nth-of-type(2){height:44px;background:#9667ff}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='console'] .system-page-ornament i:nth-of-type(3){height:19px}
+
+/* Security — surveillance frame, scan lines and command type. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan']{
+  min-height:750px;
+  grid-template-columns:minmax(410px,.75fr) minmax(600px,1.25fr);
+  background:#05272c;
+  border-bottom:4px solid #ff465b;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan']:before{
+  inset:0;
+  background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(52,211,191,.045) 6px);
+  mask-image:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-title h1{
+  font-family:"Arial Narrow",Impact,sans-serif;
+  font-size:clamp(67px,6.5vw,106px);
+  font-weight:900;
+  line-height:.81;
+  letter-spacing:-.04em;
+  text-transform:uppercase;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-title__line .system-page-title__word:nth-child(even){
+  color:transparent;
+  -webkit-text-stroke:2px #34d3bf;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-title__accent{color:#ff465b!important}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-art{
+  margin:6px calc(var(--hero-pad) * -1) 6px 0;
+  min-height:650px;
+  clip-path:polygon(0 0,94% 0,100% 9%,100% 100%,6% 100%,0 91%);
+  outline:1px solid #34d3bf;
+  outline-offset:-16px;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-brief{
+  padding-left:46px;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-brief:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:2px;
+  width:28px;
+  height:28px;
+  border:1px solid #34d3bf;
+  border-radius:50%;
+  box-shadow:inset 0 0 0 7px #05272c,inset 0 0 0 9px #ff465b;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-ornament{
+  right:calc(var(--hero-pad) + 18px);
+  top:70px;
+  width:110px;
+  height:32px;
+  border-top:2px solid #ff465b;
+  border-right:2px solid #ff465b;
+}
+
+/* Maintenance — bold diagnostic typography and a live fault trace. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic']{
+  min-height:760px;
+  grid-template-columns:minmax(430px,.78fr) minmax(590px,1.22fr);
+  background:#172e67;
+  border-bottom:4px solid #d3ef48;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title{
+  align-self:center;
+  transform:rotate(-1deg);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title h1{
+  font-family:Impact,"Arial Black",sans-serif;
+  font-size:clamp(70px,7.2vw,116px);
+  font-weight:900;
+  line-height:.72;
+  letter-spacing:-.035em;
+  text-transform:uppercase;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__word{display:block}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__word:nth-child(2){font-size:.58em;letter-spacing:.08em;color:#d3ef48}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__word:nth-child(3){font-size:1.08em;color:#d3ef48}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__word:nth-child(4){font-size:.56em;letter-spacing:.1em}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__accent{color:#d3ef48!important}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-art{
+  margin:-38px calc(var(--hero-pad) * -1) -48px 0;
+  clip-path:polygon(10% 0,100% 0,100% 100%,0 100%,6% 55%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-brief{
+  padding-top:13px;
+  border-top:6px solid #3d63ff;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-art figcaption{
+  left:14%;
+  right:var(--hero-pad);
+  bottom:38px;
+  padding:15px 17px;
+  border:1px solid rgba(211,239,72,.65);
+  background:rgba(8,21,44,.58);
+  backdrop-filter:blur(10px);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-ornament{
+  left:var(--hero-pad);
+  top:50%;
+  width:31%;
+  height:1px;
+  background:#d3ef48;
+  transform:translateY(162px);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-ornament:after{
+  content:"";
+  position:absolute;
+  left:36%;
+  top:-12px;
+  width:24px;
+  height:24px;
+  border:3px solid #d3ef48;
+  border-radius:50%;
+  background:#172e67;
+}
+
+/* Shop landing — a theatrical product runway rather than another split hero. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway']{
+  min-height:790px;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto 1fr auto;
+  background:#2b1219;
+  border-bottom:8px solid #38d4c4;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art{
+  position:absolute;
+  z-index:0;
+  inset:0;
+  min-height:0;
+  margin:0;
+  clip-path:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art__wash{
+  background:linear-gradient(90deg,rgba(43,18,25,.88),rgba(43,18,25,.14) 66%),linear-gradient(0deg,rgba(43,18,25,.94),transparent 62%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-index{grid-column:1 / 3}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title{
+  grid-column:1 / 3;
+  grid-row:2;
+  align-self:end;
+  width:min(1150px,84vw);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title h1{
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(80px,9.4vw,158px);
+  font-weight:350;
+  line-height:.75;
+  letter-spacing:-.09em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title__accent{
+  padding-left:22vw;
+  color:#38d4c4!important;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-brief{
+  grid-column:1 / 3;
+  display:grid;
+  grid-template-columns:145px minmax(300px,560px) 1fr;
+  gap:25px;
+  padding:15px 0 0;
+  border-top:1px solid rgba(255,255,255,.5);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-brief p{margin:0}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-brief>div{justify-self:end;margin:0}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art figcaption{display:none}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-ornament{
+  right:var(--hero-pad);
+  top:58px;
+  width:88px;
+  height:150px;
+  border-left:2px solid #38d4c4;
+  border-bottom:2px solid #ff6b54;
+  transform:skew(-12deg);
+}
+
+/* Catalogue folio — quiet paper, serif display and margin notes. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio']{
+  min-height:735px;
+  grid-template-columns:minmax(430px,.88fr) minmax(560px,1.12fr);
+  background:#21125f;
+  border-bottom:12px solid #ffc250;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio']:before{
+  inset:0 48% 0 0;
+  background:repeating-linear-gradient(0deg,transparent 0 37px,rgba(54,215,255,.12) 38px);
+  mask-image:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio'] .system-page-title h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(70px,6.8vw,112px);
+  font-weight:400;
+  line-height:.84;
+  letter-spacing:-.055em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio'] .system-page-title__accent{
+  padding-left:4vw;
+  color:#ffc250!important;
+  font-style:italic;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio'] .system-page-art{
+  margin:5px calc(var(--hero-pad) * -.55) 5px 20px;
+  min-height:620px;
+  transform:rotate(1.8deg);
+  clip-path:polygon(0 3%,96% 0,100% 96%,4% 100%);
+  box-shadow:18px 20px 0 rgba(54,215,255,.18);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio'] .system-page-brief{
+  width:84%;
+  padding-left:20px;
+  border-left:5px solid #36d7ff;
+  transform:rotate(-1deg);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='folio'] .system-page-ornament{
+  right:var(--hero-pad);
+  top:42px;
+  color:#ffc250;
+  transform:rotate(90deg);
+  transform-origin:right top;
+}
+
+/* Projects — proof-led archive over the completed building itself. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive']{
+  min-height:800px;
+  grid-template-columns:1.2fr .8fr;
+  grid-template-rows:auto 1fr auto;
+  background:#10271b;
+  border-bottom:0;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-art{
+  position:absolute;
+  z-index:0;
+  inset:0;
+  min-height:0;
+  margin:0;
+  clip-path:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-art__wash{
+  background:linear-gradient(90deg,rgba(14,33,23,.87),rgba(14,33,23,.15) 61%),linear-gradient(0deg,rgba(14,33,23,.9),transparent 58%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-title{
+  grid-column:1 / 3;
+  grid-row:2;
+  align-self:end;
+  width:min(1080px,82vw);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-title h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(78px,8.7vw,146px);
+  font-weight:400;
+  line-height:.76;
+  letter-spacing:-.07em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-title__accent{color:#d6a15f!important;font-style:italic}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-brief{
+  grid-column:2;
+  grid-row:1;
+  max-width:400px;
+  justify-self:end;
+  padding:18px;
+  border-top:1px solid #d6a15f;
+  border-bottom:1px solid rgba(255,255,255,.32);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-art figcaption{
+  left:var(--hero-pad);
+  right:auto;
+  bottom:35px;
+  width:290px;
+  border-top-color:#d6a15f;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-ornament{
+  right:var(--hero-pad);
+  bottom:54px;
+  width:190px;
+  height:96px;
+  border:1px solid rgba(214,161,95,.65);
+  box-shadow:-12px -12px 0 rgba(75,139,96,.28);
+}
+
+/* About — a warm, human manifesto with a portrait-like image aperture. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto']{
+  min-height:735px;
+  grid-template-columns:minmax(480px,1.08fr) minmax(470px,.92fr);
+  background:#672733;
+  border-bottom:20px solid #ff9d69;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-title h1{
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(74px,7.4vw,122px);
+  font-weight:280;
+  line-height:.84;
+  letter-spacing:-.075em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-title__accent{color:#ff9d69!important;font-family:Georgia,serif;font-weight:400;font-style:italic}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-art{
+  min-height:630px;
+  margin:0;
+  clip-path:ellipse(48% 50% at 52% 50%);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-art figcaption{left:18%;right:18%}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-brief{
+  max-width:590px;
+  padding-left:64px;
+  font-family:Georgia,serif;
+  font-size:1.05rem;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-brief:before{
+  content:"“";
+  position:absolute;
+  left:0;
+  top:-26px;
+  color:#ff9d69;
+  font:80px/1 Georgia,serif;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='manifesto'] .system-page-ornament{
+  right:calc(var(--hero-pad) + 14px);
+  top:42px;
+  width:70px;
+  height:70px;
+  border:10px solid rgba(255,157,105,.23);
+  border-radius:50%;
+}
+
+/* Contact — direct signal paths, with the team framed as the destination. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal']{
+  min-height:710px;
+  grid-template-columns:minmax(460px,.92fr) minmax(520px,1.08fr);
+  background:#063d48;
+  border-bottom:4px solid #42d8ca;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal']:before{
+  inset:0 50% 0 0;
+  background:
+    radial-gradient(circle at 12px 12px,#42d8ca 0 2px,transparent 3px),
+    linear-gradient(90deg,rgba(66,216,202,.18) 1px,transparent 1px);
+  background-size:58px 58px;
+  mask-image:linear-gradient(90deg,#000,transparent);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-title h1{
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(66px,6.4vw,105px);
+  font-weight:400;
+  line-height:.86;
+  letter-spacing:-.07em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-title__accent{
+  color:#42d8ca!important;
+  font-weight:800;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-art{
+  margin:20px 0 20px 0;
+  min-height:610px;
+  clip-path:inset(0 round 190px 0 0 190px);
+  box-shadow:28px 0 0 rgba(255,112,79,.24);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-brief{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:7px;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-brief>div{margin-top:5px;color:#42d8ca}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-ornament{
+  left:var(--hero-pad);
+  bottom:40px;
+  width:44%;
+  height:18px;
+  border-bottom:2px solid #42d8ca;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-ornament:after{
+  content:"→";
+  position:absolute;
+  right:-2px;
+  bottom:-11px;
+  color:#ff704f;
+  font:28px/1 Arial,sans-serif;
+}
+
+/* Quote — project plan, notes and a clean Cyprus/UK specification desk. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan']{
+  min-height:740px;
+  grid-template-columns:minmax(440px,.86fr) minmax(560px,1.14fr);
+  background:#10274f;
+  border-bottom:4px solid #cce94b;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan']:before{
+  inset:0 48% 0 0;
+  background:
+    linear-gradient(rgba(204,233,75,.14) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(204,233,75,.14) 1px,transparent 1px);
+  background-size:32px 32px;
+  mask-image:none;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan'] .system-page-title h1{
+  font-family:"Courier New",monospace;
+  font-size:clamp(57px,5.8vw,94px);
+  font-weight:700;
+  line-height:.87;
+  letter-spacing:-.055em;
+  text-transform:uppercase;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan'] .system-page-title__accent{
+  color:#cce94b!important;
+  padding-left:3vw;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan'] .system-page-art{
+  margin:-5px calc(var(--hero-pad) * -.7) -5px 15px;
+  min-height:640px;
+  clip-path:polygon(9% 0,100% 0,100% 100%,0 100%,0 9%);
+  box-shadow:-18px 18px 0 rgba(204,233,75,.18);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan'] .system-page-brief{
+  padding:15px 17px;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 29px,rgba(204,233,75,.15) 30px);
+  border-left:3px solid #ff684d;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='plan'] .system-page-ornament{
+  left:calc(var(--hero-pad) - 12px);
+  top:39%;
+  width:18px;
+  height:18px;
+  border:2px solid #cce94b;
+  transform:rotate(45deg);
+  box-shadow:78px 78px 0 -3px #ff684d;
+}
+
+/* Managed editorial pages retain a clean but unmistakably magazine-like stage. */
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='editorial'] .system-page-title h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(68px,6.7vw,110px);
+  font-weight:400;
+  line-height:.85;
+  letter-spacing:-.06em;
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='editorial'] .system-page-title__accent{color:#38dcf1!important;font-style:italic}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='editorial'] .system-page-brief{padding-left:24px;border-left:1px solid #38dcf1}
+
+/* Shop collections — three deliberately different campaign languages. */
+.ia-shell .catalogue-hero[data-hero-composition]{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy,
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__visual{position:relative;z-index:2}
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__title-line,
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1 em{display:block}
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1{overflow:visible}
+.ia-shell .catalogue-hero[data-hero-composition='orbit']{
+  min-height:760px;
+  grid-template-columns:minmax(500px,1.02fr) minmax(470px,.98fr);
+  background:#0a2c72;
+  border-bottom:0;
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__copy h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(72px,7.3vw,120px);
+  font-weight:400;
+  line-height:.78;
+  letter-spacing:-.07em;
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__copy h1 em{
+  padding-left:5vw;
+  color:#d8f34c;
+  font-style:italic;
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__campaign{
+  inset:-5% -10% -5% 2%;
+  clip-path:ellipse(47% 48% at 52% 50%);
+  box-shadow:0 0 0 34px rgba(216,243,76,.08),0 0 0 68px rgba(71,112,255,.12);
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__facts{
+  width:88%;
+  transform:translateX(7%) rotate(-2deg);
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__seal{
+  right:auto;
+  left:-24px;
+  bottom:28px;
+  border-radius:50%;
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__ornament{
+  right:4vw;
+  top:38px;
+  width:145px;
+  height:145px;
+  border:1px solid rgba(216,243,76,.6);
+  border-radius:50%;
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__ornament:after{
+  content:"";
+  position:absolute;
+  inset:36px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:50%;
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic']{
+  min-height:735px;
+  grid-template-columns:minmax(430px,.88fr) minmax(550px,1.12fr);
+  background:#275f55;
+  border-bottom:14px solid #f05a43;
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic']:before{
+  background:repeating-linear-gradient(90deg,transparent 0 74px,rgba(138,221,199,.11) 75px);
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__copy h1{
+  font-family:"Trebuchet MS",Arial,sans-serif;
+  font-size:clamp(69px,6.6vw,108px);
+  font-weight:700;
+  line-height:.82;
+  letter-spacing:-.065em;
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__copy h1 em{
+  color:#8addc7;
+  font-weight:400;
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__campaign{
+  inset:-2% -8% -8% 0;
+  clip-path:inset(0 round 260px 260px 0 0);
+  box-shadow:-22px 22px 0 rgba(138,221,199,.18);
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__facts{
+  background:transparent;
+  gap:7px;
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__facts strong{
+  border-radius:60px;
+  background:#17372f;
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__ornament{
+  right:5vw;
+  top:42px;
+  width:160px;
+  height:18px;
+  border-top:2px solid #8addc7;
+  border-bottom:2px solid #f05a43;
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster']{
+  min-height:770px;
+  grid-template-columns:minmax(520px,1.12fr) minmax(440px,.88fr);
+  background:#5d123d;
+  border-bottom:12px solid #ffb038;
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster']:before{
+  inset:-30% 42% -30% -12%;
+  background:#ff3192;
+  transform:rotate(-13deg);
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster']:after{
+  border-color:#ffb038;
+  box-shadow:0 0 0 86px rgba(255,176,56,.08),0 0 0 172px rgba(255,49,146,.08);
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__copy h1{
+  font-family:Impact,"Arial Black",sans-serif;
+  font-size:clamp(74px,7.8vw,128px);
+  font-weight:900;
+  line-height:.72;
+  letter-spacing:-.035em;
+  text-transform:uppercase;
+  transform:rotate(-2deg);
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__copy h1 em{
+  color:#ffb038;
+  text-shadow:6px 6px 0 #5d123d;
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__facts{
+  width:88%;
+  transform:rotate(2deg);
+  background:#ffb038;
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__facts strong{background:#5d123d}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__campaign{
+  inset:5% -12% -3% 3%;
+  clip-path:polygon(8% 0,100% 0,100% 89%,88% 100%,0 100%,0 9%);
+  transform:rotate(1.2deg);
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__seal{
+  width:120px;
+  height:120px;
+  transform:rotate(11deg);
+  background:#ffb038;
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__ornament{
+  right:3vw;
+  top:35px;
+  color:#ffb038;
+  font-size:1rem;
+}
+
+/*
+ * Absolute hero art must span the full grid before route-specific insets are
+ * applied. Without an explicit grid area, CSS positions it inside column two,
+ * which makes full-bleed compositions look small and pinned to the far right.
+ */
+html[data-experience='tech'] .ia-shell .system-page-intro:is(
+  [data-hero-composition='constellation'],
+  [data-hero-composition='gallery'],
+  [data-hero-composition='runway'],
+  [data-hero-composition='archive']
+) .system-page-art{
+  grid-column:1 / -1;
+  grid-row:1 / -1;
+}
+
+/* Shop campaigns keep different shapes, but share a confident visual scale. */
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__campaign{
+  inset:-5% -10% -5% -12%;
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__campaign{
+  inset:5% -12% -3% -20%;
+}
+
+@media(max-width:1100px){
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]{
+    --hero-pad:clamp(25px,4vw,46px);
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='constellation'] .system-page-title h1,
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title h1,
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title h1,
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='archive'] .system-page-title h1{
+    font-size:clamp(68px,9vw,106px);
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title{
+    width:min(500px,49vw);
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery']{
+    grid-template-columns:minmax(330px,.85fr) minmax(0,1.15fr);
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title h1{
+    font-size:clamp(62px,8vw,84px);
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-art{
+    inset:-38px calc(var(--hero-pad) * -1) -48px 44%;
+  }
+  .ia-shell .catalogue-hero[data-hero-composition]{padding-inline:38px}
+}
+
+@media(max-width:820px){
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]{
+    --hero-pad:22px;
+    min-height:auto;
+    padding:26px var(--hero-pad) 0;
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto auto;
+    gap:25px;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index,
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title,
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief{
+    grid-column:1;
+    width:auto;
+    max-width:none;
+    margin:0;
+    transform:none;
+    justify-self:stretch;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index{grid-row:1}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title{grid-row:2;align-self:auto;padding:0}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief{
+    grid-row:4;
+    display:block;
+    margin-bottom:34px;
+    padding:18px 0 0;
+    border-top:1px solid color-mix(in srgb,var(--page-accent) 60%,transparent);
+    border-left:0;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief p{margin:9px 0 0}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief>div{margin-top:14px;justify-self:auto}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title h1{
+    font-size:clamp(50px,13.7vw,82px);
+    line-height:.84;
+    letter-spacing:-.055em;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title__accent{padding-left:0}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery']:after{display:none}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__break{
+    display:none;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:nth-child(n){
+    margin-left:0;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='gallery'] .system-page-title__word:not(:last-child){
+    margin-right:.18em;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art{
+    position:relative;
+    z-index:1;
+    inset:auto;
+    grid-column:1;
+    grid-row:3;
+    min-height:430px;
+    margin:0 calc(var(--hero-pad) * -1);
+    transform:none;
+    clip-path:none;
+    outline:0;
+    box-shadow:none;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art__wash{
+    background:linear-gradient(0deg,color-mix(in srgb,var(--page-deep) 64%,transparent),transparent 50%);
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art figcaption{
+    display:flex;
+    inset:auto 22px 22px;
+    width:auto;
+    padding:12px 0 0;
+    border:0;
+    border-top:1px solid rgba(255,255,255,.5);
+    background:transparent;
+    transform:none;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-ornament{display:none}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__word{display:inline-block}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-title__word:nth-child(n){
+    font-size:inherit;
+    letter-spacing:inherit;
+  }
+  .ia-shell .catalogue-hero[data-hero-composition]{
+    min-height:auto;
+    grid-template-columns:1fr;
+    padding:62px 22px 0;
+    gap:36px;
+  }
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1{
+    font-size:clamp(55px,14vw,84px);
+    line-height:.82;
+    transform:none;
+  }
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1 em{padding-left:0}
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__facts{
+    width:auto;
+    transform:none;
+  }
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__visual{min-height:470px}
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__campaign{
+    inset:0 -22px 0 -22px;
+    transform:none;
+    clip-path:none;
+    box-shadow:none;
+  }
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__ornament{display:none}
+}
+
+@media(max-width:560px){
+  .system-page-index__serial{display:none}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index nav{
+    flex-wrap:wrap;
+    font-size:7px;
+    line-height:1.4;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title>span{margin-bottom:14px}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title h1{
+    font-size:clamp(43px,13.5vw,65px);
+    line-height:.86;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='scan'] .system-page-title h1{
+    font-size:clamp(38px,10.5vw,48px);
+    letter-spacing:-.035em;
+  }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art{min-height:340px}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art figcaption{display:block}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art figcaption strong{display:block;margin-top:7px;text-align:left}
+  .ia-shell .catalogue-hero[data-hero-composition]{padding-top:42px}
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1{font-size:clamp(47px,13.4vw,67px)}
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__facts{grid-template-columns:repeat(3,1fr)}
+  .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__visual{min-height:355px}
+}
+
+/*
+ * Route-owned action language
+ * Primary actions keep the same interaction contract while changing their
+ * geometry, material and signal pattern to match the subject of each page.
+ */
+.ia-shell[data-page-theme]{
+  --page-cta-bg:linear-gradient(110deg,var(--page-deep),color-mix(in srgb,var(--page-deep) 78%,var(--page-accent)));
+  --page-cta-ink:#fff;
+  --page-cta-border:color-mix(in srgb,var(--page-accent) 74%,#fff);
+  --page-cta-radius:0;
+  --page-cta-clip:none;
+  --page-cta-shadow:inset 4px 0 0 var(--page-pop),0 12px 28px color-mix(in srgb,var(--page-deep) 20%,transparent);
+  --page-cta-pattern:linear-gradient(90deg,transparent 0 72%,color-mix(in srgb,var(--page-accent) 13%,transparent) 72% 100%);
+}
+.ia-shell[data-page-theme='services']{
+  --page-cta-clip:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,15px 100%,0 calc(100% - 15px));
+  --page-cta-pattern:linear-gradient(135deg,transparent 0 72%,color-mix(in srgb,var(--page-accent) 24%,transparent) 72% 74%,transparent 74%);
+}
+.ia-shell[data-page-theme='installations']{
+  --page-cta-clip:polygon(0 0,calc(100% - 13px) 0,100% 13px,100% 100%,0 100%);
+  --page-cta-shadow:inset 5px 0 0 var(--page-pop),inset 0 -1px 0 color-mix(in srgb,var(--page-accent) 62%,transparent),0 13px 28px rgba(8,21,40,.2);
+  --page-cta-pattern:linear-gradient(90deg,color-mix(in srgb,var(--page-accent) 18%,transparent) 1px,transparent 1px),linear-gradient(color-mix(in srgb,var(--page-accent) 13%,transparent) 1px,transparent 1px);
+}
+.ia-shell[data-page-theme='lighting-design']{
+  --page-cta-bg:radial-gradient(circle at 18% 50%,#fff0b9 0 4%,transparent 25%),linear-gradient(105deg,#351345,#6b2b76);
+  --page-cta-border:#ffc14a;
+  --page-cta-radius:999px;
+  --page-cta-shadow:0 0 0 4px color-mix(in srgb,var(--page-accent) 15%,transparent),0 13px 32px color-mix(in srgb,var(--page-pop) 23%,transparent);
+  --page-cta-pattern:radial-gradient(circle at 82% 50%,color-mix(in srgb,var(--page-accent) 34%,transparent),transparent 34%);
+}
+.ia-shell[data-page-theme='automation']{
+  --page-cta-bg:linear-gradient(90deg,#171848 0 26%,#242760 26% 74%,#171848 74%);
+  --page-cta-clip:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  --page-cta-shadow:inset 0 0 0 1px color-mix(in srgb,var(--page-accent) 55%,transparent),0 14px 32px rgba(11,12,38,.24);
+  --page-cta-pattern:linear-gradient(90deg,transparent 0 32%,color-mix(in srgb,var(--page-accent) 14%,transparent) 32% 33%,transparent 33% 66%,color-mix(in srgb,var(--page-pop) 16%,transparent) 66% 67%,transparent 67%);
+}
+.ia-shell[data-page-theme='security']{
+  --page-cta-bg:linear-gradient(100deg,#082f36,#0b454b 72%,#102d34);
+  --page-cta-border:#34d3bf;
+  --page-cta-clip:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  --page-cta-shadow:inset 4px 0 0 #ff465b,inset 0 0 0 1px rgba(52,211,191,.18),0 14px 32px rgba(6,26,29,.24);
+  --page-cta-pattern:repeating-linear-gradient(90deg,transparent 0 32px,rgba(52,211,191,.08) 32px 33px),linear-gradient(90deg,transparent 0 76%,rgba(255,70,91,.13) 76%);
+}
+.ia-shell[data-page-theme='maintenance']{
+  --page-cta-bg:linear-gradient(112deg,#172e67 0 70%,#223f7c 70%);
+  --page-cta-border:#d3ef48;
+  --page-cta-clip:polygon(17px 0,100% 0,calc(100% - 17px) 100%,0 100%);
+  --page-cta-shadow:inset 6px 0 0 #d3ef48,0 13px 30px rgba(23,46,103,.22);
+  --page-cta-pattern:repeating-linear-gradient(135deg,transparent 0 12px,rgba(211,239,72,.11) 12px 16px);
+}
+.ia-shell[data-page-theme='shop']{
+  --page-cta-bg:linear-gradient(110deg,#6d2930,#8b3c42);
+  --page-cta-border:#38d4c4;
+  --page-cta-radius:7px;
+  --page-cta-shadow:inset 0 0 0 2px rgba(255,255,255,.08),0 14px 30px rgba(109,41,48,.2);
+  --page-cta-pattern:radial-gradient(circle at 10px 50%,var(--page-accent) 0 2px,transparent 3px);
+}
+.ia-shell[data-page-theme='shop-lighting']{
+  --page-cta-bg:linear-gradient(100deg,#103b8d,#315cd0);
+  --page-cta-border:#d8f34c;
+  --page-cta-radius:999px;
+  --page-cta-shadow:0 0 0 3px rgba(216,243,76,.16),0 15px 34px rgba(16,59,141,.22);
+  --page-cta-pattern:radial-gradient(ellipse at 76% 50%,rgba(216,243,76,.28),transparent 38%);
+}
+.ia-shell[data-page-theme='shop-appliances']{
+  --page-cta-bg:linear-gradient(110deg,#275f55,#3d7c70);
+  --page-cta-border:#8addc7;
+  --page-cta-radius:15px;
+  --page-cta-shadow:inset 0 -5px 0 rgba(0,0,0,.12),0 12px 26px rgba(39,95,85,.18);
+  --page-cta-pattern:linear-gradient(90deg,transparent 0 78%,rgba(248,255,251,.11) 78%);
+}
+.ia-shell[data-page-theme='shop-offers']{
+  --page-cta-bg:linear-gradient(105deg,#5d123d,#a71963);
+  --page-cta-border:#ffb038;
+  --page-cta-clip:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px));
+  --page-cta-shadow:5px 5px 0 #ffb038,0 14px 28px rgba(93,18,61,.2);
+  --page-cta-pattern:repeating-linear-gradient(-35deg,transparent 0 13px,rgba(255,176,56,.12) 13px 17px);
+}
+.ia-shell[data-page-theme='shop-catalogues']{
+  --page-cta-bg:linear-gradient(90deg,#231166,#3b2387);
+  --page-cta-border:#36d7ff;
+  --page-cta-clip:polygon(0 9px,13px 9px,18px 0,100% 0,100% 100%,0 100%);
+  --page-cta-shadow:inset 8px 0 0 #ffc250,0 14px 30px rgba(35,17,102,.2);
+  --page-cta-pattern:linear-gradient(90deg,transparent 0 84%,rgba(54,215,255,.14) 84% 86%,transparent 86%);
+}
+.ia-shell[data-page-theme='projects']{
+  --page-cta-bg:linear-gradient(110deg,#244d36,#326744);
+  --page-cta-border:#d6a15f;
+  --page-cta-clip:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);
+  --page-cta-shadow:inset 0 0 0 2px rgba(214,161,95,.17),8px 8px 0 color-mix(in srgb,var(--page-panel) 78%,transparent);
+  --page-cta-pattern:linear-gradient(rgba(214,161,95,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(214,161,95,.1) 1px,transparent 1px);
+}
+.ia-shell[data-page-theme='about']{
+  --page-cta-bg:linear-gradient(112deg,#672733,#8e3c46);
+  --page-cta-border:#ff9d69;
+  --page-cta-radius:18px 2px 18px 2px;
+  --page-cta-shadow:0 14px 30px rgba(103,39,51,.2);
+  --page-cta-pattern:linear-gradient(120deg,transparent 0 72%,rgba(255,157,105,.18) 72%);
+}
+.ia-shell[data-page-theme='contact']{
+  --page-cta-bg:linear-gradient(105deg,#063d48,#0c6370);
+  --page-cta-border:#42d8ca;
+  --page-cta-radius:999px;
+  --page-cta-shadow:0 0 0 4px rgba(66,216,202,.12),0 14px 30px rgba(6,61,72,.2);
+  --page-cta-pattern:radial-gradient(circle at 82% 50%,rgba(66,216,202,.28) 0 3px,transparent 4px 12px,rgba(66,216,202,.16) 13px 14px,transparent 15px);
+}
+.ia-shell[data-page-theme='quote']{
+  --page-cta-bg:linear-gradient(110deg,#10274f,#183c72);
+  --page-cta-border:#cce94b;
+  --page-cta-clip:polygon(0 0,calc(100% - 17px) 0,100% 17px,100% 100%,0 100%);
+  --page-cta-shadow:inset 5px 0 0 #cce94b,0 14px 30px rgba(16,39,79,.22);
+  --page-cta-pattern:linear-gradient(rgba(204,233,75,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(204,233,75,.1) 1px,transparent 1px);
+}
+.ia-shell[data-page-theme='product']{
+  --page-cta-bg:linear-gradient(105deg,#283c76,#39549a);
+  --page-cta-border:#76dfd0;
+  --page-cta-clip:polygon(0 0,calc(100% - 18px) 0,100% 50%,calc(100% - 18px) 100%,0 100%);
+  --page-cta-shadow:inset 5px 0 0 #ff7157,0 13px 28px rgba(40,60,118,.2);
+  --page-cta-pattern:repeating-linear-gradient(90deg,transparent 0 9px,rgba(118,223,208,.1) 9px 10px);
+}
+.ia-shell[data-page-theme='editorial']{
+  --page-cta-bg:linear-gradient(110deg,#1b344c,#28516c);
+  --page-cta-border:#38dcf1;
+  --page-cta-radius:2px;
+  --page-cta-shadow:inset 4px 0 0 #ef5c43,0 12px 28px rgba(27,52,76,.2);
+}
+
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+){
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid var(--page-cta-border)!important;
+  border-radius:var(--page-cta-radius)!important;
+  background:var(--page-cta-pattern),var(--page-cta-bg)!important;
+  color:var(--page-cta-ink)!important;
+  clip-path:var(--page-cta-clip);
+  box-shadow:var(--page-cta-shadow)!important;
+  text-shadow:none;
+}
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+)::after{
+  content:"";
+  width:7px;
+  height:7px;
+  flex:0 0 7px;
+  order:-1;
+  border:1px solid var(--page-accent);
+  border-radius:50%;
+  background:var(--page-pop);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--page-accent) 11%,transparent);
+}
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+)::before{
+  content:none;
+  display:none;
+}
+.ia-shell[data-page-theme] :is(
+  .ia-quote-button,
+  .ia-footer-lead>a,
+  .ia-mobile-ctas>a:last-child,
+  .electrical-main .button.copper
+):hover{
+  border-color:var(--page-pop)!important;
+  background:linear-gradient(110deg,color-mix(in srgb,var(--page-deep) 84%,#000),var(--page-deep))!important;
+  color:#fff!important;
+  transform:translateY(-2px);
+}
+
+.ia-service-summary .ia-service-action{
+  width:100%;
+  min-height:84px;
+  margin-top:28px;
+  padding:10px 11px;
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr) 38px;
+  align-items:center;
+  gap:11px;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid var(--page-cta-border);
+  border-radius:var(--page-cta-radius);
+  background:var(--page-cta-pattern),var(--page-cta-bg);
+  color:var(--page-cta-ink);
+  clip-path:var(--page-cta-clip);
+  box-shadow:var(--page-cta-shadow);
+  transition:transform .22s ease,border-color .22s ease,filter .22s ease;
+}
+.ia-service-action__glyph{
+  width:48px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border:1px solid color-mix(in srgb,var(--page-accent) 52%,transparent);
+  background:color-mix(in srgb,var(--page-accent) 13%,transparent);
+}
+.ia-service-action__glyph svg{width:23px;height:23px;color:var(--page-accent)}
+.ia-service-action__copy{min-width:0;display:flex;flex-direction:column;gap:6px}
+.ia-service-action__copy small{
+  overflow:hidden;
+  color:var(--page-accent)!important;
+  font:800 8px/1.2 var(--mono);
+  letter-spacing:.09em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.ia-service-action__copy strong{font:750 13px/1.25 var(--display);letter-spacing:-.015em}
+.ia-service-action__go{width:36px;height:52px;display:flex;align-items:center;justify-content:center;position:relative;border-left:1px solid color-mix(in srgb,var(--page-accent) 25%,transparent)}
+.ia-service-action__go i{position:absolute;left:-4px;width:7px;height:7px;border-radius:50%;background:var(--page-pop);box-shadow:0 0 0 4px color-mix(in srgb,var(--page-pop) 14%,transparent)}
+.ia-service-action__go svg{width:17px;transition:transform .22s ease}
+.ia-service-action:hover,.ia-service-action:focus-visible{outline:0;border-color:var(--page-pop);filter:saturate(1.1);transform:translateY(-3px)}
+.ia-service-action:hover .ia-service-action__go svg,.ia-service-action:focus-visible .ia-service-action__go svg{transform:translate(3px,-3px)}
+.ia-shell[data-page-theme='lighting-design'] .ia-service-action__glyph{border-radius:50%;box-shadow:0 0 24px rgba(255,193,74,.3)}
+.ia-shell[data-page-theme='automation'] .ia-service-action__glyph{clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.ia-shell[data-page-theme='security'] .ia-service-action__glyph{border-radius:50%;background:radial-gradient(circle,rgba(255,70,91,.2) 0 13%,transparent 14% 38%,rgba(52,211,191,.2) 39% 42%,transparent 43%)}
+.ia-shell[data-page-theme='security'] .ia-service-action__go i{background:#ff465b;box-shadow:0 0 0 4px rgba(255,70,91,.16)}
+.ia-shell[data-page-theme='maintenance'] .ia-service-action__glyph{transform:rotate(-4deg);background:rgba(211,239,72,.14)}
+
+.ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action{
+  min-width:310px;
+  min-height:76px;
+  padding:9px 11px;
+  display:grid;
+  grid-template-columns:45px minmax(0,1fr) 22px;
+  align-items:center;
+  gap:11px;
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--page-cta-border);
+  border-radius:var(--page-cta-radius);
+  background:var(--page-cta-pattern),var(--page-cta-bg);
+  color:var(--page-cta-ink);
+  clip-path:var(--page-cta-clip);
+  box-shadow:var(--page-cta-shadow);
+  transition:transform .22s ease,filter .22s ease;
+}
+.ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action::before{content:none;display:none}
+.ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action>svg{
+  width:20px!important;
+  height:20px!important;
+  padding:0!important;
+  flex:0 0 20px;
+  align-self:auto;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action>svg:first-child{width:23px!important;height:23px!important;justify-self:center;color:var(--page-accent)}
+.ia-shell[data-page-theme] .ia-route-band-action>span{min-width:0;display:flex;flex-direction:column;gap:5px}
+.ia-shell[data-page-theme] .ia-route-band-action small{color:var(--page-accent)!important;font:800 8px/1.2 var(--mono);letter-spacing:.1em}
+.ia-shell[data-page-theme] .ia-route-band-action strong{font:750 13px/1.2 var(--display)}
+.ia-shell[data-page-theme] .ia-route-band-action>svg:last-child{width:17px!important;color:var(--page-accent);transition:transform .22s ease}
+.ia-shell[data-page-theme] .ia-route-band-action:hover,.ia-shell[data-page-theme] .ia-route-band-action:focus-visible{outline:0;filter:saturate(1.12);transform:translateY(-3px)}
+.ia-shell[data-page-theme] .ia-route-band-action:hover>svg:last-child,.ia-shell[data-page-theme] .ia-route-band-action:focus-visible>svg:last-child{transform:translateX(4px)}
+
+@media(max-width:900px){
+  .ia-shell[data-page-theme] .ia-header .ia-quote-button{display:none}
+}
+
+@media(max-width:820px){
+  .ia-service-summary .ia-service-action{min-height:78px}
+  .ia-shell[data-page-theme] .ia-conversion-band>a.ia-route-band-action{min-width:0;width:100%;margin-top:24px}
+}
+
+@media(max-width:560px){
+  .ia-service-summary{padding:28px 20px}
+  .ia-service-summary .ia-service-action{grid-template-columns:44px minmax(0,1fr) 32px;gap:8px}
+  .ia-service-action__glyph{width:44px;height:48px}
+  .ia-service-action__copy small{font-size:7px;letter-spacing:.06em}
+  .ia-service-action__go{width:32px;height:48px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ia-service-action,.ia-route-band-action,
+  .ia-shell[data-page-theme] :is(.ia-quote-button,.ia-footer-lead>a,.ia-mobile-ctas>a:last-child,.electrical-main .button.copper){transition:none}
+}
+
+/* Quote and contact are task-heavy routes: keep every annotation readable. */
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-index,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-index nav,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-title>span,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-brief small,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-brief>div,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-art figcaption small,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-art figcaption strong,
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-ornament span{
+  font-size:12px;
+  line-height:1.35;
+}
+html[data-experience='tech'] .ia-shell:is([data-page-theme='quote'],[data-page-theme='contact']) .system-page-intro[data-hero-composition] .system-page-brief p{
+  font-size:16px;
+}

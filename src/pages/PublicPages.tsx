@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {Fragment, useEffect, useRef, useState} from 'react';
 import {Link, useLocation, useParams, useSearchParams} from 'react-router-dom';
 import {AnimatePresence, motion} from 'framer-motion';
 import {
@@ -9,12 +9,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   FileText,
-  Mail,
-  MapPin,
-  Phone,
-  Share2,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -30,6 +25,10 @@ import {CmsSections} from '../components/CmsSections';
 import {ResponsiveImage} from '../components/ResponsiveImage';
 import {ManagedPublicForm} from '../components/ManagedPublicForm';
 import {ProductShareActions} from '../components/ProductShareActions';
+import {ContactCommandCenter} from '../components/ContactCommandCenter';
+import {ContactSignalPlayer} from '../components/ContactSignalPlayer';
+import {AboutHeritageExperience} from '../components/AboutHeritageExperience';
+import {pageVisualForPath} from '../pageVisuals';
 
 const pageFocusByEyebrow: Record<string, [string, string, string]> = {
   'The people behind every installation': ['Engineering', 'Design', 'Installations'],
@@ -72,6 +71,12 @@ const pageContextByEyebrow: Record<string, {index: string; brief: string}> = {
   },
 };
 
+function HeroWords({text, breakAfter = []}: {text: string; breakAfter?: number[]}) {
+  const words = text.trim().split(/\s+/);
+  const breaks = new Set(breakAfter);
+  return <>{words.map((word, index) => <Fragment key={`${word}-${index}`}><span className="system-page-title__word" data-word-index={index}>{word}{index < words.length - 1 ? ' ' : null}</span>{breaks.has(index) && <br className="system-page-title__break" aria-hidden="true"/>}</Fragment>)}</>;
+}
+
 export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; title: string; italic?: string; body: string}) {
   const location = useLocation();
   const {pageForRoute} = useContent();
@@ -80,7 +85,8 @@ export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; titl
   const visibleTitle = cmsPage?.introTitle || cmsPage?.heroTitle || title;
   const visibleItalic = cmsPage?.introAccent || italic;
   const visibleBody = cmsPage?.introBody || cmsPage?.heroBody || body;
-  const focus = pageFocusByEyebrow[visibleEyebrow] || ['Scope', 'Coordinate', 'Deliver'];
+  const pageVisual = pageVisualForPath(location.pathname);
+  const focus = pageVisual?.focus || pageFocusByEyebrow[visibleEyebrow] || ['Scope', 'Coordinate', 'Deliver'];
   const context = pageContextByEyebrow[visibleEyebrow] || {
     index: `${visibleEyebrow.toUpperCase()} / NK ELECTRICAL`,
     brief: 'Page overview',
@@ -94,45 +100,44 @@ export function PageIntro({eyebrow, title, italic, body}: {eyebrow: string; titl
       : location.pathname.startsWith('/projects/')
         ? '/projects'
         : '/';
-  return <><section className="system-page-intro">
+  return <><section className="system-page-intro" data-hero-composition={pageVisual?.composition}>
     <div className="system-page-index">
       <nav aria-label="Breadcrumb" data-visual-no-edit>
+        {pageVisual && <span className="system-page-index__serial">{pageVisual.serial}</span>}
         <Link to={breadcrumbBackPath} aria-label={`Back to ${indexParent.toLowerCase()}`}>{indexParent}</Link>
         {indexCurrent && <><b aria-hidden="true">/</b><span aria-current="page">{indexCurrent}</span></>}
       </nav>
     </div>
-    <div className="system-page-title"><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'eyebrow', 'data-visual-edit': 'text', 'data-visual-label': 'Page eyebrow'} : {})}>{visibleEyebrow}</span><h1><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introTitle', 'data-visual-edit': 'text', 'data-visual-label': 'Page title'} : {})}>{visibleTitle}</span>{visibleItalic && <><br/><em {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introAccent', 'data-visual-edit': 'text', 'data-visual-label': 'Page title accent'} : {})}>{visibleItalic}</em></>}</h1></div>
-    <aside className="system-page-brief"><small>{context.brief}</small><p {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introBody', 'data-visual-edit': 'text', 'data-visual-label': 'Page introduction', 'data-visual-multiline': 'true'} : {})}>{visibleBody}</p><div aria-label={`${visibleEyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
+    <div className="system-page-title"><span {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'eyebrow', 'data-visual-edit': 'text', 'data-visual-label': 'Page eyebrow'} : {})}>{visibleEyebrow}</span><h1 aria-label={`${visibleTitle}${visibleItalic ? ` ${visibleItalic}` : ''}`}><span className="system-page-title__line" {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introTitle', 'data-visual-edit': 'text', 'data-visual-label': 'Page title'} : {})}><HeroWords text={visibleTitle} breakAfter={pageVisual?.composition === 'gallery' ? [1, 3] : undefined}/></span>{visibleItalic && <em className="system-page-title__accent" {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introAccent', 'data-visual-edit': 'text', 'data-visual-label': 'Page title accent'} : {})}><HeroWords text={visibleItalic}/></em>}</h1></div>
+    <aside className="system-page-brief"><small>{pageVisual?.briefLabel || context.brief}</small><p {...(cmsPage ? {'data-visual-kind': 'page', 'data-visual-slug': cmsPage.slug, 'data-visual-path': 'introBody', 'data-visual-edit': 'text', 'data-visual-label': 'Page introduction', 'data-visual-multiline': 'true'} : {})}>{visibleBody}</p><div aria-label={`${visibleEyebrow} focus`}><span>{focus[0]}</span><i/><span>{focus[1]}</span><i/><span>{focus[2]}</span></div></aside>
+    {pageVisual && <figure className="system-page-art">
+      <ResponsiveImage src={publicAsset(pageVisual.image)} alt={pageVisual.alt} loading="eager" fetchPriority="high" style={{objectPosition: pageVisual.position}}/>
+      <span className="system-page-art__wash" aria-hidden="true"/>
+      <figcaption><small>{pageVisual.label}</small><strong>{pageVisual.signal}</strong></figcaption>
+    </figure>}
+    {pageVisual?.composition === 'signal' && <ContactSignalPlayer/>}
+    {pageVisual && <div className="system-page-ornament" aria-hidden="true"><span>{pageVisual.serial}</span><i/><i/><i/><b/></div>}
     <div className="system-page-trace" aria-hidden="true"><i/><i/><i/><b/></div>
   </section>{cmsPage&&<CmsSections sections={cmsPage.sections} pageSlug={cmsPage.slug}/>}</>;
 }
 
 export function AboutPage() {
   const {content, company} = useContent();
-  return <>
-    <PageIntro eyebrow="The people behind every installation" title={content.aboutTitle} body={content.aboutBody}/>
-    <section className="story-visual section">
-      <div className="story-image"><img src={publicAsset('assets/generated/team-craft.webp')} alt="Electrical designer studying a warmly lit interior"/><span>Family-founded · electrically focused</span></div>
-      <div className="story-copy">
-        <p className="dropcap" data-visual-kind="company" data-visual-slug={company.slug} data-visual-path="introduction" data-visual-edit="text" data-visual-label="Company introduction" data-visual-multiline="true">{company.introduction}</p>
-        <p data-visual-kind="company" data-visual-slug={company.slug} data-visual-path="heading" data-visual-edit="text" data-visual-label="Company summary" data-visual-multiline="true">{company.heading}</p>
-        <div className="timeline">{(company.history.length ? company.history : ['1985 — Ntinos and Eliana establish NK Electrical.', 'Today — Specialists plan, supply, install, test and support each system.', 'Next — More connected, energy-aware electrical spaces for Cyprus.']).map((entry, index) => <div key={`${entry}-${index}`}><b>{String(index + 1).padStart(2, '0')}</b><span data-visual-kind="company" data-visual-slug={company.slug} data-visual-path={`history@line.${index}`} data-visual-edit="text" data-visual-label={`History entry ${index + 1}`} data-visual-multiline="true">{entry}</span></div>)}</div>
-      </div>
-    </section>
-    <section className="org-section section">
-      <div className="org-heading"><span className="eyebrow">The complete team</span><h2>Different expertise.<br/><em>One electrical standard.</em></h2><p>The team is ordered by responsibility. The electrical installations team is the company’s backbone, and every card shows how each person contributes to the work.</p></div>
-      <div className="team-all-grid">
-        {team.map((person, index) => <article className={`person-card${person.name === 'Installation team' ? ' person-card--group' : ''}`} key={person.name}>
-          <div className="person-portrait"><img src={person.image} alt={`Illustrated role portrait for ${person.name}, ${person.role}`}/><span><b>{String(index + 1).padStart(2, '0')}</b>{person.responsibility}</span></div>
-          <div className="person-content"><small>{person.branch}</small><h3>{person.name}</h3><p className="person-role">{person.role}</p><p className="person-area">{person.workArea}</p>{person.credential && <span className="person-credential">{person.credential}</span>}<ul>{person.characteristics.map(item => <li key={item}>{item}</li>)}</ul><div className="person-links">{person.email && <a aria-label={`Email ${person.name}`} href={`mailto:${person.email}`}><Mail/></a>}{person.linkedin && <a aria-label={`${person.name} on LinkedIn`} target="_blank" rel="noreferrer" href={person.linkedin}><ExternalLink/></a>}</div></div>
-        </article>)}
-      </div>
-    </section>
+  return <div className="about-page">
+    <AboutHeritageExperience
+      title={content.aboutTitle}
+      heroBody={content.aboutBody}
+      introduction={company.introduction}
+      summary={company.heading || content.aboutBody}
+      history={company.history}
+      companySlug={company.slug}
+      members={team}
+    />
     <section className="ia-partnerships section">
       <header><span>PARTNERSHIPS / PRODUCT ECOSYSTEM</span><h2>Specialist relationships that support the work.</h2><p>NK Electrical combines its installation team with established lighting brands, product suppliers and project collaborators.</p></header>
       <div>{(company.partnerships.length ? company.partnerships : ['ACA Lighting', 'Nova Luce', 'VIOKEF', 'Architects, designers & contractors']).map((partner, index) => <article key={`${partner}-${index}`}><small>{String(index + 1).padStart(2, '0')} / PARTNER</small><h3 data-visual-kind="company" data-visual-slug={company.slug} data-visual-path={`partnerships@line.${index}`} data-visual-edit="text" data-visual-label={`Partnership ${index + 1}`}>{partner}</h3><p>{index < 3 ? 'Lighting and product expertise available through the NK Electrical project and showroom ecosystem.' : 'Project collaboration that keeps power, lighting, equipment and controls aligned before installation.'}</p></article>)}</div>
     </section>
-  </>;
+  </div>;
 }
 
 export function ProjectsPage() {
@@ -352,18 +357,12 @@ export function AppliancesPage() {
 }
 
 export function ContactPage() {
-  const {content, settings} = useContent();
+  const {content} = useContent();
   const [params] = useSearchParams();
   const project = params.get('project');
-  const message = project ? `I would like to discuss the ${project} project and a related electrical requirement.\n\nProject or property details:` : '';
-  const locations = settings.locations.filter(item => item.active);
-  const phones = settings.phones.filter(item => item.active);
-  const emails = settings.emails.filter(item => item.active);
-  const schedules = settings.openingHours.filter(item => item.active);
-  const socials = settings.socialLinks.filter(item => item.active && item.placements.includes('contact'));
   return <>
     <PageIntro eyebrow="Electrical enquiry" title="Your enquiry," italic="sent to the right specialist." body={content.contactNote}/>
-    <section className="contact-layout section"><div className="contact-details">{locations.map(item => <div key={item.id}><MapPin/><span><b>{item.label}</b>{item.address}<a target="_blank" rel="noreferrer" href={item.mapsUrl}>Open in maps <ArrowUpRight/></a></span></div>)}{phones.map(item => <div key={item.id}><Phone/><span><b>{item.label}</b><a href={`tel:${item.number.replace(/[^+\d]/g, '')}`}>{item.number}</a><small>Electrical installation, fault and maintenance enquiries</small></span></div>)}{emails.map(item => <div key={item.id}><Mail/><span><b>{item.label}</b><a href={`mailto:${item.address}`}>{item.address}</a></span></div>)}{schedules.map(item => <div className="hours" key={item.id}><b>{item.label}</b>{item.hours.split('\n').map(line => <p key={line}>{line}</p>)}</div>)}{socials.length > 0 && <div className="contact-socials"><Share2/><span><b>Follow NK Electrical</b><span>{socials.map(item => <a href={item.url} target={item.newTab ? '_blank' : undefined} rel={item.newTab ? 'noreferrer' : undefined} key={item.id}>{item.iconUrl && <img src={item.iconUrl} alt=""/>}{item.platform}</a>)}</span></span></div>}{settings.mapEmbedUrl && <iframe className="contact-map" title="NK Electrical location map" loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={settings.mapEmbedUrl}/>}</div><ManagedPublicForm slug="contact" eyebrow={project ? 'Project discussion' : 'Electrical enquiry'} title="What needs powering, installing or controlling?" defaults={{subject: project ? 'Project discussion' : 'New electrical project', message}}/></section>
+    <ContactCommandCenter project={project}/>
     <section className="ia-conversion-band section"><div><small>READY TO SCOPE THE WORK?</small><h2>Use the structured quote form for project requirements.</h2></div><Link to="/request-a-quote">Request a Quote <ArrowRight/></Link></section>
   </>;
 }

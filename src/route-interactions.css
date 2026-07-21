@@ -59,45 +59,46 @@
 
 .ia-desktop-nav>[data-route-profile]{
   overflow:hidden;
-  border-bottom-color:color-mix(in srgb,var(--route-link-accent) 28%,transparent);
+  border-bottom-color:transparent;
 }
 .ia-desktop-nav>[data-route-profile]::before,
 .ia-desktop-nav>[data-route-profile]::after{
   content:"";
   position:absolute;
   z-index:-1;
+  opacity:0;
   pointer-events:none;
   transition:transform .42s cubic-bezier(.16,1,.3,1),opacity .3s ease,background-size .42s cubic-bezier(.16,1,.3,1);
 }
-.ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active)::before,
-.ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active)::after{opacity:1}
+.ia-desktop-nav>[data-route-profile]:hover::before,
+.ia-desktop-nav>[data-route-profile]:hover::after{opacity:.72}
 .ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active){
   border-bottom-color:var(--route-link-accent);
-  color:#fff;
+  color:var(--system-ink);
 }
 
 /* Home: parallel energized conductors arrive from the left. */
 .ia-desktop-nav>[data-route-motion='conductor']::before{
   inset:auto 12% 10px 12%;
   height:8px;
-  opacity:.18;
+  opacity:0;
   background:linear-gradient(var(--route-link-secondary) 0 0) 0 0/72% 1px no-repeat,
     linear-gradient(var(--route-link-accent) 0 0) 30% 3px/70% 2px no-repeat,
     linear-gradient(#c9f9ff 0 0) 8% 7px/82% 1px no-repeat;
   transform:translateX(-115%);
 }
-.ia-desktop-nav>[data-route-motion='conductor']:is(:hover,:focus-visible,.active)::before{transform:none}
+.ia-desktop-nav>[data-route-motion='conductor']:hover::before{transform:none}
 
 /* Services: branching circuit trace. */
 .ia-desktop-nav>[data-route-motion='circuit']::before{
   inset:12px 7px 10px;
-  opacity:.12;
+  opacity:0;
   background:
     linear-gradient(90deg,var(--route-link-accent),var(--route-link-accent)) 0 55%/0 1px no-repeat,
     linear-gradient(135deg,transparent 46%,var(--route-link-secondary) 48% 52%,transparent 54%) 55% 0/18px 18px no-repeat,
     radial-gradient(circle,var(--route-link-accent) 0 2px,transparent 2.5px) 100% 55%/7px 7px no-repeat;
 }
-.ia-desktop-nav>[data-route-motion='circuit']:is(:hover,:focus-visible,.active)::before{background-size:78% 1px,18px 18px,7px 7px}
+.ia-desktop-nav>[data-route-motion='circuit']:hover::before{background-size:78% 1px,18px 18px,7px 7px}
 
 /* Shop: a single deliberate scanner pass. */
 .ia-desktop-nav>[data-route-motion='scan']::before{
@@ -105,24 +106,24 @@
   bottom:9px;
   left:-9px;
   width:24px;
-  opacity:.22;
+  opacity:0;
   background:linear-gradient(90deg,transparent,var(--route-link-accent),#fff,var(--route-link-accent),transparent);
   filter:blur(.2px);
   transform:translateX(0);
 }
-.ia-desktop-nav>[data-route-motion='scan']:is(:hover,:focus-visible,.active)::before{transform:translateX(calc(100% + 150px))}
+.ia-desktop-nav>[data-route-motion='scan']:hover::before{transform:translateX(calc(100% + 150px))}
 
 /* Projects and catalogues: precise framing corners build in. */
 .ia-desktop-nav>[data-route-motion='frame']::before{
   inset:10px 7px 8px;
-  opacity:.16;
+  opacity:0;
   background:
     linear-gradient(var(--route-link-accent) 0 0) 0 0/0 1px no-repeat,
     linear-gradient(var(--route-link-accent) 0 0) 0 0/1px 0 no-repeat,
     linear-gradient(var(--route-link-secondary) 0 0) 100% 100%/0 1px no-repeat,
     linear-gradient(var(--route-link-secondary) 0 0) 100% 100%/1px 0 no-repeat;
 }
-.ia-desktop-nav>[data-route-motion='frame']:is(:hover,:focus-visible,.active)::before{background-size:24px 1px,1px 18px,24px 1px,1px 18px}
+.ia-desktop-nav>[data-route-motion='frame']:hover::before{background-size:24px 1px,1px 18px,24px 1px,1px 18px}
 
 /* About: a measured timeline marker, not a generic underline. */
 .ia-desktop-nav>[data-route-motion='timeline']::before{
@@ -130,11 +131,11 @@
   right:12%;
   bottom:12px;
   height:4px;
-  opacity:.16;
+  opacity:0;
   background:radial-gradient(circle,var(--route-link-secondary) 0 2px,transparent 2.5px) 0 50%/25% 4px repeat-x;
   transform:scaleX(.15);
 }
-.ia-desktop-nav>[data-route-motion='timeline']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+.ia-desktop-nav>[data-route-motion='timeline']:hover::before{transform:scaleX(1)}
 
 /* Contact: calm signal rings. */
 .ia-desktop-nav>[data-route-motion='radar']::before{
@@ -142,13 +143,13 @@
   top:50%;
   width:42px;
   height:42px;
-  opacity:.08;
+  opacity:0;
   border:1px solid var(--route-link-accent);
   border-radius:50%;
   box-shadow:0 0 0 7px color-mix(in srgb,var(--route-link-accent) 18%,transparent),0 0 0 14px color-mix(in srgb,var(--route-link-accent) 8%,transparent);
   transform:translateY(-50%) scale(.2);
 }
-.ia-desktop-nav>[data-route-motion='radar']:is(:hover,:focus-visible,.active)::before{transform:translateY(-50%) scale(1)}
+.ia-desktop-nav>[data-route-motion='radar']:hover::before{transform:translateY(-50%) scale(1)}
 
 /* Quote/offers: connector segments fill toward the destination. */
 .ia-shell [data-route-motion='connector']::before{
@@ -159,11 +160,11 @@
   right:12%;
   bottom:11px;
   height:3px;
-  opacity:.15;
+  opacity:0;
   transform:scaleX(0);
   transform-origin:left;
 }
-.ia-desktop-nav>[data-route-motion='connector']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+.ia-desktop-nav>[data-route-motion='connector']:hover::before{transform:scaleX(1)}
 
 /* Lighting, automation, security and diagnostics get their own instruments. */
 .ia-desktop-nav>[data-route-motion='lighting']::before{
@@ -171,41 +172,85 @@
   right:18%;
   bottom:9px;
   height:7px;
-  opacity:.15;
+  opacity:0;
   background:radial-gradient(circle,var(--route-link-accent) 0 2px,transparent 3px) 0 50%/25% 7px repeat-x;
   transform:scale(.35);
 }
-.ia-desktop-nav>[data-route-motion='lighting']:is(:hover,:focus-visible,.active)::before{transform:scale(1);filter:drop-shadow(0 0 5px var(--route-link-accent))}
+.ia-desktop-nav>[data-route-motion='lighting']:hover::before{transform:scale(1);filter:drop-shadow(0 0 5px var(--route-link-accent))}
 .ia-desktop-nav>[data-route-motion='automation']::before{
   inset:auto 12% 10px;
   height:5px;
-  opacity:.14;
+  opacity:0;
   background:repeating-linear-gradient(90deg,var(--route-link-accent) 0 12px,transparent 12px 17px,var(--route-link-secondary) 17px 22px,transparent 22px 28px);
   transform:scaleX(0);
   transform-origin:left;
 }
-.ia-desktop-nav>[data-route-motion='automation']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+.ia-desktop-nav>[data-route-motion='automation']:hover::before{transform:scaleX(1)}
 .ia-desktop-nav>[data-route-motion='security']::before{
   top:8px;
   bottom:8px;
   left:50%;
   width:60%;
-  opacity:.1;
+  opacity:0;
   background:conic-gradient(from 220deg at 0 50%,transparent,var(--route-link-accent),transparent 42%);
   transform:scaleX(.1);
   transform-origin:left;
 }
-.ia-desktop-nav>[data-route-motion='security']:is(:hover,:focus-visible,.active)::before{transform:scaleX(1)}
+.ia-desktop-nav>[data-route-motion='security']:hover::before{transform:scaleX(1)}
 .ia-desktop-nav>[data-route-motion='diagnostic']::before{
   left:12%;
   right:12%;
   bottom:9px;
   height:8px;
-  opacity:.14;
+  opacity:0;
   background:repeating-linear-gradient(90deg,var(--route-link-accent) 0 3px,transparent 3px 7px);
   transform:scaleY(.2);
 }
-.ia-desktop-nav>[data-route-motion='diagnostic']:is(:hover,:focus-visible,.active)::before{transform:scaleY(1)}
+.ia-desktop-nav>[data-route-motion='diagnostic']:hover::before{transform:scaleY(1)}
+
+/*
+ * Primary navigation stays calm and legible. Route-specific motion was too
+ * faint on light headers and left distracting fragments around menu labels.
+ */
+.ia-shell .ia-desktop-nav>[data-route-profile]{
+  height:58px;
+  min-height:58px;
+  margin-block:14px;
+  padding-inline:18px;
+  overflow:visible;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent;
+  color:var(--system-ink)!important;
+  font-size:16px;
+  font-weight:750;
+  line-height:1;
+  opacity:1;
+  text-shadow:none;
+  box-shadow:none;
+  transition:none;
+}
+.ia-shell .ia-desktop-nav>[data-route-profile]::before,
+.ia-shell .ia-desktop-nav>[data-route-profile]::after{
+  content:none!important;
+  display:none!important;
+}
+.ia-shell .ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active),
+.ia-shell .ia-desktop-nav>button[data-route-profile][aria-expanded='true']{
+  border:0!important;
+  background:var(--system-ink);
+  color:var(--system-bg)!important;
+  box-shadow:inset 0 -4px 0 var(--route-link-accent);
+}
+.ia-shell .ia-desktop-nav>[data-route-profile]:focus-visible{
+  outline:0!important;
+  outline-offset:0!important;
+}
+.ia-shell .ia-desktop-nav>button[data-route-profile] svg{
+  width:14px;
+  opacity:.82;
+  transition:none!important;
+}
 
 /* Mega, mobile and primary page actions keep the same destination identity. */
 .ia-shell :is(.ia-mega>nav,.ia-mobile-menu) [data-route-profile]{
@@ -477,4 +522,113 @@
   .ia-shell [data-route-profile]::before,
   .ia-shell [data-route-profile]::after,
   .ia-shell[data-interaction-profile] .ia-main :is(a,button){transition:none!important}
+}
+
+/*
+ * Public header: restrained architectural navigation.
+ * Route identity is reduced to a single hairline; page-specific action
+ * treatments must not turn the header into a themed control panel.
+ */
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]{
+  height:64px!important;
+  min-height:64px!important;
+  margin:0!important;
+  padding:0 14px!important;
+  overflow:visible!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#314f58!important;
+  box-shadow:none!important;
+  font-family:var(--display)!important;
+  font-size:14px!important;
+  font-weight:620!important;
+  letter-spacing:0!important;
+  text-shadow:none!important;
+  transition:color .2s ease,letter-spacing .2s ease!important;
+}
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]::before{
+  content:none!important;
+  display:none!important;
+}
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]::after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:4px!important;
+  display:block!important;
+  width:0!important;
+  height:1px!important;
+  transform:translateX(-50%)!important;
+  opacity:1!important;
+  background:#f16b51!important;
+  transition:width .24s cubic-bezier(.16,1,.3,1),background-color .2s ease!important;
+}
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible){
+  background:transparent!important;
+  color:#f16b51!important;
+  box-shadow:none!important;
+  letter-spacing:.008em!important;
+}
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]:is(.active,[aria-expanded='true']){
+  background:transparent!important;
+  color:#153d49!important;
+  box-shadow:none!important;
+  font-weight:720!important;
+}
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible)::after{width:20px!important}
+.ia-shell .ia-header .ia-desktop-nav>[data-route-profile]:is(.active,[aria-expanded='true'])::after{
+  width:34px!important;
+  background:var(--route-link-accent)!important;
+}
+#ia-primary-quote{
+  min-height:42px!important;
+  height:42px!important;
+  padding:0 16px!important;
+  gap:11px!important;
+  overflow:visible!important;
+  border:1px solid #91a63d!important;
+  border-radius:0!important;
+  background:#153d49!important;
+  color:#fffdf7!important;
+  box-shadow:0 6px 16px rgba(22,59,70,.12)!important;
+  font-family:var(--display)!important;
+  font-size:12px!important;
+  font-weight:720!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+  transition:background-color .2s ease,border-color .2s ease,transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease!important;
+}
+#ia-primary-quote::before,
+#ia-primary-quote::after{
+  content:none!important;
+  display:none!important;
+}
+#ia-primary-quote>svg:last-child{
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:currentColor!important;
+}
+#ia-primary-quote:is(:hover,:focus-visible){
+  transform:translateY(-1px)!important;
+  border-color:#adc44b!important;
+  background:#1c4c59!important;
+  color:#fff!important;
+  box-shadow:0 8px 20px rgba(22,59,70,.16)!important;
+}
+html[data-theme='dark'] .ia-shell .ia-header .ia-desktop-nav>[data-route-profile]{color:#c0cecc!important}
+html[data-theme='dark'] .ia-shell .ia-header .ia-desktop-nav>[data-route-profile]:is(:hover,:focus-visible,.active,[aria-expanded='true']){color:#fff!important}
+
+@media(max-width:1180px){
+  .ia-shell .ia-header .ia-desktop-nav>[data-route-profile]{
+    padding-inline:9px!important;
+    font-size:13px!important;
+  }
 }
