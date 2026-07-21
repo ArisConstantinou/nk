@@ -409,6 +409,40 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]
   background:#d8a467!important;
 }
 
+/* Persistent light panels keep their own readable annotation palette in every mode. */
+.ia-shell .catalogue-hero--appliances .catalogue-hero__copy>span,
+.ia-shell .catalogue-hero--appliances .catalogue-hero__campaign figcaption strong{
+  color:#f5d7a6!important;
+  opacity:1!important;
+}
+
+.about-page .ia-partnerships>header>span,
+.about-page .ia-partnerships article>small{
+  color:#7d4b27!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] .ia-shell .ia-main .project-principle .eyebrow.light{
+  color:#7d4b27!important;
+  opacity:1!important;
+}
+
+html[data-theme='light'] .ia-shell .ia-main .project-principle>div{
+  color:#4b5c60!important;
+}
+
+/* Dark surfaces must not inherit the route's equally dark action ink. */
+html[data-theme='dark'] .ia-shell[data-interaction-profile] :is(
+  .ia-main .button.outline,
+  .ia-main .catalogue-load-more button.secondary,
+  .ia-main .contact-router-back,
+  .ia-main .quote-builder-back,
+  .ia-main .quote-draft-clear
+){
+  background:#19272b!important;
+  color:#f3f0e8!important;
+}
+
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] :is(
   .system-page-index__serial,
   .system-page-art figcaption strong,

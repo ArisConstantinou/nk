@@ -18,8 +18,8 @@
   .ia-shell .ia-brand-logo{width:50px;height:50px}
   .ia-shell .ia-brand-wires{
     left:auto;
-    right:calc(100% + 4px);
-    width:60px;
+    right:calc(100% - 1px);
+    width:65px;
     height:58px;
     opacity:.94;
   }
