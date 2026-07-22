@@ -24,6 +24,23 @@
   padding:0 12px 0 0;
   overflow:visible;
   isolation:isolate;
+  pointer-events:none;
+}
+
+.ia-shell .ia-brand-mark,
+.ia-shell .ia-brand-copy{
+  pointer-events:auto;
+  cursor:pointer;
+}
+
+.nk-home-topbar__brand{
+  pointer-events:none;
+}
+
+.nk-home-topbar__brand>img,
+.nk-home-topbar__brand>span{
+  pointer-events:auto;
+  cursor:pointer;
 }
 
 .ia-shell .ia-brand-rail{
