@@ -197,6 +197,8 @@
 /* Desktop home header: permanent warm top rail, story, then photographic navigation. */
 @media(min-width:901px){
   .ia-shell .ia-header--home-preview{display:grid;grid-template-rows:auto auto auto auto}
+  .ia-shell .ia-header--home-preview.ia-header--route-preview:not(.ia-header--static){position:sticky;z-index:220;top:0}
+  .ia-shell .ia-header--home-preview.ia-header--route-preview .ia-header-bar{grid-row:2!important}
   .nk-home-topbar{position:relative;z-index:50;grid-row:1;min-height:50px;display:grid;grid-template-columns:minmax(215px,.76fr) minmax(330px,1.2fr) minmax(190px,.76fr);align-items:center;gap:18px;padding:0 clamp(18px,3vw,58px);color:var(--nk-explore-ink,#17383e);background:var(--nk-explore-header,#f4ead8);border-top:1px solid rgba(23,56,62,.12);border-bottom:1px solid rgba(23,56,62,.2);box-shadow:0 5px 15px rgba(80,49,30,.08)}
   .nk-home-topbar__brand{min-width:0;display:flex;align-items:center;gap:10px;color:var(--nk-explore-ink,#17383e);text-decoration:none}
   .nk-home-topbar__brand img{width:38px;height:38px;flex:0 0 38px;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(80,49,30,.18))}
@@ -217,6 +219,15 @@
   .nk-home-topbar__live-search .nk-live-search__panel::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
   .nk-home-topbar__status{justify-self:end;display:flex;align-items:center;gap:8px;color:#a75334;font:760 12px/1 var(--campaign-mono);letter-spacing:.08em;white-space:nowrap}
   .nk-home-topbar__status svg{width:16px;height:16px;color:#e06b4d}
+  .nk-home-topbar--route{grid-template-columns:205px minmax(300px,1fr) auto}
+  .nk-home-topbar__route-tools{justify-self:end;display:flex;align-items:center;gap:8px}
+  .nk-home-topbar__route-tools .nk-home-topbar__status{margin-right:4px}
+  .nk-home-topbar__route-tools .nk-modern-route-quote{height:38px;min-height:38px;padding:0 12px;color:#f7f1e5;background:#173e49;border:0;box-shadow:inset 3px 0 #e06b4d;font-size:12px}
+  .nk-home-topbar__route-tools .nk-modern-route-quote:hover{color:#fff;background:#20505c;border:0;box-shadow:inset 3px 0 #f2bd73}
+  .nk-home-topbar__route-tools .nk-modern-route-theme{height:38px}
+  .nk-home-topbar__route-tools .nk-modern-route-theme summary{width:38px;min-width:38px;height:38px;color:#17383e;background:rgba(255,255,255,.32);border-color:rgba(23,56,62,.24)}
+  .nk-home-topbar__route-tools .ia-live-edit-button{width:62px;height:38px;grid-template-columns:18px auto;grid-template-rows:1fr;gap:5px;color:#a84e35;background:rgba(255,255,255,.32);border-color:rgba(168,78,53,.4);font-size:12px;letter-spacing:0;text-transform:none}
+  .nk-home-topbar__route-tools .ia-live-edit-button svg{width:16px;height:16px}
 
   .ia-shell .ia-header--home-preview .nk-main-header-preview{grid-row:3}
   .nk-main-header-preview{background:var(--nk-explore-header,#f4ead8);border-bottom:1px solid rgba(23,56,62,.22)}
@@ -371,6 +382,8 @@
 
 @media(min-width:901px) and (max-width:1180px){
   .nk-home-topbar{grid-template-columns:205px minmax(300px,1fr) 250px;gap:10px;padding-inline:14px}
+  .nk-home-topbar--route{grid-template-columns:190px minmax(260px,1fr) auto;gap:8px}
+  .nk-home-topbar--route .nk-home-topbar__status{display:none}
   .nk-main-header-preview .nk-campaign-design--installation{grid-template-columns:minmax(0,44%) minmax(0,56%)}
   .nk-main-header-preview .nk-campaign-design--installation>section{padding:12px 18px 52px}
   .nk-main-header-preview .nk-campaign-design--installation>section h1{font-size:clamp(37px,4.6vw,48px)}

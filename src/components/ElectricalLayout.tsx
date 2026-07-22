@@ -58,6 +58,18 @@ const navigationPanelForPath = (to: string) => {
   return segment ? navigationPanelMedia[segment] : undefined;
 };
 
+const headerStatusForPath = (path: string) => {
+  if (path === '/') return 'NEW BUILD / RENOVATION';
+  if (path.startsWith('/services/electrical-installations')) return 'INSTALLATIONS / SCROLL STORY';
+  if (path.startsWith('/services')) return 'SERVICES / EXPERTISE';
+  if (path.startsWith('/shop')) return 'SHOP / PRODUCTS';
+  if (path.startsWith('/projects')) return 'PROJECTS / BUILT PROOF';
+  if (path.startsWith('/about')) return 'ABOUT / SINCE 1985';
+  if (path.startsWith('/contact')) return 'CONTACT / NICOSIA';
+  if (path.startsWith('/request-a-quote')) return 'PROJECT / START A BRIEF';
+  return 'NK ELECTRICAL / CYPRUS';
+};
+
 function NavigationPanelContent({to, label, hasMenu = false}: {to: string; label: string; hasMenu?: boolean}) {
   const media = navigationPanelForPath(to);
   const panelKey = to.split('/').filter(Boolean)[0];
@@ -165,7 +177,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const megaOpenTimerRef = useRef<number | null>(null);
   const megaCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
-  const showHomeHeaderPreview = location.pathname === '/';
+  const showHeaderStory = location.pathname === '/';
+  const useModernHeader = true;
+  const headerStatus = headerStatusForPath(location.pathname);
   const pageVisual = pageVisualForPath(location.pathname);
   const interactionProfile = routeInteractionForPath(location.pathname);
   const menu = (name: PublicNavigationItem['menu']) => navigation.filter(item => item.menu === name && item.active).sort((a, b) => a.position - b.position);
@@ -277,8 +291,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   }, []);
 
   useEffect(() => {
-    if (showHomeHeaderPreview && isDesktopViewport) setSearchOpen(false);
-  }, [isDesktopViewport, showHomeHeaderPreview]);
+    if (useModernHeader && isDesktopViewport) setSearchOpen(false);
+  }, [isDesktopViewport, useModernHeader]);
 
   useEffect(() => {
     clearMegaTimers();
@@ -342,7 +356,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   useEffect(() => {
     if (!searchOpen) return;
     const previous = document.body.style.overflow;
-    const locksViewport = !showHomeHeaderPreview || !window.matchMedia('(min-width: 901px)').matches;
+    const locksViewport = !useModernHeader || !window.matchMedia('(min-width: 901px)').matches;
     if (locksViewport) document.body.style.overflow = 'hidden';
     const focusTimer = window.setTimeout(() => searchDialogRef.current?.querySelector<HTMLInputElement>('input')?.focus(), 0);
     const trapFocus = (event: KeyboardEvent) => {
@@ -361,7 +375,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       document.removeEventListener('keydown', trapFocus);
       if (locksViewport) document.body.style.overflow = previous;
     };
-  }, [searchOpen, showHomeHeaderPreview]);
+  }, [searchOpen, useModernHeader]);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -423,9 +437,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     style={interactionStyle}
   >
     <SeoRouteMeta/>
-    <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${showHomeHeaderPreview ? 'ia-header--home-preview' : ''}`} ref={headerRef}>
-      {showHomeHeaderPreview ? <>
-        <div className="nk-home-topbar">
+    <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${useModernHeader ? 'ia-header--modern ia-header--home-preview' : ''} ${showHeaderStory ? 'ia-header--has-story' : 'ia-header--route-preview'}`} ref={headerRef}>
+      {useModernHeader && <>
+        <div className={`nk-home-topbar ${showHeaderStory ? '' : 'nk-home-topbar--route'}`.trim()}>
           <Link className="nk-home-topbar__brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`}>
             <img src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true"/>
             <span><strong>{railBrandLabel}</strong><small>POWER · LIGHT · CONTROL</small></span>
@@ -438,20 +452,28 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
               labels={{input: 'Search products, images, catalogues and PDFs', placeholder: 'Search products, catalogues & PDFs'}}
             />}
           </div>
-          <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>NEW BUILD / RENOVATION</span>
+          {showHeaderStory
+            ? <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>{headerStatus}</span>
+            : <div className="nk-home-topbar__route-tools">
+                <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>{headerStatus}</span>
+                <SmartLink className="ia-quote-button nk-modern-route-quote" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
+                <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
+                <LiveSiteEditButton/>
+              </div>}
         </div>
-        <HomeHeaderPreview/>
-      </> : <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
+        {showHeaderStory && <HomeHeaderPreview/>}
+      </>}
+      {!useModernHeader && <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
         {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
         <div>
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
         </div>
       </div>}
       <div className="ia-header-bar">
-        <Link className={`ia-brand ${showHomeHeaderPreview ? 'ia-brand--home-preview ' : ''}${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
+        <Link className={`ia-brand ${useModernHeader ? 'ia-brand--home-preview ' : ''}${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
         <div className="ia-header-command-dock" role="group" aria-label="Search and navigation">
           <button
-            className={`ia-header-command-trigger ia-header-search-trigger ${showHomeHeaderPreview ? 'ia-header-search-trigger--home' : ''}`.trim()}
+            className={`ia-header-command-trigger ia-header-search-trigger ${useModernHeader ? 'ia-header-search-trigger--home' : ''}`.trim()}
             ref={searchTriggerRef}
             type="button"
             aria-label="Search products, images, catalogues and PDFs"
@@ -460,14 +482,14 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             aria-expanded={searchOpen}
             onClick={toggleHeaderSearch}
           ><span>Search</span><Search aria-hidden="true"/></button>
-          <button ref={mobileTriggerRef} className={`ia-header-command-trigger ia-mobile-trigger ${showHomeHeaderPreview ? 'ia-mobile-trigger--home' : ''}`.trim()} type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
+          <button ref={mobileTriggerRef} className={`ia-header-command-trigger ia-mobile-trigger ${useModernHeader ? 'ia-mobile-trigger--home' : ''}`.trim()} type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
         </div>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
           ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
           : linkTo(item) === '/shop'
             ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
-        {!showHomeHeaderPreview && <div className="ia-header-actions">
+        {!useModernHeader && <div className="ia-header-actions">
           <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <ThemeSwitcher className="ia-theme-selector--header"/>
           <LiveSiteEditButton/>
