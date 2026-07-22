@@ -192,5 +192,100 @@
   .nk-campaign-design .nk-campaign-brand{display:none!important}.nk-fault-rail,.nk-sun-brand,.nk-campaign-design--outdoor>header,.nk-lighting-mast,.nk-campaign-design--catalogues>header,.nk-campaign-design--installation>header{display:none!important}.nk-campaign-design--outdoor>section{top:26px}.nk-campaign-design--offers>header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:9px 16px}.nk-campaign-design--offers>header>strong{font-size:38px}.nk-campaign-design--offers>header>small{margin:0}
 }
 
+/* Desktop home header: the same warm command palette as mobile, in a tighter frame. */
+@media(min-width:901px){
+  .nk-main-header-preview{background:var(--nk-explore-header,#f4ead8);border-bottom:1px solid rgba(23,56,62,.22)}
+  .nk-main-header-preview .nk-campaign-canvas{height:clamp(282px,15vw,304px);min-height:282px}
+  .nk-main-header-preview .nk-campaign-design{padding-bottom:50px}
+
+  .nk-main-header-preview .nk-campaign-design--summer{grid-template-rows:58px 1fr}
+  .nk-main-header-preview .nk-campaign-design--summer>.nk-campaign-brand{margin:11px 3vw 0}
+  .nk-main-header-preview .nk-summer-copy{align-self:start;padding:10px 3vw 54px}
+  .nk-main-header-preview .nk-summer-copy h1{margin:6px 0 9px;font-size:clamp(42px,3vw,54px)}
+  .nk-main-header-preview .nk-summer-copy>span{display:none}
+  .nk-main-header-preview .nk-summer-products{padding:8px 2vw 52px}
+  .nk-main-header-preview .nk-summer-products .nk-campaign-product{grid-template-columns:52px minmax(0,1fr) 16px;padding:4px 0}
+  .nk-main-header-preview .nk-summer-products .nk-campaign-product__image{width:52px;height:52px}
+  .nk-main-header-preview .nk-summer-visual figcaption{bottom:54px}
+
+  .nk-main-header-preview .nk-campaign-design--outdoor>section{top:62px}
+  .nk-main-header-preview .nk-campaign-design--outdoor>section h1{margin:6px 0 9px;font-size:clamp(43px,3.2vw,58px)}
+  .nk-main-header-preview .nk-campaign-design--outdoor>section>span{display:none}
+  .nk-main-header-preview .nk-campaign-design--outdoor>aside{top:18px;bottom:54px}
+
+  .nk-main-header-preview .nk-campaign-picker{bottom:6px;color:var(--nk-explore-ink,#17383e);background:rgba(244,234,216,.97);border-color:rgba(23,56,62,.26);box-shadow:0 9px 24px rgba(80,49,30,.18)}
+  .nk-main-header-preview .nk-campaign-picker__steps{border-color:rgba(23,56,62,.18)}
+  .nk-main-header-preview .nk-campaign-picker__steps button{color:var(--nk-explore-ink,#17383e)}
+  .nk-main-header-preview .nk-campaign-picker__steps button:hover{color:var(--nk-explore-ink,#17383e);background:#eaa35f}
+  .nk-main-header-preview .nk-campaign-picker__name small{color:#aa5435}
+  .nk-main-header-preview .nk-campaign-picker__name strong{color:var(--nk-explore-ink,#17383e)}
+  .nk-main-header-preview .nk-campaign-picker nav button{color:rgba(23,56,62,.48)}
+  .nk-main-header-preview .nk-campaign-picker nav button:hover,
+  .nk-main-header-preview .nk-campaign-picker nav button:focus-visible{color:var(--nk-explore-ink,#17383e);background:rgba(223,135,83,.2)}
+  .nk-main-header-preview .nk-campaign-picker nav button.active{color:var(--nk-explore-ink,#17383e);background:#eaa35f}
+
+  .nk-main-header-preview .nk-campaign-design--projects{color:var(--nk-explore-ink,#17383e);background:var(--nk-explore-header,#f4ead8)}
+  .nk-main-header-preview .nk-campaign-design--projects>figure>.nk-campaign-brand{color:#fff}
+  .nk-main-header-preview .nk-campaign-design--projects>section{padding:18px 3vw 58px}
+  .nk-main-header-preview .nk-campaign-design--projects>section>p{color:#a75334}
+  .nk-main-header-preview .nk-campaign-design--projects>section h1{margin:5px 0 7px;font-size:clamp(42px,3.2vw,58px)}
+  .nk-main-header-preview .nk-campaign-design--projects>section>span{color:#4e676b}
+  .nk-main-header-preview .nk-campaign-design--projects .nk-campaign-stats{margin:8px 0}
+  .nk-main-header-preview .nk-campaign-design--projects .nk-campaign-stats>span{border-left-color:rgba(23,56,62,.28)}
+  .nk-main-header-preview .nk-campaign-design--projects .nk-campaign-stats>span:first-child{border-left-color:#df8753}
+  .nk-main-header-preview .nk-campaign-design--projects>aside{color:var(--nk-explore-ink,#17383e);background:linear-gradient(135deg,#f3d9b3 0%,#edbd82 100%)}
+  .nk-main-header-preview .nk-campaign-design--projects>aside>a{border-bottom-color:rgba(23,56,62,.2)}
+  .nk-main-header-preview .nk-campaign-design--projects>aside small{color:#a75334}
+
+  html[data-theme] .ia-shell .ia-header--home-preview .ia-header-bar{height:58px;background:var(--nk-explore-header,#f4ead8);border-top:1px solid rgba(23,56,62,.18);border-bottom:1px solid rgba(23,56,62,.28);box-shadow:0 8px 22px rgba(80,49,30,.1)}
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>a,
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>button{color:var(--nk-explore-ink,#17383e)!important;background:var(--nk-explore-header,#f4ead8)!important;box-shadow:inset -1px 0 rgba(23,56,62,.18)!important}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__media{background:var(--nk-explore-header,#f4ead8)}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__media img{opacity:.075;filter:sepia(.28) saturate(.55) contrast(.94)}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__shade{background:linear-gradient(180deg,rgba(244,234,216,.1),rgba(232,188,130,.3))}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__copy{bottom:9px;transform:none}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__copy small{display:none}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__copy strong{color:var(--nk-explore-ink,#17383e);font-size:14px;text-shadow:none}
+  .ia-shell .ia-header--home-preview .ia-nav-panel__chevron{top:9px;color:rgba(23,56,62,.58)}
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>a:is(:hover,:focus-visible),
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>button:is(:hover,:focus-visible),
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>button[aria-expanded='true'],
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>a.active,
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>button.active{color:var(--nk-explore-ink,#17383e)!important;background:#eaa35f!important;box-shadow:inset 0 -3px #d55d43,inset -1px 0 rgba(23,56,62,.18)!important}
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__media img,
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__media img,
+  .ia-shell .ia-header--home-preview .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__media img{opacity:.16;filter:sepia(.22) saturate(.7) contrast(.98)}
+  html[data-theme] .ia-shell .ia-header.ia-header--home-preview .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__media,
+  html[data-theme] .ia-shell .ia-header.ia-header--home-preview .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__media,
+  html[data-theme] .ia-shell .ia-header.ia-header--home-preview .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__media{background:#eaa35f!important}
+  html[data-theme] .ia-shell .ia-header.ia-header--home-preview .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__shade,
+  html[data-theme] .ia-shell .ia-header.ia-header--home-preview .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__shade,
+  html[data-theme] .ia-shell .ia-header.ia-header--home-preview .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__shade{background:linear-gradient(180deg,rgba(244,234,216,.06),rgba(213,93,67,.24))!important}
+}
+
+@media(min-width:1451px){
+  .nk-main-header-preview .nk-campaign-design--lighting>section{grid-template-rows:1fr;padding:16px clamp(24px,2.4vw,50px) 74px}
+  .nk-main-header-preview .nk-lighting-copy h1{margin:5px 0 7px;font-size:clamp(48px,2.8vw,58px)}
+  .nk-main-header-preview .nk-lighting-copy>span{line-height:1.32}
+  .nk-main-header-preview .nk-lighting-diagnostic{gap:8px;padding:12px 14px}
+  .nk-main-header-preview .nk-lighting-diagnostic>strong{font-size:24px}
+  .nk-main-header-preview .nk-lighting-diagnostic>div>span{padding-block:5px}
+  .nk-main-header-preview .nk-campaign-design--lighting .nk-campaign-points{display:none}
+}
+
+@media(min-width:901px) and (max-width:1180px){
+  .nk-main-header-preview .nk-campaign-design--projects{grid-template-columns:34% minmax(0,42%) minmax(0,24%)}
+  .nk-main-header-preview .nk-campaign-design--projects>section{padding:15px 20px 58px}
+  .nk-main-header-preview .nk-campaign-design--projects>section h1{font-size:clamp(38px,4.6vw,48px)}
+  .nk-main-header-preview .nk-campaign-design--projects>section>span{font-size:14px;line-height:1.34}
+  .nk-main-header-preview .nk-campaign-design--projects .nk-campaign-actions{left:14px;gap:6px}
+  .nk-main-header-preview .nk-campaign-design--projects .nk-campaign-action{min-height:44px;gap:8px;padding-inline:10px;font-size:12px}
+  .nk-main-header-preview .nk-campaign-design--projects>aside{padding:10px 12px 54px}
+  .nk-main-header-preview .nk-campaign-design--projects>aside>a{grid-template-columns:58px minmax(0,1fr) 14px;gap:8px}
+  .nk-main-header-preview .nk-campaign-design--projects>aside img{width:58px;height:54px}
+  .nk-main-header-preview .nk-campaign-design--projects>aside strong{font-size:13px}
+  .nk-main-header-preview .nk-campaign-design--projects>aside>a>svg{width:14px}
+}
+
 @media(max-width:380px){.nk-main-header-preview__mobile-summary{grid-template-columns:44px 28px minmax(0,1fr) 44px;gap:2px;padding-inline:2px 0}.nk-main-header-preview__mobile-summary small{display:none}.nk-main-header-preview__mobile-summary strong{font-size:14px}.nk-main-header-preview__mobile-controls{min-width:80px;padding-left:10px}.nk-main-header-preview__mobile-toggle{min-width:70px;font-size:13px}.nk-campaign-picker nav button{width:28px}.nk-campaign-picker__back{padding-inline:7px}.nk-campaign-design h1{overflow-wrap:anywhere}.nk-campaign-design--offers>header .nk-campaign-brand small,.nk-lighting-mast .nk-campaign-brand small{display:none}.nk-campaign-design--installation .nk-campaign-actions{grid-template-columns:1fr}.nk-campaign-design--outdoor>section h1{font-size:clamp(42px,13vw,51px)}}
 @media(prefers-reduced-motion:reduce){.nk-campaign-action,.nk-campaign-picker nav button,.nk-studio-nav img,.nk-studio-nav small,.nk-main-header-preview__mobile-toggle svg,.ia-shell .ia-header--home-preview .ia-mobile-trigger--home,.ia-shell .ia-header--home-preview .ia-mobile-trigger--home svg{transition:none!important}.nk-main-header-preview__floating-close{animation:none!important}}
