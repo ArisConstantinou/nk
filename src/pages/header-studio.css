@@ -213,10 +213,8 @@
   .nk-home-topbar__live-search .nk-live-search__field input{height:38px;color:#f7f1e5;font:650 14px/1 var(--campaign-body)}
   .nk-home-topbar__live-search .nk-live-search__field input::placeholder{color:rgba(247,241,229,.9)}
   .nk-home-topbar__live-search .nk-live-search__field kbd{color:#17383e;background:#f2bd73;font-family:var(--campaign-mono)}
-  .nk-home-topbar__live-search .nk-live-search__panel{top:calc(100% + 6px);max-height:min(70vh,640px);overflow-y:auto;overscroll-behavior:auto;border-radius:0;scrollbar-width:thin;scrollbar-color:#eaa05d #102328}
-  .nk-home-topbar__live-search .nk-live-search__panel::-webkit-scrollbar{display:block!important;width:10px!important;height:10px!important}
-  .nk-home-topbar__live-search .nk-live-search__panel::-webkit-scrollbar-track{background:#102328}
-  .nk-home-topbar__live-search .nk-live-search__panel::-webkit-scrollbar-thumb{background:#eaa05d;border:2px solid #102328}
+  .nk-home-topbar__live-search .nk-live-search__panel{top:calc(100% + 6px);max-height:min(70vh,640px);overflow-y:auto;overscroll-behavior:auto;border-radius:0;scrollbar-width:none;-ms-overflow-style:none}
+  .nk-home-topbar__live-search .nk-live-search__panel::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
   .nk-home-topbar__status{justify-self:end;display:flex;align-items:center;gap:8px;color:#a75334;font:760 12px/1 var(--campaign-mono);letter-spacing:.08em;white-space:nowrap}
   .nk-home-topbar__status svg{width:16px;height:16px;color:#e06b4d}
 
