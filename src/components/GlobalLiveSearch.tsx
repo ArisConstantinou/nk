@@ -44,6 +44,7 @@ export type GlobalLiveSearchProps = {
   maxResults?: number;
   labels?: Partial<LiveSearchLabels>;
   onNavigate?: () => void;
+  autoFocus?: boolean;
 };
 
 const defaultLabels: LiveSearchLabels = {
@@ -171,7 +172,7 @@ function ResultCopy({result, labels}: {result: SearchResult; labels: LiveSearchL
   return <><span><small>{labels.product}</small><strong>{product.name}</strong><em>{product.category} · {product.space}{product.offer ? ' · Offer' : ''}</em></span><ArrowRight className="nk-live-search__result-arrow" aria-hidden="true"/></>;
 }
 
-export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelOverrides, onNavigate}: GlobalLiveSearchProps) {
+export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelOverrides, onNavigate, autoFocus = false}: GlobalLiveSearchProps) {
   const {content} = useContent();
   const navigate = useNavigate();
   const listId = useId();
@@ -316,8 +317,9 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
           aria-controls={listId}
           aria-activedescendant={activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
           autoComplete="off"
+          autoFocus={autoFocus}
           enterKeyHint="search"
-          onFocus={() => setOpen(true)}
+          onFocus={() => window.requestAnimationFrame(() => setOpen(true))}
           onChange={event => {setQuery(event.target.value); setOpen(true); setActiveIndex(-1);}}
           onKeyDown={onKeyDown}
         />

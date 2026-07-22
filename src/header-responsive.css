@@ -152,7 +152,7 @@ html[data-theme='dark'] .ia-shell .ia-brand.ia-brand--no-rail strong{
 @media(max-width:480px){
   .ia-shell .ia-header-bar{padding-right:10px}
   .ia-shell .ia-header-actions{gap:6px}
-  .ia-shell .ia-brand{min-width:148px;padding-right:4px}
+  .ia-shell .ia-brand{min-width:0;padding-right:4px}
   .ia-shell .ia-brand-copy{min-width:92px;padding-right:8px}
   .ia-shell .ia-brand strong{font-size:12px;letter-spacing:-.01em}
 }

@@ -63,6 +63,16 @@ export function HomeHeaderPreview() {
   }, [mobileStoryOpen]);
 
   const moveCampaign = (direction: -1 | 1) => setCampaignId(current => adjacentCampaign(current, direction));
+  const selectCampaign = (nextCampaignId: HeaderCampaignId) => {
+    setCampaignId(nextCampaignId);
+    if (!mobileStoryOpen || !window.matchMedia('(max-width: 900px)').matches) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById('nk-mobile-header-story')?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+        block: 'start',
+      });
+    });
+  };
   const closeMobileStory = () => {
     setMobileStoryOpen(false);
     window.requestAnimationFrame(() => mobileToggleRef.current?.focus({preventScroll: true}));
@@ -92,7 +102,7 @@ export function HomeHeaderPreview() {
     </div>
     <div className="nk-main-header-preview__story" id="nk-mobile-header-story">
       <HeaderCampaignShowcase campaignId={campaignId}/>
-      <HeaderCampaignPicker activeId={campaignId} onSelect={setCampaignId}/>
+      <HeaderCampaignPicker activeId={campaignId} onSelect={selectCampaign}/>
     </div>
     {mobileStoryOpen && showFloatingClose && <button
       className="nk-main-header-preview__floating-close"

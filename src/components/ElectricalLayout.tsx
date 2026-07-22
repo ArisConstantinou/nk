@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
-import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Phone, Sun, X} from 'lucide-react';
+import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Phone, Search, Sparkles, Sun, X} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../context/ContentContext';
 import {serviceLinks, shopLinks} from '../navigation';
@@ -9,6 +9,7 @@ import {ResponsiveImage} from './ResponsiveImage';
 import {BrandEnergyMark} from './BrandEnergyMark';
 import {LiveSiteEditButton} from './LiveSiteEditButton';
 import {HomeHeaderPreview} from './HomeHeaderPreview';
+import {GlobalLiveSearch} from './GlobalLiveSearch';
 import {applyTheme, getThemePreference, saveThemePreference, themeChangeEvent, watchSystemTheme, type ThemePreference} from '../theme';
 import {pageVisualForPath} from '../pageVisuals';
 import {routeInteractionForPath} from '../routeInteractions';
@@ -150,10 +151,13 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const {navigation, settings} = useContent();
   const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState<MegaSection>('services');
   const headerRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchDialogRef = useRef<HTMLElement>(null);
   const megaOpenModeRef = useRef<MegaOpenMode>(null);
   const megaOpenTimerRef = useRef<number | null>(null);
   const megaCloseTimerRef = useRef<number | null>(null);
@@ -179,6 +183,19 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     if (megaCloseTimerRef.current !== null) window.clearTimeout(megaCloseTimerRef.current);
     megaOpenTimerRef.current = null;
     megaCloseTimerRef.current = null;
+  };
+
+  const closeHeaderSearch = (restoreFocus = true) => {
+    setSearchOpen(false);
+    if (restoreFocus) window.requestAnimationFrame(() => searchTriggerRef.current?.focus());
+  };
+
+  const openHeaderSearch = () => {
+    clearMegaTimers();
+    megaOpenModeRef.current = null;
+    setMegaOpen(null);
+    setMobileOpen(false);
+    setSearchOpen(true);
   };
 
   const supportsMenuHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -221,12 +238,17 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     megaOpenModeRef.current = null;
     setMegaOpen(null);
     setMobileOpen(false);
+    setSearchOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
   }, [location.pathname, location.search]);
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
+      if (searchOpen) {
+        closeHeaderSearch();
+        return;
+      }
       clearMegaTimers();
       megaOpenModeRef.current = null;
       setMegaOpen(null);
@@ -237,7 +259,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     };
     window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);
-  }, [mobileOpen]);
+  }, [mobileOpen, searchOpen]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -255,6 +277,29 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     document.addEventListener('keydown', trapFocus);
     return () => { document.removeEventListener('keydown', trapFocus); document.body.style.overflow = previous; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => searchDialogRef.current?.querySelector<HTMLInputElement>('input')?.focus(), 0);
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !searchDialogRef.current) return;
+      const focusable = [...searchDialogRef.current.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled)')]
+        .filter(element => getComputedStyle(element).display !== 'none' && getComputedStyle(element).visibility !== 'hidden');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {event.preventDefault(); last.focus();}
+      else if (!event.shiftKey && document.activeElement === last) {event.preventDefault(); first.focus();}
+    };
+    document.addEventListener('keydown', trapFocus);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', trapFocus);
+      document.body.style.overflow = previous;
+    };
+  }, [searchOpen]);
 
   useEffect(() => {
     if (!megaOpen) return;
@@ -308,8 +353,17 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
         </div>
       </div>}
-      <div className="ia-header-bar">
+      <div className="ia-header-bar" inert={searchOpen || undefined}>
         <Link className={`ia-brand ${showHomeHeaderPreview ? 'ia-brand--home-preview ' : ''}${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
+        <button
+          className={`ia-header-search-trigger ${showHomeHeaderPreview ? 'ia-header-search-trigger--home' : ''}`.trim()}
+          ref={searchTriggerRef}
+          type="button"
+          aria-label="Search products, images, catalogues and PDFs"
+          aria-haspopup="dialog"
+          aria-expanded={searchOpen}
+          onClick={openHeaderSearch}
+        ><span>Search</span><Search aria-hidden="true"/></button>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
           ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
           : linkTo(item) === '/shop'
@@ -324,6 +378,23 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
         </div>}
       </div>
+      {searchOpen && <div className="ia-header-search-layer">
+        <button className="ia-header-search-backdrop" type="button" aria-label="Close search" onClick={() => closeHeaderSearch()}/>
+        <section className="ia-header-search-dialog" ref={searchDialogRef} role="dialog" aria-modal="true" aria-labelledby="ia-header-search-title">
+          <header>
+            <div><Sparkles aria-hidden="true"/><span><small>LIVE PRODUCT FINDER</small><strong id="ia-header-search-title">Products & PDFs</strong></span></div>
+            <button type="button" onClick={() => closeHeaderSearch()} aria-label="Close search"><span>Close</span><X aria-hidden="true"/></button>
+          </header>
+          <GlobalLiveSearch
+            autoFocus
+            className="ia-header-global-search"
+            maxResults={10}
+            onNavigate={() => closeHeaderSearch(false)}
+            labels={{input: 'Search products, images, catalogues and PDFs', placeholder: 'What are you looking for?'}}
+          />
+          <p>Type a product, category, brand or catalogue name. Results match while you type.</p>
+        </section>
+      </div>}
       {megaOpen && <div className={`ia-mega ia-mega--${megaOpen}`} id={`${megaOpen}-mega-menu`} onMouseEnter={keepMegaOpenOnHover} onMouseLeave={closeMegaOnHover}>
         <div className="ia-mega-heading"><span>{megaOpen === 'services' ? 'SERVICES / EXPERTISE' : 'SHOP / PRODUCTS'}</span><h2>{megaOpen === 'services' ? 'Work performed by our team.' : 'Products available through NK Electrical.'}</h2><p>{megaOpen === 'services' ? 'Planning, installation, integration and support. No product categories are mixed into this path.' : 'Lighting, appliances and official PDF catalogues. Service enquiries remain under Services.'}</p><SmartLink to={megaOpen === 'services' ? '/services' : '/shop'}><span>{megaOpen === 'services' ? 'View all services' : 'Browse all products'}</span><ArrowRight/></SmartLink></div>
         <nav aria-label={`${megaOpen === 'services' ? 'Services' : 'Shop'} menu`}>{(megaOpen === 'services' ? serviceMenu : shopMenu).map((item, index) => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{item.label}</strong><small>{item.description}</small></div><ArrowRight/></SmartLink>)}</nav>
@@ -338,7 +409,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       </nav>}
     </header>
     <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>
-    <div className="electrical-stage ia-stage" inert={mobileOpen || undefined} aria-hidden={mobileOpen || undefined}>
+    <div className="electrical-stage ia-stage" inert={mobileOpen || searchOpen || undefined} aria-hidden={mobileOpen || searchOpen || undefined}>
       <main className="electrical-main ia-main">{children}</main>
       <footer className="ia-footer">
         <div className="ia-footer-lead"><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerEyebrow" data-visual-edit="text" data-visual-label="Footer eyebrow">{settings.footerEyebrow}</span><h2 data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerTitle" data-visual-edit="text" data-visual-label="Footer heading" data-visual-multiline="true">{settings.footerTitle}</h2><SmartLink to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerCtaLabel" data-visual-edit="text" data-visual-label="Footer button" data-visual-link-path="quoteUrl">{settings.footerCtaLabel}</span><ArrowRight/></SmartLink></div>
