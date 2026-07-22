@@ -62,7 +62,7 @@ const defaultLabels: LiveSearchLabels = {
   product: 'Product',
   catalogue: 'PDF catalogue',
   openPdf: 'Open PDF',
-  keyboardHint: 'Use arrow keys to move and Enter to open',
+  keyboardHint: 'Use ↑ / ↓ to select objects and Enter to open',
 };
 
 const normalize = (value: string) => value
@@ -324,6 +324,28 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
     close();
   };
 
+  const focusResult = (index: number) => {
+    setActiveIndex(index);
+    window.requestAnimationFrame(() => {
+      rootRef.current
+        ?.querySelector<HTMLElement>(`[data-search-result-index="${index}"]`)
+        ?.focus();
+    });
+  };
+
+  const moveResultFocus = (direction: -1 | 1, currentIndex = activeIndex) => {
+    if (!orderedResults.length) {
+      setActiveIndex(-1);
+      return;
+    }
+
+    const nextIndex = currentIndex < 0
+      ? direction > 0 ? 0 : orderedResults.length - 1
+      : (currentIndex + direction + orderedResults.length) % orderedResults.length;
+    setOpen(true);
+    focusResult(nextIndex);
+  };
+
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
       event.stopPropagation();
@@ -336,21 +358,48 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       event.stopPropagation();
-      setOpen(true);
-      setActiveIndex(current => orderedResults.length ? (current + 1) % orderedResults.length : -1);
+      moveResultFocus(1);
       return;
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       event.stopPropagation();
-      setOpen(true);
-      setActiveIndex(current => orderedResults.length ? (current <= 0 ? orderedResults.length - 1 : current - 1) : -1);
+      moveResultFocus(-1);
       return;
     }
     if (event.key === 'Enter' && open && orderedResults.length) {
       event.preventDefault();
       event.stopPropagation();
       openResult(orderedResults[activeIndex >= 0 ? activeIndex : 0]);
+    }
+  };
+
+  const onResultKeyDown = (event: KeyboardEvent<HTMLAnchorElement>, currentIndex: number) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      event.stopPropagation();
+      moveResultFocus(1, currentIndex);
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      event.stopPropagation();
+      moveResultFocus(-1, currentIndex);
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      openResult(orderedResults[currentIndex]);
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      setOpen(false);
+      setActiveIndex(-1);
+      inputRef.current?.focus();
+      onDismiss?.();
     }
   };
 
@@ -412,7 +461,10 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
                       className: `nk-live-search__result ${currentIndex === activeIndex ? 'is-active' : ''}`,
                       role: 'option',
                       'aria-selected': currentIndex === activeIndex,
+                      tabIndex: currentIndex === activeIndex ? 0 : -1,
                       onMouseEnter: () => setActiveIndex(currentIndex),
+                      onFocus: () => setActiveIndex(currentIndex),
+                      onKeyDown: (event: KeyboardEvent<HTMLAnchorElement>) => onResultKeyDown(event, currentIndex),
                       onClick: close,
                     } as const;
                     return result.kind === 'catalogue'
