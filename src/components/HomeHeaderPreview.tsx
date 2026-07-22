@@ -3,6 +3,7 @@ import {BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircuitBoard, L
 import {HeaderCampaignPicker, HeaderCampaignShowcase, HEADER_CAMPAIGNS, type HeaderCampaignId, useHeaderCampaigns} from './HeaderCampaignShowcase';
 import {resolvePublicUrl} from '../utils/assets';
 import '../pages/header-studio.css';
+import '../pages/header-unified-panels.css';
 
 const storedCampaign = () => {
   const stored = window.localStorage.getItem('nk-header-studio-concept');

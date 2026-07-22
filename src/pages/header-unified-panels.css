@@ -1,0 +1,53 @@
+.nk-campaign-legacy-mobile{height:100%}
+.nk-campaign-design--unified{display:none}
+
+@media(min-width:901px){
+  .nk-campaign-legacy-mobile{display:none}
+  .nk-campaign-design--unified{
+    --story-accent:#d86647;
+    display:grid;
+    grid-template-columns:minmax(0,40%) minmax(0,36%) minmax(0,24%);
+    padding-bottom:50px;
+    color:var(--nk-explore-ink,#17383e);
+    background:var(--nk-explore-header,#f4ead8)
+  }
+  .nk-campaign-design--unified-fault{--story-accent:#c7533e}
+  .nk-campaign-design--unified-summer{--story-accent:#b96b2d}
+  .nk-campaign-design--unified-offers{--story-accent:#e85f49}
+  .nk-campaign-design--unified-security{--story-accent:#2b8178}
+  .nk-campaign-design--unified-sun-control{--story-accent:#c9822f}
+  .nk-campaign-design--unified-outdoor{--story-accent:#bd6b3d}
+  .nk-campaign-design--unified-lighting{--story-accent:#d17a55}
+  .nk-campaign-design--unified-catalogues{--story-accent:#397584}
+  .nk-campaign-design--unified-installation{--story-accent:#d86647}
+  .nk-campaign-design--unified-projects{--story-accent:#ba673d}
+  .nk-unified-story__copy{min-width:0;display:flex;flex-direction:column;justify-content:center;padding:10px clamp(24px,3vw,60px)}
+  .nk-unified-story__copy>p{color:var(--story-accent)}
+  .nk-unified-story__copy>h1{max-width:720px;margin:5px 0 5px;font-size:clamp(36px,3vw,58px);line-height:.88}
+  .nk-unified-story__copy>span{max-width:650px;overflow:hidden;color:#52686b;font-size:14px!important;line-height:1.28!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .nk-unified-story__copy .nk-campaign-actions{gap:7px;margin-top:9px;flex-wrap:nowrap}
+  .nk-unified-story__copy .nk-campaign-action{min-height:40px;gap:14px;padding-inline:14px;font-size:12px;box-shadow:inset 0 0 0 1px rgba(23,56,62,.12)}
+  .nk-unified-story__copy .nk-campaign-action.is-primary{color:#fff;background:var(--story-accent);box-shadow:none}
+  .nk-unified-story__board{min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+  .nk-unified-story__board>article{min-width:0;display:grid;grid-template-rows:auto 20px auto auto;align-content:center;gap:5px;padding:12px 16px;border-left:1px solid rgba(23,56,62,.2)}
+  .nk-unified-story__board b{color:var(--story-accent);font:760 12px/1 var(--campaign-mono)}
+  .nk-unified-story__board svg{width:19px;height:19px;color:#17383e}
+  .nk-unified-story__board strong{font:720 14px/1.15 var(--campaign-body)}
+  .nk-unified-story__board small{color:#66797b;font:500 12px/1.25 var(--campaign-body)}
+  .nk-unified-story__media{position:relative;min-width:0;margin:0;overflow:hidden;background:#102f39}
+  .nk-unified-story__media::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,34,40,.82),transparent 64%)}
+  .nk-unified-story__media img{width:100%;height:100%;object-fit:cover;filter:saturate(.82) contrast(1.04)}
+  .nk-unified-story__media figcaption{position:absolute;z-index:2;left:18px;right:18px;bottom:14px;display:flex;align-items:center;gap:8px;color:#fff;font:760 12px/1 var(--campaign-mono);letter-spacing:.07em}
+  .nk-unified-story__media figcaption svg{width:15px;height:15px;color:#f2a45d}
+}
+
+@media(min-width:901px) and (max-width:1180px){
+  .nk-campaign-design--unified{grid-template-columns:minmax(0,44%) minmax(0,56%)}
+  .nk-unified-story__copy{padding-inline:18px}
+  .nk-unified-story__copy>h1{font-size:clamp(34px,4vw,44px)}
+  .nk-unified-story__copy>span{font-size:13px!important}
+  .nk-unified-story__copy .nk-campaign-action{padding-inline:11px}
+  .nk-unified-story__board>article{padding-inline:10px}
+  .nk-unified-story__board strong{font-size:13px}
+  .nk-unified-story__media{display:none}
+}

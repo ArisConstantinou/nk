@@ -191,7 +191,71 @@ function ProjectsHeader({campaign, projects}: {campaign: Campaign; projects: Arr
   </div>;
 }
 
-function CampaignRenderer({campaign}: {campaign: Campaign}) {
+const unifiedStoryDetails: Record<HeaderCampaignId, [string, string, string]> = {
+  '01': ['Start with the symptom', 'Trace the actual cause', 'Finish with a verified repair'],
+  '02': ['Quiet everyday airflow', 'Portable room relief', 'Flexible cooling options'],
+  '03': ['Live website records', 'Images and model names', 'Confirm showroom availability'],
+  '04': ['See and record activity', 'Detect before entry', 'Control doors and gates'],
+  '05': ['Move before heat builds', 'Use light only where needed', 'Repeat the right response'],
+  '06': ['Safe, welcoming arrival', 'Useful light where you sit', 'Low-glare movement routes'],
+  '07': ['Build depth and ambience', 'Put light on the task', 'Control comfort and scenes'],
+  '08': ['Search the product range', 'Use real product imagery', 'Open original supplier PDFs'],
+  '09': ['Before equipment selection', 'Before walls close', 'Before handover'],
+  '10': ['Homes and apartments', 'Offices and workplaces', 'Shops and mixed-use spaces'],
+};
+
+const unifiedStoryMedia: Record<HeaderCampaignId, string> = {
+  '01': 'DIAGNOSED / REPAIRED',
+  '02': 'COOLING / READY',
+  '03': 'LIVE OFFER RECORDS',
+  '04': 'CONNECTED PROTECTION',
+  '05': 'AUTOMATION / ACTIVE',
+  '06': 'AFTER-SUNSET LIGHT',
+  '07': 'ROOM / BALANCED',
+  '08': 'ORIGINAL CATALOGUES',
+  '09': 'TESTED HANDOVER',
+  '10': 'DELIVERED / CYPRUS',
+};
+
+const unifiedStoryIcons: Record<HeaderCampaignId, typeof Zap> = {
+  '01': Siren,
+  '02': Snowflake,
+  '03': Sparkles,
+  '04': ShieldCheck,
+  '05': Sun,
+  '06': Lightbulb,
+  '07': Lightbulb,
+  '08': BookOpen,
+  '09': CircuitBoard,
+  '10': MapPin,
+};
+
+function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
+  const StoryIcon = unifiedStoryIcons[campaign.id];
+  const details = unifiedStoryDetails[campaign.id];
+  return <div className={`nk-campaign-design nk-campaign-design--unified nk-campaign-design--unified-${campaign.slug}`} data-unified-story={campaign.id}>
+    <section className="nk-unified-story__copy">
+      <p>{campaign.kicker}</p>
+      <h1>{campaign.title}</h1>
+      <span>{campaign.body}</span>
+      <div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div>
+    </section>
+    <div className="nk-unified-story__board">
+      {campaign.points.slice(0, 3).map((point, index) => <article key={point}>
+        <b>0{index + 1}</b>
+        <StoryIcon aria-hidden="true"/>
+        <strong>{point}</strong>
+        <small>{details[index]}</small>
+      </article>)}
+    </div>
+    <figure className="nk-unified-story__media">
+      <ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/>
+      <figcaption><Check aria-hidden="true"/>{unifiedStoryMedia[campaign.id]}</figcaption>
+    </figure>
+  </div>;
+}
+
+function LegacyCampaignRenderer({campaign}: {campaign: Campaign}) {
   const {content, settings} = useContent();
   switch (campaign.id) {
     case '01': return <FaultHeader campaign={campaign} phone={settings.phone}/>;
@@ -205,6 +269,13 @@ function CampaignRenderer({campaign}: {campaign: Campaign}) {
     case '09': return <InstallationHeader campaign={campaign}/>;
     default: return <ProjectsHeader campaign={campaign} projects={content.projects}/>;
   }
+}
+
+function CampaignRenderer({campaign}: {campaign: Campaign}) {
+  return <>
+    <UnifiedCampaignHeader campaign={campaign}/>
+    <div className="nk-campaign-legacy-mobile"><LegacyCampaignRenderer campaign={campaign}/></div>
+  </>;
 }
 
 export function useHeaderCampaigns(): Campaign[] {
