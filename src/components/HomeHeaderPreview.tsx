@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircuitBoard, Lightbulb, ShieldCheck, Sparkles, Sun, Zap} from 'lucide-react';
-import {HeaderCampaignPicker, HeaderCampaignShowcase, HEADER_CAMPAIGNS, type HeaderCampaignId} from './HeaderCampaignShowcase';
+import {HeaderCampaignPicker, HeaderCampaignShowcase, HEADER_CAMPAIGNS, type HeaderCampaignId, useHeaderCampaigns} from './HeaderCampaignShowcase';
+import {resolvePublicUrl} from '../utils/assets';
 import '../pages/header-studio.css';
 
 const storedCampaign = () => {
@@ -35,17 +36,38 @@ export function HomeHeaderPreview() {
   const [showFloatingClose, setShowFloatingClose] = useState(false);
   const mobileSwitcherRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
+  const campaigns = useHeaderCampaigns();
   const activeCampaign = HEADER_CAMPAIGNS.find(item => item.id === campaignId) || HEADER_CAMPAIGNS[0];
   const UtilityIcon = utilityIcons[activeCampaign.id];
 
   useEffect(() => { window.localStorage.setItem('nk-header-studio-concept', campaignId); }, [campaignId]);
   useEffect(() => { window.localStorage.setItem('nk-mobile-header-story-open', String(mobileStoryOpen)); }, [mobileStoryOpen]);
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const currentIndex = campaigns.findIndex(campaign => campaign.id === campaignId);
+    if (currentIndex < 0) return;
+    const preloadIndexes = [currentIndex, (currentIndex + 1) % campaigns.length, (currentIndex - 1 + campaigns.length) % campaigns.length];
+    const sources = [...new Set(preloadIndexes.flatMap(index => [
+      campaigns[index].image,
+      ...(campaigns[index].products || []).map(product => product.image),
+    ]))];
+    sources.forEach(source => {
+      const preload = new Image();
+      preload.decoding = 'async';
+      preload.src = resolvePublicUrl(source);
+    });
+  }, [campaignId, campaigns]);
+  useEffect(() => {
+    let timer: number;
+    const rotate = () => {
+      if (document.activeElement?.closest('.nk-campaign-search')) {
+        timer = window.setTimeout(rotate, 2_000);
+        return;
+      }
       if (window.matchMedia('(max-width: 900px)').matches) {
         setCampaignId(current => adjacentCampaign(current, 1));
       }
-    }, 10_000);
+    };
+    timer = window.setTimeout(rotate, 10_000);
     return () => window.clearTimeout(timer);
   }, [campaignId]);
   useEffect(() => {

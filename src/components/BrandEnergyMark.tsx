@@ -44,6 +44,6 @@ export function BrandEnergyMark({src, alt, showWires = true}: BrandEnergyMarkPro
         style={{width: '100%', height: '100%', overflow: 'visible', background: 'transparent'}}
       />
     </span>}
-    <ResponsiveImage className="ia-brand-logo" src={src} alt={alt}/>
+    <ResponsiveImage className="ia-brand-logo" src={src} alt={alt} loading="eager" decoding="async" fetchPriority="high"/>
   </span>;
 }

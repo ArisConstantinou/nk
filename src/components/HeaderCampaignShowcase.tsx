@@ -70,7 +70,7 @@ function CampaignLink({action, className = ''}: {action: Action; className?: str
 function Brand({compact = false}: {compact?: boolean}) {
   const {settings} = useContent();
   return <Link className={`nk-campaign-brand ${compact ? 'is-compact' : ''}`} to="/" aria-label={`${settings.brandName} home`}>
-    <ResponsiveImage src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/>
+    <ResponsiveImage src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} loading="eager" decoding="async" fetchPriority="high"/>
     <span><strong>Electrical</strong><small>POWER · LIGHT · CONTROL</small></span>
   </Link>;
 }
@@ -85,7 +85,7 @@ function PointList({points}: {points: string[]}) {
 
 function ProductTile({product, index = 0}: {product: Product; index?: number}) {
   return <Link className="nk-campaign-product" to={`/shop/product/${encodeURIComponent(product.id)}`}>
-    <span className="nk-campaign-product__image"><ResponsiveImage src={product.image} alt=""/></span>
+    <span className="nk-campaign-product__image"><ResponsiveImage src={product.image} alt="" loading="eager" decoding="async"/></span>
     <span><small>{String(index + 1).padStart(2, '0')} / {product.category}</small><strong>{product.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'")}</strong></span>
     <ArrowRight aria-hidden="true"/>
   </Link>;
@@ -105,7 +105,7 @@ function SummerHeader({campaign}: {campaign: Campaign}) {
   return <div className="nk-campaign-design nk-campaign-design--summer">
     <Brand/>
     <section className="nk-summer-copy"><p><Sun/> {campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
-    <figure className="nk-summer-visual"><ResponsiveImage src={campaign.image} alt={campaign.alt}/><figcaption><Snowflake/><span><b>{campaign.stats[0].value}</b>{campaign.stats[0].label}</span></figcaption></figure>
+    <figure className="nk-summer-visual"><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><figcaption><Snowflake/><span><b>{campaign.stats[0].value}</b>{campaign.stats[0].label}</span></figcaption></figure>
     <div className="nk-summer-products">{products.slice(0, 3).map((product, index) => <ProductTile product={product} index={index} key={product.id}/>)}</div>
   </div>;
 }
@@ -122,7 +122,7 @@ function OffersHeader({campaign}: {campaign: Campaign}) {
 
 function SecurityHeader({campaign}: {campaign: Campaign}) {
   return <div className="nk-campaign-design nk-campaign-design--security">
-    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt}/><span><Eye/> PROTECTION / CONNECTED</span></figure>
+    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span><Eye/> PROTECTION / CONNECTED</span></figure>
     <section><Brand compact/><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><PointList points={campaign.points}/></section>
     <aside><ShieldCheck/><strong>One protection plan.</strong><p>Cameras, detection and entry systems designed as one system.</p>{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</aside>
   </div>;
@@ -140,17 +140,17 @@ function SunControlHeader({campaign}: {campaign: Campaign}) {
 function OutdoorHeader({campaign}: {campaign: Campaign}) {
   const product = campaign.products?.[0];
   return <div className="nk-campaign-design nk-campaign-design--outdoor">
-    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt}/><i/></figure>
+    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><i/></figure>
     <header><Brand compact/><span>SUMMER NIGHTS / OUTDOOR LIGHT</span></header>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
-    <aside><Lightbulb/>{product && <><ResponsiveImage src={product.image} alt=""/><small>PRODUCT PICK</small><strong>{product.name}</strong></>}<b>{campaign.stats[0].value}<span>{campaign.stats[0].label}</span></b></aside>
+    <aside><Lightbulb/>{product && <><ResponsiveImage src={product.image} alt="" loading="eager" decoding="async"/><small>PRODUCT PICK</small><strong>{product.name}</strong></>}<b>{campaign.stats[0].value}<span>{campaign.stats[0].label}</span></b></aside>
   </div>;
 }
 
 function LightingHeader({campaign}: {campaign: Campaign}) {
   return <div className="nk-campaign-design nk-campaign-design--lighting">
     <div className="nk-lighting-mast"><Brand compact/><span>LIGHTING CLINIC</span><small>AMBIENCE · TASK · GLARE · CONTROL</small></div>
-    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt}/><span>THE ROOM IS FINISHED</span></figure>
+    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span>THE ROOM IS FINISHED</span></figure>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><PointList points={campaign.points}/></section>
     <aside><strong>Fix the feeling, not just the fitting.</strong>{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</aside>
   </div>;
@@ -169,15 +169,15 @@ function InstallationHeader({campaign}: {campaign: Campaign}) {
     <header><Brand compact/><span><Zap/> NEW BUILD / RENOVATION</span></header>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
     <div className="nk-installation-board">{campaign.points.map((point, index) => <span key={point}><b>0{index + 1}</b><CircuitBoard/><strong>{point}</strong><small>{index === 0 ? 'Before equipment selection' : index === 1 ? 'Before walls close' : 'Before handover'}</small></span>)}</div>
-    <aside><ResponsiveImage src={campaign.image} alt={campaign.alt}/><span><Check/> TESTED HANDOVER</span></aside>
+    <aside><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span><Check/> TESTED HANDOVER</span></aside>
   </div>;
 }
 
 function ProjectsHeader({campaign, projects}: {campaign: Campaign; projects: Array<{id: string; name: string; image: string; category: string; systems: string[]}>}) {
   return <div className="nk-campaign-design nk-campaign-design--projects">
-    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt}/><span><Check/> DELIVERED / CYPRUS</span><Brand compact/></figure>
+    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span><Check/> DELIVERED / CYPRUS</span><Brand compact/></figure>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><StatRow stats={campaign.stats}/><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
-    <aside>{projects.slice(0, 2).map((project, index) => <Link to="/projects" key={project.id}><ResponsiveImage src={project.image} alt=""/><span><small>0{index + 1} / {project.category}</small><strong>{project.name}</strong></span><ArrowRight/></Link>)}</aside>
+    <aside>{projects.slice(0, 2).map((project, index) => <Link to="/projects" key={project.id}><ResponsiveImage src={project.image} alt="" loading="eager" decoding="async"/><span><small>0{index + 1} / {project.category}</small><strong>{project.name}</strong></span><ArrowRight/></Link>)}</aside>
   </div>;
 }
 
