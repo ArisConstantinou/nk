@@ -134,7 +134,6 @@ export function HomeHeaderPreview() {
       </div>
     </div>
     <div className="nk-main-header-preview__story" id="nk-mobile-header-story" ref={mobileStoryRef}>
-      <HeaderCampaignShowcase campaignId={campaignId}/>
       <HeaderCampaignPicker
         activeId={campaignId}
         onSelect={selectCampaign}
@@ -143,6 +142,7 @@ export function HomeHeaderPreview() {
           <button type="button" aria-label="Next live story" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
         </div>}
       />
+      <HeaderCampaignShowcase campaignId={campaignId}/>
       {mobileStoryOpen && showFloatingClose && <div className="nk-main-header-preview__close-rail">
         <button
           className="nk-main-header-preview__floating-close"

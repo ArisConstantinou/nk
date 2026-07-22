@@ -167,20 +167,22 @@ html[data-theme='dark'] .ia-shell .ia-brand.ia-brand--no-rail strong{
 
 .ia-header-command-dock{display:none}
 
+html,
+body,
+#root{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+
 @media(max-width:900px){
-  html,
-  body,
-  #root{
-    scrollbar-width:none;
-    -ms-overflow-style:none;
-  }
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar,
-  #root::-webkit-scrollbar{
-    display:none;
-    width:0;
-    height:0;
-  }
   .ia-shell .ia-brand{left:auto}
   .ia-shell .ia-header-bar{padding-left:8px}
   .ia-theme-selector--header{height:42px}

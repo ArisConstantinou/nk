@@ -223,7 +223,7 @@
   .ia-shell .ia-header--home-preview .nk-main-header-preview{grid-row:3}
   .nk-main-header-preview{background:var(--nk-explore-header,#f4ead8);border-bottom:1px solid rgba(23,56,62,.22)}
   .nk-main-header-preview .nk-campaign-canvas{height:clamp(234px,12.5vw,256px);min-height:234px}
-  .nk-main-header-preview .nk-campaign-design{padding-bottom:50px}
+  .nk-main-header-preview .nk-campaign-design{padding-bottom:0}
 
   .nk-main-header-preview .nk-campaign-design--summer{grid-template-rows:58px 1fr}
   .nk-main-header-preview .nk-campaign-design--summer>.nk-campaign-brand{margin:11px 3vw 0}
@@ -253,12 +253,14 @@
   .nk-main-header-preview .nk-installation-board>span{gap:6px;padding-block:8px}
   .nk-main-header-preview .nk-campaign-design--installation>aside span{bottom:56px}
 
-  .nk-main-header-preview .nk-campaign-picker{bottom:6px;color:var(--nk-explore-ink,#17383e);background:rgba(244,234,216,.97);border-color:rgba(23,56,62,.26);box-shadow:0 9px 24px rgba(80,49,30,.18)}
+  .nk-main-header-preview .nk-campaign-picker{top:6px;bottom:auto;color:var(--nk-explore-ink,#17383e);background:rgba(244,234,216,.97);border-color:rgba(23,56,62,.26);box-shadow:0 9px 24px rgba(80,49,30,.18)}
   .nk-main-header-preview .nk-campaign-picker__steps{border-color:rgba(23,56,62,.18)}
   .nk-main-header-preview .nk-campaign-picker__steps button{color:var(--nk-explore-ink,#17383e)}
   .nk-main-header-preview .nk-campaign-picker__steps button:hover{color:var(--nk-explore-ink,#17383e);background:#eaa35f}
   .nk-main-header-preview .nk-campaign-picker__name small{color:#aa5435}
   .nk-main-header-preview .nk-campaign-picker__name strong{color:var(--nk-explore-ink,#17383e)}
+  .nk-main-header-preview .nk-campaign-picker nav button::after{top:calc(100% + 8px);bottom:auto;transform:translate(-50%,-4px)}
+  .nk-main-header-preview .nk-campaign-picker nav button:hover::after{transform:translate(-50%,0)}
   .nk-main-header-preview .nk-campaign-picker nav button{color:rgba(23,56,62,.48)}
   .nk-main-header-preview .nk-campaign-picker nav button:hover,
   .nk-main-header-preview .nk-campaign-picker nav button:focus-visible{color:var(--nk-explore-ink,#17383e);background:rgba(223,135,83,.2)}
@@ -277,7 +279,7 @@
   .nk-main-header-preview .nk-campaign-design--projects>aside>a{border-bottom-color:rgba(23,56,62,.2)}
   .nk-main-header-preview .nk-campaign-design--projects>aside small{color:#a75334}
 
-  html[data-theme] .ia-shell .ia-header--home-preview .ia-header-bar{grid-row:4;height:54px;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:0;padding:0;background:#102f39;border-top:1px solid rgba(242,189,115,.34);border-bottom:1px solid rgba(23,56,62,.32);box-shadow:0 8px 22px rgba(80,49,30,.13)}
+  html[data-theme] .ia-shell .ia-header--home-preview .ia-header-bar{grid-row:4;height:78px;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:0;padding:0;background:#102f39;border-top:1px solid rgba(242,189,115,.34);border-bottom:1px solid rgba(23,56,62,.32);box-shadow:0 8px 22px rgba(80,49,30,.13)}
   .ia-shell .ia-header--home-preview .ia-desktop-nav{grid-column:1;grid-row:1}
   .ia-shell .ia-header--home-preview .ia-desktop-nav>a,
   .ia-shell .ia-header--home-preview .ia-desktop-nav>button{color:#fffdf7!important;background:#173e49!important;box-shadow:inset -1px 0 rgba(242,189,115,.2)!important}
