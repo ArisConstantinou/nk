@@ -441,7 +441,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       {useModernHeader && <>
         <div className={`nk-home-topbar ${showHeaderStory ? '' : 'nk-home-topbar--route'}`.trim()}>
           <Link className="nk-home-topbar__brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`}>
-            <img src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true"/>
+            <ResponsiveImage src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high"/>
             <span><strong>{railBrandLabel}</strong><small>POWER · LIGHT · CONTROL</small></span>
           </Link>
           <div className="nk-home-topbar__search">
