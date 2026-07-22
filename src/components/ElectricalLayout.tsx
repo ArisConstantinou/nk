@@ -453,10 +453,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             />}
           </div>
           {showHeaderStory
-            ? <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>{headerStatus}</span>
+            ? <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
             : <div className="nk-home-topbar__route-tools">
-                <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>{headerStatus}</span>
-                <SmartLink className="ia-quote-button nk-modern-route-quote" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
+                <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
                 <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                 <LiveSiteEditButton/>
               </div>}
