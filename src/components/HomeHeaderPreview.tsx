@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {BookOpen, Check, ChevronDown, CircuitBoard, Lightbulb, ShieldCheck, Sparkles, Sun, Zap} from 'lucide-react';
+import {BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircuitBoard, Lightbulb, ShieldCheck, Sparkles, Sun, Zap} from 'lucide-react';
 import {HeaderCampaignPicker, HeaderCampaignShowcase, HEADER_CAMPAIGNS, type HeaderCampaignId} from './HeaderCampaignShowcase';
 import '../pages/header-studio.css';
 
@@ -23,6 +23,12 @@ const utilityIcons = {
   '10': Check,
 } satisfies Record<HeaderCampaignId, typeof Sparkles>;
 
+const adjacentCampaign = (campaignId: HeaderCampaignId, direction: -1 | 1) => {
+  const currentIndex = HEADER_CAMPAIGNS.findIndex(item => item.id === campaignId);
+  const nextIndex = (currentIndex + direction + HEADER_CAMPAIGNS.length) % HEADER_CAMPAIGNS.length;
+  return HEADER_CAMPAIGNS[nextIndex].id;
+};
+
 export function HomeHeaderPreview() {
   const [campaignId, setCampaignId] = useState<HeaderCampaignId>(storedCampaign);
   const [mobileStoryOpen, setMobileStoryOpen] = useState(storedMobileStoryVisibility);
@@ -31,19 +37,33 @@ export function HomeHeaderPreview() {
 
   useEffect(() => { window.localStorage.setItem('nk-header-studio-concept', campaignId); }, [campaignId]);
   useEffect(() => { window.localStorage.setItem('nk-mobile-header-story-open', String(mobileStoryOpen)); }, [mobileStoryOpen]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        setCampaignId(current => adjacentCampaign(current, 1));
+      }
+    }, 10_000);
+    return () => window.clearTimeout(timer);
+  }, [campaignId]);
+
+  const moveCampaign = (direction: -1 | 1) => setCampaignId(current => adjacentCampaign(current, direction));
 
   return <section className={`nk-main-header-preview ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
-    <button
-      className="nk-main-header-preview__mobile-toggle"
-      type="button"
-      aria-expanded={mobileStoryOpen}
-      aria-controls="nk-mobile-header-story"
-      onClick={() => setMobileStoryOpen(open => !open)}
-    >
-      <UtilityIcon aria-hidden="true"/>
-      <span><small>{activeCampaign.utility}</small><strong>{activeCampaign.name}</strong></span>
-      <b>{mobileStoryOpen ? 'Hide' : 'Explore'}<ChevronDown aria-hidden="true"/></b>
-    </button>
+    <div className="nk-main-header-preview__mobile-switcher">
+      <button
+        className="nk-main-header-preview__mobile-toggle"
+        type="button"
+        aria-expanded={mobileStoryOpen}
+        aria-controls="nk-mobile-header-story"
+        onClick={() => setMobileStoryOpen(open => !open)}
+      >
+        <UtilityIcon aria-hidden="true"/>
+        <span aria-live="polite"><small>{activeCampaign.utility}</small><strong>{activeCampaign.name}</strong></span>
+        <b>{mobileStoryOpen ? 'Hide' : 'Explore'}<ChevronDown aria-hidden="true"/></b>
+      </button>
+      <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
+      <button className="nk-main-header-preview__mobile-step is-next" type="button" aria-label="Next highlight" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
+    </div>
     <div className="nk-main-header-preview__story" id="nk-mobile-header-story">
       <HeaderCampaignShowcase campaignId={campaignId}/>
       <HeaderCampaignPicker activeId={campaignId} onSelect={setCampaignId}/>
