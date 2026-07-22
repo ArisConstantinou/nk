@@ -6,6 +6,7 @@ import {serviceLinks, shopLinks} from '../navigation';
 import {publicAsset} from '../utils/assets';
 import {SeoRouteMeta} from './SeoRouteMeta';
 import {ResponsiveImage} from './ResponsiveImage';
+import {BrandEnergyMark} from './BrandEnergyMark';
 import {LiveSiteEditButton} from './LiveSiteEditButton';
 import {HomeHeaderPreview} from './HomeHeaderPreview';
 import {applyTheme, getThemePreference, saveThemePreference, themeChangeEvent, watchSystemTheme, type ThemePreference} from '../theme';
