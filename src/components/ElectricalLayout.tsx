@@ -177,7 +177,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const megaOpenTimerRef = useRef<number | null>(null);
   const megaCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
-  const showHeaderStory = location.pathname === '/';
+  const isHomeRoute = location.pathname === '/';
+  const showHeaderStory = true;
   const useModernHeader = true;
   const headerStatus = headerStatusForPath(location.pathname);
   const pageVisual = pageVisualForPath(location.pathname);
@@ -439,7 +440,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     <SeoRouteMeta/>
     <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${useModernHeader ? 'ia-header--modern ia-header--home-preview' : ''} ${showHeaderStory ? 'ia-header--has-story' : 'ia-header--route-preview'}`} ref={headerRef}>
       {useModernHeader && <>
-        <div className={`nk-home-topbar ${showHeaderStory ? '' : 'nk-home-topbar--route'}`.trim()}>
+        <div className={`nk-home-topbar ${isHomeRoute ? '' : 'nk-home-topbar--route'}`.trim()}>
           <Link className="nk-home-topbar__brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`}>
             <ResponsiveImage src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high"/>
             <span><strong>{railBrandLabel}</strong><small>POWER · LIGHT · CONTROL</small></span>
@@ -452,7 +453,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
               labels={{input: 'Search products, images, catalogues and PDFs', placeholder: 'Search products, catalogues & PDFs'}}
             />}
           </div>
-          {showHeaderStory
+          {isHomeRoute
             ? <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
             : <div className="nk-home-topbar__route-tools">
                 <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
