@@ -446,7 +446,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     <SeoRouteMeta/>
     <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${useModernHeader ? 'ia-header--modern ia-header--home-preview' : ''} ${showHeaderStory ? 'ia-header--has-story' : 'ia-header--route-preview'}`} ref={headerRef}>
       {useModernHeader && <>
-        <div className={`nk-home-topbar ${isHomeRoute ? '' : 'nk-home-topbar--route'}`.trim()}>
+        <div className={`nk-home-topbar ${isHomeRoute ? '' : 'nk-home-topbar--route'} ${desktopStoryOpen ? 'is-highlights-open' : ''}`.trim()}>
           <Link className="nk-home-topbar__brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`}>
             <ResponsiveImage src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high"/>
             <span><strong>{railBrandLabel}</strong><small>POWER · LIGHT · CONTROL</small></span>
