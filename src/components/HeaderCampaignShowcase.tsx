@@ -60,6 +60,24 @@ type Campaign = {
 
 const serviceImage = (slug: string) => `assets/heroes/${slug}.webp`;
 
+function CampaignHeroImage({campaign}: {campaign: Campaign}) {
+  const fallbackSrc = campaign.id === '10' ? publicAsset('assets/projects/residential-exterior.webp') : '';
+  return <ResponsiveImage
+    src={campaign.image}
+    alt={campaign.alt}
+    loading="eager"
+    decoding="async"
+    fetchPriority="high"
+    onError={fallbackSrc ? event => {
+      const image = event.currentTarget;
+      if (image.dataset.fallbackApplied === 'true') return;
+      image.dataset.fallbackApplied = 'true';
+      image.parentElement?.querySelector('source')?.remove();
+      image.src = fallbackSrc;
+    } : undefined}
+  />;
+}
+
 function CampaignLink({action, className = ''}: {action: Action; className?: string}) {
   const classes = `nk-campaign-action ${action.primary ? 'is-primary' : ''} ${className}`.trim();
   const content = <>{action.label}<ArrowRight aria-hidden="true"/></>;
@@ -185,7 +203,7 @@ function InstallationHeader({campaign}: {campaign: Campaign}) {
 
 function ProjectsHeader({campaign, projects}: {campaign: Campaign; projects: Array<{id: string; name: string; image: string; category: string; systems: string[]}>}) {
   return <div className="nk-campaign-design nk-campaign-design--projects">
-    <figure><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span><Check/> DELIVERED / CYPRUS</span><Brand compact/></figure>
+    <figure><CampaignHeroImage campaign={campaign}/><span><Check/> DELIVERED / CYPRUS</span><Brand compact/></figure>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><StatRow stats={campaign.stats}/><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
     <aside>{projects.slice(0, 2).map((project, index) => <Link to="/projects" key={project.id}><ResponsiveImage src={project.image} alt="" loading="eager" decoding="async"/><span><small>0{index + 1} / {project.category}</small><strong>{project.name}</strong></span><ArrowRight/></Link>)}</aside>
   </div>;
@@ -249,7 +267,7 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
       </article>)}
     </div>
     <figure className="nk-unified-story__media">
-      <ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/>
+      <CampaignHeroImage campaign={campaign}/>
       <figcaption><Check aria-hidden="true"/>{unifiedStoryMedia[campaign.id]}</figcaption>
     </figure>
   </div>;
@@ -345,7 +363,7 @@ export function useHeaderCampaigns(): Campaign[] {
       },
       {
         id: '10', slug: 'projects', name: 'Built Proof', kicker: 'DON’T TAKE OUR WORD FOR IT', title: 'See where we switched on.',
-        body: 'Real electrical and LED-lighting installations across residences, offices, retail and mixed-use buildings.', image: 'assets/heroes/projects-cyprus-v3.webp', alt: 'Completed NK Electrical projects in Cyprus',
+        body: 'Real electrical and LED-lighting installations across residences, offices, retail and mixed-use buildings.', image: 'assets/heroes/projects-cyprus-v3.webp?v=20260722-2', alt: 'Completed NK Electrical projects in Cyprus',
         actions: [{label: `Explore ${content.projects.length} projects`, to: '/projects', primary: true}, {label: 'Start my project', to: '/request-a-quote'}],
         stats: [{value: String(content.projects.length), label: 'documented projects'}, {value: '4', label: 'building types'}, {value: '1985', label: 'NK since'}], points: ['Residential', 'Commercial', 'Retail'],
       },
@@ -355,9 +373,9 @@ export function useHeaderCampaigns(): Campaign[] {
 
 export function HeaderCampaignPicker({activeId, onSelect, prefix}: {activeId: string; onSelect: (id: HeaderCampaignId) => void; prefix?: ReactNode}) {
   const active = HEADER_CAMPAIGNS.find(item => item.id === activeId) || HEADER_CAMPAIGNS[0];
-  return <div className="nk-campaign-picker" aria-label="Choose a header story">
+  return <div className="nk-campaign-picker" aria-label="Choose a highlight">
     {prefix}
-    <span className="nk-campaign-picker__name"><small>LIVE STORY</small><strong>{active.id} · {active.name}</strong></span>
+    <span className="nk-campaign-picker__name"><small>HIGHLIGHTS</small><strong>{active.id} · {active.name}</strong></span>
     <nav>{HEADER_CAMPAIGNS.map(item => <button className={item.id === active.id ? 'active' : ''} type="button" onClick={() => onSelect(item.id)} aria-label={`${item.id} ${item.name}`} data-label={item.short} key={item.id}><i/><span>{item.id}</span></button>)}</nav>
   </div>;
 }

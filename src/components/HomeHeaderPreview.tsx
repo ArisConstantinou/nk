@@ -126,10 +126,10 @@ export function HomeHeaderPreview({desktopStoryOpen = true}: {desktopStoryOpen?:
           type="button"
           aria-expanded={mobileStoryOpen}
           aria-controls="nk-mobile-header-story"
-          aria-label={`${mobileStoryOpen ? 'Hide' : 'Explore'} ${activeCampaign.name} highlight`}
+          aria-label={`${mobileStoryOpen ? 'Hide' : 'Show'} ${activeCampaign.name} highlight`}
           onClick={() => setMobileStoryOpen(open => !open)}
         >
-          <span>{mobileStoryOpen ? 'Hide' : 'Explore'}</span><ChevronDown aria-hidden="true"/>
+          <span>Highlights</span><ChevronDown aria-hidden="true"/>
         </button>
       </div>
     </div>
