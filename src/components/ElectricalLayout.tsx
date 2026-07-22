@@ -153,6 +153,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchAnchor, setSearchAnchor] = useState({left: 0, width: 0});
+  const [menuAnchor, setMenuAnchor] = useState({left: 0, width: 0});
   const [mobileSection, setMobileSection] = useState<MegaSection>('services');
   const headerRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
@@ -209,9 +210,24 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     openHeaderSearch();
   };
 
-  const toggleMobileNavigation = () => {
+  const closeMobileNavigation = (restoreFocus = true) => {
+    setMobileOpen(false);
+    if (restoreFocus) window.requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+  };
+
+  const openMobileNavigation = () => {
+    const triggerRect = mobileTriggerRef.current?.getBoundingClientRect();
+    if (triggerRect) setMenuAnchor({left: triggerRect.left, width: triggerRect.width});
     if (searchOpen) setSearchOpen(false);
-    setMobileOpen(open => !open);
+    setMobileOpen(true);
+  };
+
+  const toggleMobileNavigation = () => {
+    if (mobileOpen) {
+      closeMobileNavigation(false);
+      return;
+    }
+    openMobileNavigation();
   };
 
   const supportsMenuHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -269,8 +285,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       megaOpenModeRef.current = null;
       setMegaOpen(null);
       if (mobileOpen) {
-        setMobileOpen(false);
-        window.setTimeout(() => mobileTriggerRef.current?.focus(), 0);
+        closeMobileNavigation();
       }
     };
     window.addEventListener('keydown', close);
@@ -292,6 +307,21 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     };
     document.addEventListener('keydown', trapFocus);
     return () => { document.removeEventListener('keydown', trapFocus); document.body.style.overflow = previous; };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const updateAnchor = () => {
+      const triggerRect = mobileTriggerRef.current?.getBoundingClientRect();
+      if (triggerRect) setMenuAnchor({left: triggerRect.left, width: triggerRect.width});
+    };
+    updateAnchor();
+    window.addEventListener('resize', updateAnchor);
+    window.addEventListener('orientationchange', updateAnchor);
+    return () => {
+      window.removeEventListener('resize', updateAnchor);
+      window.removeEventListener('orientationchange', updateAnchor);
+    };
   }, [mobileOpen]);
 
   useEffect(() => {
@@ -402,12 +432,12 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
         {showHomeHeaderPreview ? <div className="ia-header-actions ia-header-actions--home-preview">
-          <button ref={mobileTriggerRef} className="ia-mobile-trigger ia-mobile-trigger--home" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>{mobileOpen ? 'Close' : 'Menu'}</span>{mobileOpen ? <X/> : <Menu/>}</button>
+          <button ref={mobileTriggerRef} className="ia-mobile-trigger ia-mobile-trigger--home" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
         </div> : <div className="ia-header-actions">
           <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <ThemeSwitcher className="ia-theme-selector--header"/>
           <LiveSiteEditButton/>
-          <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}>{mobileOpen ? <X/> : <Menu/>}</button>
+          <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><Menu aria-hidden="true"/></button>
         </div>}
       </div>
       {searchOpen && <div className="ia-header-search-layer" style={{'--ia-search-anchor-left': `${searchAnchor.left}px`, '--ia-search-anchor-width': `${searchAnchor.width}px`} as CSSProperties}>
@@ -432,13 +462,22 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <nav aria-label={`${megaOpen === 'services' ? 'Services' : 'Shop'} menu`}>{(megaOpen === 'services' ? serviceMenu : shopMenu).map((item, index) => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{item.label}</strong><small>{item.description}</small></div><ArrowRight/></SmartLink>)}</nav>
         <aside>{megaOpen === 'services' ? <><CircuitBoard/><small>SERVICE PATH</small><strong>From survey to tested handover.</strong><p>Start with the requirement and the building. Equipment selection follows the scope.</p></> : <><FileText/><small>PRODUCT PATH</small><strong>Products, specifications and downloads.</strong><p>Find the item first, then ask about availability, supply or installation.</p></>}</aside>
       </div>}
-      {mobileOpen && <nav ref={mobileNavRef} className="ia-mobile-menu" id="mobile-navigation" aria-label="Mobile navigation">
-        <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'services'} aria-controls="mobile-services" onClick={() => toggleMobile('services')}><span>Services</span><ChevronDown/></button>{mobileSection === 'services' && <div id="mobile-services">{serviceMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
-        <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'shop'} aria-controls="mobile-shop" onClick={() => toggleMobile('shop')}><span>Shop</span><ChevronDown/></button>{mobileSection === 'shop' && <div id="mobile-shop">{shopMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
-        {primary.filter(item => !['/services', '/shop'].includes(linkTo(item))).map(item => <SmartLink className="ia-mobile-primary" to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{item.label}</span><ArrowRight/></SmartLink>)}
-        <div className="ia-mobile-ctas"><a href={`tel:${tel}`}><Phone/><span>Call us</span></a><SmartLink to={settings.quoteUrl}><span>{settings.quoteLabel}</span><ArrowRight/></SmartLink></div>
-        <SocialLinks links={settings.socialLinks} placement="mobile" className="ia-social-links ia-social-links--mobile"/>
-      </nav>}
+      {mobileOpen && <div className="ia-mobile-menu-layer" style={{'--ia-menu-anchor-left': `${menuAnchor.left}px`, '--ia-menu-anchor-width': `${menuAnchor.width}px`} as CSSProperties}>
+        <button className="ia-mobile-menu-backdrop" type="button" aria-label="Close navigation" onClick={() => closeMobileNavigation()}/>
+        <section ref={mobileNavRef} className="ia-mobile-menu" id="mobile-navigation" role="dialog" aria-modal="true" aria-labelledby="ia-mobile-menu-title">
+          <header className="ia-mobile-menu__header">
+            <div><Menu aria-hidden="true"/><span><small>SITE NAVIGATION</small><strong id="ia-mobile-menu-title">Explore</strong></span></div>
+            <button type="button" onClick={() => closeMobileNavigation()} aria-label="Close navigation"><span>Close</span><X aria-hidden="true"/></button>
+          </header>
+          <nav className="ia-mobile-menu__content" aria-label="Mobile navigation links">
+            <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'services'} aria-controls="mobile-services" onClick={() => toggleMobile('services')}><span>Services</span><ChevronDown/></button>{mobileSection === 'services' && <div id="mobile-services">{serviceMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
+            <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'shop'} aria-controls="mobile-shop" onClick={() => toggleMobile('shop')}><span>Shop</span><ChevronDown/></button>{mobileSection === 'shop' && <div id="mobile-shop">{shopMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
+            {primary.filter(item => !['/services', '/shop'].includes(linkTo(item))).map(item => <SmartLink className="ia-mobile-primary" to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><span>{item.label}</span><ArrowRight/></SmartLink>)}
+            <div className="ia-mobile-ctas"><a href={`tel:${tel}`}><Phone/><span>Call us</span></a><SmartLink to={settings.quoteUrl}><span>{settings.quoteLabel}</span><ArrowRight/></SmartLink></div>
+            <SocialLinks links={settings.socialLinks} placement="mobile" className="ia-social-links ia-social-links--mobile"/>
+          </nav>
+        </section>
+      </div>}
     </header>
     <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>
     <div className="electrical-stage ia-stage" inert={mobileOpen || searchOpen || undefined} aria-hidden={mobileOpen || searchOpen || undefined}>
