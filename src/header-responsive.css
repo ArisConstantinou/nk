@@ -1,4 +1,4 @@
-/* Compact appearance access and a readable mobile energy mark. */
+/* Compact appearance access and a clean, unembellished brand lockup. */
 .ia-theme-selector--header summary{
   width:36px;
   min-width:36px;
@@ -10,26 +10,91 @@
 .ia-theme-selector--header summary span,
 .ia-theme-selector--header summary svg:last-child{display:none}
 
+.ia-shell .ia-brand{
+  left:clamp(24px,2.6vw,48px);
+  min-width:166px;
+  gap:10px;
+  padding:0;
+  overflow:visible;
+  isolation:isolate;
+}
+
+.ia-shell .ia-brand-rail{
+  display:none;
+}
+
+.ia-shell .ia-brand-mark{
+  position:relative;
+  z-index:3;
+  width:50px;
+  height:52px;
+  flex:0 0 50px;
+  overflow:visible;
+}
+
+.ia-shell .ia-brand-mark::before,
+.ia-shell .ia-brand-mark::after{content:none}
+
+.ia-shell .ia-brand img,
+.ia-shell .ia-brand-logo{
+  position:absolute;
+  z-index:3;
+  top:4px;
+  left:1px;
+  width:48px;
+  height:44px;
+  transform:none;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.28));
+}
+
+.ia-shell .ia-brand-wires{
+  display:none;
+}
+
+.ia-shell .ia-brand-wires>div{overflow:visible!important;background:transparent!important}
+
+.ia-shell .ia-brand-copy{
+  position:relative;
+  z-index:2;
+  min-width:0;
+  min-height:0;
+  height:auto;
+  margin:0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  border:0;
+}
+
+.ia-shell .ia-brand-copy::before{
+  content:none;
+}
+
+.ia-shell .ia-brand strong,
+html[data-theme='light'] .ia-shell .ia-brand strong,
+html[data-theme='dark'] .ia-shell .ia-brand strong{
+  color:#f2eee6;
+  font-family:var(--display);
+  font-size:16px;
+  font-weight:720;
+  letter-spacing:-.018em;
+  text-transform:none;
+  text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+
 @media(max-width:900px){
   .ia-shell .ia-brand{left:auto}
-  .ia-shell .ia-header-bar{padding-left:64px}
-  .ia-shell .ia-brand-mark{width:52px;height:52px;flex-basis:52px}
-  .ia-shell .ia-brand img,
-  .ia-shell .ia-brand-logo{width:50px;height:50px}
-  .ia-shell .ia-brand-wires{
-    left:auto;
-    right:calc(100% - 1px);
-    width:65px;
-    height:58px;
-    opacity:.94;
-  }
+  .ia-shell .ia-header-bar{padding-left:14px}
   .ia-theme-selector--header{height:42px}
   .ia-theme-selector--header summary{width:42px;min-width:42px;height:42px}
   .ia-theme-selector--header .ia-theme-menu{top:calc(100% + 8px);right:0;width:174px}
 }
 
 @media(max-width:480px){
-  .ia-shell .ia-brand-copy{display:none}
   .ia-shell .ia-header-bar{padding-right:10px}
   .ia-shell .ia-header-actions{gap:6px}
+  .ia-shell .ia-brand{min-width:158px;padding-right:4px}
+  .ia-shell .ia-brand-copy{min-width:0;padding-right:8px}
+  .ia-shell .ia-brand strong{font-size:13px;letter-spacing:-.01em}
 }

@@ -5,6 +5,7 @@ import {ContentProvider} from './context/ContentContext';
 import {AboutPage, ContactPage, ExplorePage, LightingPage, ManagedPage, ProductPage, ProjectsPage} from './pages/PublicPages';
 import {QuotePage, ServiceDetailPage, ServicesPage, ShopCategoryPage} from './pages/ArchitecturePages';
 import {GuidedDemoPage} from './pages/GuidedDemoPage';
+import {HeaderStudioPage} from './pages/HeaderStudioPage';
 import {ExperienceProvider} from './interactive';
 import {experienceManifest} from './interactive/experienceManifest';
 
@@ -60,6 +61,7 @@ export default function App() {
     <Route path="/about" element={<Public><AboutPage/></Public>}/>
     <Route path="/contact" element={<Public><ContactPage/></Public>}/>
     <Route path="/request-a-quote" element={<Public><QuotePage/></Public>}/>
+    <Route path="/_header-studio" element={<HeaderStudioPage/>}/>
     <Route path="/pages/:slug" element={<GuidedDemoPage/>}/>
     <Route path="/_cms-guide/:slug" element={<GuidedDemoPage/>}/>
     <Route path="/interactive/:slug/engine" element={<Suspense fallback={<div className="route-loader">Opening read-only engine…</div>}><InteractiveEngineReadOnly/></Suspense>}/>
