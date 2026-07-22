@@ -417,7 +417,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       <div className="ia-header-bar">
         <Link className={`ia-brand ${showHomeHeaderPreview ? 'ia-brand--home-preview ' : ''}${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
         <button
-          className={`ia-header-search-trigger ${showHomeHeaderPreview ? 'ia-header-search-trigger--home' : ''}`.trim()}
+          className={`ia-header-command-trigger ia-header-search-trigger ${showHomeHeaderPreview ? 'ia-header-search-trigger--home' : ''}`.trim()}
           ref={searchTriggerRef}
           type="button"
           aria-label="Search products, images, catalogues and PDFs"
@@ -432,12 +432,12 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
         {showHomeHeaderPreview ? <div className="ia-header-actions ia-header-actions--home-preview">
-          <button ref={mobileTriggerRef} className="ia-mobile-trigger ia-mobile-trigger--home" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
+          <button ref={mobileTriggerRef} className="ia-header-command-trigger ia-mobile-trigger ia-mobile-trigger--home" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
         </div> : <div className="ia-header-actions">
           <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <ThemeSwitcher className="ia-theme-selector--header"/>
           <LiveSiteEditButton/>
-          <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><Menu aria-hidden="true"/></button>
+          <button ref={mobileTriggerRef} className="ia-header-command-trigger ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><Menu aria-hidden="true"/></button>
         </div>}
       </div>
       {searchOpen && <div className="ia-header-search-layer" style={{'--ia-search-anchor-left': `${searchAnchor.left}px`, '--ia-search-anchor-width': `${searchAnchor.width}px`} as CSSProperties}>
