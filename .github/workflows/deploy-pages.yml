@@ -34,7 +34,28 @@ jobs:
       - run: npm run build:pages
       - name: Add route entry points and SPA fallback
         run: |
-          routes=(about electrical-installations lighting appliances projects contact explore admin)
+          routes=(
+            about
+            projects
+            contact
+            request-a-quote
+            services
+            services/electrical-installations
+            services/lighting-design
+            services/smart-home-automation
+            services/security-systems
+            services/maintenance
+            shop
+            shop/catalogues
+            shop/lighting
+            shop/appliances
+            shop/offers
+            electrical-installations
+            lighting
+            appliances
+            explore
+            admin
+          )
           for route in "${routes[@]}"; do
             mkdir -p "dist/$route"
             cp dist/index.html "dist/$route/index.html"
