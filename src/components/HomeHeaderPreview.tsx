@@ -35,6 +35,7 @@ export function HomeHeaderPreview() {
   const [mobileStoryOpen, setMobileStoryOpen] = useState(storedMobileStoryVisibility);
   const [showFloatingClose, setShowFloatingClose] = useState(false);
   const mobileSwitcherRef = useRef<HTMLDivElement>(null);
+  const mobileStoryRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const campaigns = useHeaderCampaigns();
   const activeCampaign = HEADER_CAMPAIGNS.find(item => item.id === campaignId) || HEADER_CAMPAIGNS[0];
@@ -72,15 +73,24 @@ export function HomeHeaderPreview() {
   }, [campaignId]);
   useEffect(() => {
     const switcher = mobileSwitcherRef.current;
-    if (!mobileStoryOpen || !switcher || !window.matchMedia('(max-width: 900px)').matches) {
+    const story = mobileStoryRef.current;
+    if (!mobileStoryOpen || !switcher || !story || !window.matchMedia('(max-width: 900px)').matches) {
       setShowFloatingClose(false);
       return;
     }
 
-    const observer = new IntersectionObserver(([entry]) => {
-      setShowFloatingClose(!entry.isIntersecting);
+    let switcherVisible = true;
+    let storyVisible = true;
+    const updateVisibility = () => setShowFloatingClose(!switcherVisible && storyVisible);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.target === switcher) switcherVisible = entry.isIntersecting;
+        if (entry.target === story) storyVisible = entry.isIntersecting;
+      });
+      updateVisibility();
     }, {rootMargin: '-74px 0px 0px 0px'});
     observer.observe(switcher);
+    observer.observe(story);
     return () => observer.disconnect();
   }, [mobileStoryOpen]);
 
@@ -122,16 +132,18 @@ export function HomeHeaderPreview() {
         </button>
       </div>
     </div>
-    <div className="nk-main-header-preview__story" id="nk-mobile-header-story">
+    <div className="nk-main-header-preview__story" id="nk-mobile-header-story" ref={mobileStoryRef}>
       <HeaderCampaignShowcase campaignId={campaignId}/>
       <HeaderCampaignPicker activeId={campaignId} onSelect={selectCampaign}/>
+      {mobileStoryOpen && showFloatingClose && <div className="nk-main-header-preview__close-rail">
+        <button
+          className="nk-main-header-preview__floating-close"
+          type="button"
+          aria-controls="nk-mobile-header-story"
+          aria-label={`Hide ${activeCampaign.name} panel`}
+          onClick={closeMobileStory}
+        ><span><small>PANEL OPEN</small><strong>Hide panel</strong></span><ChevronDown aria-hidden="true"/></button>
+      </div>}
     </div>
-    {mobileStoryOpen && showFloatingClose && <button
-      className="nk-main-header-preview__floating-close"
-      type="button"
-      aria-controls="nk-mobile-header-story"
-      aria-label={`Hide ${activeCampaign.name} panel`}
-      onClick={closeMobileStory}
-    ><span><small>PANEL OPEN</small><strong>Hide panel</strong></span><ChevronDown aria-hidden="true"/></button>}
   </section>;
 }
