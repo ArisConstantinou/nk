@@ -31,23 +31,23 @@ const routeLinkAttributes = (to: string) => {
 const navigationPanelMedia = {
   services: {
     image: 'assets/generated/navigation-tabs/services-v2.webp',
-    detail: 'Design · Install · Test',
+    detail: 'Plan · Install',
   },
   shop: {
     image: 'assets/generated/navigation-tabs/shop-v2.webp',
-    detail: 'Lighting · Controls · Supply',
+    detail: 'Light · Supply',
   },
   projects: {
     image: 'assets/generated/navigation-tabs/projects.webp',
-    detail: 'Built · Tested · Delivered',
+    detail: 'Built · Tested',
   },
   about: {
     image: 'assets/generated/navigation-tabs/about-v2.webp',
-    detail: 'Experience · Standards · Craft',
+    detail: 'Team · Craft',
   },
   contact: {
     image: 'assets/generated/navigation-tabs/contact.webp',
-    detail: 'Enquire · Plan · Visit',
+    detail: 'Plan · Visit',
   },
 } as const;
 
@@ -65,6 +65,7 @@ function NavigationPanelContent({to, label, hasMenu = false}: {to: string; label
       <img src={publicAsset(media.image)} alt=""/>
     </span>}
     <span className="ia-nav-panel__shade" aria-hidden="true"/>
+    <span className="ia-nav-panel__effect" aria-hidden="true"/>
     <span className="ia-nav-panel__copy">
       {media && <small>{media.detail}</small>}
       <strong>{label}</strong>
@@ -79,10 +80,10 @@ function SmartLink({to, className, id, children}: {to: string; className?: strin
     : <a className={className} id={id} href={to} rel={to.startsWith('http') ? 'noreferrer' : undefined}>{children}</a>;
 }
 
-function PrimaryLink({to, children}: {to: string; children: ReactNode}) {
+function PrimaryLink({to, children, ariaLabel}: {to: string; children: ReactNode; ariaLabel?: string}) {
   return isInternalUrl(to)
-    ? <NavLink to={to} {...routeLinkAttributes(to)}>{children}</NavLink>
-    : <a href={to} rel={to.startsWith('http') ? 'noreferrer' : undefined}>{children}</a>;
+    ? <NavLink to={to} aria-label={ariaLabel} {...routeLinkAttributes(to)}>{children}</NavLink>
+    : <a href={to} aria-label={ariaLabel} rel={to.startsWith('http') ? 'noreferrer' : undefined}>{children}</a>;
 }
 
 function SocialIcon({link}: {link: SiteSocialLink}) {
@@ -305,13 +306,14 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         </div>
       </div>
       <div className="ia-header-bar">
-        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong></span></Link>
+        <Link className="ia-brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{settings.brandName}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{settings.brandName}</span></strong>{settings.header.showTagline && <small data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</small>}</span></Link>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
-          ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
+          ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-label={item.label} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
           : linkTo(item) === '/shop'
-            ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
-            : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
+            ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-label={item.label} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
+            : <PrimaryLink to={linkTo(item)} ariaLabel={item.label} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
         <div className="ia-header-actions">
+          <a className="ia-header-phone ia-header-phone--command" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span className="ia-header-phone-copy"><small>Call our team</small><b data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</b></span></a>
           <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <ThemeSwitcher className="ia-theme-selector--header"/>
           <LiveSiteEditButton/>
