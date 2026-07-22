@@ -151,7 +151,17 @@ function LightingHeader({campaign}: {campaign: Campaign}) {
   return <div className="nk-campaign-design nk-campaign-design--lighting">
     <div className="nk-lighting-mast"><Brand compact/><span>LIGHTING CLINIC</span><small>AMBIENCE · TASK · GLARE · CONTROL</small></div>
     <figure><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span>THE ROOM IS FINISHED</span></figure>
-    <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><PointList points={campaign.points}/></section>
+    <section>
+      <div className="nk-lighting-copy"><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span></div>
+      <div className="nk-lighting-diagnostic" aria-label="Lighting design layers">
+        <span className="nk-lighting-diagnostic__status"><i/> LIVE ROOM READ</span>
+        <strong>Three layers.<br/>One atmosphere.</strong>
+        <div>{campaign.stats.map((stat, index) => <span key={stat.value}>
+          <b>0{index + 1}</b><small>{stat.value}</small><em>{stat.label}</em>
+        </span>)}</div>
+      </div>
+      <PointList points={campaign.points}/>
+    </section>
     <aside><strong>Fix the feeling, not just the fitting.</strong>{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</aside>
   </div>;
 }
