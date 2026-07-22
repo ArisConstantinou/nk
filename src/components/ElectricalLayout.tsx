@@ -6,8 +6,8 @@ import {serviceLinks, shopLinks} from '../navigation';
 import {publicAsset} from '../utils/assets';
 import {SeoRouteMeta} from './SeoRouteMeta';
 import {ResponsiveImage} from './ResponsiveImage';
-import {BrandEnergyMark} from './BrandEnergyMark';
 import {LiveSiteEditButton} from './LiveSiteEditButton';
+import {HomeHeaderPreview} from './HomeHeaderPreview';
 import {applyTheme, getThemePreference, saveThemePreference, themeChangeEvent, watchSystemTheme, type ThemePreference} from '../theme';
 import {pageVisualForPath} from '../pageVisuals';
 import {routeInteractionForPath} from '../routeInteractions';
@@ -65,6 +65,7 @@ function NavigationPanelContent({to, label, hasMenu = false}: {to: string; label
       <img src={publicAsset(media.image)} alt=""/>
     </span>}
     <span className="ia-nav-panel__shade" aria-hidden="true"/>
+    <span className="ia-nav-panel__effect" aria-hidden="true"/>
     <span className="ia-nav-panel__copy">
       {media && <small>{media.detail}</small>}
       <strong>{label}</strong>
@@ -156,6 +157,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const megaOpenTimerRef = useRef<number | null>(null);
   const megaCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
+  const showHomeHeaderPreview = location.pathname === '/';
   const pageVisual = pageVisualForPath(location.pathname);
   const interactionProfile = routeInteractionForPath(location.pathname);
   const menu = (name: PublicNavigationItem['menu']) => navigation.filter(item => item.menu === name && item.active).sort((a, b) => a.position - b.position);
@@ -298,26 +300,28 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     style={interactionStyle}
   >
     <SeoRouteMeta/>
-    <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'}`} ref={headerRef}>
-      <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
+    <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${showHomeHeaderPreview ? 'ia-header--home-preview' : ''}`} ref={headerRef}>
+      {showHomeHeaderPreview ? <HomeHeaderPreview/> : <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
         {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
         <div>
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
         </div>
-      </div>
+      </div>}
       <div className="ia-header-bar">
-        <Link className={`ia-brand ${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
+        <Link className={`ia-brand ${showHomeHeaderPreview ? 'ia-brand--home-preview ' : ''}${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
           ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
           : linkTo(item) === '/shop'
             ? <button key="shop" type="button" data-route-profile="shop" className={megaOpen === 'shop' || location.pathname.startsWith('/shop') ? 'active' : ''} aria-expanded={megaOpen === 'shop'} aria-controls="shop-mega-menu" onMouseEnter={() => openMegaOnHover('shop')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('shop')}><NavigationPanelContent to="/shop" label={item.label} hasMenu/></button>
             : <PrimaryLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><NavigationPanelContent to={linkTo(item)} label={item.label}/></PrimaryLink>)}</nav>
-        <div className="ia-header-actions">
+        {showHomeHeaderPreview ? <div className="ia-header-actions ia-header-actions--home-preview">
+          <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
+        </div> : <div className="ia-header-actions">
           <SmartLink className="ia-quote-button" id="ia-primary-quote" to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="quoteLabel" data-visual-edit="text" data-visual-label="Quote button" data-visual-link-path="quoteUrl">{settings.quoteLabel}</span><ArrowRight/></SmartLink>
           <ThemeSwitcher className="ia-theme-selector--header"/>
           <LiveSiteEditButton/>
           <button ref={mobileTriggerRef} className="ia-mobile-trigger" type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
-        </div>
+        </div>}
       </div>
       {megaOpen && <div className={`ia-mega ia-mega--${megaOpen}`} id={`${megaOpen}-mega-menu`} onMouseEnter={keepMegaOpenOnHover} onMouseLeave={closeMegaOnHover}>
         <div className="ia-mega-heading"><span>{megaOpen === 'services' ? 'SERVICES / EXPERTISE' : 'SHOP / PRODUCTS'}</span><h2>{megaOpen === 'services' ? 'Work performed by our team.' : 'Products available through NK Electrical.'}</h2><p>{megaOpen === 'services' ? 'Planning, installation, integration and support. No product categories are mixed into this path.' : 'Lighting, appliances and official PDF catalogues. Service enquiries remain under Services.'}</p><SmartLink to={megaOpen === 'services' ? '/services' : '/shop'}><span>{megaOpen === 'services' ? 'View all services' : 'Browse all products'}</span><ArrowRight/></SmartLink></div>
