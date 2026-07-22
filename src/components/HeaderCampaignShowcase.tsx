@@ -27,16 +27,16 @@ import {GlobalLiveSearch} from './GlobalLiveSearch';
 import {ResponsiveImage} from './ResponsiveImage';
 
 export const HEADER_CAMPAIGNS = [
-  {id: '01', slug: 'fault', name: 'Fault Response', short: 'Fault'},
-  {id: '02', slug: 'summer', name: 'Cyprus Summer', short: 'Heat'},
-  {id: '03', slug: 'offers', name: 'Live Offers', short: 'Offers'},
-  {id: '04', slug: 'security', name: 'Security Watch', short: 'Security'},
-  {id: '05', slug: 'sun-control', name: 'Sun Control', short: 'Sun'},
-  {id: '06', slug: 'outdoor', name: 'Summer Nights', short: 'Outdoor'},
-  {id: '07', slug: 'lighting', name: 'Lighting Clinic', short: 'Lighting'},
-  {id: '08', slug: 'catalogues', name: '2026 Library', short: 'PDFs'},
-  {id: '09', slug: 'installation', name: 'Build It Once', short: 'Build'},
-  {id: '10', slug: 'projects', name: 'Built Proof', short: 'Proof'},
+  {id: '01', slug: 'fault', name: 'Fault Response', short: 'Fault', utility: 'POWER FAILURE HELP'},
+  {id: '02', slug: 'summer', name: 'Cyprus Summer', short: 'Heat', utility: 'BEAT THE HEAT'},
+  {id: '03', slug: 'offers', name: 'Live Offers', short: 'Offers', utility: 'CURRENT OFFERS'},
+  {id: '04', slug: 'security', name: 'Security Watch', short: 'Security', utility: 'SECURITY KNOW-HOW'},
+  {id: '05', slug: 'sun-control', name: 'Sun Control', short: 'Sun', utility: 'COOLER HOME GUIDE'},
+  {id: '06', slug: 'outdoor', name: 'Summer Nights', short: 'Outdoor', utility: 'OUTDOOR PRODUCT PICKS'},
+  {id: '07', slug: 'lighting', name: 'Lighting Clinic', short: 'Lighting', utility: 'LIGHTING KNOW-HOW'},
+  {id: '08', slug: 'catalogues', name: '2026 Library', short: 'PDFs', utility: 'PRODUCTS & CATALOGUES'},
+  {id: '09', slug: 'installation', name: 'Build It Once', short: 'Build', utility: 'BUILDING ADVICE'},
+  {id: '10', slug: 'projects', name: 'Built Proof', short: 'Proof', utility: 'REAL PROJECT PROOF'},
 ] as const;
 
 export type HeaderCampaignId = typeof HEADER_CAMPAIGNS[number]['id'];
