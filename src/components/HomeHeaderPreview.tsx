@@ -1,6 +1,5 @@
-import {useEffect, useRef, useState, type RefObject} from 'react';
-import {BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircuitBoard, Lightbulb, ShieldCheck, Sparkles, Sun, X, Zap} from 'lucide-react';
-import {createPortal} from 'react-dom';
+import {useEffect, useRef, useState} from 'react';
+import {BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircuitBoard, Lightbulb, ShieldCheck, Sparkles, Sun, Zap} from 'lucide-react';
 import {HeaderCampaignPicker, HeaderCampaignShowcase, HEADER_CAMPAIGNS, type HeaderCampaignId, useHeaderCampaigns} from './HeaderCampaignShowcase';
 import {resolvePublicUrl} from '../utils/assets';
 import '../pages/header-studio.css';
@@ -10,6 +9,8 @@ const storedCampaign = () => {
   const stored = window.localStorage.getItem('nk-header-studio-concept');
   return HEADER_CAMPAIGNS.some(item => item.id === stored) ? stored as HeaderCampaignId : '01';
 };
+
+const storedMobileStoryVisibility = () => window.localStorage.getItem('nk-mobile-header-story-open') === 'true';
 
 const utilityIcons = {
   '01': Zap,
@@ -30,31 +31,19 @@ const adjacentCampaign = (campaignId: HeaderCampaignId, direction: -1 | 1) => {
   return HEADER_CAMPAIGNS[nextIndex].id;
 };
 
-type HomeHeaderPreviewProps = {
-  desktopStoryOpen?: boolean;
-  desktopTriggerRef?: RefObject<HTMLButtonElement | null>;
-  isDesktopViewport?: boolean;
-  onDesktopStoryClose?: () => void;
-};
-
-export function HomeHeaderPreview({
-  desktopStoryOpen = false,
-  desktopTriggerRef,
-  isDesktopViewport = false,
-  onDesktopStoryClose,
-}: HomeHeaderPreviewProps) {
+export function HomeHeaderPreview({desktopStoryOpen = true}: {desktopStoryOpen?: boolean}) {
   const [campaignId, setCampaignId] = useState<HeaderCampaignId>(storedCampaign);
-  const [mobileStoryOpen, setMobileStoryOpen] = useState(false);
+  const [mobileStoryOpen, setMobileStoryOpen] = useState(storedMobileStoryVisibility);
+  const [showFloatingClose, setShowFloatingClose] = useState(false);
+  const mobileSwitcherRef = useRef<HTMLDivElement>(null);
   const mobileStoryRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const campaigns = useHeaderCampaigns();
   const activeCampaign = HEADER_CAMPAIGNS.find(item => item.id === campaignId) || HEADER_CAMPAIGNS[0];
   const UtilityIcon = utilityIcons[activeCampaign.id];
-  const modalOpen = isDesktopViewport ? desktopStoryOpen : mobileStoryOpen;
 
   useEffect(() => { window.localStorage.setItem('nk-header-studio-concept', campaignId); }, [campaignId]);
+  useEffect(() => { window.localStorage.setItem('nk-mobile-header-story-open', String(mobileStoryOpen)); }, [mobileStoryOpen]);
   useEffect(() => {
     const currentIndex = campaigns.findIndex(campaign => campaign.id === campaignId);
     if (currentIndex < 0) return;
@@ -84,87 +73,46 @@ export function HomeHeaderPreview({
     return () => window.clearTimeout(timer);
   }, [campaignId]);
   useEffect(() => {
-    if (!modalOpen) return;
+    const switcher = mobileSwitcherRef.current;
+    const story = mobileStoryRef.current;
+    if (!mobileStoryOpen || !switcher || !story || !window.matchMedia('(max-width: 900px)').matches) {
+      setShowFloatingClose(false);
+      return;
+    }
 
-    const previousOverflow = document.body.style.overflow;
-    const trigger = isDesktopViewport ? desktopTriggerRef?.current : mobileToggleRef.current;
-    document.body.style.overflow = 'hidden';
-    window.requestAnimationFrame(() => closeButtonRef.current?.focus({preventScroll: true}));
-
-    const closeModal = () => {
-      if (isDesktopViewport) onDesktopStoryClose?.();
-      else setMobileStoryOpen(false);
-      window.requestAnimationFrame(() => trigger?.focus({preventScroll: true}));
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        event.stopPropagation();
-        closeModal();
-        return;
-      }
-      if (event.key !== 'Tab' || !dialogRef.current) return;
-      const focusable = [...dialogRef.current.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), [tabindex]:not([tabindex="-1"])')]
-        .filter(element => getComputedStyle(element).display !== 'none' && getComputedStyle(element).visibility !== 'hidden');
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown, true);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [desktopStoryOpen, desktopTriggerRef, isDesktopViewport, mobileStoryOpen, modalOpen, onDesktopStoryClose]);
+    let switcherVisible = true;
+    let storyVisible = true;
+    const updateVisibility = () => setShowFloatingClose(!switcherVisible && storyVisible);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.target === switcher) switcherVisible = entry.isIntersecting;
+        if (entry.target === story) storyVisible = entry.isIntersecting;
+      });
+      updateVisibility();
+    }, {rootMargin: '-74px 0px 0px 0px'});
+    observer.observe(switcher);
+    observer.observe(story);
+    return () => observer.disconnect();
+  }, [mobileStoryOpen]);
 
   const moveCampaign = (direction: -1 | 1) => setCampaignId(current => adjacentCampaign(current, direction));
   const selectCampaign = (nextCampaignId: HeaderCampaignId) => {
     setCampaignId(nextCampaignId);
-    if (!mobileStoryOpen || isDesktopViewport) return;
+    if (!mobileStoryOpen || !window.matchMedia('(max-width: 900px)').matches) return;
     window.requestAnimationFrame(() => {
-      mobileStoryRef.current?.scrollTo({top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+      document.getElementById('nk-mobile-header-story')?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+        block: 'start',
+      });
     });
   };
-  const closeStory = () => {
-    const trigger = isDesktopViewport ? desktopTriggerRef?.current : mobileToggleRef.current;
-    if (isDesktopViewport) onDesktopStoryClose?.();
-    else setMobileStoryOpen(false);
-    window.requestAnimationFrame(() => trigger?.focus({preventScroll: true}));
+  const closeMobileStory = () => {
+    setMobileStoryOpen(false);
+    window.requestAnimationFrame(() => mobileToggleRef.current?.focus({preventScroll: true}));
   };
 
-  const modal = modalOpen && createPortal(<div className={`nk-main-header-preview nk-highlights-modal ${isDesktopViewport ? 'is-desktop-modal' : 'is-mobile-modal'} ${mobileStoryOpen ? 'is-mobile-open' : ''}`}>
-    <button className="nk-highlights-modal__backdrop" type="button" tabIndex={-1} aria-label="Close highlights" onClick={closeStory}/>
-    <div className="nk-highlights-modal__dialog" id="nk-highlights-dialog" role="dialog" aria-modal="true" aria-labelledby="nk-highlights-title" ref={dialogRef}>
-      <header className="nk-highlights-modal__header">
-        <span className="nk-highlights-modal__title"><small>NK ELECTRICAL</small><strong id="nk-highlights-title">Highlights</strong></span>
-        <span className="nk-highlights-modal__active" aria-live="polite"><small>{activeCampaign.utility}</small><strong>{activeCampaign.name}</strong></span>
-        <button className="nk-highlights-modal__close" ref={closeButtonRef} type="button" aria-label="Close highlights" onClick={closeStory}><span>Close</span><X aria-hidden="true"/></button>
-      </header>
-      <div className="nk-main-header-preview__story" ref={mobileStoryRef}>
-        <HeaderCampaignPicker
-          activeId={campaignId}
-          onSelect={selectCampaign}
-          prefix={<div className="nk-campaign-picker__steps" role="group" aria-label="Step through highlights">
-            <button type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
-            <button type="button" aria-label="Next highlight" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
-          </div>}
-        />
-        <HeaderCampaignShowcase campaignId={campaignId}/>
-      </div>
-    </div>
-  </div>, document.body);
-
-  return <>
-    <section className={`nk-main-header-preview nk-main-header-preview--launcher ${desktopStoryOpen ? 'is-desktop-open' : 'is-desktop-collapsed'} ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
-    <div className="nk-main-header-preview__mobile-switcher">
+  return <section id="nk-desktop-header-story" className={`nk-main-header-preview ${desktopStoryOpen ? 'is-desktop-open' : 'is-desktop-collapsed'} ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
+    <div className="nk-main-header-preview__mobile-switcher" ref={mobileSwitcherRef}>
       <div className="nk-main-header-preview__mobile-summary">
         <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
         <UtilityIcon aria-hidden="true"/>
@@ -177,16 +125,33 @@ export function HomeHeaderPreview({
           ref={mobileToggleRef}
           type="button"
           aria-expanded={mobileStoryOpen}
-          aria-controls="nk-highlights-dialog"
-          aria-haspopup="dialog"
-          aria-label={`Open ${activeCampaign.name} highlight`}
+          aria-controls="nk-mobile-header-story"
+          aria-label={`${mobileStoryOpen ? 'Hide' : 'Show'} ${activeCampaign.name} highlight`}
           onClick={() => setMobileStoryOpen(open => !open)}
         >
           <span>Highlights</span><ChevronDown aria-hidden="true"/>
         </button>
       </div>
     </div>
-    </section>
-    {modal}
-  </>;
+    <div className="nk-main-header-preview__story" id="nk-mobile-header-story" ref={mobileStoryRef}>
+      <HeaderCampaignPicker
+        activeId={campaignId}
+        onSelect={selectCampaign}
+        prefix={<div className="nk-campaign-picker__steps" role="group" aria-label="Step through live stories">
+          <button type="button" aria-label="Previous live story" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
+          <button type="button" aria-label="Next live story" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
+        </div>}
+      />
+      <HeaderCampaignShowcase campaignId={campaignId}/>
+      {mobileStoryOpen && showFloatingClose && <div className="nk-main-header-preview__close-rail">
+        <button
+          className="nk-main-header-preview__floating-close"
+          type="button"
+          aria-controls="nk-mobile-header-story"
+          aria-label={`Hide ${activeCampaign.name} panel`}
+          onClick={closeMobileStory}
+        ><span><small>PANEL OPEN</small><strong>Hide panel</strong></span><ChevronDown aria-hidden="true"/></button>
+      </div>}
+    </div>
+  </section>;
 }
