@@ -27,7 +27,6 @@ export function BrandEnergyMark({src, alt, showWires = true}: BrandEnergyMarkPro
   }, [shouldAnimate]);
 
   return <span className="ia-brand-mark">
-    <span className="ia-brand-plinth" aria-hidden="true"/>
     {showWires && <span className="ia-brand-wires" aria-hidden="true">
       <Player
         ref={playerRef}

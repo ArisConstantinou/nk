@@ -149,11 +149,23 @@ html[data-theme='dark'] .ia-shell .ia-brand.ia-brand--no-rail strong{
 }
 
 .ia-header-command-dock{display:none}
-.ia-brand-plinth{display:none}
 
 @media(max-width:900px){
+  html,
+  body,
+  #root{
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  #root::-webkit-scrollbar{
+    display:none;
+    width:0;
+    height:0;
+  }
   .ia-shell .ia-brand{left:auto}
-  .ia-shell .ia-header-bar{padding-left:14px}
+  .ia-shell .ia-header-bar{padding-left:8px}
   .ia-theme-selector--header{height:42px}
   .ia-theme-selector--header summary{width:42px;min-width:42px;height:42px}
   .ia-theme-selector--header .ia-theme-menu{top:calc(100% + 8px);right:0;width:174px}
@@ -325,33 +337,31 @@ html[data-theme='dark'] .ia-shell .ia-brand.ia-brand--no-rail strong{
   }
 
   .ia-shell .ia-header .ia-header-bar .ia-brand-mark{
-    width:52px;
-    height:52px;
-    flex-basis:52px;
+    width:46px;
+    height:46px;
+    flex-basis:46px;
   }
 
   .ia-shell .ia-header .ia-header-bar .ia-brand-mark::before,
   .ia-shell .ia-header .ia-header-bar .ia-brand-mark::after{content:none!important}
 
-  .ia-shell .ia-header .ia-header-bar .ia-brand-plinth{
-    position:absolute;
-    z-index:0;
-    inset:2px;
-    display:block;
-    background:linear-gradient(145deg,#1b4650 0%,#102f39 58%,#0a252d 100%);
-    clip-path:polygon(0 7px,7px 7px,7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) calc(100% - 7px),calc(100% - 7px) 100%,0 100%);
-    box-shadow:inset 0 0 0 1px rgba(244,234,216,.2),inset -5px 0 rgba(255,255,255,.025);
-    filter:drop-shadow(3px 3px 0 #df8753) drop-shadow(0 5px 7px rgba(23,56,62,.22));
-    pointer-events:none;
-  }
-
   .ia-shell .ia-header .ia-header-bar .ia-brand img,
   .ia-shell .ia-header .ia-header-bar .ia-brand-logo{
-    width:44px;
-    height:43px;
+    width:46px;
+    height:45px;
     transform:none;
-    filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));
+    filter:drop-shadow(0 2px 2px rgba(23,56,62,.2));
   }
+
+  .ia-shell .ia-header .ia-header-bar .ia-brand{gap:6px}
+  .ia-shell .ia-header .ia-header-bar .ia-brand-copy{
+    min-width:0;
+    min-height:0;
+    height:auto;
+    margin:0;
+    padding:0;
+  }
+  .ia-shell .ia-header .ia-header-bar .ia-brand-copy::before{content:none!important}
 
   .ia-shell .ia-header--home-preview .ia-header-bar .ia-brand{gap:6px}
 
