@@ -70,20 +70,25 @@ export function HomeHeaderPreview() {
 
   return <section className={`nk-main-header-preview ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
     <div className="nk-main-header-preview__mobile-switcher" ref={mobileSwitcherRef}>
-      <button
-        className="nk-main-header-preview__mobile-toggle"
-        ref={mobileToggleRef}
-        type="button"
-        aria-expanded={mobileStoryOpen}
-        aria-controls="nk-mobile-header-story"
-        onClick={() => setMobileStoryOpen(open => !open)}
-      >
+      <span className="nk-main-header-preview__mobile-summary">
         <UtilityIcon aria-hidden="true"/>
         <span aria-live="polite"><small>{activeCampaign.utility}</small><strong>{activeCampaign.name}</strong></span>
-        <b>{mobileStoryOpen ? 'Hide' : 'Explore'}<ChevronDown aria-hidden="true"/></b>
-      </button>
-      <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
-      <button className="nk-main-header-preview__mobile-step is-next" type="button" aria-label="Next highlight" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
+      </span>
+      <div className="nk-main-header-preview__mobile-controls">
+        <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
+        <button
+          className="nk-main-header-preview__mobile-toggle"
+          ref={mobileToggleRef}
+          type="button"
+          aria-expanded={mobileStoryOpen}
+          aria-controls="nk-mobile-header-story"
+          aria-label={`${mobileStoryOpen ? 'Hide' : 'Explore'} ${activeCampaign.name} highlight`}
+          onClick={() => setMobileStoryOpen(open => !open)}
+        >
+          <span>{mobileStoryOpen ? 'Hide' : 'Explore'}</span><ChevronDown aria-hidden="true"/>
+        </button>
+        <button className="nk-main-header-preview__mobile-step is-next" type="button" aria-label="Next highlight" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
+      </div>
     </div>
     <div className="nk-main-header-preview__story" id="nk-mobile-header-story">
       <HeaderCampaignShowcase campaignId={campaignId}/>
