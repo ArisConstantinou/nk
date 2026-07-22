@@ -31,7 +31,7 @@ const adjacentCampaign = (campaignId: HeaderCampaignId, direction: -1 | 1) => {
   return HEADER_CAMPAIGNS[nextIndex].id;
 };
 
-export function HomeHeaderPreview() {
+export function HomeHeaderPreview({desktopStoryOpen = true}: {desktopStoryOpen?: boolean}) {
   const [campaignId, setCampaignId] = useState<HeaderCampaignId>(storedCampaign);
   const [mobileStoryOpen, setMobileStoryOpen] = useState(storedMobileStoryVisibility);
   const [showFloatingClose, setShowFloatingClose] = useState(false);
@@ -111,7 +111,7 @@ export function HomeHeaderPreview() {
     window.requestAnimationFrame(() => mobileToggleRef.current?.focus({preventScroll: true}));
   };
 
-  return <section className={`nk-main-header-preview ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
+  return <section id="nk-desktop-header-story" className={`nk-main-header-preview ${desktopStoryOpen ? 'is-desktop-open' : 'is-desktop-collapsed'} ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
     <div className="nk-main-header-preview__mobile-switcher" ref={mobileSwitcherRef}>
       <div className="nk-main-header-preview__mobile-summary">
         <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>

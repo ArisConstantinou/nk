@@ -19,6 +19,7 @@ type MegaOpenMode = 'hover' | 'click' | null;
 type LinkItem = {label: string; description?: string; to?: string; url?: string};
 
 const isInternalUrl = (url: string) => url.startsWith('/') && !url.startsWith('//');
+const storedDesktopStoryVisibility = () => window.localStorage.getItem('nk-desktop-header-story-open') !== 'false';
 
 const routeLinkAttributes = (to: string) => {
   if (!isInternalUrl(to)) return {};
@@ -163,6 +164,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const {navigation, settings} = useContent();
   const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopStoryOpen, setDesktopStoryOpen] = useState(storedDesktopStoryVisibility);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => window.matchMedia('(min-width: 901px)').matches);
   const [searchAnchor, setSearchAnchor] = useState({left: 0, width: 0});
@@ -183,6 +185,10 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const headerStatus = headerStatusForPath(location.pathname);
   const pageVisual = pageVisualForPath(location.pathname);
   const interactionProfile = routeInteractionForPath(location.pathname);
+
+  useEffect(() => {
+    window.localStorage.setItem('nk-desktop-header-story-open', String(desktopStoryOpen));
+  }, [desktopStoryOpen]);
   const menu = (name: PublicNavigationItem['menu']) => navigation.filter(item => item.menu === name && item.active).sort((a, b) => a.position - b.position);
   const linkTo = (item: LinkItem) => item.url || item.to || '/';
   const primary: LinkItem[] = menu('primary').length ? menu('primary') : [{label: 'Services', url: '/services'}, {label: 'Shop', url: '/shop'}, {label: 'Projects', url: '/projects'}, {label: 'About', url: '/about'}, {label: 'Contact', url: '/contact'}];
@@ -454,14 +460,18 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             />}
           </div>
           {isHomeRoute
-            ? <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
+            ? <div className="nk-home-topbar__home-tools">
+                <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
+                <button className="nk-home-topbar__story-toggle" type="button" aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopStoryOpen(open => !open)}><span>{desktopStoryOpen ? 'Hide story' : 'Explore story'}</span><ChevronDown aria-hidden="true"/></button>
+              </div>
             : <div className="nk-home-topbar__route-tools">
                 <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
                 <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                 <LiveSiteEditButton/>
+                <button className="nk-home-topbar__story-toggle" type="button" aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopStoryOpen(open => !open)}><span>{desktopStoryOpen ? 'Hide story' : 'Explore story'}</span><ChevronDown aria-hidden="true"/></button>
               </div>}
         </div>
-        {showHeaderStory && <HomeHeaderPreview/>}
+        {showHeaderStory && <HomeHeaderPreview desktopStoryOpen={desktopStoryOpen}/>}
       </>}
       {!useModernHeader && <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
         {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
