@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircuitBoard, Lightbulb, ShieldCheck, Sparkles, Sun, Zap} from 'lucide-react';
 import {HeaderCampaignPicker, HeaderCampaignShowcase, HEADER_CAMPAIGNS, type HeaderCampaignId} from './HeaderCampaignShowcase';
 import '../pages/header-studio.css';
@@ -32,6 +32,9 @@ const adjacentCampaign = (campaignId: HeaderCampaignId, direction: -1 | 1) => {
 export function HomeHeaderPreview() {
   const [campaignId, setCampaignId] = useState<HeaderCampaignId>(storedCampaign);
   const [mobileStoryOpen, setMobileStoryOpen] = useState(storedMobileStoryVisibility);
+  const [showFloatingClose, setShowFloatingClose] = useState(false);
+  const mobileSwitcherRef = useRef<HTMLDivElement>(null);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const activeCampaign = HEADER_CAMPAIGNS.find(item => item.id === campaignId) || HEADER_CAMPAIGNS[0];
   const UtilityIcon = utilityIcons[activeCampaign.id];
 
@@ -45,13 +48,31 @@ export function HomeHeaderPreview() {
     }, 10_000);
     return () => window.clearTimeout(timer);
   }, [campaignId]);
+  useEffect(() => {
+    const switcher = mobileSwitcherRef.current;
+    if (!mobileStoryOpen || !switcher || !window.matchMedia('(max-width: 900px)').matches) {
+      setShowFloatingClose(false);
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setShowFloatingClose(!entry.isIntersecting);
+    }, {rootMargin: '-74px 0px 0px 0px'});
+    observer.observe(switcher);
+    return () => observer.disconnect();
+  }, [mobileStoryOpen]);
 
   const moveCampaign = (direction: -1 | 1) => setCampaignId(current => adjacentCampaign(current, direction));
+  const closeMobileStory = () => {
+    setMobileStoryOpen(false);
+    window.requestAnimationFrame(() => mobileToggleRef.current?.focus({preventScroll: true}));
+  };
 
   return <section className={`nk-main-header-preview ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
-    <div className="nk-main-header-preview__mobile-switcher">
+    <div className="nk-main-header-preview__mobile-switcher" ref={mobileSwitcherRef}>
       <button
         className="nk-main-header-preview__mobile-toggle"
+        ref={mobileToggleRef}
         type="button"
         aria-expanded={mobileStoryOpen}
         aria-controls="nk-mobile-header-story"
@@ -68,5 +89,12 @@ export function HomeHeaderPreview() {
       <HeaderCampaignShowcase campaignId={campaignId}/>
       <HeaderCampaignPicker activeId={campaignId} onSelect={setCampaignId}/>
     </div>
+    {mobileStoryOpen && showFloatingClose && <button
+      className="nk-main-header-preview__floating-close"
+      type="button"
+      aria-controls="nk-mobile-header-story"
+      aria-label={`Close ${activeCampaign.name} highlight`}
+      onClick={closeMobileStory}
+    >Close highlight<ChevronDown aria-hidden="true"/></button>}
   </section>;
 }
