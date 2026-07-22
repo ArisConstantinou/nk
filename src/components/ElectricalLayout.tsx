@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
-import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Phone, Search, Sparkles, Sun, X} from 'lucide-react';
+import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Phone, Search, Sparkles, Sun, X, Zap} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../context/ContentContext';
 import {serviceLinks, shopLinks} from '../navigation';
@@ -159,6 +159,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchTriggerRef = useRef<HTMLButtonElement>(null);
   const searchDialogRef = useRef<HTMLElement>(null);
   const megaOpenModeRef = useRef<MegaOpenMode>(null);
   const megaOpenTimerRef = useRef<number | null>(null);
@@ -187,13 +188,19 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     megaCloseTimerRef.current = null;
   };
 
+  const activeSearchTrigger = () => {
+    const desktopTrigger = desktopSearchTriggerRef.current;
+    if (desktopTrigger && desktopTrigger.getClientRects().length > 0) return desktopTrigger;
+    return searchTriggerRef.current;
+  };
+
   const closeHeaderSearch = (restoreFocus = true) => {
     setSearchOpen(false);
-    if (restoreFocus) window.requestAnimationFrame(() => searchTriggerRef.current?.focus());
+    if (restoreFocus) window.requestAnimationFrame(() => activeSearchTrigger()?.focus());
   };
 
   const openHeaderSearch = () => {
-    const triggerRect = searchTriggerRef.current?.getBoundingClientRect();
+    const triggerRect = activeSearchTrigger()?.getBoundingClientRect();
     if (triggerRect) setSearchAnchor({left: triggerRect.left, width: triggerRect.width});
     clearMegaTimers();
     megaOpenModeRef.current = null;
@@ -327,7 +334,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   useEffect(() => {
     if (!searchOpen) return;
     const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const locksViewport = !showHomeHeaderPreview || !window.matchMedia('(min-width: 901px)').matches;
+    if (locksViewport) document.body.style.overflow = 'hidden';
     const focusTimer = window.setTimeout(() => searchDialogRef.current?.querySelector<HTMLInputElement>('input')?.focus(), 0);
     const trapFocus = (event: KeyboardEvent) => {
       if (event.key !== 'Tab' || !searchDialogRef.current) return;
@@ -343,14 +351,14 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     return () => {
       window.clearTimeout(focusTimer);
       document.removeEventListener('keydown', trapFocus);
-      document.body.style.overflow = previous;
+      if (locksViewport) document.body.style.overflow = previous;
     };
-  }, [searchOpen]);
+  }, [searchOpen, showHomeHeaderPreview]);
 
   useEffect(() => {
     if (!searchOpen) return;
     const updateAnchor = () => {
-      const triggerRect = searchTriggerRef.current?.getBoundingClientRect();
+      const triggerRect = activeSearchTrigger()?.getBoundingClientRect();
       if (triggerRect) setSearchAnchor({left: triggerRect.left, width: triggerRect.width});
     };
     updateAnchor();
@@ -408,7 +416,26 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   >
     <SeoRouteMeta/>
     <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${showHomeHeaderPreview ? 'ia-header--home-preview' : ''}`} ref={headerRef}>
-      {showHomeHeaderPreview ? <HomeHeaderPreview/> : <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
+      {showHomeHeaderPreview ? <>
+        <div className="nk-home-topbar">
+          <Link className="nk-home-topbar__brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`}>
+            <img src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true"/>
+            <span><strong>{railBrandLabel}</strong><small>POWER · LIGHT · CONTROL</small></span>
+          </Link>
+          <button
+            className="nk-home-topbar__search"
+            ref={desktopSearchTriggerRef}
+            type="button"
+            aria-label="Search products, images, catalogues and PDFs"
+            aria-haspopup="dialog"
+            aria-controls="ia-header-search-panel"
+            aria-expanded={searchOpen}
+            onClick={toggleHeaderSearch}
+          ><Search aria-hidden="true"/><span>Search products, catalogues & PDFs</span><kbd>/</kbd></button>
+          <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>NEW BUILD / RENOVATION</span>
+        </div>
+        <HomeHeaderPreview/>
+      </> : <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
         {settings.header.showTagline && <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandTagline" data-visual-edit="text" data-visual-label="Brand tagline">{settings.brandTagline}</span>}
         <div>
           <a className="ia-header-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName}`}><Phone/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>

@@ -192,10 +192,32 @@
   .nk-campaign-design .nk-campaign-brand{display:none!important}.nk-fault-rail,.nk-sun-brand,.nk-campaign-design--outdoor>header,.nk-lighting-mast,.nk-campaign-design--catalogues>header,.nk-campaign-design--installation>header{display:none!important}.nk-campaign-design--outdoor>section{top:26px}.nk-campaign-design--offers>header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:9px 16px}.nk-campaign-design--offers>header>strong{font-size:38px}.nk-campaign-design--offers>header>small{margin:0}
 }
 
-/* Desktop home header: the same warm command palette as mobile, in a tighter frame. */
+.nk-home-topbar{display:none}
+
+/* Desktop home header: permanent warm top rail, story, then photographic navigation. */
 @media(min-width:901px){
+  .ia-shell .ia-header--home-preview{display:grid;grid-template-rows:auto auto auto auto}
+  .nk-home-topbar{position:relative;z-index:10;grid-row:1;min-height:50px;display:grid;grid-template-columns:minmax(215px,.76fr) minmax(330px,1.2fr) minmax(190px,.76fr);align-items:center;gap:18px;padding:0 clamp(18px,3vw,58px);color:var(--nk-explore-ink,#17383e);background:var(--nk-explore-header,#f4ead8);border-top:1px solid rgba(23,56,62,.12);border-bottom:1px solid rgba(23,56,62,.2);box-shadow:0 5px 15px rgba(80,49,30,.08)}
+  .nk-home-topbar__brand{min-width:0;display:flex;align-items:center;gap:10px;color:var(--nk-explore-ink,#17383e);text-decoration:none}
+  .nk-home-topbar__brand img{width:38px;height:38px;flex:0 0 38px;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(80,49,30,.18))}
+  .nk-home-topbar__brand>span{min-width:0;display:flex;flex-direction:column;gap:3px}
+  .nk-home-topbar__brand strong{font:760 17px/1 var(--campaign-body);letter-spacing:-.03em}
+  .nk-home-topbar__brand small{font:720 10px/1 var(--campaign-mono);letter-spacing:.1em;white-space:nowrap}
+  .nk-home-topbar__search{position:relative;isolation:isolate;width:100%;max-width:680px;min-height:38px;display:grid;grid-template-columns:32px minmax(0,1fr) 28px;align-items:center;gap:8px;justify-self:center;padding:0 8px;color:#365157;background:rgba(255,255,255,.34);border:1px solid rgba(183,86,54,.52);box-shadow:inset 3px 0 #e06b4d;font:650 14px/1 var(--campaign-body);text-align:left;cursor:pointer;transition:color .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}
+  .nk-home-topbar__search svg{width:18px;height:18px;justify-self:center;color:#a85235}
+  .nk-home-topbar__search span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nk-home-topbar__search kbd{width:24px;height:24px;display:grid;place-items:center;color:#8d553d;background:rgba(23,56,62,.06);border:1px solid rgba(23,56,62,.16);font:720 12px/1 var(--campaign-mono)}
+  .nk-home-topbar__search:is(:hover,:focus-visible){color:#17383e;background:#fff9ee;border-color:#e06b4d;outline:0;box-shadow:inset 3px 0 #e06b4d,inset 0 0 0 1px rgba(224,107,77,.22)}
+  html[data-theme] .ia-shell .ia-header--home-preview .nk-home-topbar__search:focus-visible{outline:0!important;box-shadow:inset 3px 0 #e06b4d,inset 0 0 0 2px rgba(224,107,77,.42)}
+  .nk-home-topbar__search[aria-expanded='true']{color:#f7f1e5;background:#153b45;border-color:#153b45;box-shadow:inset 3px 0 #e06b4d,inset 0 -3px #f2bd73}
+  .nk-home-topbar__search[aria-expanded='true'] svg{color:#f2bd73}
+  .nk-home-topbar__search[aria-expanded='true'] kbd{color:#17383e;background:#f2bd73;border-color:#f2bd73}
+  .nk-home-topbar__status{justify-self:end;display:flex;align-items:center;gap:8px;color:#a75334;font:760 12px/1 var(--campaign-mono);letter-spacing:.08em;white-space:nowrap}
+  .nk-home-topbar__status svg{width:16px;height:16px;color:#e06b4d}
+
+  .ia-shell .ia-header--home-preview .nk-main-header-preview{grid-row:3}
   .nk-main-header-preview{background:var(--nk-explore-header,#f4ead8);border-bottom:1px solid rgba(23,56,62,.22)}
-  .nk-main-header-preview .nk-campaign-canvas{height:clamp(282px,15vw,304px);min-height:282px}
+  .nk-main-header-preview .nk-campaign-canvas{height:clamp(234px,12.5vw,256px);min-height:234px}
   .nk-main-header-preview .nk-campaign-design{padding-bottom:50px}
 
   .nk-main-header-preview .nk-campaign-design--summer{grid-template-rows:58px 1fr}
@@ -212,6 +234,19 @@
   .nk-main-header-preview .nk-campaign-design--outdoor>section h1{margin:6px 0 9px;font-size:clamp(43px,3.2vw,58px)}
   .nk-main-header-preview .nk-campaign-design--outdoor>section>span{display:none}
   .nk-main-header-preview .nk-campaign-design--outdoor>aside{top:18px;bottom:54px}
+  .nk-main-header-preview .nk-campaign-design--lighting>section{padding:12px 24px 56px}
+  .nk-main-header-preview .nk-lighting-copy h1{margin:3px 0 5px;font-size:clamp(42px,3.6vw,52px)}
+  .nk-main-header-preview .nk-lighting-copy>span{font-size:14px;line-height:1.3}
+  .nk-main-header-preview .nk-campaign-design--lighting .nk-campaign-points{display:none}
+
+  .nk-main-header-preview .nk-campaign-design--installation{grid-template-rows:1fr}
+  .nk-main-header-preview .nk-campaign-design--installation>header{display:none}
+  .nk-main-header-preview .nk-campaign-design--installation>section{padding:14px 3vw 54px}
+  .nk-main-header-preview .nk-campaign-design--installation>section h1{margin:5px 0 7px;font-size:clamp(40px,3.5vw,58px)}
+  .nk-main-header-preview .nk-campaign-design--installation>section>span{margin-bottom:9px;line-height:1.35}
+  .nk-main-header-preview .nk-installation-board{padding:8px 0 54px}
+  .nk-main-header-preview .nk-installation-board>span{gap:6px;padding-block:8px}
+  .nk-main-header-preview .nk-campaign-design--installation>aside span{bottom:56px}
 
   .nk-main-header-preview .nk-campaign-picker{bottom:6px;color:var(--nk-explore-ink,#17383e);background:rgba(244,234,216,.97);border-color:rgba(23,56,62,.26);box-shadow:0 9px 24px rgba(80,49,30,.18)}
   .nk-main-header-preview .nk-campaign-picker__steps{border-color:rgba(23,56,62,.18)}
@@ -237,7 +272,7 @@
   .nk-main-header-preview .nk-campaign-design--projects>aside>a{border-bottom-color:rgba(23,56,62,.2)}
   .nk-main-header-preview .nk-campaign-design--projects>aside small{color:#a75334}
 
-  html[data-theme] .ia-shell .ia-header--home-preview .ia-header-bar{height:58px;grid-template-columns:minmax(0,1fr) 224px;align-items:stretch;gap:0;padding:0;background:#102f39;border-top:1px solid rgba(242,189,115,.34);border-bottom:1px solid rgba(23,56,62,.32);box-shadow:0 8px 22px rgba(80,49,30,.13)}
+  html[data-theme] .ia-shell .ia-header--home-preview .ia-header-bar{grid-row:4;height:54px;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:0;padding:0;background:#102f39;border-top:1px solid rgba(242,189,115,.34);border-bottom:1px solid rgba(23,56,62,.32);box-shadow:0 8px 22px rgba(80,49,30,.13)}
   .ia-shell .ia-header--home-preview .ia-desktop-nav{grid-column:1;grid-row:1}
   .ia-shell .ia-header--home-preview .ia-desktop-nav>a,
   .ia-shell .ia-header--home-preview .ia-desktop-nav>button{color:#fffdf7!important;background:#173e49!important;box-shadow:inset -1px 0 rgba(242,189,115,.2)!important}
@@ -275,6 +310,14 @@
   html[data-theme] .ia-shell .ia-header--home-preview .ia-header-command-dock>.ia-header-command-trigger:focus-visible{outline:0!important;box-shadow:inset 0 0 0 2px #e06b4d,inset 0 -3px #e06b4d}
   .ia-shell .ia-header--home-preview .ia-header-command-dock>.ia-header-command-trigger[aria-expanded='true']{color:#f7f1e5;background:#153b45;box-shadow:inset 0 -3px #f2bd73}
   .ia-shell .ia-header--home-preview .ia-header-command-dock>.ia-header-command-trigger[aria-expanded='true'] svg{color:#17383e;background:#f2bd73;border-color:#f2bd73}
+  .ia-shell .ia-header--home-preview .ia-header-command-dock{display:none!important}
+
+  .ia-shell .ia-header--home-preview .ia-header-search-layer{position:relative;z-index:9;inset:auto;grid-row:2;width:100%;display:grid;place-items:start center;overflow:visible;padding:0 16px 14px;background:var(--nk-explore-header,#f4ead8);border-bottom:1px solid rgba(23,56,62,.18)}
+  .ia-shell .ia-header--home-preview .ia-header-search-backdrop{display:none}
+  .ia-shell .ia-header--home-preview .ia-header-search-dialog{width:min(760px,100%);max-height:min(500px,calc(100dvh - 140px));margin:0;overflow:auto;border-top:3px solid #eaa05d;border-radius:0;box-shadow:0 18px 38px rgba(53,39,28,.24),inset 4px 0 #e06b4d;animation:nkDesktopSearchExpand .24s cubic-bezier(.16,1,.3,1) both;transform-origin:top center}
+  .ia-shell .ia-header--home-preview .ia-header-search-dialog>p{margin-bottom:4px}
+  .ia-shell .ia-header--home-preview .ia-header-search-dialog .nk-live-search__panel{max-height:300px}
+  @keyframes nkDesktopSearchExpand{from{opacity:0;transform:scaleY(.86) translateY(-8px)}to{opacity:1;transform:none}}
 
   .ia-header--home-preview .ia-mobile-menu-layer{position:fixed;z-index:319;inset:0;display:grid;place-items:start center;overflow:auto;padding:clamp(34px,8vh,86px) 16px 24px}
   .ia-header--home-preview .ia-mobile-menu-backdrop{position:absolute;inset:0;width:100%;height:100%;padding:0;background:rgba(3,17,21,.74);border:0;backdrop-filter:blur(7px);cursor:pointer}
@@ -324,7 +367,21 @@
   .nk-main-header-preview .nk-campaign-design--lighting .nk-campaign-points{display:none}
 }
 
+@media(min-width:901px) and (max-width:1450px){
+  .nk-main-header-preview .nk-campaign-design--projects .nk-campaign-stats{display:none}
+}
+
 @media(min-width:901px) and (max-width:1180px){
+  .nk-home-topbar{grid-template-columns:205px minmax(300px,1fr) 250px;gap:10px;padding-inline:14px}
+  .nk-main-header-preview .nk-campaign-design--installation{grid-template-columns:minmax(0,44%) minmax(0,56%)}
+  .nk-main-header-preview .nk-campaign-design--installation>section{padding:12px 18px 52px}
+  .nk-main-header-preview .nk-campaign-design--installation>section h1{font-size:clamp(37px,4.6vw,48px)}
+  .nk-main-header-preview .nk-campaign-design--installation>section>span{font-size:14px}
+  .nk-main-header-preview .nk-campaign-design--installation>aside{display:none}
+  .nk-main-header-preview .nk-installation-board{padding-bottom:52px}
+  .nk-main-header-preview .nk-installation-board>span{padding-inline:10px}
+  .nk-main-header-preview .nk-installation-board strong{font-size:14px}
+  .nk-main-header-preview .nk-installation-board small{font-size:12px}
   .nk-main-header-preview .nk-campaign-design--projects{grid-template-columns:34% minmax(0,42%) minmax(0,24%)}
   .nk-main-header-preview .nk-campaign-design--projects>section{padding:15px 20px 58px}
   .nk-main-header-preview .nk-campaign-design--projects>section h1{font-size:clamp(38px,4.6vw,48px)}
