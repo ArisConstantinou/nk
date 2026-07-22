@@ -206,6 +206,7 @@
   .nk-home-topbar__search{position:relative;z-index:340;width:100%;max-width:680px;min-width:0;justify-self:center}
   .nk-home-topbar__live-search{--nks-panel:#102328;--nks-panel-soft:#173f49;--nks-ivory:#f7f1e5;--nks-muted:#aebdbd;--nks-copper:#eaa05d;--nks-coral:#ef6a50;z-index:341;width:100%;max-width:none}
   .nk-home-topbar__live-search .nk-live-search__field{min-height:38px;padding:0 10px;background:#153b45;border-radius:0;box-shadow:inset 0 -2px #eaa05d}
+  html[data-theme] .ia-shell .ia-header--home-preview .nk-home-topbar__live-search .nk-live-search__field{background:#153b45}
   .nk-home-topbar__live-search.is-open .nk-live-search__field,
   .nk-home-topbar__live-search .nk-live-search__field:focus-within{background:#153b45;box-shadow:inset 0 -2px #f2bd73,0 8px 22px rgba(23,56,62,.18)}
   .nk-home-topbar__live-search .nk-live-search__field>svg{width:18px;height:18px;color:#f2bd73}
