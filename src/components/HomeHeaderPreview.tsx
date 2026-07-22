@@ -70,12 +70,13 @@ export function HomeHeaderPreview() {
 
   return <section className={`nk-main-header-preview ${mobileStoryOpen ? 'is-mobile-open' : 'is-mobile-collapsed'}`} aria-label="NK Electrical current highlights">
     <div className="nk-main-header-preview__mobile-switcher" ref={mobileSwitcherRef}>
-      <span className="nk-main-header-preview__mobile-summary">
+      <div className="nk-main-header-preview__mobile-summary">
+        <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
         <UtilityIcon aria-hidden="true"/>
         <span aria-live="polite"><small>{activeCampaign.utility}</small><strong>{activeCampaign.name}</strong></span>
-      </span>
+        <button className="nk-main-header-preview__mobile-step is-next" type="button" aria-label="Next highlight" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
+      </div>
       <div className="nk-main-header-preview__mobile-controls">
-        <button className="nk-main-header-preview__mobile-step is-previous" type="button" aria-label="Previous highlight" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
         <button
           className="nk-main-header-preview__mobile-toggle"
           ref={mobileToggleRef}
@@ -87,7 +88,6 @@ export function HomeHeaderPreview() {
         >
           <span>{mobileStoryOpen ? 'Hide' : 'Explore'}</span><ChevronDown aria-hidden="true"/>
         </button>
-        <button className="nk-main-header-preview__mobile-step is-next" type="button" aria-label="Next highlight" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
       </div>
     </div>
     <div className="nk-main-header-preview__story" id="nk-mobile-header-story">
