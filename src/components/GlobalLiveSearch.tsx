@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type WheelEvent,
 } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
@@ -43,6 +44,7 @@ export type GlobalLiveSearchProps = {
   className?: string;
   maxResults?: number;
   labels?: Partial<LiveSearchLabels>;
+  lockPageScroll?: boolean;
   onDismiss?: () => void;
   onNavigate?: () => void;
   autoFocus?: boolean;
@@ -173,7 +175,7 @@ function ResultCopy({result, labels}: {result: SearchResult; labels: LiveSearchL
   return <><span><small>{labels.product}</small><strong>{product.name}</strong><em>{product.category} · {product.space}{product.offer ? ' · Offer' : ''}</em></span><ArrowRight className="nk-live-search__result-arrow" aria-hidden="true"/></>;
 }
 
-export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelOverrides, onDismiss, onNavigate, autoFocus = false}: GlobalLiveSearchProps) {
+export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelOverrides, lockPageScroll = false, onDismiss, onNavigate, autoFocus = false}: GlobalLiveSearchProps) {
   const {content} = useContent();
   const navigate = useNavigate();
   const listId = useId();
@@ -184,6 +186,45 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
   const [activeIndex, setActiveIndex] = useState(-1);
   const deferredQuery = useDeferredValue(query);
   const labels = useMemo(() => ({...defaultLabels, ...labelOverrides}), [labelOverrides]);
+
+  useEffect(() => {
+    if (!open || !lockPageScroll) return;
+
+    const body = document.body;
+    const documentElement = document.documentElement;
+    const previousOverflow = body.style.overflow;
+    const previousDocumentOverflow = documentElement.style.overflow;
+    const previousPaddingRight = body.style.paddingRight;
+    const previousPosition = body.style.position;
+    const previousTop = body.style.top;
+    const previousLeft = body.style.left;
+    const previousRight = body.style.right;
+    const previousWidth = body.style.width;
+    const scrollPosition = window.scrollY;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const bodyPaddingRight = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;
+
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollPosition}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    documentElement.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) body.style.paddingRight = `${bodyPaddingRight + scrollbarWidth}px`;
+
+    return () => {
+      body.style.overflow = previousOverflow;
+      body.style.position = previousPosition;
+      body.style.top = previousTop;
+      body.style.left = previousLeft;
+      body.style.right = previousRight;
+      body.style.width = previousWidth;
+      documentElement.style.overflow = previousDocumentOverflow;
+      body.style.paddingRight = previousPaddingRight;
+      window.scrollTo({top: scrollPosition, left: 0, behavior: 'auto'});
+    };
+  }, [lockPageScroll, open]);
 
   const results = useMemo<SearchResult[]>(() => {
     const normalizedQuery = normalize(deferredQuery);
@@ -312,6 +353,15 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
       openResult(orderedResults[activeIndex >= 0 ? activeIndex : 0]);
     }
   };
+
+  const onPanelWheel = (event: WheelEvent<HTMLDivElement>) => {
+    const panel = event.currentTarget;
+    const atTop = panel.scrollTop <= 0;
+    const atBottom = Math.ceil(panel.scrollTop + panel.clientHeight) >= panel.scrollHeight;
+
+    event.stopPropagation();
+    if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) event.preventDefault();
+  };
   let optionIndex = -1;
 
   return (
@@ -339,7 +389,7 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
         {query ? <button type="button" className="nk-live-search__clear" aria-label={labels.clear} onClick={() => {setQuery(''); setActiveIndex(-1); inputRef.current?.focus();}}><X/></button> : <kbd>/</kbd>}
       </div>
 
-      {open && <div className="nk-live-search__panel" id={listId} role="listbox" aria-label={labels.input}>
+      {open && <div className="nk-live-search__panel" id={listId} role="listbox" aria-label={labels.input} onWheel={onPanelWheel}>
         <header className="nk-live-search__panel-head">
           <span><Sparkles aria-hidden="true"/>{query ? `Matches for “${query}”` : labels.suggested}</span>
           <small>{labels.keyboardHint}</small>
