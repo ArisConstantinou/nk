@@ -229,7 +229,7 @@
 
   .ia-shell .ia-header--home-preview .nk-main-header-preview{grid-row:3}
   .nk-main-header-preview{background:var(--nk-explore-header,#f4ead8);border-bottom:1px solid rgba(23,56,62,.22)}
-  .nk-main-header-preview .nk-campaign-canvas{height:clamp(234px,12.5vw,256px);min-height:234px}
+  .nk-main-header-preview .nk-campaign-canvas{height:clamp(210px,10.75vw,220px);min-height:210px}
   .nk-main-header-preview .nk-campaign-design{padding-bottom:0}
 
   .nk-main-header-preview .nk-campaign-design--summer{grid-template-rows:58px 1fr}
