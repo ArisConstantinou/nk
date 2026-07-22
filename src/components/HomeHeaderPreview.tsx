@@ -137,8 +137,10 @@ export function HomeHeaderPreview({desktopStoryOpen = true}: {desktopStoryOpen?:
       <HeaderCampaignPicker
         activeId={campaignId}
         onSelect={selectCampaign}
-        prefix={<div className="nk-campaign-picker__steps" role="group" aria-label="Step through live stories">
+        prefix={<div className="nk-campaign-picker__steps nk-campaign-picker__steps--previous">
           <button type="button" aria-label="Previous live story" onClick={() => moveCampaign(-1)}><ChevronLeft aria-hidden="true"/></button>
+        </div>}
+        suffix={<div className="nk-campaign-picker__steps nk-campaign-picker__steps--next">
           <button type="button" aria-label="Next live story" onClick={() => moveCampaign(1)}><ChevronRight aria-hidden="true"/></button>
         </div>}
       />

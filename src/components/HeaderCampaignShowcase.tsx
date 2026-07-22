@@ -371,12 +371,13 @@ export function useHeaderCampaigns(): Campaign[] {
   }, [content, settings]);
 }
 
-export function HeaderCampaignPicker({activeId, onSelect, prefix}: {activeId: string; onSelect: (id: HeaderCampaignId) => void; prefix?: ReactNode}) {
+export function HeaderCampaignPicker({activeId, onSelect, prefix, suffix}: {activeId: string; onSelect: (id: HeaderCampaignId) => void; prefix?: ReactNode; suffix?: ReactNode}) {
   const active = HEADER_CAMPAIGNS.find(item => item.id === activeId) || HEADER_CAMPAIGNS[0];
   return <div className="nk-campaign-picker" aria-label="Choose a highlight">
     {prefix}
     <span className="nk-campaign-picker__name"><small>HIGHLIGHTS</small><strong>{active.id} · {active.name}</strong></span>
     <nav>{HEADER_CAMPAIGNS.map(item => <button className={item.id === active.id ? 'active' : ''} type="button" onClick={() => onSelect(item.id)} aria-label={`${item.id} ${item.name}`} data-label={item.short} key={item.id}><i/><span>{item.id}</span></button>)}</nav>
+    {suffix}
   </div>;
 }
 

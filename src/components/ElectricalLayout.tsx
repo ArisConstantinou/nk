@@ -59,15 +59,34 @@ const navigationPanelForPath = (to: string) => {
   return segment ? navigationPanelMedia[segment] : undefined;
 };
 
+const headerStatusByPath: Record<string, string> = {
+  '/': 'ELECTRICAL',
+  '/services': 'SERVICES / ELECTRICAL EXPERTISE',
+  '/services/electrical-installations': 'ELECTRICAL / INSTALLATIONS',
+  '/services/lighting-design': 'LIGHTING / DESIGN',
+  '/services/smart-home-automation': 'AUTOMATION / SMART CONTROL',
+  '/services/security-systems': 'SECURITY / LOW VOLTAGE',
+  '/services/maintenance': 'MAINTENANCE / FAULT SUPPORT',
+  '/shop': 'SHOP / ALL PRODUCTS',
+  '/shop/lighting': 'SHOP / LIGHTING',
+  '/shop/appliances': 'SHOP / APPLIANCES',
+  '/shop/offers': 'SHOP / OFFERS',
+  '/shop/catalogues': 'SHOP / CATALOGUES',
+  '/projects': 'PROJECTS / BUILT PROOF',
+  '/about': 'ABOUT / SINCE 1985',
+  '/contact': 'CONTACT / NICOSIA',
+  '/request-a-quote': 'PROJECT / START A BRIEF',
+};
+
+const formatStatusSegment = (value: string) => value.replace(/[-_]+/g, ' ').trim().toUpperCase();
+
 const headerStatusForPath = (path: string) => {
-  if (path === '/') return 'NEW BUILD / RENOVATION';
-  if (path.startsWith('/services/electrical-installations')) return 'INSTALLATIONS / SCROLL STORY';
-  if (path.startsWith('/services')) return 'SERVICES / EXPERTISE';
-  if (path.startsWith('/shop')) return 'SHOP / PRODUCTS';
-  if (path.startsWith('/projects')) return 'PROJECTS / BUILT PROOF';
-  if (path.startsWith('/about')) return 'ABOUT / SINCE 1985';
-  if (path.startsWith('/contact')) return 'CONTACT / NICOSIA';
-  if (path.startsWith('/request-a-quote')) return 'PROJECT / START A BRIEF';
+  const normalizedPath = path.length > 1 ? path.replace(/\/$/, '') : path;
+  if (headerStatusByPath[normalizedPath]) return headerStatusByPath[normalizedPath];
+  if (normalizedPath.startsWith('/shop/product/')) return 'SHOP / PRODUCT DETAIL';
+  if (normalizedPath.startsWith('/services/')) return `SERVICES / ${formatStatusSegment(normalizedPath.split('/').pop() || 'ELECTRICAL')}`;
+  if (normalizedPath.startsWith('/shop/')) return `SHOP / ${formatStatusSegment(normalizedPath.split('/').pop() || 'PRODUCTS')}`;
+  if (normalizedPath.startsWith('/pages/')) return `PAGE / ${formatStatusSegment(normalizedPath.split('/').pop() || 'INFORMATION')}`;
   return 'NK ELECTRICAL / CYPRUS';
 };
 
