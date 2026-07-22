@@ -98,8 +98,8 @@ export function HomeHeaderPreview() {
       className="nk-main-header-preview__floating-close"
       type="button"
       aria-controls="nk-mobile-header-story"
-      aria-label={`Close ${activeCampaign.name} highlight`}
+      aria-label={`Hide ${activeCampaign.name} panel`}
       onClick={closeMobileStory}
-    >Close highlight<ChevronDown aria-hidden="true"/></button>}
+    ><span><small>PANEL OPEN</small><strong>Hide panel</strong></span><ChevronDown aria-hidden="true"/></button>}
   </section>;
 }
