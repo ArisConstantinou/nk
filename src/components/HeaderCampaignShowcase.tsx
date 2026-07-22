@@ -284,8 +284,5 @@ export function HeaderCampaignPicker({activeId, onSelect, prefix}: {activeId: st
 export function HeaderCampaignShowcase({campaignId}: {campaignId: string}) {
   const campaigns = useHeaderCampaigns();
   const campaign = campaigns.find(item => item.id === campaignId) || campaigns[0];
-  return <div className={`nk-campaign-canvas nk-campaign-canvas--${campaign.slug}`} data-campaign={campaign.id}>
-    <div className="nk-campaign-mobile-masthead"><Brand/><span>{campaign.name}</span></div>
-    <CampaignRenderer campaign={campaign}/>
-  </div>;
+  return <div className={`nk-campaign-canvas nk-campaign-canvas--${campaign.slug}`} data-campaign={campaign.id}><CampaignRenderer campaign={campaign}/></div>;
 }
