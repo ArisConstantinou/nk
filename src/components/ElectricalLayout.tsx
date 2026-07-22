@@ -152,6 +152,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(() => window.matchMedia('(min-width: 901px)').matches);
   const [searchAnchor, setSearchAnchor] = useState({left: 0, width: 0});
   const [menuAnchor, setMenuAnchor] = useState({left: 0, width: 0});
   const [mobileSection, setMobileSection] = useState<MegaSection>('services');
@@ -159,7 +160,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
-  const desktopSearchTriggerRef = useRef<HTMLButtonElement>(null);
   const searchDialogRef = useRef<HTMLElement>(null);
   const megaOpenModeRef = useRef<MegaOpenMode>(null);
   const megaOpenTimerRef = useRef<number | null>(null);
@@ -188,11 +188,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     megaCloseTimerRef.current = null;
   };
 
-  const activeSearchTrigger = () => {
-    const desktopTrigger = desktopSearchTriggerRef.current;
-    if (desktopTrigger && desktopTrigger.getClientRects().length > 0) return desktopTrigger;
-    return searchTriggerRef.current;
-  };
+  const activeSearchTrigger = () => searchTriggerRef.current;
 
   const closeHeaderSearch = (restoreFocus = true) => {
     setSearchOpen(false);
@@ -271,6 +267,18 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       megaCloseTimerRef.current = null;
     }, 275);
   };
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia('(min-width: 901px)');
+    const syncViewport = () => setIsDesktopViewport(desktopQuery.matches);
+    syncViewport();
+    desktopQuery.addEventListener('change', syncViewport);
+    return () => desktopQuery.removeEventListener('change', syncViewport);
+  }, []);
+
+  useEffect(() => {
+    if (showHomeHeaderPreview && isDesktopViewport) setSearchOpen(false);
+  }, [isDesktopViewport, showHomeHeaderPreview]);
 
   useEffect(() => {
     clearMegaTimers();
@@ -422,16 +430,13 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             <img src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt="" aria-hidden="true"/>
             <span><strong>{railBrandLabel}</strong><small>POWER · LIGHT · CONTROL</small></span>
           </Link>
-          <button
-            className="nk-home-topbar__search"
-            ref={desktopSearchTriggerRef}
-            type="button"
-            aria-label="Search products, images, catalogues and PDFs"
-            aria-haspopup="dialog"
-            aria-controls="ia-header-search-panel"
-            aria-expanded={searchOpen}
-            onClick={toggleHeaderSearch}
-          ><Search aria-hidden="true"/><span>Search products, catalogues & PDFs</span><kbd>/</kbd></button>
+          <div className="nk-home-topbar__search">
+            {isDesktopViewport && <GlobalLiveSearch
+              className="nk-home-topbar__live-search"
+              maxResults={10}
+              labels={{input: 'Search products, images, catalogues and PDFs', placeholder: 'Search products, catalogues & PDFs'}}
+            />}
+          </div>
           <span className="nk-home-topbar__status"><Zap aria-hidden="true"/>NEW BUILD / RENOVATION</span>
         </div>
         <HomeHeaderPreview/>
@@ -478,6 +483,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             autoFocus
             className="ia-header-global-search"
             maxResults={10}
+            onDismiss={() => closeHeaderSearch()}
             onNavigate={() => closeHeaderSearch(false)}
             labels={{input: 'Search products, images, catalogues and PDFs', placeholder: 'What are you looking for?'}}
           />

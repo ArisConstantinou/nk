@@ -43,6 +43,7 @@ export type GlobalLiveSearchProps = {
   className?: string;
   maxResults?: number;
   labels?: Partial<LiveSearchLabels>;
+  onDismiss?: () => void;
   onNavigate?: () => void;
   autoFocus?: boolean;
 };
@@ -172,7 +173,7 @@ function ResultCopy({result, labels}: {result: SearchResult; labels: LiveSearchL
   return <><span><small>{labels.product}</small><strong>{product.name}</strong><em>{product.category} · {product.space}{product.offer ? ' · Offer' : ''}</em></span><ArrowRight className="nk-live-search__result-arrow" aria-hidden="true"/></>;
 }
 
-export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelOverrides, onNavigate, autoFocus = false}: GlobalLiveSearchProps) {
+export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelOverrides, onDismiss, onNavigate, autoFocus = false}: GlobalLiveSearchProps) {
   const {content} = useContent();
   const navigate = useNavigate();
   const listId = useId();
@@ -263,6 +264,13 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
     setActiveIndex(current => current >= orderedResults.length ? orderedResults.length - 1 : current);
   }, [orderedResults.length]);
 
+  useEffect(() => {
+    if (activeIndex < 0) return;
+    rootRef.current
+      ?.querySelector<HTMLElement>(`[data-search-result-index="${activeIndex}"]`)
+      ?.scrollIntoView({block: 'nearest'});
+  }, [activeIndex]);
+
   const close = () => {
     setOpen(false);
     setActiveIndex(-1);
@@ -277,25 +285,30 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
+      event.stopPropagation();
       setOpen(false);
       setActiveIndex(-1);
       inputRef.current?.blur();
+      onDismiss?.();
       return;
     }
     if (event.key === 'ArrowDown') {
       event.preventDefault();
+      event.stopPropagation();
       setOpen(true);
       setActiveIndex(current => orderedResults.length ? (current + 1) % orderedResults.length : -1);
       return;
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
+      event.stopPropagation();
       setOpen(true);
       setActiveIndex(current => orderedResults.length ? (current <= 0 ? orderedResults.length - 1 : current - 1) : -1);
       return;
     }
     if (event.key === 'Enter' && open && orderedResults.length) {
       event.preventDefault();
+      event.stopPropagation();
       openResult(orderedResults[activeIndex >= 0 ? activeIndex : 0]);
     }
   };
@@ -345,6 +358,7 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
                     const currentIndex = optionIndex;
                     const commonProps = {
                       id: `${listId}-option-${currentIndex}`,
+                      'data-search-result-index': currentIndex,
                       className: `nk-live-search__result ${currentIndex === activeIndex ? 'is-active' : ''}`,
                       role: 'option',
                       'aria-selected': currentIndex === activeIndex,

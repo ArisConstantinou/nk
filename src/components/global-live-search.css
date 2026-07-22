@@ -138,7 +138,15 @@
   transition:background .15s ease,transform .15s ease;
 }
 .nk-live-search__result:last-child{box-shadow:none}
-.nk-live-search__result:hover,.nk-live-search__result.is-active{background:var(--nks-panel-soft);transform:translateX(2px);outline:0}
+.nk-live-search__result:hover{background:var(--nks-panel-soft);transform:translateX(2px);outline:0}
+.nk-live-search__result.is-active,
+.nk-live-search__result:focus-visible{
+  position:relative;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--nks-copper) 24%,var(--nks-panel-soft)),var(--nks-panel-soft));
+  box-shadow:inset 4px 0 var(--nks-copper),inset 0 0 0 1px color-mix(in srgb,var(--nks-copper) 52%,transparent);
+  transform:none;
+  outline:0;
+}
 .nk-live-search__thumbnail,.nk-live-search__document{width:58px;height:58px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.06);border-radius:2px}
 .nk-live-search__thumbnail img{width:100%;height:100%;object-fit:cover;filter:saturate(.82) contrast(1.03)}
 .nk-live-search__document{position:relative;color:var(--nks-copper);background:linear-gradient(145deg,rgba(215,160,100,.15),rgba(255,255,255,.035))}
@@ -166,13 +174,14 @@ html[data-theme='light'] .nk-live-search{
 html[data-theme='light'] .nk-live-search__field{background:rgba(16,39,45,.06)}
 html[data-theme='light'] .nk-live-search__panel{box-shadow:0 30px 70px rgba(11,30,34,.24),0 0 0 1px rgba(16,39,45,.1)}
 html[data-theme='light'] .nk-live-search__document{background:rgba(16,39,45,.06)}
-html[data-theme='light'] .nk-live-search__result{box-shadow:inset 0 -1px rgba(16,39,45,.08)}
+html[data-theme='light'] .nk-live-search__result:not(.is-active):not(:focus-visible){box-shadow:inset 0 -1px rgba(16,39,45,.08)}
 
 @media (max-width:760px){
   .nk-live-search{width:100%}
   .nk-live-search__field{min-height:48px;padding:0 13px}
   .nk-live-search__field input{height:48px;font-size:14px}
-  .nk-live-search__panel{position:fixed;top:var(--nk-search-mobile-top,64px);right:10px;bottom:10px;left:10px;max-height:none}
+  .nk-live-search__panel{position:fixed;top:var(--nk-search-mobile-top,64px);right:10px;bottom:10px;left:10px;max-height:none;scrollbar-width:none}
+  .nk-live-search__panel::-webkit-scrollbar{display:none!important}
   .nk-live-search__panel-head{padding:0 13px}
   .nk-live-search__panel-head small{display:none}
   .nk-live-search__groups{padding:5px}
