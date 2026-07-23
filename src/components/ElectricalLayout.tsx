@@ -487,18 +487,20 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
                 <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
                 <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                 <span className="nk-home-topbar__story-divider" aria-hidden="true"/>
-                <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'highlights' ? null : 'highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
-                <span className="nk-home-topbar__story-divider" aria-hidden="true"/>
-                <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'contact' ? null : 'contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
+                <div className="nk-home-topbar__panel-switcher" role="group" aria-label="Header stories">
+                  <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'highlights' ? null : 'highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
+                  <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'contact' ? null : 'contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
+                </div>
               </div>
             : <div className="nk-home-topbar__route-tools">
                 <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
                 <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                 <LiveSiteEditButton/>
                 <span className="nk-home-topbar__story-divider" aria-hidden="true"/>
-                <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'highlights' ? null : 'highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
-                <span className="nk-home-topbar__story-divider" aria-hidden="true"/>
-                <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'contact' ? null : 'contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
+                <div className="nk-home-topbar__panel-switcher" role="group" aria-label="Header stories">
+                  <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'highlights' ? null : 'highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
+                  <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'contact' ? null : 'contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
+                </div>
               </div>}
         </div>
         {showHeaderStory && <>
