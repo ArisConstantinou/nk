@@ -219,7 +219,7 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 .ia-theme-selector summary svg{width:14px;height:14px}
 .ia-theme-selector summary svg:first-child{color:#d8a467}
 .ia-theme-selector summary svg:last-child{width:12px;color:#9eaaa6;transition:transform .18s ease}
-.ia-theme-selector summary span{font:700 9px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase}
+.ia-theme-selector summary span{font:700 12px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase}
 .ia-theme-selector[open] summary svg:last-child{transform:rotate(180deg)}
 .ia-theme-selector summary:hover,
 .ia-theme-selector summary:focus-visible{border-color:#d8a467;background:rgba(216,164,103,.08);outline:0}
@@ -248,7 +248,7 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
   border-top:1px solid rgba(255,255,255,.08);
   background:transparent;
   color:inherit;
-  font:700 10px var(--mono);
+  font:700 12px var(--mono);
   text-transform:uppercase;
   cursor:pointer;
 }

@@ -481,12 +481,15 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           {isHomeRoute
             ? <div className="nk-home-topbar__home-tools">
                 <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
+                <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
+                <span className="nk-home-topbar__story-divider" aria-hidden="true"/>
                 <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopStoryOpen(open => !open)}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
               </div>
             : <div className="nk-home-topbar__route-tools">
                 <span className="nk-home-topbar__status"><Zap aria-hidden="true"/><span>{headerStatus}</span></span>
                 <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                 <LiveSiteEditButton/>
+                <span className="nk-home-topbar__story-divider" aria-hidden="true"/>
                 <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopStoryOpen(open => !open)}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
               </div>}
         </div>
