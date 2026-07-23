@@ -4,14 +4,27 @@ import legacyProductData from '../data/legacy-products.json';
 import {isPagesAdminMode, PAGES_ADMIN_CHANGED_EVENT, PAGES_ADMIN_STORAGE_KEY, readPagesPublicPayload, savePagesSubmission} from '../admin/pagesMode';
 import type {Catalogue, Product, Project, SiteContent} from '../types';
 import {LIVE_EDITOR_COMMAND_EVENT, LIVE_EDITOR_NONCE} from '../components/liveEditorEvents';
+import {resolvePublicUrl} from '../utils/assets';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
-const importedProducts = legacyProductData as unknown as Product[];
+const importedProducts = (legacyProductData as unknown as Product[]).map(product => ({
+  ...product,
+  image: resolvePublicUrl(product.image),
+}));
+const bundledTransparentProductImage = (image = '') => (
+  /\/assets\/product-cutouts\/[^/?#]+\.webp(?:[?#].*)?$/i.test(image)
+  || /\/assets\/products\/(?:blaupunkt|bosch-multitalent|el-led|nespresso)\.webp(?:[?#].*)?$/i.test(image)
+);
 
 function mergeCatalogueProducts(overrides: Product[] = []) {
   const products = new Map(importedProducts.map(product => [product.id, product]));
   defaultContent.products.forEach(product => products.set(product.id, {...products.get(product.id), ...product}));
-  overrides.forEach(product => products.set(product.id, {...products.get(product.id), ...product}));
+  overrides.forEach(product => {
+    const current = products.get(product.id);
+    const merged = {...current, ...product};
+    if (current && bundledTransparentProductImage(current.image)) merged.image = current.image;
+    products.set(product.id, merged);
+  });
   return [...products.values()];
 }
 
