@@ -40,7 +40,7 @@
   .nk-unified-story__offer-thumb:hover img,.nk-unified-story__offer-thumb:focus-visible img{transform:scale(1.05)}
   .nk-unified-story__offer-thumb:focus-visible{outline:2px solid var(--story-accent);outline-offset:-2px}
   .nk-campaign-design--unified-offers .nk-unified-story__board small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .nk-campaign-design--unified-installation .nk-unified-story__board>article{grid-template-rows:auto 58px auto auto;gap:4px;padding:8px 10px}
+  .nk-campaign-design--unified-installation .nk-unified-story__board>article{grid-template-rows:12px 58px 34px auto;align-content:start;gap:4px;padding:58px 10px 4px}
   .nk-unified-story__step-thumb{position:relative;display:block;width:100%;height:58px;overflow:hidden;background:#17383e;border:1px solid color-mix(in srgb,var(--story-accent) 44%,transparent)}
   .nk-unified-story__step-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(9,33,39,.3));pointer-events:none}
   .nk-unified-story__step-thumb img{width:100%;height:100%;display:block;object-fit:cover;filter:saturate(.82) contrast(1.04)}
