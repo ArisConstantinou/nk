@@ -230,7 +230,8 @@
   .nk-home-topbar__route-tools{position:relative;min-width:0;width:100%;align-self:stretch;justify-self:end;display:flex;align-items:center;justify-content:flex-end;gap:8px}
   .nk-home-topbar__route-tools .nk-home-topbar__status{flex:1 1 auto;margin-right:4px;justify-content:flex-end;overflow:hidden}
   .nk-home-topbar__home-tools .nk-modern-route-theme,.nk-home-topbar__route-tools .nk-modern-route-theme{position:relative;z-index:2;width:48px;height:48px}
-  .nk-home-topbar__home-tools .nk-modern-route-theme summary,.nk-home-topbar__route-tools .nk-modern-route-theme summary{width:48px;min-width:48px;height:48px;padding-left:6px;color:#17383e;background:transparent;border:0;border-right:1px solid rgba(23,56,62,.32);box-shadow:1px 0 rgba(255,255,255,.36)}
+  .nk-home-topbar__home-tools .nk-modern-route-theme summary,.nk-home-topbar__route-tools .nk-modern-route-theme summary{width:48px;min-width:48px;height:48px;padding:0;color:#17383e;background:transparent;border:0;border-right:1px solid rgba(23,56,62,.32);box-shadow:1px 0 rgba(255,255,255,.36)}
+  .nk-home-topbar__home-tools .nk-modern-route-theme summary svg:first-child,.nk-home-topbar__route-tools .nk-modern-route-theme summary svg:first-child{width:18px;height:18px;color:#17383e;stroke-width:2.15}
   .nk-home-topbar__home-tools .nk-modern-route-theme summary:hover,.nk-home-topbar__route-tools .nk-modern-route-theme summary:hover,.nk-home-topbar__home-tools .nk-modern-route-theme summary:focus-visible,.nk-home-topbar__route-tools .nk-modern-route-theme summary:focus-visible,.nk-home-topbar__home-tools .nk-modern-route-theme[open] summary,.nk-home-topbar__route-tools .nk-modern-route-theme[open] summary{background:rgba(255,255,255,.13);border-color:rgba(23,56,62,.32)}
   .nk-home-topbar__route-tools .ia-live-edit-button{width:62px;height:38px;grid-template-columns:18px auto;grid-template-rows:1fr;gap:5px;color:#a84e35;background:rgba(255,255,255,.32);border-color:rgba(168,78,53,.4);font-size:12px;letter-spacing:0;text-transform:none}
   .nk-home-topbar__route-tools .ia-live-edit-button svg{width:16px;height:16px}
@@ -257,6 +258,9 @@
   .nk-contact-header-preview.is-desktop-collapsed{max-height:0;opacity:0;visibility:hidden;pointer-events:none;border-bottom:0;transition:max-height .3s cubic-bezier(.7,0,.84,0),opacity .16s ease,visibility 0s linear .3s}
   .nk-contact-header-preview.is-desktop-open{opacity:1;visibility:visible;box-shadow:inset 0 0 0 2px rgba(223,135,83,.72);animation:nkDesktopHighlightsExpand .36s cubic-bezier(.16,1,.3,1) both}
   .nk-contact-header-preview.is-desktop-open::before{content:"";position:absolute;z-index:4;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,#df8753 0%,#f3bd73 50%,#df8753 100%);pointer-events:none;animation:nkDesktopHighlightsRail .46s cubic-bezier(.16,1,.3,1) both}
+  .ia-header--home-preview.is-header-panel-swap :is(.nk-main-header-preview,.nk-contact-header-preview){transition:none}
+  .ia-header--home-preview.is-header-panel-swap :is(.nk-main-header-preview,.nk-contact-header-preview).is-desktop-open,
+  .ia-header--home-preview.is-header-panel-swap :is(.nk-main-header-preview,.nk-contact-header-preview).is-desktop-open::before{animation:none}
   .nk-contact-header-story{height:clamp(210px,10.75vw,220px);display:grid;grid-template-columns:minmax(270px,29%) minmax(0,48%) minmax(230px,23%);overflow:hidden}
   .nk-contact-header-story__copy{min-width:0;display:flex;flex-direction:column;justify-content:center;padding:18px clamp(24px,3vw,58px)}
   .nk-contact-header-story__copy p{margin:0;color:#b75636;font:760 12px/1 var(--campaign-mono);letter-spacing:.1em}

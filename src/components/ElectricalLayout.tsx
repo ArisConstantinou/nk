@@ -186,6 +186,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopHeaderPanel, setDesktopHeaderPanel] = useState<DesktopHeaderPanel>(() => storedDesktopStoryVisibility() ? 'highlights' : null);
+  const [desktopPanelSwap, setDesktopPanelSwap] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => window.matchMedia('(min-width: 901px)').matches);
   const [searchAnchor, setSearchAnchor] = useState({left: 0, width: 0});
@@ -208,6 +209,11 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const interactionProfile = routeInteractionForPath(location.pathname);
   const desktopStoryOpen = desktopHeaderPanel === 'highlights';
   const desktopContactOpen = desktopHeaderPanel === 'contact';
+  const toggleDesktopHeaderPanel = (target: Exclude<DesktopHeaderPanel, null>) => {
+    const next = desktopHeaderPanel === target ? null : target;
+    setDesktopPanelSwap(desktopHeaderPanel !== null && next !== null && desktopHeaderPanel !== next);
+    setDesktopHeaderPanel(next);
+  };
 
   useEffect(() => {
     window.localStorage.setItem('nk-desktop-header-story-open', String(desktopStoryOpen));
@@ -467,7 +473,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     style={interactionStyle}
   >
     <SeoRouteMeta/>
-    <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${useModernHeader ? 'ia-header--modern ia-header--home-preview' : ''} ${showHeaderStory ? 'ia-header--has-story' : 'ia-header--route-preview'}`} ref={headerRef}>
+    <header className={`ia-header ${settings.header.sticky ? '' : 'ia-header--static'} ${useModernHeader ? 'ia-header--modern ia-header--home-preview' : ''} ${showHeaderStory ? 'ia-header--has-story' : 'ia-header--route-preview'} ${desktopPanelSwap ? 'is-header-panel-swap' : ''}`.trim()} ref={headerRef}>
       {useModernHeader && <>
         <div className={`nk-home-topbar ${isHomeRoute ? '' : 'nk-home-topbar--route'} ${desktopStoryOpen ? 'is-highlights-open' : ''} ${desktopContactOpen ? 'is-contact-open' : ''}`.trim()}>
           <Link className="nk-home-topbar__brand" to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`}>
@@ -489,8 +495,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
                 <div className="nk-home-topbar__control-rail">
                   <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                   <div className="nk-home-topbar__panel-switcher" role="group" aria-label="Header stories">
-                    <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'highlights' ? null : 'highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
-                    <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'contact' ? null : 'contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
+                    <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => toggleDesktopHeaderPanel('highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
+                    <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => toggleDesktopHeaderPanel('contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
                   </div>
                 </div>
               </div>
@@ -501,8 +507,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
                 <div className="nk-home-topbar__control-rail">
                   <ThemeSwitcher className="ia-theme-selector--header nk-modern-route-theme"/>
                   <div className="nk-home-topbar__panel-switcher" role="group" aria-label="Header stories">
-                    <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'highlights' ? null : 'highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
-                    <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => setDesktopHeaderPanel(panel => panel === 'contact' ? null : 'contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
+                    <button className="nk-home-topbar__story-toggle" type="button" aria-label={desktopStoryOpen ? 'Hide highlights' : 'Show highlights'} aria-expanded={desktopStoryOpen} aria-controls="nk-desktop-header-story" onClick={() => toggleDesktopHeaderPanel('highlights')}><span>Highlights</span><ChevronDown aria-hidden="true"/></button>
+                    <button className="nk-home-topbar__story-toggle nk-home-topbar__contact-toggle" type="button" aria-label={desktopContactOpen ? 'Hide contact options' : 'Show contact options'} aria-expanded={desktopContactOpen} aria-controls="nk-desktop-contact-story" onClick={() => toggleDesktopHeaderPanel('contact')}><span>Contact</span><ChevronDown aria-hidden="true"/></button>
                   </div>
                 </div>
               </div>}
