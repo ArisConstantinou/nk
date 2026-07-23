@@ -66,6 +66,24 @@ type Campaign = {
 
 const serviceImage = (slug: string) => `assets/heroes/${slug}.webp`;
 
+const INSTALLATION_STEPS = [
+  {
+    image: 'assets/generated/electrical-installation-story/02-marking.webp',
+    alt: 'Electrician setting out power routes and outlet positions on a new-build wall',
+    detail: 'Set loads, outlets and routes before equipment selection.',
+  },
+  {
+    image: 'assets/generated/electrical-installation-story/05-wiring.webp',
+    alt: 'Electrician wiring prepared containment and electrical outlet boxes',
+    detail: 'Install containment, cabling and protection before walls close.',
+  },
+  {
+    image: 'assets/generated/electrical-installation-story/08-lights-on.webp',
+    alt: 'Completed electrical installation with tested sockets and wall lighting',
+    detail: 'Inspect every circuit and prove the system before handover.',
+  },
+] as const;
+
 function CampaignHeroImage({campaign}: {campaign: Campaign}) {
   const fallbackSrc = campaign.id === '10' ? publicAsset('assets/projects/residential-exterior.webp') : '';
   return <ResponsiveImage
@@ -203,7 +221,13 @@ function InstallationHeader({campaign}: {campaign: Campaign}) {
   return <div className="nk-campaign-design nk-campaign-design--installation">
     <header><Brand compact/><span><Zap/> NEW BUILD / RENOVATION</span></header>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
-    <div className="nk-installation-board">{campaign.points.map((point, index) => <span key={point}><b>0{index + 1}</b><CircuitBoard/><strong>{point}</strong><small>{index === 0 ? 'Before equipment selection' : index === 1 ? 'Before walls close' : 'Before handover'}</small></span>)}</div>
+    <div className="nk-installation-board">{campaign.points.map((point, index) => {
+      const step = INSTALLATION_STEPS[index];
+      return <article key={point}>
+        <span className="nk-installation-board__image"><ResponsiveImage src={step.image} alt={step.alt} loading="eager" decoding="async"/></span>
+        <span className="nk-installation-board__copy"><b>0{index + 1}</b><strong>{point}</strong><small>{step.detail}</small></span>
+      </article>;
+    })}</div>
     <aside><ResponsiveImage src={campaign.image} alt={campaign.alt} loading="eager" decoding="async" fetchPriority="high"/><span><Check/> TESTED HANDOVER</span></aside>
   </div>;
 }
@@ -270,15 +294,18 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
       {campaign.points.slice(0, 3).map((point, index) => {
         const offerProduct = offerProducts[index];
         const offerImage = offerProduct ? OFFER_SHOWCASE_CUTOUTS[offerProduct.id] || offerProduct.image : '';
-        return <article className={offerProduct ? 'has-offer-preview' : undefined} key={point}>
+        const installationStep = campaign.id === '09' ? INSTALLATION_STEPS[index] : undefined;
+        return <article className={offerProduct ? 'has-offer-preview' : installationStep ? 'has-step-preview' : undefined} key={point}>
           <b>0{index + 1}</b>
           {offerProduct
             ? <Link className="nk-unified-story__offer-thumb" to={`/shop/product/${encodeURIComponent(offerProduct.id)}`} aria-label={`View offer: ${offerProduct.name}`}>
                 <ResponsiveImage src={offerImage} alt="" loading="eager" decoding="async"/>
               </Link>
-            : <StoryIcon aria-hidden="true"/>}
+            : installationStep
+              ? <span className="nk-unified-story__step-thumb"><ResponsiveImage src={installationStep.image} alt={installationStep.alt} loading="eager" decoding="async"/></span>
+              : <StoryIcon aria-hidden="true"/>}
           <strong>{point}</strong>
-          <small>{offerProduct ? offerProduct.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'") : details[index]}</small>
+          <small>{offerProduct ? offerProduct.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'") : installationStep?.detail || details[index]}</small>
         </article>;
       })}
     </div>
