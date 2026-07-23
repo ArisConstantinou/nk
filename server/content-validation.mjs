@@ -131,7 +131,7 @@ function structuredSettings(data) {
     quoteLabel: optional(data.quoteLabel, 'quoteLabel', 80) || 'Request a Quote',
     quoteUrl: optionalUrl(data.quoteUrl, 'quoteUrl', {relative: true}) || '/request-a-quote',
     footerEyebrow: optional(data.footerEyebrow, 'footerEyebrow', 180) || 'PROJECT LINE / CYPRUS',
-    footerTitle: optional(data.footerTitle, 'footerTitle', 300) || 'Define the requirement. Then build it properly.',
+    footerTitle: optional(data.footerTitle, 'footerTitle', 300) || 'Tell us what you need. We will confirm the next step.',
     footerCtaLabel: optional(data.footerCtaLabel, 'footerCtaLabel', 120) || 'Request a Quote',
     footerCopyright: optional(data.footerCopyright, 'footerCopyright', 240) || 'NK Electrical Ltd. · Since 1985',
     phones: objectList(data.phones ?? [{id: 'primary-phone', label: 'Main', number: phone, active: true, primary: true}], 'phones', item => ({label: required(item.label, 'phone label', 80), number: required(item.number, 'phone number', 50), active: item.active !== false, primary: item.primary === true})),

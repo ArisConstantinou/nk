@@ -26,7 +26,6 @@ import './route-interactions.css';
 import './navigation-panels.css';
 import './unified-theme.css';
 import './header-responsive.css';
-import './content-clarity.css';
 
 document.documentElement.dataset.experience = 'tech';
 applyTheme(getThemePreference());

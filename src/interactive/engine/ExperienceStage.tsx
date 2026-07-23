@@ -395,7 +395,7 @@ function Placeholder({layer}: {layer: ExperienceLayer}) {
     <rect width={width} height={height} rx={Math.min(width, height) * 0.035} fill={layer.fill || 'rgba(15,31,42,.64)'} stroke={layer.stroke || '#48d7ea'} strokeWidth={layer.strokeWidth || 4} strokeDasharray="18 12"/>
     <path d={`M 0 ${height * .73} C ${width * .23} ${height * .63}, ${width * .34} ${height * .84}, ${width * .56} ${height * .69} S ${width * .83} ${height * .72}, ${width} ${height * .59}`} fill="none" stroke={layer.stroke || '#48d7ea'} strokeWidth={Math.max(3, (layer.strokeWidth || 4) * .65)} opacity=".34"/>
     <text x={width / 2} y={height / 2 - 10} textAnchor="middle" dominantBaseline="middle" fill="#f5f8fa" fontSize={Math.max(24, Math.min(64, width / 12))} fontWeight="700">{label}</text>
-    <text x={width / 2} y={height / 2 + 48} textAnchor="middle" dominantBaseline="middle" fill="#9eb2bd" fontSize={Math.max(18, Math.min(30, width / 22))}>PLACEHOLDER · REPLACE FROM ASSET LIBRARY</text>
+    <text x={width / 2} y={height / 2 + 48} textAnchor="middle" dominantBaseline="middle" fill="#9eb2bd" fontSize={Math.max(18, Math.min(30, width / 22))}>VISUAL PROCESS STEP</text>
   </g>;
 }
 

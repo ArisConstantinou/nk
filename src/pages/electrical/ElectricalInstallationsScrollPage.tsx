@@ -18,14 +18,14 @@ type ElectricalInstallationsScrollPageProps = {
 };
 
 const stages = [
-  {label: 'Raw structure', title: 'Start with what is real.', copy: 'An uneven masonry wall. A clean concrete datum. Nothing hidden.', asset: '01-rough-wall.webp', focal: 50},
-  {label: 'Mark', title: 'Measure. Mark. Commit.', copy: 'Every switch, socket and lighting point finds its exact line before the wall is touched.', asset: '02-marking.webp', focal: 34},
-  {label: 'Chase', title: 'Cut only with purpose.', copy: 'Straight chases, controlled depth and safe zones turn the drawing into architecture.', asset: '03-chases.webp', focal: 50},
-  {label: 'Conduit', title: 'Build the pathways.', copy: 'Conduit creates a protected, serviceable route through the structure.', asset: '04-conduit.webp', focal: 50},
-  {label: 'Wire', title: 'Pull the conductors.', copy: 'Modern harmonised wiring is identified, protected and prepared for precise termination.', asset: '05-wiring.webp', focal: 78},
-  {label: 'Finish', title: 'Make the wall whole.', copy: 'The routes are tested, sealed, skimmed and painted until the work disappears.', asset: '06-patch-paint.webp', focal: 50},
-  {label: 'Fit', title: 'Controls land perfectly.', copy: 'UK/Cyprus sockets and switches sit level, secure and ready for everyday use.', asset: '07-fittings.webp', focal: 50},
-  {label: 'Light', title: 'Bring the space alive.', copy: 'One final test. Then the architecture answers with warm, controlled light.', asset: '08-lights-on.webp', focal: 50},
+  {label: 'Site review', title: 'Review the existing conditions.', copy: 'We confirm the room, drawings, supply, access and intended use before installation starts.', asset: '01-rough-wall.webp', focal: 50},
+  {label: 'Set out', title: 'Measure and mark the agreed positions.', copy: 'Switches, sockets, lighting points and cable routes are confirmed on site before cutting begins.', asset: '02-marking.webp', focal: 34},
+  {label: 'First fix', title: 'Prepare routes and back-box positions.', copy: 'Chases and recesses follow the approved layout, safe zones and required depths.', asset: '03-chases.webp', focal: 50},
+  {label: 'Containment', title: 'Install protected cable routes.', copy: 'Conduit and containment connect distribution, control points and final outlets while keeping the installation serviceable.', asset: '04-conduit.webp', focal: 50},
+  {label: 'Cabling', title: 'Pull, identify and prepare conductors.', copy: 'Conductors are installed through the prepared routes, identified and left ready for termination.', asset: '05-wiring.webp', focal: 78},
+  {label: 'Inspection', title: 'Check the first fix before closing walls.', copy: 'Routes, boxes and cabling are checked against the agreed layout before plaster and finishes are restored.', asset: '06-patch-paint.webp', focal: 50},
+  {label: 'Second fix', title: 'Fit accessories and complete connections.', copy: 'Sockets, switches, luminaires and controls are installed level, secure and ready for testing.', asset: '07-fittings.webp', focal: 50},
+  {label: 'Handover', title: 'Inspect, test and demonstrate the system.', copy: 'Circuits and controls are verified, operation is explained and the completed installation is handed over.', asset: '08-lights-on.webp', focal: 50},
 ] as const;
 
 const stageImages = stages.map(stage => publicAsset(`assets/generated/electrical-installation-story/${stage.asset}`));
@@ -114,16 +114,16 @@ export function ElectricalInstallationsScrollPage({title, description, actionLab
       <div className="installation-story__hero-shade" aria-hidden="true"/>
       <div className="installation-story__hero-copy">
         <span><Zap/> NK / ELECTRICAL INSTALLATIONS / CYPRUS</span>
-        <h1 id="installation-story-title">Power,<br/><em>built into</em><br/>the architecture.</h1>
+        <h1 id="installation-story-title">From site review,<br/><em>through wiring</em><br/>to tested handover.</h1>
         <p>{description}</p>
       </div>
-      <div className="installation-story__scroll-cue"><ArrowDown/><span>Scroll to build</span><i/></div>
+      <div className="installation-story__scroll-cue"><ArrowDown/><span>Scroll through the work</span><i/></div>
     </section>
 
     <section className="installation-story__manifesto" aria-label="Installation principle">
-      <span>THE WORK BEHIND THE WALL</span>
-      <h2>The best electrical work <em>disappears.</em><br/>The result never does.</h2>
-      <p>One controlled sequence - from the first mark to the moment the room comes alive.</p>
+      <span>THE WORK FROM FIRST FIX TO HANDOVER</span>
+      <h2>A clear electrical installation <em>follows a tested sequence.</em><br/>Each stage is checked before the next begins.</h2>
+      <p>Follow the site review, setting out, first fix, second fix, testing and handover.</p>
     </section>
 
     {motionPreference === 'reduced' ? <ReducedInstallationStory/> : <section className="installation-story__timeline" ref={timelineRef} aria-label="Scroll through the electrical installation">
@@ -170,9 +170,9 @@ export function ElectricalInstallationsScrollPage({title, description, actionLab
       <img src={stageImages[7]} alt="Completed electrical installation with four warm wall lights" loading="lazy"/>
       <div className="installation-story__outcome-shade" aria-hidden="true"/>
       <div>
-        <span><CheckCircle2/> TESTED / FINISHED / READY</span>
-        <h2 id="installation-outcome-title">From raw structure.<br/><em>To living light.</em></h2>
-        <p>Plan the routes, protect the system and finish every visible detail with one accountable electrical team.</p>
+        <span><CheckCircle2/> INSPECTED / TESTED / HANDED OVER</span>
+        <h2 id="installation-outcome-title">From initial site review.<br/><em>To a tested installation.</em></h2>
+        <p>Share the property, project stage, drawings and target timing. We review the brief and confirm the next survey or scope call.</p>
         <Link to="/request-a-quote?service=electrical-installations"><span>{actionLabel}</span><ArrowRight/></Link>
       </div>
     </section>

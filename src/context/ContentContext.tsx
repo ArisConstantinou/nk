@@ -65,7 +65,7 @@ const defaultSettings: SiteSettings = {
   quoteLabel: 'Request a Quote',
   quoteUrl: '/request-a-quote',
   footerEyebrow: 'PROJECT LINE / CYPRUS',
-  footerTitle: 'Define the requirement. Then build it properly.',
+  footerTitle: 'Tell us what you need. We will confirm the next step.',
   footerCtaLabel: 'Request a Quote',
   footerCopyright: 'NK Electrical Ltd. · Since 1985',
   phones: [{id: 'primary-phone', label: 'Main', number: '+357 22 494145', active: true, primary: true}],

@@ -62,11 +62,11 @@ export function ExperiencePresentation({document, motion = 'full', initialSectio
     aria-label={document.title}
   >
     <header className="ix-presentation__bar">
-      <div><small>INTERACTIVE EXPERIENCE</small><strong>{document.title}</strong></div>
+      <div><small>INSTALLATION PROCESS</small><strong>{document.title}</strong></div>
       <div className="ix-presentation__modes" role="group" aria-label="Stage view">
         {editingPreview && <button type="button" onClick={onExitPreview}>Back to editor</button>}
         <button type="button" className={mode === 'page' ? 'active' : ''} onClick={() => setMode('page')} aria-label="Page view"><Minimize2/><span>Page</span></button>
-        <button type="button" className={mode === 'focus' ? 'active' : ''} onClick={() => setMode('focus')} aria-label="Theater view"><Focus/><span>Theater</span></button>
+        <button type="button" className={mode === 'focus' ? 'active' : ''} onClick={() => setMode('focus')} aria-label="Focus view"><Focus/><span>Focus</span></button>
         <button type="button" onClick={() => void toggleFullscreen()} aria-label="Browser fullscreen"><Expand/><span>Fullscreen</span></button>
       </div>
     </header>

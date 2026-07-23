@@ -1,8 +1,8 @@
 export const homePaletteOptions = [
   {
-    id: 'nk-copper', number: '01', code: 'NK-01', label: 'Copper current', context: 'NK Electrical signature',
+    id: 'nk-copper', number: '01', code: 'NK-01', label: 'Warm hospitality lighting', context: 'Completed hospitality project',
     image: 'assets/generated/hospitality-project.webp', alt: 'Warm hospitality lighting project', route: '/projects',
-    detail: 'Graphite, warm copper, brass and mineral ivory create one consistent professional identity.',
+    detail: 'This completed project combines warm light with copper, brass and mineral finishes.',
     colors: ['#E06B4D', '#D8A467', '#F2EEE6', '#17343A', '#11191C'],
   },
 ] as const;

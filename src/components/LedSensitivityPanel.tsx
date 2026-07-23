@@ -146,7 +146,7 @@ export function LedSensitivityPanel() {
   >
     <div className="led-rgb-console">
       <div className="led-lab-heading">
-        <h2 id="led-lab-title">Set the colour.<br/><em>See the room respond.</em></h2>
+        <h2 id="led-lab-title">Compare the light.<br/><em>See the room change.</em></h2>
       </div>
 
       <div className="rgb-remote-stage">
@@ -269,7 +269,7 @@ export function LedSensitivityPanel() {
           >{effectLabels[value]}</button>)}
         </div>
 
-        <p className="rgb-control-note">Use the remote wheel or presets, then fine-tune brightness and movement here. Every change is visible in the room above.</p>
+        <p className="rgb-control-note">Try a colour preset, then adjust brightness and movement. Use the comparison to discuss colour, output and effect before the lighting is specified.</p>
       </div>
     </div>
   </section>;

@@ -47,9 +47,9 @@ function LightingSignature() {
     <div className="service-signature__intro">
       <SignatureHeading
         code="SRV-02"
-        eyebrow="Live light study"
-        title="See the architecture hold the light."
-        body="Adjust a concealed linear channel and watch the wall wash, shadow edge and floor reflection respond together."
+        eyebrow="Interactive lighting example"
+        title="Compare brightness and colour temperature."
+        body="Adjust output and 2700K, 3000K or 4000K to see how one concealed light changes the wall, shadow and floor."
       />
       <div className="lighting-controls" aria-label="Lighting controls">
         <button type="button" className={powered ? 'is-active' : ''} onClick={() => setPowered(value => !value)} aria-pressed={powered}>
@@ -114,9 +114,9 @@ function AutomationSignature() {
     <div className="service-signature__intro">
       <SignatureHeading
         code="SRV-03"
-        eyebrow="Scene orchestrator"
-        title="One action. The whole room responds."
-        body="Try a scene to coordinate lighting, shading, climate and security as one calm control strategy."
+        eyebrow="Interactive automation example"
+        title="Test how one scene coordinates the room."
+        body="Choose a routine to see lighting, blinds, climate and security respond together before the control strategy is specified."
       />
       <div className="automation-scenes" role="group" aria-label="Select a room scene">
         {(Object.keys(automationScenes) as Array<keyof typeof automationScenes>).map(key => <button
@@ -166,9 +166,9 @@ function SecuritySignature() {
     <div className="service-signature__intro">
       <SignatureHeading
         code="SRV-04"
-        eyebrow="Coverage planner"
-        title="Protection starts with what can be seen."
-        body="Select a zone to test camera position, coverage overlap and the response path before hardware is fixed."
+        eyebrow="Interactive CCTV example"
+        title="Check camera coverage before installation."
+        body="Select a zone to see how camera position, blind spots and the response path are reviewed before equipment is fixed."
       />
       <div className="security-zones" role="group" aria-label="Select a security zone">
         {(Object.keys(securityZones) as Array<keyof typeof securityZones>).map(key => <button
@@ -220,9 +220,9 @@ function MaintenanceSignature() {
     <div className="service-signature__intro">
       <SignatureHeading
         code="SRV-05"
-        eyebrow="Fault trace"
-        title="Test the system. Isolate the cause."
-        body="Walk the diagnostic path from supply to load and see how measured evidence narrows a fault."
+        eyebrow="Interactive diagnostic example"
+        title="Trace a fault from supply to load."
+        body="Run each test to see how supply, protection, circuit and load measurements narrow the likely cause."
       />
       <button type="button" className="diagnostic-action" onClick={advance}>
         {complete ? <RotateCcw/> : <Play/>}
@@ -256,9 +256,9 @@ function InstallationSignature() {
     <div className="service-signature__intro">
       <SignatureHeading
         code="SRV-01"
-        eyebrow="Circuit route"
-        title="Plan the load before pulling the cable."
-        body="A compact route from incoming supply to protected final circuits."
+        eyebrow="Installation route example"
+        title="Follow the route from supply to final circuit."
+        body="This example shows how distribution and protection sit between the incoming supply and the circuits used in the property."
       />
     </div>
     <div className="installation-route">
