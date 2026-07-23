@@ -538,3 +538,32 @@ html[data-theme='light'] .ia-shell :is(
 .about-page .about-history__title>a{font-size:12px!important}
 .about-page .about-team__role{font-size:12px!important;line-height:1.45!important}
 .about-page .about-team__actions a{font-size:12px!important}
+
+/* Preserve the dedicated mobile shop-filter hierarchy after the global action system. */
+@media(max-width:820px){
+  .ia-shell .shop-filter-panel .filter-row button,
+  .ia-shell .catalogue-mobile-filter-panel .catalogue-filter-chips button{
+    min-height:48px!important;
+  }
+  .ia-shell .catalogue-controls .catalogue-mobile-filter-toggle{
+    min-height:72px!important;
+    padding:11px 13px!important;
+    border:1px solid var(--system-line)!important;
+    border-radius:0!important;
+    background:color-mix(in srgb,var(--system-live) 6%,var(--system-surface))!important;
+    color:var(--system-ink)!important;
+  }
+  .ia-shell .catalogue-controls .catalogue-mobile-filter-actions button{
+    min-height:54px!important;
+    padding:0 12px!important;
+    border:1px solid var(--system-line)!important;
+    border-radius:0!important;
+    background:var(--system-surface)!important;
+    color:var(--system-ink)!important;
+  }
+  .ia-shell .catalogue-controls .catalogue-mobile-filter-actions button:last-child{
+    border-color:var(--page-accent,var(--system-live))!important;
+    background:var(--page-accent,var(--system-live))!important;
+    color:var(--page-accent-ink,var(--system-accent-ink))!important;
+  }
+}

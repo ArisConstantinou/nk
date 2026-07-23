@@ -294,6 +294,7 @@ export function ExplorePage() {
   const space = params.get('space') || 'All';
   const viewAll = params.get('view') === 'all';
   const [visibleCount, setVisibleCount] = useState(48);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
   const setViewAll = (enabled: boolean) => {
     const next = new URLSearchParams(params);
@@ -303,6 +304,13 @@ export function ExplorePage() {
   };
   const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
   const shown = viewAll ? filtered : filtered.slice(0, visibleCount);
+  const selectedFilters = {category, season, space};
+  const activeFilterCount = Object.values(selectedFilters).filter(value => value !== 'All').length;
+  const clearFilters = () => {
+    const next = new URLSearchParams(params);
+    ['category', 'season', 'space'].forEach(key => next.delete(key));
+    setParams(next);
+  };
   useEffect(() => setVisibleCount(48), [category, season, space]);
   return <>
     <PageIntro eyebrow="NK Electrical Shop" title="Products organised" italic="for practical browsing." body="Browse products only: lighting, coffee, kitchen, cooling and household equipment. Installation and design expertise remains under Services."/>
@@ -315,7 +323,38 @@ export function ExplorePage() {
           <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={() => setViewAll(true)}>View all</button>
         </div>
       </div>
-      {Object.entries(filterValues).map(([key, values]) => <div className="filter-row" key={key}><b>{key}</b><div>{values.map(value => <button className={(key === 'category' ? category : key === 'season' ? season : space) === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div></div>)}
+      <button
+        type="button"
+        className={`shop-mobile-filter-toggle${filtersOpen ? ' is-open' : ''}`}
+        aria-expanded={filtersOpen}
+        aria-controls="shop-mobile-filter-panel"
+        onClick={() => setFiltersOpen(open => !open)}
+      >
+        <span className="shop-mobile-filter-toggle__title">
+          <SlidersHorizontal/>
+          <span><small>Filters &amp; categories</small><strong>{activeFilterCount ? `${activeFilterCount} active` : 'All products'}</strong></span>
+        </span>
+        <span className="shop-mobile-filter-toggle__result">{filtered.length} results</span>
+        <ChevronDown/>
+      </button>
+      <div id="shop-mobile-filter-panel" className={`shop-filter-panel${filtersOpen ? ' is-mobile-open' : ''}`}>
+        {Object.entries(filterValues).map(([key, values]) => {
+          const selectedValue = selectedFilters[key as keyof typeof selectedFilters];
+          return <div className="filter-row" key={key}>
+            <b><span>{key}</span><em>{selectedValue}</em></b>
+            <div>{values.map(value => <button type="button" aria-pressed={selectedValue === value} className={selectedValue === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div>
+          </div>;
+        })}
+        <div className="shop-mobile-view-mode" aria-label="Number of products shown">
+          <span>Display</span>
+          <button type="button" className={!viewAll ? 'active' : ''} aria-pressed={!viewAll} onClick={() => setViewAll(false)}>48 at a time</button>
+          <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={() => setViewAll(true)}>View all</button>
+        </div>
+        <div className="shop-mobile-filter-actions">
+          <button type="button" className="shop-mobile-filter-clear" disabled={!activeFilterCount} onClick={clearFilters}>Clear all</button>
+          <button type="button" className="shop-mobile-filter-apply" onClick={() => setFiltersOpen(false)}>Show {filtered.length} products <ArrowRight/></button>
+        </div>
+      </div>
     </section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
     <section className="product-grid section">{shown.map(product => <article className="product-card-share-shell" key={product.id}><ProductCard item={product}/><ProductShareActions product={product}/></article>)}</section>

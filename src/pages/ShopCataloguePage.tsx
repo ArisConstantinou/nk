@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from 'react';
-import {ArrowRight, ArrowUpRight, BadgePercent, FileText, Package, Search, SlidersHorizontal, Sparkles} from 'lucide-react';
+import {ArrowRight, ArrowUpRight, BadgePercent, ChevronDown, FileText, Package, Search, SlidersHorizontal, Sparkles} from 'lucide-react';
 import {Link, useLocation, useParams} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import {ProductShareActions} from '../components/ProductShareActions';
@@ -21,6 +21,7 @@ export function ModernShopCategoryPage() {
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [visibleCount, setVisibleCount] = useState(36);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const mode = isOffers ? 'offers' : isLighting ? 'lighting' : 'appliances';
   const pageVisual = pageVisualForPath(location.pathname);
 
@@ -68,8 +69,25 @@ export function ModernShopCategoryPage() {
 
     <section className="catalogue-controls section" aria-label="Product filters">
       <label className="catalogue-search"><Search/><span className="sr-only">Search products</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${isOffers ? 'offers' : mode}…`}/>{query && <button type="button" onClick={() => setQuery('')}>Clear</button>}</label>
-      <div className="catalogue-filter-heading"><span><SlidersHorizontal/> Browse by collection</span><b>{filtered.length} {filtered.length === 1 ? 'result' : 'results'}</b></div>
-      <div className="catalogue-filter-chips">{categories.map(value => <button type="button" className={selectedCategory === value ? 'active' : ''} onClick={() => setSelectedCategory(value)} key={value}>{value}</button>)}</div>
+      <button
+        type="button"
+        className={`catalogue-mobile-filter-toggle${filtersOpen ? ' is-open' : ''}`}
+        aria-expanded={filtersOpen}
+        aria-controls="catalogue-mobile-filter-panel"
+        onClick={() => setFiltersOpen(open => !open)}
+      >
+        <span><SlidersHorizontal/><span><small>Filter by collection</small><strong>{selectedCategory}</strong></span></span>
+        <b>{filtered.length} {filtered.length === 1 ? 'result' : 'results'}</b>
+        <ChevronDown/>
+      </button>
+      <div id="catalogue-mobile-filter-panel" className={`catalogue-mobile-filter-panel${filtersOpen ? ' is-mobile-open' : ''}`}>
+        <div className="catalogue-filter-heading"><span><SlidersHorizontal/> Browse by collection</span><b>{filtered.length} {filtered.length === 1 ? 'result' : 'results'}</b></div>
+        <div className="catalogue-filter-chips">{categories.map(value => <button type="button" aria-pressed={selectedCategory === value} className={selectedCategory === value ? 'active' : ''} onClick={() => setSelectedCategory(value)} key={value}>{value}</button>)}</div>
+        <div className="catalogue-mobile-filter-actions">
+          <button type="button" disabled={selectedCategory === 'All'} onClick={() => setSelectedCategory('All')}>Clear</button>
+          <button type="button" onClick={() => setFiltersOpen(false)}>Show {filtered.length} products <ArrowRight/></button>
+        </div>
+      </div>
     </section>
 
     <section className="catalogue-product-grid section" aria-live="polite">
