@@ -251,6 +251,7 @@ const unifiedStoryIcons: Record<HeaderCampaignId, typeof Zap> = {
 function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
   const StoryIcon = unifiedStoryIcons[campaign.id];
   const details = unifiedStoryDetails[campaign.id];
+  const offerProducts = campaign.id === '03' ? (campaign.products || []).slice(0, 3) : [];
   return <div className={`nk-campaign-design nk-campaign-design--unified nk-campaign-design--unified-${campaign.slug}`} data-unified-story={campaign.id}>
     <section className="nk-unified-story__copy">
       <p>{campaign.kicker}</p>
@@ -259,12 +260,19 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
       <div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div>
     </section>
     <div className="nk-unified-story__board">
-      {campaign.points.slice(0, 3).map((point, index) => <article key={point}>
-        <b>0{index + 1}</b>
-        <StoryIcon aria-hidden="true"/>
-        <strong>{point}</strong>
-        <small>{details[index]}</small>
-      </article>)}
+      {campaign.points.slice(0, 3).map((point, index) => {
+        const offerProduct = offerProducts[index];
+        return <article className={offerProduct ? 'has-offer-preview' : undefined} key={point}>
+          <b>0{index + 1}</b>
+          {offerProduct
+            ? <Link className="nk-unified-story__offer-thumb" to={`/shop/product/${encodeURIComponent(offerProduct.id)}`} aria-label={`View offer: ${offerProduct.name}`}>
+                <ResponsiveImage src={offerProduct.image} alt="" loading="eager" decoding="async"/>
+              </Link>
+            : <StoryIcon aria-hidden="true"/>}
+          <strong>{point}</strong>
+          <small>{offerProduct ? offerProduct.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'") : details[index]}</small>
+        </article>;
+      })}
     </div>
     <figure className="nk-unified-story__media">
       <CampaignHeroImage campaign={campaign}/>
