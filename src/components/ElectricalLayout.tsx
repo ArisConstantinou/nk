@@ -483,7 +483,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <div className="nk-home-topbar__search">
             {isDesktopViewport && <GlobalLiveSearch
               className="nk-home-topbar__live-search"
-              lockPageScroll
               maxResults={10}
               labels={{input: 'Search products, images, catalogues and PDFs', placeholder: 'Search products, catalogues & PDFs'}}
             />}
