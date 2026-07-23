@@ -977,6 +977,10 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
   margin:0;
   clip-path:none;
 }
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art img{
+  object-fit:contain;
+  object-position:right center!important;
+}
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art__wash{
   background:linear-gradient(90deg,rgba(43,18,25,.88),rgba(43,18,25,.14) 66%),linear-gradient(0deg,rgba(43,18,25,.94),transparent 62%);
 }
@@ -1601,6 +1605,13 @@ html[data-experience='tech'] .ia-shell .system-page-intro:is(
     outline:0;
     box-shadow:none;
   }
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art{
+    width:100vw;
+    max-width:100vw;
+    min-height:0;
+    aspect-ratio:1672 / 941;
+    justify-self:start;
+  }
   html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art__wash{
     background:linear-gradient(0deg,color-mix(in srgb,var(--page-deep) 64%,transparent),transparent 50%);
   }
@@ -1663,6 +1674,7 @@ html[data-experience='tech'] .ia-shell .system-page-intro:is(
     letter-spacing:-.035em;
   }
   html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art{min-height:340px}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art{min-height:0}
   html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art figcaption{display:block}
   html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art figcaption strong{display:block;margin-top:7px;text-align:left}
   .ia-shell .catalogue-hero[data-hero-composition]{padding-top:42px}
