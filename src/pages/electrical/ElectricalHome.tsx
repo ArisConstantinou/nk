@@ -27,7 +27,7 @@ const systems = [
     short: 'Power',
     route: '/services/electrical-installations',
     Icon: PlugZap,
-    detail: 'We plan loads and circuits, coordinate distribution and wiring, then inspect, test and hand over the completed installation.',
+    detail: 'Loads, distribution, wiring, protection, testing and handover.',
     signal: 'Survey → scope → install → test',
   },
   {
@@ -36,7 +36,7 @@ const systems = [
     short: 'Light',
     route: '/services/lighting-design',
     Icon: Lightbulb,
-    detail: 'We plan lighting layers, layouts, fittings, colour temperature and controls so the space works without glare or guesswork.',
+    detail: 'Layouts, fittings, colour temperature, glare control and scenes.',
     signal: 'Review → plan → specify → coordinate',
   },
   {
@@ -45,19 +45,39 @@ const systems = [
     short: 'Control',
     route: '/services/smart-home-automation',
     Icon: CircuitBoard,
-    detail: 'We coordinate KNX, lighting, shading, climate and security controls so daily routines work from simple scenes.',
+    detail: 'KNX controls for lighting, shading, climate and daily routines.',
     signal: 'Map → connect → programme → test',
   },
   {
-    code: 'MNT-04',
+    code: 'SEC-04',
+    label: 'Security systems',
+    short: 'Safety',
+    route: '/services/security-systems',
+    Icon: ShieldCheck,
+    detail: 'CCTV, alarms, access control and entry systems.',
+    signal: 'Review → cover → install → test',
+  },
+  {
+    code: 'MNT-05',
     label: 'Maintenance & fault support',
     short: 'Support',
     route: '/services/maintenance',
     Icon: Wrench,
-    detail: 'We trace electrical faults, agree the corrective work, retest the system and plan maintenance that reduces repeat failures.',
+    detail: 'Fault finding, corrective repairs, retesting and planned maintenance.',
     signal: 'Report → diagnose → repair → retest',
   },
 ];
+
+const compactServicesTitle = 'Five services. One accountable team.';
+const compactServicesBody = 'We plan, install and support electrical, lighting, automation, security and maintenance systems.';
+const previousServicesTitles = new Set([
+  'Specialist services. One accountable team.',
+  'Choose the electrical work you need.',
+]);
+const previousServicesBodies = new Set([
+  'Services stay focused on planning, installation and support. Products and PDF catalogues follow a separate Shop path.',
+  'Each service page explains the practical scope, who it is for, the problem it solves and the details to send first.',
+]);
 
 const projects = [
   {name: 'Bank of Cyprus Head Offices', type: 'Commercial electrical + LED', image: 'assets/projects/archive/project-01.jpg'},
@@ -69,6 +89,8 @@ export default function ElectricalHome() {
   const {content, pageForRoute} = useContent();
   const theme = content.themeContent.tech;
   const homepage = pageForRoute('/');
+  const servicesTitle = previousServicesTitles.has(theme.sectionTitle.trim()) ? compactServicesTitle : theme.sectionTitle;
+  const servicesBody = previousServicesBodies.has(theme.sectionBody.trim()) ? compactServicesBody : theme.sectionBody;
   const [activePaletteId, setActivePaletteId] = useState<HomePaletteId>(() => getHomePalette());
   const visualPalettes = homePaletteOptions.map(palette => ({...palette, image: palette.image ? publicAsset(palette.image) : content.heroImage}));
   const activePalette = Math.max(0, visualPalettes.findIndex(palette => palette.id === activePaletteId));
@@ -144,14 +166,14 @@ export default function ElectricalHome() {
       <Link to="/shop"><small>02 / SHOP</small><h2>Need a product or catalogue?</h2><p>Choose the Shop for lighting products, appliances and official catalogues.</p><span>Browse products and catalogues <ArrowRight/></span></Link>
     </section>
 
-    <section className="power-routing">
-      <header><span>01 / WHAT WE DO</span><h2 data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionTitle" data-visual-edit="text" data-visual-label="Capabilities heading" data-visual-multiline="true">{theme.sectionTitle}</h2><p data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionBody" data-visual-edit="text" data-visual-label="Capabilities description" data-visual-multiline="true">{theme.sectionBody}</p></header>
+    <section className="power-routing power-routing--compact" aria-labelledby="home-services-title">
+      <header><span>01 / SERVICES</span><h2 id="home-services-title" data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionTitle" data-visual-edit="text" data-visual-label="Capabilities heading" data-visual-multiline="true">{servicesTitle}</h2><p data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionBody" data-visual-edit="text" data-visual-label="Capabilities description" data-visual-multiline="true">{servicesBody}</p></header>
       <div className="power-routing-map">
         {systems.map((system, index) => <Link to={system.route} className="power-route" key={system.code}>
           <span className="power-route-index">{String(index + 1).padStart(2, '0')}</span>
           <span className="power-route-icon"><system.Icon/></span>
           <span className="power-route-copy"><small>{system.code}</small><strong>{system.label}</strong><p>{system.detail}</p></span>
-          <span className="power-route-state"><i/>Service page</span>
+          <span className="power-route-state"><i/>{system.short}</span>
           <ArrowDownRight/>
         </Link>)}
       </div>
@@ -174,7 +196,7 @@ export default function ElectricalHome() {
       <div className="power-assurance-grid">
         <div><Gauge/><b>40+</b><span>Years supporting homes and businesses</span></div>
         <div><Box/><b>50+</b><span>Projects coordinated each year</span></div>
-        <div><ShieldCheck/><b>4</b><span>Service routes shown above</span></div>
+        <div><ShieldCheck/><b>5</b><span>Service routes shown above</span></div>
         <div><Waves/><b>1</b><span>Team from first survey to aftercare</span></div>
       </div>
     </section>
