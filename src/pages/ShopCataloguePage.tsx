@@ -4,7 +4,7 @@ import {Link, useLocation, useParams} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import {ProductShareActions} from '../components/ProductShareActions';
 import {pageVisualForPath} from '../pageVisuals';
-import {publicAsset} from '../utils/assets';
+import {isProductCutoutAsset, publicAsset} from '../utils/assets';
 
 function CatalogueHeroWords({text}: {text: string}) {
   const words = text.trim().split(/\s+/);
@@ -75,7 +75,7 @@ export function ModernShopCategoryPage() {
     <section className="catalogue-product-grid section" aria-live="polite">
       {shown.map((product, index) => <article className="catalogue-product-card-shell" key={product.id}>
         <Link to={`/shop/product/${product.id}`} className="catalogue-product-card">
-          <div className="catalogue-product-card__image"><img loading={index < 8 ? 'eager' : 'lazy'} src={product.image} alt={product.name} data-visual-kind="product" data-visual-slug={product.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/>{product.offer && <span className="catalogue-offer-badge"><BadgePercent/> Offer</span>}<i>View details <ArrowUpRight/></i></div>
+          <div className={`catalogue-product-card__image${isProductCutoutAsset(product.image) ? ' catalogue-product-card__image--cutout' : ' catalogue-product-card__image--photo'}`}><img loading={index < 8 ? 'eager' : 'lazy'} src={product.image} alt={product.name} data-visual-kind="product" data-visual-slug={product.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/>{product.offer && <span className="catalogue-offer-badge"><BadgePercent/> Offer</span>}<i>View details <ArrowUpRight/></i></div>
           <div className="catalogue-product-card__copy"><small>{product.legacyCategory || product.category}</small><h2 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h2><p>{product.note}</p><span>Product {String(index + 1).padStart(2, '0')} <ArrowRight/></span></div>
         </Link>
         <ProductShareActions product={product}/>
