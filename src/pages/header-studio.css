@@ -446,7 +446,7 @@
 }
 
 @media(min-width:901px) and (max-width:1180px){
-  .nk-home-topbar{grid-template-columns:minmax(180px,1fr) minmax(260px,560px) minmax(180px,1fr);gap:10px;padding-inline:14px}
+  .nk-home-topbar{grid-template-columns:208px minmax(0,1fr) 300px;gap:10px;padding-inline:14px}
   .nk-home-topbar__control-rail{margin-right:-14px}
   .nk-home-topbar__story-toggle{padding-left:10px}
   .nk-contact-header-story{grid-template-columns:minmax(260px,34%) minmax(0,66%)}
@@ -477,6 +477,11 @@
   .nk-main-header-preview .nk-campaign-design--projects>aside img{width:58px;height:54px}
   .nk-main-header-preview .nk-campaign-design--projects>aside strong{font-size:13px}
   .nk-main-header-preview .nk-campaign-design--projects>aside>a>svg{width:14px}
+}
+
+@media(min-width:1181px) and (max-width:1310px){
+  .nk-home-topbar{grid-template-columns:208px minmax(0,1fr) 300px;gap:10px;padding-inline:14px}
+  .nk-home-topbar__control-rail{margin-right:-14px}
 }
 
 /* The shared navigation modal stays dark and readable in both published themes. */
