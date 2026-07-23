@@ -96,11 +96,11 @@ const pageVisuals = {
   ),
   shop: visual(
     'shop',
-    'shop-overview-awe-v2',
+    'shop-overview-awe-v4',
     'A vivid electrical showroom with lighting displays and practical home appliances',
     'The showroom, opened up',
     'LIGHT / HOME / EVERYDAY',
-    '61% center',
+    'right center',
   ),
   shopLighting: visual(
     'shop-lighting',

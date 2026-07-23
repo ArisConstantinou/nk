@@ -972,17 +972,19 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art{
   position:absolute;
   z-index:0;
-  inset:0;
+  inset:-38px calc(var(--hero-pad) * -1) -48px;
   min-height:0;
   margin:0;
   clip-path:none;
+  background:#061c1c;
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art img{
-  object-fit:contain;
-  object-position:right center!important;
+  object-fit:fill;
+  object-position:center!important;
+  transform:none;
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art__wash{
-  background:linear-gradient(90deg,rgba(43,18,25,.88),rgba(43,18,25,.14) 66%),linear-gradient(0deg,rgba(43,18,25,.94),transparent 62%);
+  background:linear-gradient(90deg,rgba(6,28,28,.88),rgba(6,28,28,.12) 66%),linear-gradient(0deg,rgba(6,28,28,.88),transparent 62%);
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-index{grid-column:1 / 3}
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title{

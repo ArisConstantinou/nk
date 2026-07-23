@@ -108,8 +108,9 @@ function PointList({points}: {points: string[]}) {
 }
 
 function ProductTile({product, index = 0}: {product: Product; index?: number}) {
+  const productImage = OFFER_SHOWCASE_CUTOUTS[product.id] || product.image;
   return <Link className="nk-campaign-product" to={`/shop/product/${encodeURIComponent(product.id)}`}>
-    <span className="nk-campaign-product__image"><ResponsiveImage src={product.image} alt="" loading="eager" decoding="async"/></span>
+    <span className="nk-campaign-product__image"><ResponsiveImage src={productImage} alt="" loading="eager" decoding="async"/></span>
     <span><small>{String(index + 1).padStart(2, '0')} / {product.category}</small><strong>{product.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'")}</strong></span>
     <ArrowRight aria-hidden="true"/>
   </Link>;

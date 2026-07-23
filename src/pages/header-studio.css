@@ -169,6 +169,9 @@
 }
 
 @media(max-width:620px){
+  .nk-campaign-design--offers .nk-campaign-product,
+  .nk-campaign-design--offers .nk-campaign-product__image{background:transparent}
+  .nk-campaign-design--offers .nk-campaign-product__image img{padding:0;object-fit:contain;mix-blend-mode:multiply}
   .nk-campaign-design{min-height:650px}.nk-campaign-brand img{width:52px;height:46px}.nk-campaign-brand strong{font-size:21px}.nk-campaign-brand small{font-size:12px}
   .nk-campaign-action{min-height:46px;padding-inline:14px;font-size:13px}.nk-campaign-design section>span,.nk-campaign-design aside>p{font-size:15px}
   .nk-campaign-picker{min-height:44px;padding:4px 6px}.nk-campaign-picker nav{gap:0}.nk-campaign-picker nav button{width:31px;height:34px}
