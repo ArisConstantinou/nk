@@ -513,13 +513,12 @@ html[data-theme='light'] .ia-shell :is(
 /* Bespoke Shop and About annotations follow the same minimum readable scale. */
 .ia-shell .catalogue-hero__ornament span,
 .ia-shell .catalogue-hero__campaign figcaption strong,
-.catalogue-offer-badge{font-size:11px!important;line-height:1.35!important}
+.catalogue-offer-badge{font-size:12px!important;line-height:1.35!important}
 .catalogue-product-card__image>i{font-size:12px!important;line-height:1.35!important}
 
 .about-page :is(
   .about-history__header,
   .about-history__title>span,
-  .about-history__title>a,
   .about-history__era-card small,
   .about-history__era-card>span,
   .about-history__era-nav button>span,
@@ -536,5 +535,6 @@ html[data-theme='light'] .ia-shell :is(
 ){font-size:11px!important;line-height:1.45!important}
 .about-page .about-history__era-card p{color:rgba(244,240,231,.82)!important;font-size:13px!important}
 .about-page .about-history__era-nav button{color:rgba(244,240,231,.78)!important}
+.about-page .about-history__title>a{font-size:12px!important}
 .about-page .about-team__role{font-size:12px!important;line-height:1.45!important}
 .about-page .about-team__actions a{font-size:12px!important}

@@ -941,9 +941,10 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
   backdrop-filter:blur(10px);
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='diagnostic'] .system-page-ornament{
-  left:var(--hero-pad);
+  left:auto;
+  right:var(--hero-pad);
   top:50%;
-  width:31%;
+  width:34%;
   height:1px;
   background:#d3ef48;
   transform:translateY(162px);
@@ -984,18 +985,20 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
   grid-column:1 / 3;
   grid-row:2;
   align-self:end;
-  width:min(1150px,84vw);
+  width:min(1220px,86vw);
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title h1{
   font-family:Manrope,Arial,sans-serif;
-  font-size:clamp(80px,9.4vw,158px);
+  font-size:clamp(76px,7.8vw,132px);
   font-weight:350;
-  line-height:.75;
-  letter-spacing:-.09em;
+  line-height:.86;
+  letter-spacing:-.075em;
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-title__accent{
-  padding-left:22vw;
+  margin-top:.08em;
+  padding-left:clamp(140px,15vw,280px);
   color:#38d4c4!important;
+  font-size:.86em;
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-brief{
   grid-column:1 / 3;
@@ -1010,12 +1013,21 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-art figcaption{display:none}
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-ornament{
   right:var(--hero-pad);
-  top:58px;
-  width:88px;
-  height:150px;
-  border-left:2px solid #38d4c4;
-  border-bottom:2px solid #ff6b54;
-  transform:skew(-12deg);
+  top:42px;
+  width:auto;
+  height:auto;
+  padding:12px 15px;
+  border:1px solid rgba(56,212,196,.78);
+  border-bottom:3px solid #ff6b54;
+  background:rgba(43,18,25,.76);
+  transform:none;
+  box-shadow:0 12px 28px rgba(22,6,10,.22);
+}
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='runway'] .system-page-ornament span{
+  display:block;
+  color:#fff;
+  font-size:12px;
+  line-height:1;
 }
 
 /* Catalogue folio — quiet paper, serif display and margin notes. */
@@ -1204,9 +1216,10 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 }
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-brief>div{margin-top:5px;color:#42d8ca}
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-ornament{
-  left:var(--hero-pad);
+  left:auto;
+  right:var(--hero-pad);
   bottom:40px;
-  width:44%;
+  width:38%;
   height:18px;
   border-bottom:2px solid #42d8ca;
 }
@@ -1289,6 +1302,18 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__title-line,
 .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1 em{display:block}
 .ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__copy h1{overflow:visible}
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__facts{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__facts strong{
+  box-sizing:border-box;
+  min-width:0;
+}
+.ia-shell .catalogue-hero[data-hero-composition] .catalogue-hero__facts small{
+  font-size:12px;
+  line-height:1.25;
+}
 .ia-shell .catalogue-hero[data-hero-composition='orbit']{
   min-height:760px;
   grid-template-columns:minmax(500px,1.02fr) minmax(470px,.98fr);
@@ -1325,15 +1350,30 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 .ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__ornament{
   right:4vw;
   top:38px;
-  width:145px;
-  height:145px;
+  width:158px;
+  height:158px;
+  display:grid;
+  place-items:center;
   border:1px solid rgba(216,243,76,.6);
   border-radius:50%;
+}
+.ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__ornament span{
+  position:absolute;
+  z-index:2;
+  top:13px;
+  left:50%;
+  width:max-content;
+  padding:5px 9px;
+  transform:translateX(-50%);
+  background:#0a2c72;
+  color:#fff;
+  font-size:12px;
+  line-height:1;
 }
 .ia-shell .catalogue-hero[data-hero-composition='orbit'] .catalogue-hero__ornament:after{
   content:"";
   position:absolute;
-  inset:36px;
+  inset:40px;
   border:1px solid rgba(255,255,255,.5);
   border-radius:50%;
 }
@@ -1372,11 +1412,23 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 }
 .ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__ornament{
   right:5vw;
-  top:42px;
-  width:160px;
-  height:18px;
-  border-top:2px solid #8addc7;
-  border-bottom:2px solid #f05a43;
+  top:34px;
+  width:auto;
+  min-width:184px;
+  height:46px;
+  padding:0 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(138,221,199,.82);
+  border-bottom:3px solid #f05a43;
+  background:rgba(23,55,47,.82);
+  box-shadow:0 12px 28px rgba(6,30,25,.2);
+}
+.ia-shell .catalogue-hero[data-hero-composition='domestic'] .catalogue-hero__ornament span{
+  color:#fff;
+  font-size:12px;
+  line-height:1;
 }
 .ia-shell .catalogue-hero[data-hero-composition='sale-poster']{
   min-height:770px;
@@ -1425,9 +1477,19 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
 }
 .ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__ornament{
   right:3vw;
-  top:35px;
+  top:32px;
+  min-width:142px;
+  padding:12px 15px;
+  border:1px solid rgba(255,176,56,.78);
+  background:rgba(93,18,61,.78);
   color:#ffb038;
-  font-size:1rem;
+  box-shadow:0 12px 28px rgba(48,5,31,.2);
+}
+.ia-shell .catalogue-hero[data-hero-composition='sale-poster'] .catalogue-hero__ornament span{
+  display:block;
+  font-size:12px;
+  line-height:1;
+  text-align:center;
 }
 
 /*

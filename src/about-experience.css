@@ -115,14 +115,21 @@
 .about-history__title>a{
   width:max-content;
   margin-top:31px;
-  padding:0 0 11px;
-  border-bottom:1px solid rgba(255,255,255,.52);
+  min-height:42px;
+  padding:10px 13px;
+  border:1px solid rgba(255,255,255,.32);
+  border-bottom-color:var(--about-cyan);
+  background:rgba(6,17,28,.78);
+  box-shadow:0 12px 30px rgba(0,0,0,.2);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
   color:inherit;
   display:flex;
   align-items:center;
   gap:18px;
   font-family:var(--mono);
-  font-size:10px;
+  font-size:12px;
+  line-height:1.35;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
@@ -641,7 +648,12 @@
   .about-history__title>span{font-size:8px}
   .about-history__title h1{margin:19px 0 16px;font-size:clamp(48px,14.5vw,69px);line-height:.84}
   .about-history__title>p{font-size:12px;line-height:1.5;max-width:92%}
-  .about-history__title>a{margin-top:18px;font-size:7px}
+  .about-history__title>a{
+    margin-top:18px;
+    min-height:44px;
+    padding:8px 10px;
+    font-size:12px;
+  }
   .about-history__era-card{
     left:18px;
     bottom:92px;
