@@ -26,6 +26,12 @@ import {publicAsset} from '../utils/assets';
 import {GlobalLiveSearch} from './GlobalLiveSearch';
 import {ResponsiveImage} from './ResponsiveImage';
 
+const OFFER_SHOWCASE_CUTOUTS: Record<string, string> = {
+  'led-wall-light-35': publicAsset('assets/products/offers-cutouts/led-wall-light-35-cutout.png'),
+  'surface-spot-light': publicAsset('assets/products/offers-cutouts/surface-spot-light-cutout.png'),
+  'pothos-1': publicAsset('assets/products/offers-cutouts/pothos-1-cutout.png'),
+};
+
 export const HEADER_CAMPAIGNS = [
   {id: '01', slug: 'fault', name: 'Fault Response', short: 'Fault', utility: 'POWER FAILURE HELP'},
   {id: '02', slug: 'summer', name: 'Cyprus Summer', short: 'Heat', utility: 'BEAT THE HEAT'},
@@ -262,11 +268,12 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
     <div className="nk-unified-story__board">
       {campaign.points.slice(0, 3).map((point, index) => {
         const offerProduct = offerProducts[index];
+        const offerImage = offerProduct ? OFFER_SHOWCASE_CUTOUTS[offerProduct.id] || offerProduct.image : '';
         return <article className={offerProduct ? 'has-offer-preview' : undefined} key={point}>
           <b>0{index + 1}</b>
           {offerProduct
             ? <Link className="nk-unified-story__offer-thumb" to={`/shop/product/${encodeURIComponent(offerProduct.id)}`} aria-label={`View offer: ${offerProduct.name}`}>
-                <ResponsiveImage src={offerProduct.image} alt="" loading="eager" decoding="async"/>
+                <ResponsiveImage src={offerImage} alt="" loading="eager" decoding="async"/>
               </Link>
             : <StoryIcon aria-hidden="true"/>}
           <strong>{point}</strong>
