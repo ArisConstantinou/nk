@@ -20,7 +20,7 @@ import {
 import {team} from '../content';
 import {useContent} from '../context/ContentContext';
 import type {Product, Project} from '../types';
-import {publicAsset} from '../utils/assets';
+import {isProductCutoutAsset, publicAsset} from '../utils/assets';
 import {CmsSections} from '../components/CmsSections';
 import {ResponsiveImage} from '../components/ResponsiveImage';
 import {ManagedPublicForm} from '../components/ManagedPublicForm';
@@ -283,7 +283,7 @@ const filterValues = {
 };
 
 function ProductCard({item}: {item: Product}) {
-  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className="product-image"><ResponsiveImage src={item.image} alt={item.name} loading="lazy" decoding="async" data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Product season">{item.season}</span></small><h3 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h3><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p></div></Link>;
+  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className={`product-image${isProductCutoutAsset(item.image) ? ' product-image--cutout' : ' product-image--photo'}`}><ResponsiveImage src={item.image} alt={item.name} loading="lazy" decoding="async" data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Product season">{item.season}</span></small><h3 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h3><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p></div></Link>;
 }
 
 export function ExplorePage() {
