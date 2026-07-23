@@ -1223,6 +1223,7 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition=
   height:18px;
   border-bottom:2px solid #42d8ca;
 }
+html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-ornament span{display:none}
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition='signal'] .system-page-ornament:after{
   content:"→";
   position:absolute;
