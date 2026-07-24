@@ -21,6 +21,7 @@ type TurnState = {
   back: number | null;
   target: number;
   active: boolean;
+  landed?: boolean;
   catalogueDelta?: -1 | 1;
 };
 
@@ -255,19 +256,39 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   }, [turn]);
 
   const completeTurn = useCallback(() => {
-    if (!turn?.active) return;
+    if (!turn?.active || turn.landed) return;
     if (turn.catalogueDelta === 1) {
       setCatalogueIndex(index => index + 1);
       setSpreadStart(1);
+      setTurn(null);
     } else if (turn.catalogueDelta === -1) {
       openLastPageRef.current = true;
       setCatalogueIndex(index => index - 1);
       setSpreadStart(1);
+      setTurn(null);
     } else {
       setSpreadStart(turn.target);
+      setTurn(current => current?.active && !current.landed ? {...current, landed: true} : current);
     }
-    setTurn(null);
   }, [turn]);
+
+  useEffect(() => {
+    if (!turn?.landed) return;
+    let holdFrame = 0;
+    let releaseFrame = 0;
+    const paintFrame = window.requestAnimationFrame(() => {
+      holdFrame = window.requestAnimationFrame(() => {
+        releaseFrame = window.requestAnimationFrame(() => {
+          setTurn(current => current?.landed ? null : current);
+        });
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(paintFrame);
+      if (holdFrame) window.cancelAnimationFrame(holdFrame);
+      if (releaseFrame) window.cancelAnimationFrame(releaseFrame);
+    };
+  }, [turn?.landed]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -324,7 +345,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     <div className="catalogue-book__reader">
       <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === 0 && spreadStart === 1)} aria-label="Previous page"><ChevronLeft/></button>
 
-      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''}` : ''}`}
+      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''}` : ''}`}
         aria-busy={!ready || isPreparingTurn}
         onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
         onTouchEnd={event => {
