@@ -282,6 +282,14 @@ const filterValues = {
   space: ['All', 'Living', 'Kitchen', 'Outdoor', 'Bedroom', 'Workspace'],
 };
 
+type ProductFilterKey = keyof typeof filterValues;
+
+const productFilterSegments: Array<{key: ProductFilterKey; label: string; index: string}> = [
+  {key: 'category', label: 'Category', index: '01'},
+  {key: 'space', label: 'Space', index: '02'},
+  {key: 'season', label: 'Season', index: '03'},
+];
+
 export function ExplorePage() {
   const {content} = useContent();
   const [params, setParams] = useSearchParams();
@@ -290,6 +298,7 @@ export function ExplorePage() {
   const space = params.get('space') || 'All';
   const viewAll = params.get('view') === 'all';
   const [visibleCount, setVisibleCount] = useState(48);
+  const [openFilter, setOpenFilter] = useState<ProductFilterKey | null>(null);
   const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
   const setViewAll = (enabled: boolean) => {
     const next = new URLSearchParams(params);
@@ -307,6 +316,7 @@ export function ExplorePage() {
   };
   const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
   const shown = viewAll ? filtered : filtered.slice(0, visibleCount);
+  const selectedFilterValues: Record<ProductFilterKey, string> = {category, space, season};
   useEffect(() => setVisibleCount(48), [category, season, space]);
   return <>
     <PageIntro eyebrow="NK Electrical Shop" title="Products organised" italic="for practical browsing." body="Browse products only: lighting, coffee, kitchen, cooling and household equipment. Installation and design expertise remains under Services."/>
@@ -320,19 +330,49 @@ export function ExplorePage() {
         </div>
       </div>
       <div className="compact-filter-bar">
-        <label className="compact-filter-field">
-          <span className="compact-filter-label"><i>01</i>Category</span>
-          <span className="compact-filter-select"><select value={category} onChange={event => set('category', event.target.value)}>{filterValues.category.map(value => <option value={value} key={value}>{value}</option>)}</select><ChevronDown aria-hidden="true"/></span>
-        </label>
-        <label className="compact-filter-field">
-          <span className="compact-filter-label"><i>02</i>Season</span>
-          <span className="compact-filter-select"><select value={season} onChange={event => set('season', event.target.value)}>{filterValues.season.map(value => <option value={value} key={value}>{value}</option>)}</select><ChevronDown aria-hidden="true"/></span>
-        </label>
-        <label className="compact-filter-field">
-          <span className="compact-filter-label"><i>03</i>Space</span>
-          <span className="compact-filter-select"><select value={space} onChange={event => set('space', event.target.value)}>{filterValues.space.map(value => <option value={value} key={value}>{value}</option>)}</select><ChevronDown aria-hidden="true"/></span>
-        </label>
-        {(category !== 'All' || season !== 'All' || space !== 'All') && <button type="button" onClick={clearFilters}>Clear filters <X/></button>}
+        <div className="compact-filter-module">
+          <div className="compact-filter-segments" role="group" aria-label="Product filters">
+            {productFilterSegments.map(({key, label, index}) => {
+              const isOpen = openFilter === key;
+              const selectedValue = selectedFilterValues[key];
+              return <button
+                id={`product-filter-${key}-trigger`}
+                className={`${isOpen ? 'is-open' : ''} ${selectedValue !== 'All' ? 'has-value' : ''}`.trim()}
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`product-filter-${key}-panel`}
+                onClick={() => setOpenFilter(isOpen ? null : key)}
+                key={key}
+              >
+                <span className="compact-filter-segment__index">{index}</span>
+                <span className="compact-filter-segment__copy"><b>{label}</b><small>{selectedValue}</small></span>
+                <ChevronDown aria-hidden="true"/>
+              </button>;
+            })}
+          </div>
+          {productFilterSegments.map(({key, label}) => {
+            const selectedValue = selectedFilterValues[key];
+            return <div
+              id={`product-filter-${key}-panel`}
+              className="compact-filter-panel"
+              role="region"
+              aria-labelledby={`product-filter-${key}-trigger`}
+              hidden={openFilter !== key}
+              key={key}
+            >
+              <header><span>{label} options</span><strong>{selectedValue}</strong></header>
+              <div className="compact-filter-options" role="group" aria-label={`${label} options`}>
+                {filterValues[key].map(value => {
+                  const isSelected = selectedValue === value;
+                  return <button type="button" className={isSelected ? 'is-selected' : ''} aria-pressed={isSelected} onClick={() => set(key, value)} key={value}>
+                    <span>{value}</span>{isSelected && <Check aria-hidden="true"/>}
+                  </button>;
+                })}
+              </div>
+            </div>;
+          })}
+        </div>
+        {(category !== 'All' || season !== 'All' || space !== 'All') && <button className="compact-filter-clear" type="button" onClick={clearFilters}>Clear filters <X/></button>}
       </div>
     </section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
