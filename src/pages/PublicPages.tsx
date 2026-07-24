@@ -29,6 +29,12 @@ import {ContactCommandCenter} from '../components/ContactCommandCenter';
 import {ContactSignalPlayer} from '../components/ContactSignalPlayer';
 import {AboutHeritageExperience} from '../components/AboutHeritageExperience';
 import {pageVisualForPath} from '../pageVisuals';
+import {
+  CompactProductFilters,
+  type ProductFilterKey,
+  type ProductFilterSegment,
+  type ProductFilterSelections,
+} from '../components/CompactProductFilters';
 
 const pageFocusByEyebrow: Record<string, [string, string, string]> = {
   'The people behind every installation': ['Engineering', 'Design', 'Installations'],
@@ -277,29 +283,46 @@ export function ElectricalInstallationsPage() {
 }
 
 const filterValues = {
-  category: ['All', 'Lighting', 'Coffee', 'Kitchen', 'Cooling', 'Cleaning', 'Heating', 'Home', 'Beauty', 'Sound & Vision'],
-  season: ['All', 'All year', 'Summer', 'Winter', 'Christmas'],
-  space: ['All', 'Living', 'Kitchen', 'Outdoor', 'Bedroom', 'Workspace'],
+  category: ['Lighting', 'Coffee', 'Kitchen', 'Cooling', 'Cleaning', 'Heating', 'Home', 'Beauty', 'Sound & Vision'],
+  season: ['All year', 'Summer', 'Winter', 'Christmas'],
+  space: ['Living', 'Kitchen', 'Outdoor', 'Bedroom', 'Workspace'],
 };
 
-type ProductFilterKey = keyof typeof filterValues;
-
-const productFilterSegments: Array<{key: ProductFilterKey; label: string; index: string}> = [
-  {key: 'category', label: 'Category', index: '01'},
-  {key: 'space', label: 'Space', index: '02'},
-  {key: 'season', label: 'Season', index: '03'},
+const productFilterSegments: ProductFilterSegment[] = [
+  {key: 'category', label: 'Category', index: '01', options: filterValues.category},
+  {key: 'space', label: 'Space', index: '02', options: filterValues.space},
+  {key: 'season', label: 'Season', index: '03', options: filterValues.season},
 ];
 
 export function ExplorePage() {
   const {content} = useContent();
   const [params, setParams] = useSearchParams();
-  const category = params.get('category') || 'All';
-  const season = params.get('season') || 'All';
-  const space = params.get('space') || 'All';
+  const selectedFilterValues: ProductFilterSelections = {
+    category: params.getAll('category').filter(value => value && value !== 'All'),
+    space: params.getAll('space').filter(value => value && value !== 'All'),
+    season: params.getAll('season').filter(value => value && value !== 'All'),
+  };
+  const pendingFilterValues = useRef<ProductFilterSelections>(selectedFilterValues);
+  pendingFilterValues.current = selectedFilterValues;
   const viewAll = params.get('view') === 'all';
   const [visibleCount, setVisibleCount] = useState(48);
   const [openFilter, setOpenFilter] = useState<ProductFilterKey | null>(null);
-  const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next, {preventScrollReset: true}); };
+  const toggleSelection = (key: ProductFilterKey, value: string) => {
+    const current = pendingFilterValues.current[key];
+    const values = value === 'All'
+      ? []
+      : current.includes(value)
+        ? current.filter(selected => selected !== value)
+        : [...current, value];
+    const pending = {...pendingFilterValues.current, [key]: values};
+    pendingFilterValues.current = pending;
+    const next = new URLSearchParams(params);
+    productFilterSegments.forEach(({key: filterKey}) => {
+      next.delete(filterKey);
+      pending[filterKey].forEach(selected => next.append(filterKey, selected));
+    });
+    setParams(next, {preventScrollReset: true});
+  };
   const setViewAll = (enabled: boolean) => {
     const next = new URLSearchParams(params);
     enabled ? next.set('view', 'all') : next.delete('view');
@@ -314,10 +337,13 @@ export function ExplorePage() {
     setVisibleCount(48);
     setParams(viewAll ? {view: 'all'} : {}, {preventScrollReset: true});
   };
-  const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
+  const filtered = content.products.filter(product =>
+    (selectedFilterValues.category.length === 0 || selectedFilterValues.category.includes(product.category))
+    && (selectedFilterValues.season.length === 0 || selectedFilterValues.season.includes(product.season))
+    && (selectedFilterValues.space.length === 0 || selectedFilterValues.space.includes(product.space)));
   const shown = viewAll ? filtered : filtered.slice(0, visibleCount);
-  const selectedFilterValues: Record<ProductFilterKey, string> = {category, space, season};
-  useEffect(() => setVisibleCount(48), [category, season, space]);
+  const filterSignature = productFilterSegments.map(({key}) => selectedFilterValues[key].join('|')).join('::');
+  useEffect(() => setVisibleCount(48), [filterSignature]);
   return <>
     <PageIntro eyebrow="NK Electrical Shop" title="Products organised" italic="for practical browsing." body="Browse products only: lighting, coffee, kitchen, cooling and household equipment. Installation and design expertise remains under Services."/>
     <section className="filter-shell compact-product-filters section">
@@ -329,56 +355,19 @@ export function ExplorePage() {
           <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={findAllProducts}>Find all</button>
         </div>
       </div>
-      <div className="compact-filter-bar">
-        <div className="compact-filter-module" data-visual-no-edit>
-          <div className="compact-filter-segments" role="group" aria-label="Product filters">
-            {productFilterSegments.map(({key, label, index}) => {
-              const isOpen = openFilter === key;
-              const selectedValue = selectedFilterValues[key];
-              return <button
-                id={`product-filter-${key}-trigger`}
-                className={`${isOpen ? 'is-open' : ''} ${selectedValue !== 'All' ? 'has-value' : ''}`.trim()}
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={`product-filter-${key}-panel`}
-                onClick={() => setOpenFilter(isOpen ? null : key)}
-                key={key}
-              >
-                <span className="compact-filter-segment__index">{index}</span>
-                <span className="compact-filter-segment__copy"><b>{label}</b><small>{selectedValue}</small></span>
-                <ChevronDown aria-hidden="true"/>
-              </button>;
-            })}
-          </div>
-          {productFilterSegments.map(({key, label}) => {
-            if (openFilter !== key) return null;
-            const selectedValue = selectedFilterValues[key];
-            return <div
-              id={`product-filter-${key}-panel`}
-              className="compact-filter-panel"
-              role="region"
-              aria-labelledby={`product-filter-${key}-trigger`}
-              key={key}
-            >
-              <header><span>{label} options</span><strong>{selectedValue}</strong></header>
-              <div className="compact-filter-options" role="group" aria-label={`${label} options`}>
-                {filterValues[key].map(value => {
-                  const isSelected = selectedValue === value;
-                  return <button type="button" className={isSelected ? 'is-selected' : ''} aria-pressed={isSelected} onClick={() => set(key, value)} key={value}>
-                    <span>{value}</span>{isSelected && <Check aria-hidden="true"/>}
-                  </button>;
-                })}
-              </div>
-            </div>;
-          })}
-        </div>
-        {(category !== 'All' || season !== 'All' || space !== 'All') && <button className="compact-filter-clear" type="button" onClick={clearFilters}>Clear filters <X/></button>}
-      </div>
+      <CompactProductFilters
+        segments={productFilterSegments}
+        selections={selectedFilterValues}
+        openFilter={openFilter}
+        onOpenFilterChange={setOpenFilter}
+        onToggle={toggleSelection}
+        onClear={clearFilters}
+      />
     </section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
     <ExpandableProductGrid products={shown} navigationProducts={filtered} allProducts={content.products}/>
     {!viewAll && shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><div><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load 48 more <ArrowRight/></button><button type="button" className="secondary" onClick={() => setViewAll(true)}>View all {filtered.length} products</button></div></section>}
-    {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({}, {preventScrollReset: true})}>Clear filters</button></div>}
+    {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={clearFilters}>Clear filters</button></div>}
   </>;
 }
 
