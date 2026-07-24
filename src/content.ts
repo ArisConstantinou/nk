@@ -2,7 +2,13 @@ import type {Catalogue, Product, Project, SiteContent, TeamMember} from './types
 import {publicAsset} from './utils/assets';
 
 const product = (id: string, name: string, category: Product['category'], season: Product['season'], space: Product['space'], ext: string, note: string): Product => ({
-  id, name, category, season, space, note, image: publicAsset(`assets/products/${id}.${ext}`),
+  id,
+  name,
+  category,
+  season,
+  space,
+  note,
+  image: publicAsset(`assets/catalogue-products/${category === 'Lighting' ? 'lighting' : 'appliances'}/${['blaupunkt', 'bosch-multitalent', 'el-led', 'nespresso'].includes(id) ? 'cutouts' : 'photos'}/${id}.${ext}`),
 });
 
 export const products: Product[] = [

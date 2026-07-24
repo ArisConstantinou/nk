@@ -4,7 +4,7 @@ import legacyProductData from '../data/legacy-products.json';
 import {isPagesAdminMode, PAGES_ADMIN_CHANGED_EVENT, PAGES_ADMIN_STORAGE_KEY, readPagesPublicPayload, savePagesSubmission} from '../admin/pagesMode';
 import type {Catalogue, Product, Project, SiteContent} from '../types';
 import {LIVE_EDITOR_COMMAND_EVENT, LIVE_EDITOR_NONCE} from '../components/liveEditorEvents';
-import {isProductCutoutAsset, resolvePublicUrl} from '../utils/assets';
+import {isLocalCatalogueProductAsset, isProductCutoutAsset, resolvePublicUrl} from '../utils/assets';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
 const importedProducts = (legacyProductData as unknown as Product[]).map(product => ({
@@ -17,7 +17,7 @@ function mergeCatalogueProducts(overrides: Product[] = []) {
   overrides.forEach(product => {
     const current = products.get(product.id);
     const merged = {...current, ...product};
-    if (current && isProductCutoutAsset(current.image)) merged.image = current.image;
+    if (current && (isLocalCatalogueProductAsset(current.image) || isProductCutoutAsset(current.image))) merged.image = current.image;
     products.set(product.id, merged);
   });
   return [...products.values()];
