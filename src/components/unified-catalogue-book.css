@@ -77,47 +77,67 @@
 .catalogue-book__reader{
   min-height:0;
   display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-columns:56px minmax(0,1450px) 56px;
+  justify-content:center;
   align-items:center;
-  gap:clamp(12px,2.2vw,34px);
-  padding:clamp(20px,3.5vw,54px);
+  gap:clamp(12px,1.3vw,22px);
+  padding:clamp(16px,2.2vw,36px);
 }
 
 .catalogue-book__stage{
   position:relative;
-  width:min(1120px,calc(100vw - 210px));
+  width:min(1450px,calc(100vw - 170px));
   max-width:100%;
   aspect-ratio:1.46;
   margin:auto;
   perspective:2400px;
   transform-style:preserve-3d;
+  transform:rotateX(1.15deg) translateZ(0);
+  transform-origin:center 70%;
 }
 .catalogue-book__stage:before{
   content:"";
   position:absolute;
   z-index:-2;
-  left:8%;
-  right:8%;
-  bottom:-6%;
-  height:16%;
+  left:3%;
+  right:3%;
+  bottom:-5.5%;
+  height:18%;
   border-radius:50%;
-  background:rgba(0,0,0,.68);
-  filter:blur(24px);
+  background:rgba(0,0,0,.72);
+  filter:blur(22px);
+}
+.catalogue-book__stage:after{
+  content:"";
+  position:absolute;
+  z-index:-3;
+  inset:-7px -11px -15px;
+  border:1px solid rgba(205,186,143,.35);
+  border-radius:14px 14px 18px 18px;
+  background:
+    linear-gradient(90deg,#142a24 0 1.3%,#365444 1.7% 49.4%,#183229 50%,#365444 50.6% 98.3%,#142a24 98.7%),
+    #284537;
+  box-shadow:
+    0 3px 0 #0b1713,
+    0 8px 0 #1e2c26,
+    0 22px 38px rgba(0,0,0,.55);
+  transform:translateZ(-16px);
 }
 
 .catalogue-book__thickness{
   position:absolute;
   z-index:-1;
-  inset:2.5% 1.7% 1.2%;
-  border-radius:8px 9px 12px 12px;
+  inset:1.2% .55% .2%;
+  border-radius:11px 11px 15px 15px;
   background:
-    repeating-linear-gradient(0deg,#d9d4c7 0 2px,#bfb9ab 2px 3px),
+    repeating-linear-gradient(0deg,#eeeadd 0 2px,#c9c2b4 2px 3px,#f7f4eb 3px 5px),
     #d9d4c7;
   box-shadow:
-    0 4px 0 #8b8375,
-    0 8px 0 #514a41,
-    0 18px 30px rgba(0,0,0,.45);
-  transform:translateY(6px);
+    0 3px 0 #a49b8a,
+    0 7px 0 #655d51,
+    0 13px 0 #20372e,
+    0 24px 34px rgba(0,0,0,.48);
+  transform:translateY(8px) translateZ(-7px);
 }
 
 .catalogue-book__spread{
@@ -126,6 +146,15 @@
   display:grid;
   grid-template-columns:1fr 1fr;
   transform-style:preserve-3d;
+  box-sizing:border-box;
+  border-top:3px solid #f2eee4;
+  border-bottom:5px solid #b7ad9d;
+  border-radius:13px 13px 10px 10px;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.95),
+    0 2px 0 #8f8678,
+    0 7px 12px rgba(0,0,0,.2);
+  transform:translateZ(2px);
 }
 .catalogue-book__leaf{
   position:relative;
@@ -138,6 +167,16 @@
     linear-gradient(90deg,rgba(255,255,255,.96),#f8f5ed 88%,#d8d2c7);
   cursor:pointer;
 }
+.catalogue-book__leaf:before{
+  content:"";
+  position:absolute;
+  z-index:3;
+  top:0;
+  bottom:0;
+  width:8px;
+  pointer-events:none;
+  opacity:.75;
+}
 .catalogue-book__leaf img,
 .catalogue-book__turn-face img{
   width:100%;
@@ -149,14 +188,28 @@
   pointer-events:none;
 }
 .catalogue-book__leaf--left{
-  border-radius:9px 2px 2px 8px;
+  border-radius:10px 2px 2px 9px;
   transform-origin:right center;
-  box-shadow:inset -22px 0 30px -30px #000,inset 3px 0 rgba(255,255,255,.85);
+  box-shadow:
+    inset -34px 0 42px -38px rgba(0,0,0,.8),
+    inset 5px 0 7px -5px rgba(82,71,54,.45),
+    inset 3px 0 rgba(255,255,255,.85);
+}
+.catalogue-book__leaf--left:before{
+  left:0;
+  background:repeating-linear-gradient(90deg,#bdb4a5 0 1px,#eee9de 1px 3px);
 }
 .catalogue-book__leaf--right{
-  border-radius:2px 9px 8px 2px;
+  border-radius:2px 10px 9px 2px;
   transform-origin:left center;
-  box-shadow:inset 22px 0 30px -30px #000,inset -3px 0 rgba(255,255,255,.85);
+  box-shadow:
+    inset 34px 0 42px -38px rgba(0,0,0,.8),
+    inset -5px 0 7px -5px rgba(82,71,54,.45),
+    inset -3px 0 rgba(255,255,255,.85);
+}
+.catalogue-book__leaf--right:before{
+  right:0;
+  background:repeating-linear-gradient(90deg,#eee9de 0 2px,#bdb4a5 2px 3px);
 }
 .catalogue-book__leaf:after{
   content:"";
@@ -165,10 +218,14 @@
   pointer-events:none;
 }
 .catalogue-book__leaf--left:after{
-  background:linear-gradient(90deg,rgba(255,255,255,.2),transparent 58%,rgba(0,0,0,.09));
+  background:
+    radial-gradient(ellipse 12% 100% at 100% 50%,rgba(0,0,0,.13),transparent 78%),
+    linear-gradient(90deg,rgba(255,255,255,.22),transparent 58%,rgba(0,0,0,.1));
 }
 .catalogue-book__leaf--right:after{
-  background:linear-gradient(90deg,rgba(0,0,0,.1),transparent 42%,rgba(255,255,255,.16));
+  background:
+    radial-gradient(ellipse 12% 100% at 0 50%,rgba(0,0,0,.14),transparent 78%),
+    linear-gradient(90deg,rgba(0,0,0,.11),transparent 42%,rgba(255,255,255,.18));
 }
 
 .catalogue-book__spine{
@@ -177,23 +234,39 @@
   top:.3%;
   bottom:.4%;
   left:50%;
-  width:24px;
+  width:44px;
   transform:translateX(-50%);
   pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(0,0,0,.26) 44%,rgba(255,255,255,.32) 51%,rgba(0,0,0,.2) 57%,transparent);
+  background:
+    radial-gradient(ellipse at center,rgba(255,255,255,.34) 0 3%,transparent 10%),
+    linear-gradient(90deg,transparent,rgba(0,0,0,.3) 40%,rgba(255,255,255,.36) 49%,rgba(0,0,0,.27) 58%,transparent);
   filter:blur(.3px);
+  opacity:.95;
 }
 
 .catalogue-book__stage.is-cover{
-  width:min(570px,calc(100vw - 210px));
+  width:min(670px,calc(100vw - 170px));
   aspect-ratio:.72;
+  transform:rotateX(1deg) rotateY(-1.4deg) translateZ(0);
 }
 .catalogue-book__stage.is-cover .catalogue-book__spread{
   grid-template-columns:0 1fr;
 }
 .catalogue-book__stage.is-cover .catalogue-book__leaf--left{visibility:hidden}
 .catalogue-book__stage.is-cover .catalogue-book__spine{left:2%;opacity:.7}
-.catalogue-book__stage.is-cover .catalogue-book__thickness{inset:1.5% -1.3% .6% 1.3%}
+.catalogue-book__stage.is-cover .catalogue-book__thickness{inset:1.1% -1.2% .2% 1.2%}
+.catalogue-book__stage.is-cover:after{
+  inset:-8px -15px -17px -8px;
+  border-radius:8px 18px 20px 8px;
+  background:
+    linear-gradient(90deg,#11261f 0 2.4%,#3b5d49 2.9% 96.8%,#13271f 97.3%),
+    #2d4b3a;
+  box-shadow:
+    -3px 2px 0 #0d1a16,
+    4px 5px 0 #20342a,
+    10px 14px 24px rgba(0,0,0,.35),
+    0 26px 44px rgba(0,0,0,.5);
+}
 
 .catalogue-book__turning-sheet{
   position:absolute;
