@@ -84,6 +84,21 @@ const INSTALLATION_STEPS = [
   },
 ] as const;
 
+const SUN_CONTROL_STEPS = [
+  {
+    image: 'assets/generated/header-stories/sun-control-shading.webp',
+    alt: 'KNX touch panel controlling motorized blinds in a modern Mediterranean living room',
+  },
+  {
+    image: 'assets/generated/header-stories/sun-control-lighting.webp',
+    alt: 'KNX touch panel dimming layered lighting in a contemporary living room',
+  },
+  {
+    image: 'assets/generated/header-stories/sun-control-scenes.webp',
+    alt: 'KNX touch panel and occupancy sensor coordinating an evening lighting scene',
+  },
+] as const;
+
 function CampaignHeroImage({campaign}: {campaign: Campaign}) {
   const fallbackSrc = campaign.id === '10' ? publicAsset('assets/projects/residential-exterior.webp') : '';
   return <ResponsiveImage
@@ -176,7 +191,13 @@ function SunControlHeader({campaign}: {campaign: Campaign}) {
     <div className="nk-sun-brand"><Brand/><span>SUMMER CONTROL PLAN</span></div>
     <section><p>{campaign.kicker}</p><h1>{campaign.title}</h1><span>{campaign.body}</span><div className="nk-campaign-actions">{campaign.actions.map(action => <CampaignLink action={action} key={action.label}/>)}</div></section>
     <div className="nk-sun-orbit"><Sun/><span>DAYLIGHT</span><b>→</b><CircuitBoard/><span>AUTOMATION</span></div>
-    <aside>{campaign.points.map((point, index) => <span key={point}><b>0{index + 1}</b><strong>{point}</strong><small>{index === 0 ? 'Move before heat builds' : index === 1 ? 'Use light only where needed' : 'Repeat the right response'}</small></span>)}</aside>
+    <aside>{campaign.points.map((point, index) => {
+      const step = SUN_CONTROL_STEPS[index];
+      return <span key={point}>
+        <span className="nk-sun-control-step__image"><ResponsiveImage src={step.image} alt={step.alt} loading="eager" decoding="async"/></span>
+        <span className="nk-sun-control-step__copy"><b>0{index + 1}</b><strong>{point}</strong><small>{index === 0 ? 'Move before heat builds' : index === 1 ? 'Use light only where needed' : 'Repeat the right response'}</small></span>
+      </span>;
+    })}</aside>
   </div>;
 }
 
@@ -295,7 +316,8 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
         const offerProduct = offerProducts[index];
         const offerImage = offerProduct ? OFFER_SHOWCASE_CUTOUTS[offerProduct.id] || offerProduct.image : '';
         const installationStep = campaign.id === '09' ? INSTALLATION_STEPS[index] : undefined;
-        return <article className={offerProduct ? 'has-offer-preview' : installationStep ? 'has-step-preview' : undefined} key={point}>
+        const sunControlStep = campaign.id === '05' ? SUN_CONTROL_STEPS[index] : undefined;
+        return <article className={offerProduct ? 'has-offer-preview' : installationStep ? 'has-step-preview' : sunControlStep ? 'has-sun-control-preview' : undefined} key={point}>
           <b>0{index + 1}</b>
           {offerProduct
             ? <Link className="nk-unified-story__offer-thumb" to={`/shop/product/${encodeURIComponent(offerProduct.id)}`} aria-label={`View offer: ${offerProduct.name}`}>
@@ -303,7 +325,9 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
               </Link>
             : installationStep
               ? <span className="nk-unified-story__step-thumb"><ResponsiveImage src={installationStep.image} alt={installationStep.alt} loading="eager" decoding="async"/></span>
-              : <StoryIcon aria-hidden="true"/>}
+              : sunControlStep
+                ? <span className="nk-unified-story__sun-control-thumb"><ResponsiveImage src={sunControlStep.image} alt={sunControlStep.alt} loading="eager" decoding="async"/></span>
+                : <StoryIcon aria-hidden="true"/>}
           <strong>{point}</strong>
           <small>{offerProduct ? offerProduct.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'") : installationStep?.detail || details[index]}</small>
         </article>;
