@@ -58,6 +58,7 @@ export function ExpandedProductModule({
   onClose,
   standalone = false,
 }: ExpandedProductModuleProps) {
+  const visualRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const sequence = collection.some(candidate => candidate.id === product.id) ? collection : allProducts;
   const index = sequence.findIndex(candidate => candidate.id === product.id);
@@ -68,17 +69,26 @@ export function ExpandedProductModule({
 
   useEffect(() => {
     if (!onClose) return;
-    closeRef.current?.focus({preventScroll: true});
+    const focusFrame = window.requestAnimationFrame(() => {
+      visualRef.current?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start',
+      });
+      closeRef.current?.focus({preventScroll: true});
+    });
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [onClose]);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [onClose, product.id]);
 
   return <article className={`product-expanded-module${standalone ? ' is-standalone' : ''}`} aria-label={`${product.name} product details`}>
     <div className="product-expanded-module__media">
-      <div className={`product-expanded-module__visual ${isCutout ? 'is-cutout' : 'is-lifestyle'}`}>
+      <div ref={visualRef} className={`product-expanded-module__visual ${isCutout ? 'is-cutout' : 'is-lifestyle'}`}>
         <ResponsiveImage
           src={product.image}
           alt={product.name}
@@ -88,6 +98,10 @@ export function ExpandedProductModule({
           data-visual-edit="image"
           data-visual-label="Product image"
         />
+        <div className="product-expanded-module__toolbar">
+          {onClose && <button ref={closeRef} className="product-expanded-module__close" type="button" onClick={onClose} aria-label={`Close ${product.name}`}><X/><span>Close</span></button>}
+          <ProductShareActions product={product}/>
+        </div>
         <span>EXPANDED / PRODUCT VIEW</span>
       </div>
 
@@ -106,11 +120,6 @@ export function ExpandedProductModule({
     </div>
 
     <div className="product-expanded-module__content">
-      <div className="product-expanded-module__toolbar">
-        {onClose && <button ref={closeRef} className="product-expanded-module__close" type="button" onClick={onClose} aria-label={`Close ${product.name}`}><X/><span>Close</span></button>}
-        <ProductShareActions product={product}/>
-      </div>
-
       <header>
         <div>
           <small>{productCategory(product)} · {product.season}</small>
@@ -127,8 +136,8 @@ export function ExpandedProductModule({
       </dl>
 
       <div className="product-expanded-module__actions">
-        <a href={`mailto:info@nk-electrical.com?subject=${encodeURIComponent(`Product enquiry: ${product.name}`)}`}>Ask about this product <ArrowUpRight/></a>
-        <Link to={`/shop/product/${product.id}`}>Shareable product page <ExternalLink/></Link>
+        <a href={`mailto:info@nk-electrical.com?subject=${encodeURIComponent(`Product enquiry: ${product.name}`)}`}>Ask us <ArrowUpRight/></a>
+        <Link to={`/shop/product/${product.id}`}>Product page <ExternalLink/></Link>
       </div>
 
       {similar.length > 0 && <div className="product-expanded-module__similar">
