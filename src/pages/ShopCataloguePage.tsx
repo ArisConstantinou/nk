@@ -1,10 +1,10 @@
 import {useEffect, useMemo, useState} from 'react';
-import {ArrowRight, ArrowUpRight, BadgePercent, ChevronDown, FileText, Package, Search, SlidersHorizontal, Sparkles} from 'lucide-react';
+import {ArrowRight, ArrowUpRight, BadgePercent, FileText, Package, Search, SlidersHorizontal, Sparkles} from 'lucide-react';
 import {Link, useLocation, useParams} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
-import {ProductShareActions} from '../components/ProductShareActions';
+import {ExpandableProductGrid} from '../components/ExpandableProductGrid';
 import {pageVisualForPath} from '../pageVisuals';
-import {isProductCutoutAsset, publicAsset} from '../utils/assets';
+import {publicAsset} from '../utils/assets';
 
 function CatalogueHeroWords({text}: {text: string}) {
   const words = text.trim().split(/\s+/);
@@ -21,7 +21,6 @@ export function ModernShopCategoryPage() {
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [visibleCount, setVisibleCount] = useState(36);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const mode = isOffers ? 'offers' : isLighting ? 'lighting' : 'appliances';
   const pageVisual = pageVisualForPath(location.pathname);
 
@@ -69,36 +68,14 @@ export function ModernShopCategoryPage() {
 
     <section className="catalogue-controls section" aria-label="Product filters">
       <label className="catalogue-search"><Search/><span className="sr-only">Search products</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${isOffers ? 'offers' : mode}…`}/>{query && <button type="button" onClick={() => setQuery('')}>Clear</button>}</label>
-      <button
-        type="button"
-        className={`catalogue-mobile-filter-toggle${filtersOpen ? ' is-open' : ''}`}
-        aria-expanded={filtersOpen}
-        aria-controls="catalogue-mobile-filter-panel"
-        onClick={() => setFiltersOpen(open => !open)}
-      >
-        <span><SlidersHorizontal/><span><small>Filter by collection</small><strong>{selectedCategory}</strong></span></span>
+      <div className="catalogue-filter-heading">
+        <label className="catalogue-collection-select"><SlidersHorizontal/><span>Collection</span><select value={selectedCategory} onChange={event => setSelectedCategory(event.target.value)}>{categories.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
         <b>{filtered.length} {filtered.length === 1 ? 'result' : 'results'}</b>
-        <ChevronDown/>
-      </button>
-      <div id="catalogue-mobile-filter-panel" className={`catalogue-mobile-filter-panel${filtersOpen ? ' is-mobile-open' : ''}`}>
-        <div className="catalogue-filter-heading"><span><SlidersHorizontal/> Browse by collection</span><b>{filtered.length} {filtered.length === 1 ? 'result' : 'results'}</b></div>
-        <div className="catalogue-filter-chips">{categories.map(value => <button type="button" aria-pressed={selectedCategory === value} className={selectedCategory === value ? 'active' : ''} onClick={() => setSelectedCategory(value)} key={value}>{value}</button>)}</div>
-        <div className="catalogue-mobile-filter-actions">
-          <button type="button" disabled={selectedCategory === 'All'} onClick={() => setSelectedCategory('All')}>Clear</button>
-          <button type="button" onClick={() => setFiltersOpen(false)}>Show {filtered.length} products <ArrowRight/></button>
-        </div>
+        <Link className="shop-find-all" to="/shop?view=all">Find all products <ArrowRight/></Link>
       </div>
     </section>
 
-    <section className="catalogue-product-grid section" aria-live="polite">
-      {shown.map((product, index) => <article className="catalogue-product-card-shell" key={product.id}>
-        <Link to={`/shop/product/${product.id}`} className="catalogue-product-card">
-          <div className={`catalogue-product-card__image${isProductCutoutAsset(product.image) ? ' catalogue-product-card__image--cutout' : ' catalogue-product-card__image--photo'}`}><img loading={index < 8 ? 'eager' : 'lazy'} src={product.image} alt={product.name} data-visual-kind="product" data-visual-slug={product.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/>{product.offer && <span className="catalogue-offer-badge"><BadgePercent/> Offer</span>}<i>View details <ArrowUpRight/></i></div>
-          <div className="catalogue-product-card__copy"><small>{product.legacyCategory || product.category}</small><h2 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h2><p>{product.note}</p><span>Product {String(index + 1).padStart(2, '0')} <ArrowRight/></span></div>
-        </Link>
-        <ProductShareActions product={product}/>
-      </article>)}
-    </section>
+    <ExpandableProductGrid products={shown} navigationProducts={filtered} allProducts={content.products} variant="catalogue" eagerCount={8}/>
 
     {filtered.length === 0 && <section className="catalogue-empty section"><Search/><h2>No products match that search.</h2><p>Try a shorter name or return to all collections.</p><button type="button" onClick={() => {setQuery(''); setSelectedCategory('All');}}>Clear filters</button></section>}
     {shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><button type="button" onClick={() => setVisibleCount(count => count + 36)}>Load more products <ArrowRight/></button></section>}

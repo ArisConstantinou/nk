@@ -19,12 +19,12 @@ import {
 } from 'lucide-react';
 import {team} from '../content';
 import {useContent} from '../context/ContentContext';
-import type {Product, Project} from '../types';
-import {isProductCutoutAsset, publicAsset} from '../utils/assets';
+import type {Project} from '../types';
+import {publicAsset} from '../utils/assets';
 import {CmsSections} from '../components/CmsSections';
 import {ResponsiveImage} from '../components/ResponsiveImage';
 import {ManagedPublicForm} from '../components/ManagedPublicForm';
-import {ProductShareActions} from '../components/ProductShareActions';
+import {ExpandableProductGrid, ExpandedProductModule} from '../components/ExpandableProductGrid';
 import {ContactCommandCenter} from '../components/ContactCommandCenter';
 import {ContactSignalPlayer} from '../components/ContactSignalPlayer';
 import {AboutHeritageExperience} from '../components/AboutHeritageExperience';
@@ -282,10 +282,6 @@ const filterValues = {
   space: ['All', 'Living', 'Kitchen', 'Outdoor', 'Bedroom', 'Workspace'],
 };
 
-function ProductCard({item}: {item: Product}) {
-  return <Link to={`/shop/product/${item.id}`} className="product-card"><div className={`product-image${isProductCutoutAsset(item.image) ? ' product-image--cutout' : ' product-image--photo'}`}><ResponsiveImage src={item.image} alt={item.name} loading="lazy" decoding="async" data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/><span>View details <ArrowUpRight/></span></div><div className="product-info"><small><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Product season">{item.season}</span></small><h3 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h3><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p></div></Link>;
-}
-
 export function ExplorePage() {
   const {content} = useContent();
   const [params, setParams] = useSearchParams();
@@ -294,7 +290,6 @@ export function ExplorePage() {
   const space = params.get('space') || 'All';
   const viewAll = params.get('view') === 'all';
   const [visibleCount, setVisibleCount] = useState(48);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
   const setViewAll = (enabled: boolean) => {
     const next = new URLSearchParams(params);
@@ -302,62 +297,37 @@ export function ExplorePage() {
     setVisibleCount(48);
     setParams(next);
   };
+  const findAllProducts = () => {
+    setVisibleCount(48);
+    setParams({view: 'all'});
+  };
+  const clearFilters = () => {
+    setVisibleCount(48);
+    setParams(viewAll ? {view: 'all'} : {});
+  };
   const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
   const shown = viewAll ? filtered : filtered.slice(0, visibleCount);
-  const selectedFilters = {category, season, space};
-  const activeFilterCount = Object.values(selectedFilters).filter(value => value !== 'All').length;
-  const clearFilters = () => {
-    const next = new URLSearchParams(params);
-    ['category', 'season', 'space'].forEach(key => next.delete(key));
-    setParams(next);
-  };
   useEffect(() => setVisibleCount(48), [category, season, space]);
   return <>
     <PageIntro eyebrow="NK Electrical Shop" title="Products organised" italic="for practical browsing." body="Browse products only: lighting, coffee, kitchen, cooling and household equipment. Installation and design expertise remains under Services."/>
-    <section className="filter-shell section">
+    <section className="filter-shell compact-product-filters section">
       <div className="filter-top">
         <div><SlidersHorizontal/><b>Refine the collection</b></div>
         <div className="shop-view-controls">
           <span>{filtered.length} considered matches</span>
           <button type="button" className={!viewAll ? 'active' : ''} aria-pressed={!viewAll} onClick={() => setViewAll(false)}>48 at a time</button>
-          <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={() => setViewAll(true)}>View all</button>
+          <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={findAllProducts}>Find all</button>
         </div>
       </div>
-      <button
-        type="button"
-        className={`shop-mobile-filter-toggle${filtersOpen ? ' is-open' : ''}`}
-        aria-expanded={filtersOpen}
-        aria-controls="shop-mobile-filter-panel"
-        onClick={() => setFiltersOpen(open => !open)}
-      >
-        <span className="shop-mobile-filter-toggle__title">
-          <SlidersHorizontal/>
-          <span><small>Filters &amp; categories</small><strong>{activeFilterCount ? `${activeFilterCount} active` : 'All products'}</strong></span>
-        </span>
-        <span className="shop-mobile-filter-toggle__result">{filtered.length} results</span>
-        <ChevronDown/>
-      </button>
-      <div id="shop-mobile-filter-panel" className={`shop-filter-panel${filtersOpen ? ' is-mobile-open' : ''}`}>
-        {Object.entries(filterValues).map(([key, values]) => {
-          const selectedValue = selectedFilters[key as keyof typeof selectedFilters];
-          return <div className="filter-row" key={key}>
-            <b><span>{key}</span><em>{selectedValue}</em></b>
-            <div>{values.map(value => <button type="button" aria-pressed={selectedValue === value} className={selectedValue === value ? 'active' : ''} onClick={() => set(key, value)} key={value}>{value}</button>)}</div>
-          </div>;
-        })}
-        <div className="shop-mobile-view-mode" aria-label="Number of products shown">
-          <span>Display</span>
-          <button type="button" className={!viewAll ? 'active' : ''} aria-pressed={!viewAll} onClick={() => setViewAll(false)}>48 at a time</button>
-          <button type="button" className={viewAll ? 'active' : ''} aria-pressed={viewAll} onClick={() => setViewAll(true)}>View all</button>
-        </div>
-        <div className="shop-mobile-filter-actions">
-          <button type="button" className="shop-mobile-filter-clear" disabled={!activeFilterCount} onClick={clearFilters}>Clear all</button>
-          <button type="button" className="shop-mobile-filter-apply" onClick={() => setFiltersOpen(false)}>Show {filtered.length} products <ArrowRight/></button>
-        </div>
+      <div className="compact-filter-bar">
+        <label><span>Category</span><select value={category} onChange={event => set('category', event.target.value)}>{filterValues.category.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
+        <label><span>Season</span><select value={season} onChange={event => set('season', event.target.value)}>{filterValues.season.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
+        <label><span>Space</span><select value={space} onChange={event => set('space', event.target.value)}>{filterValues.space.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
+        {(category !== 'All' || season !== 'All' || space !== 'All') && <button type="button" onClick={clearFilters}>Clear filters <X/></button>}
       </div>
     </section>
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
-    <section className="product-grid section">{shown.map(product => <article className="product-card-share-shell" key={product.id}><ProductCard item={product}/><ProductShareActions product={product}/></article>)}</section>
+    <ExpandableProductGrid products={shown} navigationProducts={filtered} allProducts={content.products}/>
     {!viewAll && shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><div><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load 48 more <ArrowRight/></button><button type="button" className="secondary" onClick={() => setViewAll(true)}>View all {filtered.length} products</button></div></section>}
     {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({})}>Clear filters</button></div>}
   </>;
@@ -366,9 +336,14 @@ export function ExplorePage() {
 export function ProductPage() {
   const {id} = useParams();
   const {content} = useContent();
-  const item = content.products.find(product => product.id === id);
+  const [selectedId, setSelectedId] = useState(id || '');
+  useEffect(() => setSelectedId(id || ''), [id]);
+  const item = content.products.find(product => product.id === selectedId);
   if (!item) return <section className="not-found"><span>Not found</span><h1>That product has moved.</h1><Link to="/shop">Return to the Shop</Link></section>;
-  return <section className="product-detail section"><Link className="back-link" to="/shop">← Back to Shop</Link><div className="product-detail-image"><ResponsiveImage src={item.image} alt={item.name} data-visual-kind="product" data-visual-slug={item.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Product image"/></div><div className="product-detail-copy"><span className="eyebrow"><span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="category" data-visual-edit="text" data-visual-label="Product category">{item.category}</span> · <span data-visual-kind="product" data-visual-slug={item.id} data-visual-path="space" data-visual-edit="text" data-visual-label="Product space">{item.space}</span></span><h1 data-visual-kind="product" data-visual-slug={item.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{item.name}</h1><p data-visual-kind="product" data-visual-slug={item.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{item.note}</p><dl><div><dt>Best considered for</dt><dd data-visual-kind="product" data-visual-slug={item.id} data-visual-path="space" data-visual-edit="text" data-visual-label="Best space">{item.space}</dd></div><div><dt>Seasonal edit</dt><dd data-visual-kind="product" data-visual-slug={item.id} data-visual-path="season" data-visual-edit="text" data-visual-label="Season">{item.season}</dd></div><div><dt>Available through</dt><dd>NK Electrical, Strovolos</dd></div></dl><a className="button copper" href={`mailto:info@nk-electrical.com?subject=${encodeURIComponent(`Product enquiry: ${item.name}`)}`}>Ask about this product <ArrowUpRight/></a></div></section>;
+  return <section className="product-detail-page section">
+    <div className="product-detail-page__toolbar"><Link to="/shop">← Back to Shop</Link><Link className="shop-find-all" to="/shop?view=all">Find all products <ArrowRight/></Link></div>
+    <ExpandedProductModule product={item} collection={content.products} allProducts={content.products} onSelect={product => setSelectedId(product.id)} standalone/>
+  </section>;
 }
 
 export function LightingPage() {
@@ -391,7 +366,7 @@ export function AppliancesPage() {
   return <>
     <PageIntro eyebrow="Electrical appliances" title="Practical products," italic="grouped around real use." body="Coffee, kitchen and cooling appliances presented separately from lighting and electrical installation services."/>
     <section className="appliance-controls section"><div><SlidersHorizontal/><b>Choose a season or occasion</b></div><div>{['All', 'All year', 'Summer', 'Winter', 'Christmas'].map(value => <button className={season === value ? 'active' : ''} onClick={() => setSeason(value)} key={value}>{value}</button>)}</div><span>{appliances.length} appliances</span></section>
-    <section className="product-grid section">{appliances.map(product => <ProductCard item={product} key={product.id}/>)}</section>
+    <ExpandableProductGrid products={appliances} allProducts={content.products}/>
   </>;
 }
 
