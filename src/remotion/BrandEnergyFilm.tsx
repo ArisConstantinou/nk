@@ -1,10 +1,10 @@
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 
 const wires = [
-  {color: '#2f73bd', path: 'M8 -5 C8 7 9 15 9 23 S8 38 8 51'},
-  {color: '#78442d', path: 'M24 -5 C24 7 23 15 24 23 S25 38 24 51'},
-  {color: '#10171c', path: 'M40 -5 C40 7 41 15 40 23 S39 38 40 51'},
-  {color: '#92999e', path: 'M56 -5 C56 7 55 15 56 23 S57 38 56 51'},
+  {color: '#2f73bd', path: 'M7 2 C7 9 9 14 12 19 S16 28 17 38'},
+  {color: '#78442d', path: 'M23 2 C23 9 22 15 24 20 S27 29 27 38'},
+  {color: '#10171c', path: 'M41 2 C41 9 39 15 37 20 S35 29 35 38'},
+  {color: '#92999e', path: 'M57 2 C57 9 53 14 49 19 S43 28 43 38'},
 ];
 
 const clamp = {
@@ -76,8 +76,8 @@ export function BrandEnergyFilm() {
       />)}
 
       {wires.map((_, index) => <circle
-        cx={8 + index * 16}
-        cy="46"
+        cx={17 + index * 9}
+        cy="38"
         r={.45 + spark * .48}
         fill="#f4feff"
         opacity={spark * (.78 - index * .09)}

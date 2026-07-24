@@ -34,6 +34,10 @@ html[data-experience='tech']{
     #d8d0bf;
 }
 
+.ia-shell .ia-header:has(.ia-live-edit-button) .ia-header-utility{
+  padding-right:clamp(330px,20vw,390px);
+}
+
 .ia-shell .ia-header-utility>span{
   display:none;
 }
@@ -208,7 +212,8 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 }
 
 .ia-nav-panel__media,
-.ia-nav-panel__shade{
+.ia-nav-panel__shade,
+.ia-nav-panel__effect{
   position:absolute;
   inset:0;
   pointer-events:none;
@@ -225,10 +230,10 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
   display:block;
   object-fit:cover;
   object-position:center;
-  opacity:.17;
-  filter:saturate(.45) contrast(1.05);
-  transform:scale(1.035);
-  transition:opacity .3s ease,filter .34s ease,transform .48s cubic-bezier(.16,1,.3,1);
+  opacity:.5;
+  filter:saturate(.72) contrast(1.08);
+  transform:scale(1.02);
+  transition:opacity .35s ease,filter .4s ease,transform .72s cubic-bezier(.16,1,.3,1);
 }
 
 .ia-nav-panel__media[data-nav-panel='services'] img{object-position:58% 52%}
@@ -240,9 +245,39 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 .ia-nav-panel__shade{
   z-index:-1;
   background:
-    linear-gradient(180deg,rgba(7,25,31,.18),rgba(7,25,31,.88)),
-    linear-gradient(90deg,rgba(18,54,64,.66),rgba(18,54,64,.08));
+    linear-gradient(180deg,rgba(7,25,31,.12),rgba(7,25,31,.8)),
+    linear-gradient(90deg,rgba(18,54,64,.42),rgba(18,54,64,.06));
   transition:background .34s ease;
+}
+
+.ia-nav-panel__effect{
+  z-index:1;
+  overflow:hidden;
+  box-shadow:inset 0 0 0 1px transparent,inset 0 -2px transparent;
+  transition:box-shadow .42s ease;
+}
+
+.ia-nav-panel__effect::before{
+  content:"";
+  position:absolute;
+  top:-55%;
+  bottom:-55%;
+  left:-42%;
+  width:34%;
+  background:linear-gradient(90deg,transparent,rgba(255,238,214,.26),transparent);
+  opacity:0;
+  transform:translateX(-180%) skewX(-16deg);
+  transition:transform .78s cubic-bezier(.16,1,.3,1),opacity .22s ease;
+}
+
+.ia-nav-panel__effect::after{
+  content:"";
+  position:absolute;
+  inset:7px 8px;
+  border:1px solid rgba(246,177,128,0);
+  opacity:0;
+  transform:scale(.985);
+  transition:border-color .32s ease,opacity .32s ease,transform .46s cubic-bezier(.16,1,.3,1);
 }
 
 .ia-nav-panel__copy{
@@ -279,6 +314,7 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
   font:720 clamp(12px,1vw,15px)/1 var(--display);
   letter-spacing:-.015em;
   text-shadow:0 2px 9px rgba(0,0,0,.34);
+  transition:letter-spacing .32s ease,text-shadow .32s ease;
 }
 
 .ia-nav-panel__chevron{
@@ -294,17 +330,38 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 .ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__media img,
 .ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__media img,
 .ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__media img{
-  opacity:1;
-  filter:saturate(.88) contrast(1.02);
-  transform:scale(1);
+  opacity:.9;
+  filter:saturate(1) contrast(1.04);
+  transform:scale(1.065);
 }
 
 .ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__shade,
 .ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__shade,
 .ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__shade{
   background:
-    linear-gradient(180deg,rgba(7,22,27,.06),rgba(7,22,27,.78)),
-    linear-gradient(90deg,rgba(7,22,27,.42),rgba(7,22,27,.02));
+    linear-gradient(180deg,rgba(7,22,27,.02),rgba(7,22,27,.72)),
+    linear-gradient(90deg,rgba(7,22,27,.3),rgba(7,22,27,.02));
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__effect,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__effect,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__effect{
+  box-shadow:inset 0 0 32px rgba(241,107,81,.09),inset 0 -2px #f16b51;
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__effect::before,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__effect::before,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__effect::before{
+  opacity:1;
+  transform:translateX(515%) skewX(-16deg);
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__effect::after,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__effect::after,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__effect::after{
+  border-color:rgba(246,177,128,.42);
+  opacity:1;
+  transform:scale(1);
 }
 
 .ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__copy,
@@ -322,6 +379,13 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 
 .ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__chevron{
   transform:rotate(180deg);
+}
+
+.ia-shell .ia-header .ia-desktop-nav>a:is(:hover,:focus-visible) .ia-nav-panel__copy strong,
+.ia-shell .ia-header .ia-desktop-nav>button:is(:hover,:focus-visible) .ia-nav-panel__copy strong,
+.ia-shell .ia-header .ia-desktop-nav>button[aria-expanded='true'] .ia-nav-panel__copy strong{
+  letter-spacing:.01em;
+  text-shadow:0 3px 14px rgba(0,0,0,.55);
 }
 
 .ia-shell .ia-header-actions{
@@ -409,28 +473,60 @@ html[data-theme='dark'] .ia-shell .ia-brand strong{
 .ia-shell .ia-header-search-dialog .ia-header-global-search .nk-live-search__panel{position:relative;inset:auto;top:auto;right:auto;bottom:auto;left:auto;max-height:calc(100dvh - 255px);margin-top:8px;border-radius:0;box-shadow:inset 0 0 0 1px rgba(215,160,100,.16)}
 
 .ia-shell #ia-primary-quote{
-  min-height:36px!important;
-  height:36px!important;
-  padding:0 18px 0 20px!important;
-  border:0!important;
-  background:#f16b51!important;
-  color:#112e36!important;
-  clip-path:polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%);
+  position:relative;
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 15px!important;
+  gap:12px!important;
+  overflow:visible!important;
+  border:1px solid #ee816a!important;
+  border-radius:4px!important;
+  background:#df644d!important;
+  color:#fffaf3!important;
+  clip-path:none!important;
   box-shadow:none!important;
-  font-size:12px!important;
+  font-size:12.5px!important;
+  font-weight:760!important;
+  letter-spacing:-.01em!important;
   text-transform:none!important;
-  transition:background-color .2s ease,color .2s ease!important;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease!important;
+}
+
+.ia-shell #ia-primary-quote::before,
+.ia-shell #ia-primary-quote::after{
+  content:none!important;
+  display:none!important;
+}
+
+.ia-shell #ia-primary-quote>span,
+.ia-shell #ia-primary-quote>svg{
+  position:relative;
+  z-index:1;
+}
+
+.ia-shell #ia-primary-quote>svg:last-child{
+  width:17px!important;
+  height:17px!important;
+  flex:0 0 17px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:currentColor!important;
+  transition:transform .2s ease!important;
 }
 
 .ia-shell #ia-primary-quote:hover,
 .ia-shell #ia-primary-quote:focus-visible{
   transform:none!important;
-  background:#ff8468!important;
-  color:#0c2830!important;
-  border:0!important;
+  background:#eb7359!important;
+  color:#fff!important;
+  border-color:#ffad98!important;
   box-shadow:none!important;
-  outline:1px solid rgba(255,255,255,.68);
-  outline-offset:3px;
+  filter:none;
+}
+
+.ia-shell #ia-primary-quote:is(:hover,:focus-visible)>svg:last-child{
+  transform:translateX(2px);
 }
 
 .ia-shell .ia-live-edit-button{
@@ -464,6 +560,7 @@ html[data-theme='dark'] .ia-shell .ia-header-bar{
   }
 
   .ia-shell .ia-header-utility{padding-right:220px;padding-left:210px}
+  .ia-shell .ia-header:has(.ia-live-edit-button) .ia-header-utility{padding-right:300px}
   .ia-shell .ia-brand{padding:0}
   .ia-shell .ia-header-actions{padding:0}
 
@@ -480,6 +577,7 @@ html[data-theme='dark'] .ia-shell .ia-header-bar{
     grid-template-columns:minmax(0,1fr);
   }
   .ia-shell .ia-header-utility{padding-right:145px;padding-left:86px}
+  .ia-shell .ia-header:has(.ia-live-edit-button) .ia-header-utility{padding-right:205px}
   .ia-shell .ia-brand{padding:0}
   .ia-shell .ia-header-actions{padding:0}
   .ia-shell .ia-brand-copy{display:none}
@@ -710,6 +808,9 @@ html[data-theme='dark'] .ia-shell .ia-header-bar{
   .ia-shell .ia-header .ia-desktop-nav>a,
   .ia-shell .ia-header .ia-desktop-nav>button,
   .ia-nav-panel__media img,
+  .ia-nav-panel__effect,
+  .ia-nav-panel__effect::before,
+  .ia-nav-panel__effect::after,
   .ia-nav-panel__copy,
   .ia-nav-panel__copy small{
     transition-duration:.01ms!important;
