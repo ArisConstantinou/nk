@@ -325,16 +325,16 @@
 
 @keyframes catalogue-turn-forward{
   0%{transform:translateZ(3px) rotateY(0deg) scaleX(1)}
-  22%{transform:translateZ(3px) rotateY(-38deg) scaleX(.985) rotateZ(-.35deg)}
-  50%{transform:translateZ(3px) rotateY(-92deg) scaleX(.94) rotateZ(-.7deg)}
-  76%{transform:translateZ(3px) rotateY(-146deg) scaleX(.98) rotateZ(-.3deg)}
+  22%{transform:translateZ(3px) rotateY(-38deg) scaleX(.985)}
+  50%{transform:translateZ(3px) rotateY(-92deg) scaleX(.94)}
+  76%{transform:translateZ(3px) rotateY(-146deg) scaleX(.98)}
   100%{transform:translateZ(3px) rotateY(-180deg) scaleX(1)}
 }
 @keyframes catalogue-turn-backward{
   0%{transform:translateZ(3px) rotateY(0deg) scaleX(1)}
-  22%{transform:translateZ(3px) rotateY(38deg) scaleX(.985) rotateZ(.35deg)}
-  50%{transform:translateZ(3px) rotateY(92deg) scaleX(.94) rotateZ(.7deg)}
-  76%{transform:translateZ(3px) rotateY(146deg) scaleX(.98) rotateZ(.3deg)}
+  22%{transform:translateZ(3px) rotateY(38deg) scaleX(.985)}
+  50%{transform:translateZ(3px) rotateY(92deg) scaleX(.94)}
+  76%{transform:translateZ(3px) rotateY(146deg) scaleX(.98)}
   100%{transform:translateZ(3px) rotateY(180deg) scaleX(1)}
 }
 
