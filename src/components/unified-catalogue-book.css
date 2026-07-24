@@ -276,7 +276,6 @@
   transform-style:preserve-3d;
   will-change:transform;
   transform:rotateY(0deg) translateZ(3px);
-  isolation:isolate;
 }
 .catalogue-book__turn-face{
   position:absolute;
@@ -285,7 +284,6 @@
   background:#f7f3e9;
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
-  transform-style:preserve-3d;
 }
 .catalogue-book__turn-face:after{
   content:"";
