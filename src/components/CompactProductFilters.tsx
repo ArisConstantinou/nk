@@ -37,12 +37,13 @@ export function CompactProductFilters({
   idPrefix = 'product-filter',
 }: CompactProductFiltersProps) {
   const hasSelections = segments.some(({key}) => selections[key].length > 0);
+  const activeFilter = openFilter ?? segments[0]?.key ?? null;
 
   return <div className="compact-filter-bar">
     <div className="compact-filter-module" data-visual-no-edit>
       <div className="compact-filter-segments" role="group" aria-label="Product filters">
         {segments.map(({key, label, index}) => {
-          const isOpen = openFilter === key;
+          const isOpen = activeFilter === key;
           const selectedValues = selections[key];
           const summary = selectionSummary(selectedValues);
           return <button
@@ -52,7 +53,7 @@ export function CompactProductFilters({
             aria-expanded={isOpen}
             aria-controls={`${idPrefix}-${key}-panel`}
             aria-label={`${label}: ${summary}`}
-            onClick={() => onOpenFilterChange(isOpen ? null : key)}
+            onClick={() => onOpenFilterChange(key)}
             key={key}
           >
             <span className="compact-filter-segment__index">{index}</span>
@@ -63,7 +64,7 @@ export function CompactProductFilters({
       </div>
 
       {segments.map(({key, label, options}) => {
-        if (openFilter !== key) return null;
+        if (activeFilter !== key) return null;
         const selectedValues = selections[key];
         const summary = selectionSummary(selectedValues);
         return <div
