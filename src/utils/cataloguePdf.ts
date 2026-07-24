@@ -66,7 +66,7 @@ export async function createCataloguePdfTask(sourceUrl: string, signal?: AbortSi
     rejectFailure(error);
     void destroyTask();
   });
-  task = getDocument({range, disableAutoFetch: true, rangeChunkSize: 65536});
+  task = getDocument({range, disableAutoFetch: true, rangeChunkSize: 1024 * 1024});
   const promise: Promise<PDFDocumentProxy> = Promise.race([task.promise, failure]);
   return {
     task,

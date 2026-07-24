@@ -191,39 +191,48 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     const sourceFailure = activeFailureRef.current;
     const rendering = (async () => {
       const page = await withPdfFailure(sourceDocument.getPage(pageNumber), sourceFailure);
-      const base = page.getViewport({scale: 1});
-      const targetHeight = window.innerWidth <= 760
-        ? 600
-        : Math.min(1080, Math.max(760, window.innerHeight * .9));
-      const scale = Math.min(1.7, targetHeight / base.height);
-      const viewport = page.getViewport({scale});
-      const canvas = window.document.createElement('canvas');
-      canvas.width = Math.ceil(viewport.width);
-      canvas.height = Math.ceil(viewport.height);
-      const context = canvas.getContext('2d', {alpha: false});
-      if (!context) throw new Error('Canvas is unavailable.');
-      await withPdfFailure(page.render({canvas, canvasContext: context, viewport}).promise, sourceFailure);
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob(result => result ? resolve(result) : reject(new Error('Page image conversion failed.')), 'image/webp', .88);
-      });
-      canvas.width = 1;
-      canvas.height = 1;
-      const image = URL.createObjectURL(blob);
-      if (sourceDocument !== activeDocumentRef.current) {
-        URL.revokeObjectURL(image);
-        throw new Error('Catalogue changed while rendering.');
+      try {
+        const base = page.getViewport({scale: 1});
+        const targetHeight = window.innerWidth <= 760
+          ? 600
+          : Math.min(1080, Math.max(760, window.innerHeight * .9));
+        const scale = Math.min(1.7, targetHeight / base.height);
+        const viewport = page.getViewport({scale});
+        const canvas = window.document.createElement('canvas');
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        const context = canvas.getContext('2d', {alpha: false});
+        if (!context) throw new Error('Canvas is unavailable.');
+        await withPdfFailure(page.render({canvas, canvasContext: context, viewport}).promise, sourceFailure);
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(result => result ? resolve(result) : reject(new Error('Page image conversion failed.')), 'image/webp', .88);
+        });
+        canvas.width = 1;
+        canvas.height = 1;
+        const image = URL.createObjectURL(blob);
+        if (sourceDocument !== activeDocumentRef.current) {
+          URL.revokeObjectURL(image);
+          throw new Error('Catalogue changed while rendering.');
+        }
+        const decodedImage = new Image();
+        decodedImage.decoding = 'async';
+        decodedImage.src = image;
+        try {
+          await decodedImage.decode();
+        } catch (error) {
+          URL.revokeObjectURL(image);
+          throw error;
+        }
+        if (sourceDocument !== activeDocumentRef.current) {
+          URL.revokeObjectURL(image);
+          throw new Error('Catalogue changed while decoding.');
+        }
+        pageCacheRef.current.set(pageNumber, image);
+        setRenderedPages(current => current[pageNumber] ? current : {...current, [pageNumber]: image});
+        return image;
+      } finally {
+        page.cleanup();
       }
-      const decodedImage = new Image();
-      decodedImage.decoding = 'async';
-      decodedImage.src = image;
-      await decodedImage.decode().catch(() => {});
-      if (sourceDocument !== activeDocumentRef.current) {
-        URL.revokeObjectURL(image);
-        throw new Error('Catalogue changed while decoding.');
-      }
-      pageCacheRef.current.set(pageNumber, image);
-      setRenderedPages(current => current[pageNumber] ? current : {...current, [pageNumber]: image});
-      return image;
     })().finally(() => {
       if (pageRenderRef.current.get(pageNumber) === rendering) pageRenderRef.current.delete(pageNumber);
     });
@@ -232,7 +241,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   }, [document]);
 
   useEffect(() => {
-    if (!document) return;
+    if (!document || turn) return;
     let cancelled = false;
     let preloadTimer: number | undefined;
     const currentSpread = spreadPages(spreadStart, document.numPages);
@@ -275,7 +284,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       cancelled = true;
       if (preloadTimer !== undefined) window.clearTimeout(preloadTimer);
     };
-  }, [document, failReader, renderPageImage, spreadStart]);
+  }, [document, failReader, renderPageImage, spreadStart, turn]);
 
   const changePage = useCallback(async (direction: -1 | 1) => {
     if (!document || turn || preparingTurnRef.current) return;
@@ -355,7 +364,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     if (!turn?.releasing) return;
     const releaseTimer = window.setTimeout(() => {
       setTurn(current => current?.releasing ? null : current);
-    }, 110);
+    }, 140);
     return () => window.clearTimeout(releaseTimer);
   }, [turn?.releasing]);
 
@@ -429,6 +438,9 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       ? `Cover · page 1 / ${document.numPages}`
       : `Pages ${visible.left}${visible.right ? `–${visible.right}` : ''} / ${document.numPages}`
     : loadError ? 'Catalogue unavailable' : 'Preparing pages';
+  const readerBusy = Boolean(turn) || isPreparingTurn;
+  const previousUnavailable = !document || (catalogueIndex === 0 && spreadStart === 1);
+  const nextUnavailable = !document || (catalogueIndex === catalogues.length - 1 && spreadStart === finalSpread(document?.numPages || 1));
 
   return <section className="catalogue-book" aria-label="Unified interactive catalogue book">
     <header className="catalogue-book__bar">
@@ -452,7 +464,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     </nav>}
 
     <div className="catalogue-book__reader">
-      <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === 0 && spreadStart === 1)} aria-label="Previous page"><ChevronLeft/></button>
+      <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable || readerBusy} aria-label="Previous page"><ChevronLeft/></button>
 
       <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
       <div ref={stageRef} className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''} ${turn.releasing ? 'is-turn-releasing' : ''}` : ''}`}
@@ -474,7 +486,10 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
             {rightBase && renderedPages[rightBase] && <img src={renderedPages[rightBase]} alt={`${catalogueLabel}, page ${rightBase}`}/>}
           </button>
           <span className="catalogue-book__spine" aria-hidden="true"/>
-          {turn && <div className="catalogue-book__turning-sheet" aria-hidden="true" onAnimationEnd={completeTurn}>
+          {turn && <div className="catalogue-book__turning-sheet" aria-hidden="true" onAnimationEnd={event => {
+            if (event.target !== event.currentTarget || !event.animationName.startsWith('catalogue-turn-')) return;
+            completeTurn();
+          }}>
             <div className="catalogue-book__turn-face catalogue-book__turn-face--front">
               {turn.front && renderedPages[turn.front] && <img src={renderedPages[turn.front]} alt=""/>}
             </div>
@@ -489,7 +504,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       </div>
       </div>
 
-      <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === catalogues.length - 1 && spreadStart === finalSpread(document?.numPages || 1))} aria-label="Next page"><ChevronRight/></button>
+      <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={nextUnavailable} aria-disabled={nextUnavailable || readerBusy} aria-label="Next page"><ChevronRight/></button>
     </div>
 
     <footer className="catalogue-book__footer">
