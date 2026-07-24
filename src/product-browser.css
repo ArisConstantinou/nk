@@ -329,33 +329,43 @@
   color:var(--system-white);
   font:650 14px/1.2 var(--display);
 }
-.compact-filter-options{display:flex;flex-wrap:wrap;gap:8px}
+.compact-filter-options{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
 .compact-filter-options>button{
-  min-height:44px;
-  padding:0 14px;
-  display:inline-flex;
+  min-width:0;
+  min-height:62px;
+  padding:10px 14px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 18px;
   align-items:center;
-  justify-content:center;
   gap:9px;
   border:1px solid rgba(242,189,115,.38);
   border-radius:0;
   background:rgba(255,255,255,.035);
+  box-shadow:inset 3px 0 rgba(242,189,115,.28);
   color:var(--system-white);
   font:700 13px/1.2 var(--display);
+  text-align:left;
   cursor:pointer;
-  transition:background-color .18s ease,border-color .18s ease,color .18s ease;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease;
 }
+.compact-filter-options>button span{min-width:0;overflow-wrap:anywhere}
 .compact-filter-options>button:is(:hover,:focus-visible){
   border-color:#f2bd73;
   background:rgba(242,189,115,.12);
+  box-shadow:inset 5px 0 #f2bd73;
 }
 .compact-filter-options>button:focus-visible{outline:3px solid rgba(242,189,115,.36);outline-offset:2px}
 .compact-filter-options>button.is-selected{
   border-color:#f2bd73;
   background:#f2bd73;
+  box-shadow:inset 5px 0 #e06b4d;
   color:#321d24;
 }
-.compact-filter-options>button svg{width:16px;height:16px;stroke-width:3}
+.compact-filter-options>button svg{grid-column:2;width:16px;height:16px;stroke-width:3}
 .compact-filter-clear{flex:0 0 auto;align-self:flex-start}
 @keyframes compact-filter-panel-in{
   from{opacity:0;transform:translateY(-7px)}
@@ -429,6 +439,7 @@
   .compact-filter-bar{flex-direction:column}
   .compact-filter-module{width:100%}
   .compact-filter-clear{width:100%}
+  .compact-filter-options{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:760px){
   .electrical-main .product-browser-grid.product-grid,
@@ -451,8 +462,8 @@
   .compact-filter-segment__copy b{font-size:12px}
   .compact-filter-segment__copy small{font-size:13px}
   .compact-filter-panel{padding:16px 12px}
-  .compact-filter-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-  .compact-filter-options>button{width:100%;min-width:0;padding:0 10px;font-size:13px}
+  .compact-filter-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .compact-filter-options>button{width:100%;padding:10px;font-size:13px}
   .shop-view-controls{flex-wrap:wrap}
   .electrical-main .catalogue-filter-heading{
     display:grid!important;
