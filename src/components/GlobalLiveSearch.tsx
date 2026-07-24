@@ -19,6 +19,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import type {Catalogue, Product} from '../types';
 import {ResponsiveImage} from './ResponsiveImage';
+import {catalogueBookLink} from './UnifiedCatalogueBook';
 import './global-live-search.css';
 
 type SearchResult =
@@ -242,7 +243,7 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
         kind: 'catalogue',
         score: 50 - index,
         catalogue,
-        to: catalogue.url,
+        to: catalogueBookLink(catalogue, index),
       }));
       return [...products, ...catalogues];
     }
@@ -259,7 +260,7 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
       kind: 'catalogue',
       score: catalogueScore(normalizedQuery, catalogue),
       catalogue,
-      to: catalogue.url,
+      to: catalogueBookLink(catalogue, index),
     }));
 
     return [...productResults, ...catalogueResults]
@@ -468,7 +469,7 @@ export function GlobalLiveSearch({className = '', maxResults = 8, labels: labelO
                       onClick: close,
                     } as const;
                     return result.kind === 'catalogue'
-                      ? <a {...commonProps} href={result.to} target="_blank" rel="noreferrer" key={result.key}><ResultTypeIcon result={result}/><ResultCopy result={result} labels={labels}/></a>
+                      ? <Link {...commonProps} to={result.to} key={result.key}><ResultTypeIcon result={result}/><ResultCopy result={result} labels={labels}/></Link>
                       : <Link {...commonProps} to={result.to} key={result.key}><ResultTypeIcon result={result}/><ResultCopy result={result} labels={labels}/></Link>;
                   })}
                 </div>

@@ -55,6 +55,7 @@ export default function App() {
     <Route path="/services/:service" element={<Public><ServiceDetailPage/></Public>}/>
     <Route path="/shop" element={<Public><ExplorePage/></Public>}/>
     <Route path="/shop/catalogues" element={<Public><LightingPage/></Public>}/>
+    <Route path="/shop/catalogues/book" element={<Public><LightingPage/></Public>}/>
     <Route path="/shop/:category" element={<Public><ShopCategoryPage/></Public>}/>
     <Route path="/shop/product/:id" element={<Public><ProductPage/></Public>}/>
     <Route path="/projects" element={<Public><ProjectsPage/></Public>}/>

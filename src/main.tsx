@@ -27,6 +27,8 @@ import './navigation-panels.css';
 import './unified-theme.css';
 import './header-responsive.css';
 import './product-browser.css';
+import './components/unified-catalogue-book.css';
+import './catalogue-entry.css';
 
 document.documentElement.dataset.experience = 'tech';
 applyTheme(getThemePreference());
