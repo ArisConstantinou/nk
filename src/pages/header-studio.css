@@ -491,6 +491,24 @@ html[data-theme] .ia-shell .ia-header--home-preview .ia-mobile-menu__content .ia
 html[data-theme] .ia-shell .ia-header--home-preview .ia-mobile-menu__content .ia-mobile-accordion>div>a strong{color:#f7f1e5}
 html[data-theme] .ia-shell .ia-header--home-preview .ia-mobile-menu__content .ia-mobile-accordion>div>a small{color:#aebdbd}
 
+/* Mobile navigation keeps one continuous divider rhythm, including accordions. */
+@media(max-width:900px){
+  html[data-theme] .ia-shell .ia-header--home-preview .ia-mobile-menu__content>.ia-mobile-accordion{
+    position:relative;
+    border-bottom:1px solid rgba(242,189,115,.24)!important;
+  }
+  html[data-theme] .ia-shell .ia-header--home-preview .ia-mobile-menu__content>.ia-mobile-accordion::after{
+    content:"";
+    position:absolute;
+    right:0;
+    bottom:-1px;
+    width:38px;
+    height:1px;
+    background:#eaa05d;
+    pointer-events:none;
+  }
+}
+
 @media(max-width:380px){.nk-main-header-preview__mobile-summary{grid-template-columns:44px 28px minmax(0,1fr) 44px;gap:2px;padding-inline:2px 0}.nk-main-header-preview__mobile-summary small{display:none}.nk-main-header-preview__mobile-summary strong{font-size:14px}.nk-main-header-preview__mobile-controls{min-width:80px;padding-left:10px}.nk-main-header-preview__mobile-toggle{min-width:70px;font-size:13px}.nk-campaign-picker nav button{width:28px}.nk-campaign-picker__back{padding-inline:7px}.nk-campaign-design h1{overflow-wrap:anywhere}.nk-campaign-design--offers>header .nk-campaign-brand small,.nk-lighting-mast .nk-campaign-brand small{display:none}.nk-campaign-design--installation .nk-campaign-actions{grid-template-columns:1fr}.nk-campaign-design--outdoor>section h1{font-size:clamp(42px,13vw,51px)}}
 @media(prefers-reduced-motion:reduce){.nk-campaign-action,.nk-campaign-picker nav button,.nk-studio-nav img,.nk-studio-nav small,.nk-main-header-preview__mobile-toggle svg,.ia-shell .ia-header--home-preview .ia-mobile-trigger--home,.ia-shell .ia-header--home-preview .ia-mobile-trigger--home svg{transition:none!important}.nk-main-header-preview__floating-close{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.nk-main-header-preview,.nk-main-header-preview::before,.nk-main-header-preview::after,.nk-contact-header-preview,.nk-contact-header-preview::before,.nk-home-topbar__home-tools::after,.nk-home-topbar__route-tools::after{animation:none!important;transition:none!important}}

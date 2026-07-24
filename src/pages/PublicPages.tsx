@@ -320,9 +320,18 @@ export function ExplorePage() {
         </div>
       </div>
       <div className="compact-filter-bar">
-        <label><span>Category</span><select value={category} onChange={event => set('category', event.target.value)}>{filterValues.category.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
-        <label><span>Season</span><select value={season} onChange={event => set('season', event.target.value)}>{filterValues.season.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
-        <label><span>Space</span><select value={space} onChange={event => set('space', event.target.value)}>{filterValues.space.map(value => <option value={value} key={value}>{value}</option>)}</select></label>
+        <label className="compact-filter-field">
+          <span className="compact-filter-label"><i>01</i>Category</span>
+          <span className="compact-filter-select"><select value={category} onChange={event => set('category', event.target.value)}>{filterValues.category.map(value => <option value={value} key={value}>{value}</option>)}</select><ChevronDown aria-hidden="true"/></span>
+        </label>
+        <label className="compact-filter-field">
+          <span className="compact-filter-label"><i>02</i>Season</span>
+          <span className="compact-filter-select"><select value={season} onChange={event => set('season', event.target.value)}>{filterValues.season.map(value => <option value={value} key={value}>{value}</option>)}</select><ChevronDown aria-hidden="true"/></span>
+        </label>
+        <label className="compact-filter-field">
+          <span className="compact-filter-label"><i>03</i>Space</span>
+          <span className="compact-filter-select"><select value={space} onChange={event => set('space', event.target.value)}>{filterValues.space.map(value => <option value={value} key={value}>{value}</option>)}</select><ChevronDown aria-hidden="true"/></span>
+        </label>
         {(category !== 'All' || season !== 'All' || space !== 'All') && <button type="button" onClick={clearFilters}>Clear filters <X/></button>}
       </div>
     </section>
