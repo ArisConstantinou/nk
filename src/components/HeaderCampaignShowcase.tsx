@@ -18,7 +18,7 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react';
-import {useMemo, type ReactNode} from 'react';
+import {useMemo, useState, type ReactNode} from 'react';
 import {Link} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import type {Product} from '../types';
@@ -287,22 +287,53 @@ const unifiedStoryMedia: Record<HeaderCampaignId, string> = {
   '10': 'DELIVERED / CYPRUS',
 };
 
-const unifiedStoryIcons: Record<HeaderCampaignId, typeof Zap> = {
-  '01': Siren,
-  '02': Snowflake,
-  '03': Sparkles,
-  '04': ShieldCheck,
-  '05': Sun,
-  '06': Lightbulb,
-  '07': Lightbulb,
-  '08': BookOpen,
-  '09': CircuitBoard,
-  '10': MapPin,
+const unifiedStoryImages: Record<HeaderCampaignId, readonly {src: string; alt: string}[]> = {
+  '01': [
+    {src: 'assets/heroes/maintenance.webp', alt: 'Electrical fault inspection at a property'},
+    {src: 'assets/generated/electrical-installation-story/05-wiring.webp', alt: 'Electrician tracing and wiring an electrical circuit'},
+    {src: 'assets/generated/electrical-installation-story/08-lights-on.webp', alt: 'Verified electrical installation with lights on'},
+  ],
+  '02': [
+    {src: 'assets/generated/season-summer.webp', alt: 'Summer cooling products for a home'},
+    {src: 'assets/heroes/shop-appliances.webp', alt: 'Appliances selected for everyday comfort'},
+    {src: 'assets/generated/material-light.webp', alt: 'Comfortable interior atmosphere in warm weather'},
+  ],
+  '03': [],
+  '04': [
+    {src: 'assets/heroes/security-systems.webp', alt: 'Connected security camera system'},
+    {src: 'assets/generated/contact-routing-workbench-v1.webp', alt: 'Security system monitoring and routing'},
+    {src: 'assets/heroes/smart-home-automation.webp', alt: 'Connected access and home controls'},
+  ],
+  '05': [
+    ...SUN_CONTROL_STEPS.map(step => ({src: step.image, alt: step.alt})),
+  ],
+  '06': [
+    {src: 'assets/projects/residential-exterior.webp', alt: 'Exterior lighting at a residence after sunset'},
+    {src: 'assets/generated/residence-project.webp', alt: 'Welcoming residential exterior lighting'},
+    {src: 'assets/generated/cyprus-lighting-hero.webp', alt: 'Low-glare lighting in a finished space'},
+  ],
+  '07': [
+    {src: 'assets/heroes/lighting-design.webp', alt: 'Layered architectural lighting design'},
+    {src: 'assets/generated/lighting-cove-studio-v2.webp', alt: 'Task and ambience lighting in a room'},
+    {src: 'assets/generated/led-sensitivity-room.webp', alt: 'Comfortable glare-controlled LED lighting'},
+  ],
+  '08': [
+    {src: 'assets/heroes/shop-overview-awe-v4.webp', alt: 'NK Electrical product range'},
+    {src: 'assets/heroes/shop-lighting.webp', alt: 'Lighting products with clear product imagery'},
+    {src: 'assets/heroes/shop-catalogues.webp', alt: 'Original supplier catalogues'},
+  ],
+  '09': [],
+  '10': [
+    {src: 'assets/generated/residence-project.webp', alt: 'Completed residential electrical project'},
+    {src: 'assets/generated/hospitality-project.webp', alt: 'Completed commercial electrical project'},
+    {src: 'assets/generated/retail-project.webp', alt: 'Completed retail electrical project'},
+  ],
 };
 
 function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
-  const StoryIcon = unifiedStoryIcons[campaign.id];
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const details = unifiedStoryDetails[campaign.id];
+  const storyImages = unifiedStoryImages[campaign.id];
   const offerProducts = campaign.id === '03' ? (campaign.products || []).slice(0, 3) : [];
   return <div className={`nk-campaign-design nk-campaign-design--unified nk-campaign-design--unified-${campaign.slug}`} data-unified-story={campaign.id}>
     <section className="nk-unified-story__copy">
@@ -316,8 +347,10 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
         const offerProduct = offerProducts[index];
         const offerImage = offerProduct ? OFFER_SHOWCASE_CUTOUTS[offerProduct.id] || offerProduct.image : '';
         const installationStep = campaign.id === '09' ? INSTALLATION_STEPS[index] : undefined;
-        const sunControlStep = campaign.id === '05' ? SUN_CONTROL_STEPS[index] : undefined;
-        return <article className={offerProduct ? 'has-offer-preview' : installationStep ? 'has-step-preview' : sunControlStep ? 'has-sun-control-preview' : undefined} key={point}>
+        const storyImage = storyImages[index];
+        const cardKey = `${campaign.id}-${index}`;
+        const isExpanded = expandedCard === cardKey;
+        return <article className={`${offerProduct ? 'has-offer-preview' : installationStep ? 'has-step-preview' : 'has-story-preview'} ${isExpanded ? 'is-expanded' : ''}`.trim()} key={point}>
           <b>0{index + 1}</b>
           {offerProduct
             ? <Link className="nk-unified-story__offer-thumb" to={`/shop/product/${encodeURIComponent(offerProduct.id)}`} aria-label={`View offer: ${offerProduct.name}`}>
@@ -325,9 +358,10 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
               </Link>
             : installationStep
               ? <span className="nk-unified-story__step-thumb"><ResponsiveImage src={installationStep.image} alt={installationStep.alt} loading="eager" decoding="async"/></span>
-              : sunControlStep
-                ? <span className="nk-unified-story__sun-control-thumb"><ResponsiveImage src={sunControlStep.image} alt={sunControlStep.alt} loading="eager" decoding="async"/></span>
-                : <StoryIcon aria-hidden="true"/>}
+              : storyImage && <button className="nk-unified-story__image-toggle" type="button" aria-expanded={isExpanded} aria-label={`${isExpanded ? 'Collapse' : 'Expand'} image for ${point}`} onClick={() => setExpandedCard(current => current === cardKey ? null : cardKey)}>
+                  <ResponsiveImage src={storyImage.src} alt={storyImage.alt} loading="eager" decoding="async"/>
+                  <span aria-hidden="true">{isExpanded ? 'Collapse' : 'Expand'}</span>
+                </button>}
           <strong>{point}</strong>
           <small>{offerProduct ? offerProduct.name.replace(/&amp;|&#x27;/g, match => match === '&amp;' ? '&' : "'") : installationStep?.detail || details[index]}</small>
         </article>;

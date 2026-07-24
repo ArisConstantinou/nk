@@ -12,6 +12,8 @@
     "dev:admin": "node server/run-admin-dev.mjs",
     "start:admin": "node server/admin-server.mjs",
     "admin:create-owner": "node server/create-owner.mjs",
+    "products:localize-images": "node scripts/localize-product-images.mjs",
+    "products:verify-images": "node scripts/verify-product-images.mjs",
     "build": "tsc -b && vite build",
     "build:pages": "tsc -b && vite build --mode github-pages",
     "check:admin": "npm run test:admin-api && npm run build",

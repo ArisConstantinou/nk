@@ -5,7 +5,12 @@ export const resolvePublicUrl = (url = '') => {
   return publicAsset(url);
 };
 
+export const isLocalCatalogueProductAsset = (url = '') => (
+  /\/assets\/catalogue-products\/(?:lighting|appliances)\/(?:cutouts|photos)\/[^/?#]+\.(?:jpe?g|png|webp)(?:[?#].*)?$/i.test(url)
+);
+
 export const isProductCutoutAsset = (url = '') => (
   /\/assets\/product-cutouts\/[^/?#]+\.webp(?:[?#].*)?$/i.test(url)
+  || /\/assets\/catalogue-products\/(?:lighting|appliances)\/cutouts\/[^/?#]+\.(?:jpe?g|png|webp)(?:[?#].*)?$/i.test(url)
   || /\/assets\/products\/(?:blaupunkt|bosch-multitalent|el-led|nespresso)\.webp(?:[?#].*)?$/i.test(url)
 );
