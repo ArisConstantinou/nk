@@ -659,6 +659,73 @@ body::-webkit-scrollbar,
   .ia-mobile-menu-layer,
   .ia-header-search-layer{overflow:hidden}
 
+  .ia-mobile-route-breadcrumb{
+    position:relative;
+    z-index:221;
+    min-width:0;
+    min-height:68px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:9px 18px;
+    color:#f7f1e5;
+    background:#102f39;
+    border-top:3px solid #eaa05d;
+    border-bottom:1px solid rgba(242,189,115,.24);
+    box-sizing:border-box;
+  }
+
+  .ia-mobile-route-breadcrumb>svg{
+    width:24px;
+    height:24px;
+    flex:0 0 24px;
+    color:#f2bd73;
+  }
+
+  .ia-mobile-route-breadcrumb>span{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+
+  .ia-mobile-route-breadcrumb small{
+    color:#eaa05d;
+    font:760 12px/1 var(--campaign-mono);
+    letter-spacing:.1em;
+  }
+
+  .ia-mobile-route-breadcrumb ol{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:0;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    list-style:none;
+  }
+
+  .ia-mobile-route-breadcrumb li{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    color:#fff;
+    font:720 15px/1.15 var(--campaign-body);
+    white-space:nowrap;
+  }
+
+  .ia-mobile-route-breadcrumb li:last-child{flex:1}
+  .ia-mobile-route-breadcrumb li>svg{width:15px;height:15px;flex:0 0 15px;margin:0 6px;color:#eaa05d}
+  .ia-mobile-route-breadcrumb a{color:#c4d0cf;text-decoration:none}
+  .ia-mobile-route-breadcrumb a:is(:hover,:focus-visible){color:#fff;outline:2px solid #f2bd73;outline-offset:3px}
+  .ia-mobile-route-breadcrumb strong{min-width:0;overflow:hidden;color:#fff;text-overflow:ellipsis}
+
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-index{display:none!important}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-title{grid-row:1}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-art{grid-row:2}
+  html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief{grid-row:3}
+
   .ia-mobile-menu-layer::before,
   .ia-header-search-layer::before{content:none!important}
 
@@ -739,6 +806,18 @@ body::-webkit-scrollbar,
     box-shadow:none;
   }
 
+  .ia-mobile-menu__header>button svg,
+  .ia-header-search-dialog>header>button svg,
+  .nk-mobile-expanded-panel__header>button svg{
+    width:32px;
+    height:32px;
+    padding:7px;
+    color:#f7f1e5;
+    background:transparent;
+    box-sizing:border-box;
+    transform:rotate(180deg);
+  }
+
   .nk-main-header-preview.is-mobile-dialog .nk-main-header-preview__story{
     min-height:0;
     display:block!important;
@@ -788,6 +867,10 @@ body::-webkit-scrollbar,
     from{opacity:0;transform:translateY(-16px)}
     to{opacity:1;transform:none}
   }
+}
+
+@media(min-width:901px){
+  .ia-mobile-route-breadcrumb{display:none}
 }
 
 @media(max-width:360px){

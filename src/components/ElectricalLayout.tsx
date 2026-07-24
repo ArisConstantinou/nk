@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
-import {ArrowRight, ChevronDown, CircuitBoard, FileText, Mail, MapPin, Menu, Monitor, Moon, Phone, Search, Sparkles, Sun, X, Zap} from 'lucide-react';
+import {ArrowRight, ChevronDown, ChevronRight, CircuitBoard, FileText, House, Mail, MapPin, Menu, Monitor, Moon, Phone, Search, Sparkles, Sun, Zap} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../context/ContentContext';
 import {serviceLinks, shopLinks} from '../navigation';
@@ -93,6 +93,65 @@ const headerStatusForPath = (path: string) => {
   return 'NK ELECTRICAL / CYPRUS';
 };
 
+const breadcrumbLabelsByPath: Record<string, string> = {
+  '/services': 'Services',
+  '/services/electrical-installations': 'Electrical installations',
+  '/services/lighting-design': 'Lighting design',
+  '/services/smart-home-automation': 'Smart home automation',
+  '/services/security-systems': 'Security systems',
+  '/services/maintenance': 'Maintenance',
+  '/shop': 'Shop',
+  '/shop/lighting': 'Lighting',
+  '/shop/appliances': 'Appliances',
+  '/shop/offers': 'Offers',
+  '/shop/catalogues': 'Catalogues',
+  '/projects': 'Projects',
+  '/about': 'About',
+  '/contact': 'Contact',
+  '/request-a-quote': 'Request a quote',
+};
+
+const readableRouteSegment = (value: string) => {
+  const decoded = decodeURIComponent(value).replace(/[-_]+/g, ' ').trim();
+  return decoded ? `${decoded.charAt(0).toUpperCase()}${decoded.slice(1)}` : 'Page';
+};
+
+const breadcrumbsForPath = (path: string, productName?: string) => {
+  const normalizedPath = path.length > 1 ? path.replace(/\/+$/, '') : path;
+  if (normalizedPath === '/') return [];
+
+  if (normalizedPath.startsWith('/shop/product/')) {
+    const productId = normalizedPath.split('/').pop() || '';
+    return [
+      {label: 'Home', to: '/'},
+      {label: 'Shop', to: '/shop'},
+      {label: productName || readableRouteSegment(productId)},
+    ];
+  }
+
+  if (normalizedPath.startsWith('/pages/')) {
+    return [
+      {label: 'Home', to: '/'},
+      {label: readableRouteSegment(normalizedPath.split('/').pop() || '')},
+    ];
+  }
+
+  const segments = normalizedPath.split('/').filter(Boolean);
+  const items: {label: string; to?: string}[] = [{label: 'Home', to: '/'}];
+  let currentPath = '';
+
+  segments.forEach((segment, index) => {
+    currentPath += `/${segment}`;
+    const isCurrent = index === segments.length - 1;
+    const label = currentPath.startsWith('/shop/product/') && isCurrent && productName
+      ? productName
+      : breadcrumbLabelsByPath[currentPath] || readableRouteSegment(segment);
+    items.push({label, to: isCurrent ? undefined : currentPath});
+  });
+
+  return items;
+};
+
 function NavigationPanelContent({to, label, hasMenu = false}: {to: string; label: string; hasMenu?: boolean}) {
   const media = navigationPanelForPath(to);
   const panelKey = to.split('/').filter(Boolean)[0];
@@ -183,7 +242,7 @@ function ThemeSwitcher({className = ''}: {className?: string}) {
 }
 
 export function ElectricalLayout({children}: {children: ReactNode}) {
-  const {navigation, settings} = useContent();
+  const {content, navigation, settings} = useContent();
   const [megaOpen, setMegaOpen] = useState<MegaSection>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopHeaderPanel, setDesktopHeaderPanel] = useState<DesktopHeaderPanel>(() => storedDesktopStoryVisibility() ? 'highlights' : null);
@@ -211,6 +270,14 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const headerStatus = headerStatusForPath(location.pathname);
   const pageVisual = pageVisualForPath(location.pathname);
   const interactionProfile = routeInteractionForPath(location.pathname);
+  const productId = location.pathname.startsWith('/shop/product/')
+    ? decodeURIComponent(location.pathname.split('/').pop() || '')
+    : '';
+  const currentProductName = productId
+    ? content.products.find(product => product.id === productId)?.name
+    : undefined;
+  const mobileBreadcrumbs = breadcrumbsForPath(location.pathname, currentProductName);
+  const mobilePanelOpen = mobileOpen || searchOpen || Boolean(mobileHeaderPanel);
   const desktopStoryOpen = desktopHeaderPanel === 'highlights';
   const desktopContactOpen = desktopHeaderPanel === 'contact';
   const toggleDesktopHeaderPanel = (target: Exclude<DesktopHeaderPanel, null>) => {
@@ -637,12 +704,31 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
           <LiveSiteEditButton/>
         </div>}
       </div>
+      {mobileBreadcrumbs.length > 0 && <nav
+        className="ia-mobile-route-breadcrumb"
+        aria-label="Breadcrumb"
+        aria-hidden={mobilePanelOpen || undefined}
+        inert={mobilePanelOpen || undefined}
+      >
+        <House aria-hidden="true"/>
+        <span>
+          <small>YOU ARE HERE</small>
+          <ol>
+            {mobileBreadcrumbs.map((item, index) => <li key={`${item.label}-${item.to || 'current'}`}>
+              {index > 0 && <ChevronRight aria-hidden="true"/>}
+              {item.to
+                ? <Link to={item.to} {...routeLinkAttributes(item.to)}>{item.label}</Link>
+                : <strong aria-current="page">{item.label}</strong>}
+            </li>)}
+          </ol>
+        </span>
+      </nav>}
       {searchOpen && <div className="ia-header-search-layer" style={{'--ia-search-anchor-left': `${searchAnchor.left}px`, '--ia-search-anchor-width': `${searchAnchor.width}px`} as CSSProperties}>
         <button className="ia-header-search-backdrop" type="button" aria-label="Close search" onClick={() => closeHeaderSearch()}/>
         <section className="ia-header-search-dialog" id="ia-header-search-panel" ref={searchDialogRef} role="dialog" aria-modal="true" aria-labelledby="ia-header-search-title">
           <header>
             <div><Sparkles aria-hidden="true"/><span><small>LIVE PRODUCT FINDER</small><strong id="ia-header-search-title">Products & PDFs</strong></span></div>
-            <button type="button" onClick={() => closeHeaderSearch()} aria-label="Close search"><span>Close</span><X aria-hidden="true"/></button>
+            <button type="button" onClick={() => closeHeaderSearch()} aria-label="Close search"><span>Close</span><ChevronDown aria-hidden="true"/></button>
           </header>
           <GlobalLiveSearch
             autoFocus
@@ -665,7 +751,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <section ref={mobileNavRef} className="ia-mobile-menu" id="mobile-navigation" role="dialog" aria-modal="true" aria-labelledby="ia-mobile-menu-title">
           <header className="ia-mobile-menu__header">
             <div><Menu aria-hidden="true"/><span><small>SITE NAVIGATION</small><strong id="ia-mobile-menu-title">Explore</strong></span></div>
-            <button type="button" onClick={() => closeMobileNavigation()} aria-label="Close navigation"><span>Close</span><X aria-hidden="true"/></button>
+            <button type="button" onClick={() => closeMobileNavigation()} aria-label="Close navigation"><span>Close</span><ChevronDown aria-hidden="true"/></button>
           </header>
           <nav className="ia-mobile-menu__content" aria-label="Mobile navigation links">
             <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'services'} aria-controls="mobile-services" onClick={() => toggleMobile('services')}><span>Services</span><ChevronDown/></button>{mobileSection === 'services' && <div id="mobile-services">{serviceMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
