@@ -396,7 +396,7 @@ export function LightingPage() {
   const selectedCatalogue = params.get('catalogue') || '';
   const updateBookCatalogue = useCallback((catalogue: string) => setParams({catalogue}, {replace: true}), [setParams]);
   const shown = content.catalogues.filter(catalogue => (brand === 'All' || catalogue.brand === brand) && (focus === 'All' || catalogue.focus === focus));
-  if (location.pathname.endsWith('/book')) return <UnifiedCatalogueBook catalogues={content.catalogues} initialCatalogue={selectedCatalogue} onCatalogueChange={updateBookCatalogue} onClose={() => navigate('/shop/catalogues')}/>;
+  if (location.pathname.replace(/\/+$/, '').endsWith('/book')) return <UnifiedCatalogueBook catalogues={content.catalogues} initialCatalogue={selectedCatalogue} onCatalogueChange={updateBookCatalogue} onClose={() => navigate('/shop/catalogues')}/>;
   return <>
     <section className="catalogue-entry section" aria-labelledby="catalogue-entry-title"><div className="catalogue-entry__copy"><small>NK ELECTRICAL / CATALOGUE LIBRARY</small><h1 id="catalogue-entry-title">Every collection,<br/><em>one living book.</em></h1><p>Choose any collection to enter one continuous, page-turning catalogue. You will start at that book, then keep browsing naturally through every official collection.</p><Link className="catalogue-entry__cta" to={catalogueBookLink(content.catalogues[0], 0)}>Explore the complete book <ArrowRight/></Link><span>Keyboard, buttons and swipe navigation included.</span></div><CatalogueCoverPreview catalogue={content.catalogues[0]}/></section>
     <PageIntro eyebrow="Choose a starting collection" title="Official collections," italic="ready to explore." body="Every card opens the same continuous book at the first page of the chosen catalogue."/>
