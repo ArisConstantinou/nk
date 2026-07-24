@@ -366,7 +366,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     setMobileHeaderPanel(null);
     setSearchOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {

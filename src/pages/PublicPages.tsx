@@ -299,20 +299,20 @@ export function ExplorePage() {
   const viewAll = params.get('view') === 'all';
   const [visibleCount, setVisibleCount] = useState(48);
   const [openFilter, setOpenFilter] = useState<ProductFilterKey | null>(null);
-  const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next); };
+  const set = (key: string, value: string) => { const next = new URLSearchParams(params); value === 'All' ? next.delete(key) : next.set(key, value); setParams(next, {preventScrollReset: true}); };
   const setViewAll = (enabled: boolean) => {
     const next = new URLSearchParams(params);
     enabled ? next.set('view', 'all') : next.delete('view');
     setVisibleCount(48);
-    setParams(next);
+    setParams(next, {preventScrollReset: true});
   };
   const findAllProducts = () => {
     setVisibleCount(48);
-    setParams({view: 'all'});
+    setParams({view: 'all'}, {preventScrollReset: true});
   };
   const clearFilters = () => {
     setVisibleCount(48);
-    setParams(viewAll ? {view: 'all'} : {});
+    setParams(viewAll ? {view: 'all'} : {}, {preventScrollReset: true});
   };
   const filtered = content.products.filter(product => (category === 'All' || product.category === category) && (season === 'All' || product.season === season) && (space === 'All' || product.space === space));
   const shown = viewAll ? filtered : filtered.slice(0, visibleCount);
@@ -330,7 +330,7 @@ export function ExplorePage() {
         </div>
       </div>
       <div className="compact-filter-bar">
-        <div className="compact-filter-module">
+        <div className="compact-filter-module" data-visual-no-edit>
           <div className="compact-filter-segments" role="group" aria-label="Product filters">
             {productFilterSegments.map(({key, label, index}) => {
               const isOpen = openFilter === key;
@@ -351,13 +351,13 @@ export function ExplorePage() {
             })}
           </div>
           {productFilterSegments.map(({key, label}) => {
+            if (openFilter !== key) return null;
             const selectedValue = selectedFilterValues[key];
             return <div
               id={`product-filter-${key}-panel`}
               className="compact-filter-panel"
               role="region"
               aria-labelledby={`product-filter-${key}-trigger`}
-              hidden={openFilter !== key}
               key={key}
             >
               <header><span>{label} options</span><strong>{selectedValue}</strong></header>
@@ -378,7 +378,7 @@ export function ExplorePage() {
     <section className="ia-shop-gateway section"><div><FileText/><span>CATALOGUES / PDF DOWNLOADS</span><h2>Looking for full brand collections?</h2><p>ACA, Nova Luce and VIOKEF PDF catalogues now live exclusively inside the Shop.</p></div><Link to="/shop/catalogues">Open catalogues <ArrowRight/></Link></section>
     <ExpandableProductGrid products={shown} navigationProducts={filtered} allProducts={content.products}/>
     {!viewAll && shown.length < filtered.length && <section className="catalogue-load-more section"><span>Showing {shown.length} of {filtered.length}</span><div><button type="button" onClick={() => setVisibleCount(count => count + 48)}>Load 48 more <ArrowRight/></button><button type="button" className="secondary" onClick={() => setViewAll(true)}>View all {filtered.length} products</button></div></section>}
-    {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({})}>Clear filters</button></div>}
+    {filtered.length === 0 && <div className="empty-state"><Sparkles/><h2>No exact match—yet.</h2><p>Remove one filter to widen the shortlist.</p><button onClick={() => setParams({}, {preventScrollReset: true})}>Clear filters</button></div>}
   </>;
 }
 
