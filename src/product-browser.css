@@ -13,9 +13,14 @@
   padding-top:44px;
   padding-bottom:50px;
 }
-.product-browser-card-shell{min-width:0}
+.product-browser-card-shell{
+  min-width:0;
+  content-visibility:auto;
+  contain-intrinsic-size:auto 560px;
+}
 .product-browser-card-shell.is-expanded{
   grid-column:span 3;
+  content-visibility:visible;
   animation:product-module-expand .28s cubic-bezier(.2,.7,.2,1) both;
 }
 .product-expand-trigger{

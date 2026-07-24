@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, ArrowUpRight, ExternalLink, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Product} from '../types';
@@ -152,6 +152,86 @@ export function ExpandedProductModule({
   </article>;
 }
 
+type ProductBrowserCardProps = {
+  product: Product;
+  variant: ProductGridVariant;
+  eager: boolean;
+  onOpen: (product: Product) => void;
+};
+
+const ProductBrowserCard = memo(function ProductBrowserCard({
+  product,
+  variant,
+  eager,
+  onOpen,
+}: ProductBrowserCardProps) {
+  if (variant === 'catalogue') return <article className="catalogue-product-card-shell product-browser-card-shell">
+    <div className="catalogue-product-card">
+      <button
+        className={`catalogue-product-card__image product-expand-trigger${isProductCutoutAsset(product.image) ? ' catalogue-product-card__image--cutout' : ' catalogue-product-card__image--photo'}`}
+        type="button"
+        data-product-expand={product.id}
+        aria-expanded="false"
+        aria-label={`Expand ${product.name}`}
+        onClick={() => onOpen(product)}
+      >
+        <ResponsiveImage
+          loading={eager ? 'eager' : 'lazy'}
+          src={product.image}
+          alt={product.name}
+          data-visual-kind="product"
+          data-visual-slug={product.id}
+          data-visual-path="image"
+          data-visual-edit="image"
+          data-visual-label="Product image"
+        />
+        {product.offer && <span className="catalogue-offer-badge">Offer</span>}
+        <i>Expand details <ArrowUpRight/></i>
+      </button>
+      <div className="catalogue-product-card__copy">
+        <small>{productCategory(product)}</small>
+        <h2 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h2>
+        <p>{product.note}</p>
+        <button type="button" onClick={() => onOpen(product)}>Open product <ArrowRight/></button>
+      </div>
+    </div>
+    <ProductShareActions product={product}/>
+  </article>;
+
+  return <article className="product-card-share-shell product-browser-card-shell">
+    <div className="product-card">
+      <button
+        className={`product-image product-expand-trigger${isProductCutoutAsset(product.image) ? ' product-image--cutout' : ' product-image--photo'}`}
+        type="button"
+        data-product-expand={product.id}
+        aria-expanded="false"
+        aria-label={`Expand ${product.name}`}
+        onClick={() => onOpen(product)}
+      >
+        <ResponsiveImage
+          src={product.image}
+          alt={product.name}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          data-visual-kind="product"
+          data-visual-slug={product.id}
+          data-visual-path="image"
+          data-visual-edit="image"
+          data-visual-label="Product image"
+        />
+        <span>Expand details <ArrowUpRight/></span>
+      </button>
+      <div className="product-info">
+        <small>{product.category} · {product.season}</small>
+        <h3 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h3>
+        <p data-visual-kind="product" data-visual-slug={product.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{product.note}</p>
+        <button type="button" onClick={() => onOpen(product)}>Open product <ArrowRight/></button>
+      </div>
+    </div>
+    <ProductShareActions product={product}/>
+  </article>;
+});
+
 export function ExpandableProductGrid({
   products,
   allProducts = products,
@@ -171,15 +251,10 @@ export function ExpandableProductGrid({
     }
   }, [anchorId, products]);
 
-  const openProduct = (product: Product) => {
-    if (anchorId === product.id && selectedId === product.id) {
-      setAnchorId(null);
-      setSelectedId(null);
-      return;
-    }
+  const openProduct = useCallback((product: Product) => {
     setAnchorId(product.id);
     setSelectedId(product.id);
-  };
+  }, []);
 
   const closeProduct = () => {
     const focusId = anchorId;
@@ -205,71 +280,13 @@ export function ExpandableProductGrid({
         />
       </div>;
 
-      if (variant === 'catalogue') return <article className="catalogue-product-card-shell product-browser-card-shell" key={product.id}>
-        <div className="catalogue-product-card">
-          <button
-            className={`catalogue-product-card__image product-expand-trigger${isProductCutoutAsset(product.image) ? ' catalogue-product-card__image--cutout' : ' catalogue-product-card__image--photo'}`}
-            type="button"
-            data-product-expand={product.id}
-            aria-expanded="false"
-            aria-label={`Expand ${product.name}`}
-            onClick={() => openProduct(product)}
-          >
-            <ResponsiveImage
-              loading={index < eagerCount ? 'eager' : 'lazy'}
-              src={product.image}
-              alt={product.name}
-              data-visual-kind="product"
-              data-visual-slug={product.id}
-              data-visual-path="image"
-              data-visual-edit="image"
-              data-visual-label="Product image"
-            />
-            {product.offer && <span className="catalogue-offer-badge">Offer</span>}
-            <i>Expand details <ArrowUpRight/></i>
-          </button>
-          <div className="catalogue-product-card__copy">
-            <small>{productCategory(product)}</small>
-            <h2 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h2>
-            <p>{product.note}</p>
-            <button type="button" onClick={() => openProduct(product)}>Open product <ArrowRight/></button>
-          </div>
-        </div>
-        <ProductShareActions product={product}/>
-      </article>;
-
-      return <article className="product-card-share-shell product-browser-card-shell" key={product.id}>
-        <div className="product-card">
-          <button
-            className={`product-image product-expand-trigger${isProductCutoutAsset(product.image) ? ' product-image--cutout' : ' product-image--photo'}`}
-            type="button"
-            data-product-expand={product.id}
-            aria-expanded="false"
-            aria-label={`Expand ${product.name}`}
-            onClick={() => openProduct(product)}
-          >
-            <ResponsiveImage
-              src={product.image}
-              alt={product.name}
-              loading={index < eagerCount ? 'eager' : 'lazy'}
-              decoding="async"
-              data-visual-kind="product"
-              data-visual-slug={product.id}
-              data-visual-path="image"
-              data-visual-edit="image"
-              data-visual-label="Product image"
-            />
-            <span>Expand details <ArrowUpRight/></span>
-          </button>
-          <div className="product-info">
-            <small>{product.category} · {product.season}</small>
-            <h3 data-visual-kind="product" data-visual-slug={product.id} data-visual-path="$title" data-visual-edit="text" data-visual-label="Product name">{product.name}</h3>
-            <p data-visual-kind="product" data-visual-slug={product.id} data-visual-path="note" data-visual-edit="text" data-visual-label="Product description" data-visual-multiline="true">{product.note}</p>
-            <button type="button" onClick={() => openProduct(product)}>Open product <ArrowRight/></button>
-          </div>
-        </div>
-        <ProductShareActions product={product}/>
-      </article>;
+      return <ProductBrowserCard
+        product={product}
+        variant={variant}
+        eager={index < eagerCount}
+        onOpen={openProduct}
+        key={product.id}
+      />;
     })}
   </section>;
 }
