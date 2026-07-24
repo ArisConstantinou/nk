@@ -1,4 +1,4 @@
-import {getDocument, PDFDataRangeTransport} from 'pdfjs-dist';
+import {getDocument, PDFDataRangeTransport, type PDFDocumentLoadingTask, type PDFDocumentProxy} from 'pdfjs-dist';
 
 const WIX_FILES_HOST = 'https://71b8e060-1802-4bac-b53f-e99e4fcc3a96.filesusr.com';
 
@@ -16,8 +16,9 @@ export function resolveCataloguePdfUrl(url: string) {
 
 class CatalogueRangeTransport extends PDFDataRangeTransport {
   private controller = new AbortController();
+  private failed = false;
 
-  constructor(private url: string, length: number) {
+  constructor(private url: string, length: number, private onFailure: (error: Error) => void) {
     super(length, null);
   }
 
@@ -28,8 +29,14 @@ class CatalogueRangeTransport extends PDFDataRangeTransport {
     }).then(response => {
       if (!response.ok) throw new Error(`Catalogue range request failed (${response.status}).`);
       return response.arrayBuffer();
-    }).then(buffer => this.onDataRange(begin, new Uint8Array(buffer))).catch(error => {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) console.error(error);
+    }).then(buffer => {
+      if (!this.failed) this.onDataRange(begin, new Uint8Array(buffer));
+    }).catch(error => {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (this.failed) return;
+      this.failed = true;
+      this.controller.abort();
+      this.onFailure(error instanceof Error ? error : new Error('Catalogue range request failed.'));
     });
   }
 
@@ -38,14 +45,36 @@ class CatalogueRangeTransport extends PDFDataRangeTransport {
   }
 }
 
-export async function createCataloguePdfTask(sourceUrl: string) {
+export async function createCataloguePdfTask(sourceUrl: string, signal?: AbortSignal) {
   const url = resolveCataloguePdfUrl(sourceUrl);
-  const headController = new AbortController();
-  const response = await fetch(url, {method: 'HEAD', signal: headController.signal});
+  const response = await fetch(url, {method: 'HEAD', signal});
   if (!response.ok) throw new Error(`Catalogue request failed (${response.status}).`);
   const length = Number(response.headers.get('content-length'));
   if (!Number.isFinite(length) || length <= 0) throw new Error('Catalogue size is unavailable.');
-  const range = new CatalogueRangeTransport(url, length);
-  const task = getDocument({range, disableAutoFetch: true, rangeChunkSize: 65536});
-  return {task, abort: () => {headController.abort(); range.abort(); void task.destroy();}};
+  let rejectFailure = (_error: Error) => {};
+  const failure = new Promise<never>((_resolve, reject) => {
+    rejectFailure = reject;
+  });
+  let task: PDFDocumentLoadingTask | null = null;
+  let destroyPromise: Promise<void> | null = null;
+  const destroyTask = () => {
+    if (!task) return Promise.resolve();
+    if (!destroyPromise) destroyPromise = task.destroy();
+    return destroyPromise;
+  };
+  const range = new CatalogueRangeTransport(url, length, error => {
+    rejectFailure(error);
+    void destroyTask();
+  });
+  task = getDocument({range, disableAutoFetch: true, rangeChunkSize: 65536});
+  const promise: Promise<PDFDocumentProxy> = Promise.race([task.promise, failure]);
+  return {
+    task,
+    promise,
+    failure,
+    abort: () => {
+      range.abort();
+      return destroyTask();
+    },
+  };
 }

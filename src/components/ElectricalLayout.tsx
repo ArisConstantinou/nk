@@ -265,6 +265,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const megaCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
   const isHomeRoute = location.pathname === '/';
+  const isCatalogueBookRoute = location.pathname.replace(/\/+$/, '') === '/shop/catalogues/book';
   const showHeaderStory = true;
   const useModernHeader = true;
   const headerStatus = headerStatusForPath(location.pathname);
@@ -592,7 +593,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   } as CSSProperties;
 
   return <div
-    className="electrical-shell ia-shell"
+    className={`electrical-shell ia-shell ${isCatalogueBookRoute ? 'ia-shell--catalogue-reader' : ''}`.trim()}
     data-page-theme={pageVisual?.id}
     data-interaction-profile={interactionProfile.id}
     data-interaction-motion={interactionProfile.motion}
@@ -763,10 +764,10 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         </section>
       </div>}
     </header>
-    <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>
+    {!isCatalogueBookRoute && <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>}
     <div className="electrical-stage ia-stage" inert={mobileOpen || searchOpen || Boolean(mobileHeaderPanel) || undefined} aria-hidden={mobileOpen || searchOpen || Boolean(mobileHeaderPanel) || undefined}>
       <main className="electrical-main ia-main">{children}</main>
-      <footer className="ia-footer">
+      {!isCatalogueBookRoute && <footer className="ia-footer">
         <div className="ia-footer-lead"><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerEyebrow" data-visual-edit="text" data-visual-label="Footer eyebrow">{settings.footerEyebrow}</span><h2 data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerTitle" data-visual-edit="text" data-visual-label="Footer heading" data-visual-multiline="true">{settings.footerTitle}</h2><SmartLink to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerCtaLabel" data-visual-edit="text" data-visual-label="Footer button" data-visual-link-path="quoteUrl">{settings.footerCtaLabel}</span><ArrowRight/></SmartLink></div>
         <div className="ia-footer-grid">
           <div><b>Services</b>{footerServices.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}>{item.label}</SmartLink>)}</div>
@@ -776,7 +777,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         </div>
         {settings.footer.showSocials && <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--footer"/>}
         <div className="ia-footer-bottom"><span>© {new Date().getFullYear()} <span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerCopyright" data-visual-edit="text" data-visual-label="Copyright">{settings.footerCopyright}</span></span><Link to="/admin">Content admin</Link></div>
-      </footer>
+      </footer>}
     </div>
   </div>;
 }

@@ -16,7 +16,7 @@ export function CatalogueCoverPreview({catalogue}: {catalogue: Catalogue}) {
     let abort = () => {};
     void createCataloguePdfTask(catalogue.url).then(source => {
       abort = source.abort;
-      return source.task.promise;
+      return source.promise;
     }).then(async pdf => {
       const page = await pdf.getPage(1);
       if (cancelled || !canvasRef.current) return;

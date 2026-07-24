@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {ChevronLeft, ChevronRight, LoaderCircle, X} from 'lucide-react';
+import {AlertTriangle, ChevronLeft, ChevronRight, LoaderCircle, RefreshCw, X} from 'lucide-react';
 import {GlobalWorkerOptions, type PDFDocumentProxy} from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import type {Catalogue} from '../types';
@@ -22,11 +22,26 @@ type TurnState = {
   target: number;
   active: boolean;
   landed?: boolean;
+  releasing?: boolean;
   catalogueDelta?: -1 | 1;
 };
 
 const MAX_CACHED_PAGES = 8;
 const catalogueKey = (catalogue: Catalogue, index: number) => catalogue.id || `${catalogue.brand}-${catalogue.year}-${index}`;
+const interactiveSelector = 'input, textarea, select, button, a[href], [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"], [role="combobox"], [role="slider"], [role="menuitem"]';
+
+function interactiveTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest(interactiveSelector));
+}
+
+function editableTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"], [role="combobox"]'));
+}
+
+function withPdfFailure<T>(work: PromiseLike<T>, failure: Promise<never> | null) {
+  const promise = Promise.resolve(work);
+  return failure ? Promise.race([promise, failure]) : promise;
+}
 
 export function catalogueBookLink(catalogue: Catalogue, index: number) {
   return `/shop/catalogues/book?catalogue=${encodeURIComponent(catalogueKey(catalogue, index))}`;
@@ -51,14 +66,20 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   const [turn, setTurn] = useState<TurnState | null>(null);
   const [isPreparingTurn, setIsPreparingTurn] = useState(false);
   const [showContents, setShowContents] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [renderedPages, setRenderedPages] = useState<Record<number, string>>({});
   const pageCacheRef = useRef(new Map<number, string>());
   const pageRenderRef = useRef(new Map<number, Promise<string>>());
   const activeDocumentRef = useRef<PDFDocumentProxy | null>(null);
+  const activeFailureRef = useRef<Promise<never> | null>(null);
+  const activeAbortRef = useRef<(() => void | Promise<void>) | null>(null);
   const documentDestroyRef = useRef<Promise<void>>(Promise.resolve());
   const preparingTurnRef = useRef(false);
   const touchStart = useRef<number | null>(null);
   const openLastPageRef = useRef(false);
+  const stageViewportRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const collectionsButtonRef = useRef<HTMLButtonElement>(null);
   const catalogue = catalogues[catalogueIndex];
   const catalogueLabel = useMemo(() => `${catalogue.brand} · ${catalogue.name}`, [catalogue]);
   const visible = document ? spreadPages(spreadStart, document.numPages) : {left: null, right: null};
@@ -70,10 +91,16 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
 
   useEffect(() => {
     let cancelled = false;
-    let abort = () => {};
+    const requestController = new AbortController();
+    let abort: () => void | Promise<void> = () => requestController.abort();
     let loadedDocument: PDFDocumentProxy | null = null;
     activeDocumentRef.current = null;
+    activeFailureRef.current = null;
     setDocument(null);
+    setLoadError('');
+    setTurn(null);
+    preparingTurnRef.current = false;
+    setIsPreparingTurn(false);
     setRenderedPages({});
     for (const image of pageCacheRef.current.values()) URL.revokeObjectURL(image);
     pageCacheRef.current.clear();
@@ -81,11 +108,19 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     setStatus(`Loading ${catalogue.name}…`);
     void (async () => {
       try {
-        await documentDestroyRef.current.catch(() => {});
+        await Promise.race([
+          documentDestroyRef.current.catch(() => {}),
+          new Promise<void>(resolve => window.setTimeout(resolve, 400)),
+        ]);
         if (cancelled) return;
-        const source = await createCataloguePdfTask(catalogue.url);
-        abort = source.abort;
-        const pdf = await source.task.promise;
+        const source = await createCataloguePdfTask(catalogue.url, requestController.signal);
+        abort = () => {
+          requestController.abort();
+          source.abort();
+        };
+        activeAbortRef.current = abort;
+        activeFailureRef.current = source.failure;
+        const pdf = await source.promise;
         if (cancelled) {
           await pdf.destroy();
           return;
@@ -98,19 +133,48 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
         setDocument(pdf);
         setStatus('');
       } catch {
-        if (!cancelled) setStatus('The catalogue could not be loaded. Please try again.');
+        if (!cancelled) {
+          void abort();
+          activeAbortRef.current = null;
+          activeFailureRef.current = null;
+          setStatus('');
+          setLoadError('The catalogue could not be loaded. Check the connection and try again.');
+        }
       }
     })();
     return () => {
       cancelled = true;
-      abort();
+      documentDestroyRef.current = Promise.resolve(abort()).catch(() => {});
+      if (activeAbortRef.current === abort) activeAbortRef.current = null;
+      activeFailureRef.current = null;
       if (activeDocumentRef.current === loadedDocument) activeDocumentRef.current = null;
       for (const image of pageCacheRef.current.values()) URL.revokeObjectURL(image);
       pageCacheRef.current.clear();
       pageRenderRef.current.clear();
-      if (loadedDocument) documentDestroyRef.current = loadedDocument.destroy().catch(() => {});
     };
   }, [catalogue.name, catalogue.url]);
+
+  const failReader = useCallback((message: string) => {
+    const abort = activeAbortRef.current;
+    activeAbortRef.current = null;
+    activeFailureRef.current = null;
+    activeDocumentRef.current = null;
+    void abort?.();
+    preparingTurnRef.current = false;
+    setIsPreparingTurn(false);
+    setTurn(null);
+    setDocument(null);
+    setStatus('');
+    setLoadError(message);
+    for (const image of pageCacheRef.current.values()) URL.revokeObjectURL(image);
+    pageCacheRef.current.clear();
+    pageRenderRef.current.clear();
+    setRenderedPages({});
+  }, []);
+
+  const retryCatalogue = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   const renderPageImage = useCallback(async (pageNumber: number | null) => {
     if (!document || !pageNumber || pageNumber < 1 || pageNumber > document.numPages) return null;
@@ -124,8 +188,9 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     if (inFlight) return inFlight;
 
     const sourceDocument = document;
+    const sourceFailure = activeFailureRef.current;
     const rendering = (async () => {
-      const page = await sourceDocument.getPage(pageNumber);
+      const page = await withPdfFailure(sourceDocument.getPage(pageNumber), sourceFailure);
       const base = page.getViewport({scale: 1});
       const targetHeight = window.innerWidth <= 760
         ? 600
@@ -137,7 +202,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       canvas.height = Math.ceil(viewport.height);
       const context = canvas.getContext('2d', {alpha: false});
       if (!context) throw new Error('Canvas is unavailable.');
-      await page.render({canvas, canvasContext: context, viewport}).promise;
+      await withPdfFailure(page.render({canvas, canvasContext: context, viewport}).promise, sourceFailure);
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(result => result ? resolve(result) : reject(new Error('Page image conversion failed.')), 'image/webp', .88);
       });
@@ -204,13 +269,13 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
         });
       }, 120);
     }).catch(() => {
-      if (!cancelled) setStatus('A catalogue page could not be rendered.');
+      if (!cancelled) failReader('A catalogue page could not be loaded. Check the connection and try again.');
     });
     return () => {
       cancelled = true;
       if (preloadTimer !== undefined) window.clearTimeout(preloadTimer);
     };
-  }, [document, renderPageImage, spreadStart]);
+  }, [document, failReader, renderPageImage, spreadStart]);
 
   const changePage = useCallback(async (direction: -1 | 1) => {
     if (!document || turn || preparingTurnRef.current) return;
@@ -240,12 +305,12 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       await Promise.all([renderPageImage(front), renderPageImage(back), renderPageImage(targetSpread.left), renderPageImage(targetSpread.right)]);
       setTurn({direction, front, back, target, active: false});
     } catch {
-      setStatus('A catalogue page could not be rendered.');
+      failReader('A catalogue page could not be loaded. Check the connection and try again.');
     } finally {
       preparingTurnRef.current = false;
       setIsPreparingTurn(false);
     }
-  }, [catalogueIndex, catalogues.length, document, renderPageImage, spreadStart, turn, visible.left, visible.right]);
+  }, [catalogueIndex, catalogues.length, document, failReader, renderPageImage, spreadStart, turn, visible.left, visible.right]);
 
   useEffect(() => {
     if (!turn || turn.active) return;
@@ -273,35 +338,79 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   }, [turn]);
 
   useEffect(() => {
-    if (!turn?.landed) return;
+    if (!turn?.landed || turn.releasing) return;
     let holdFrame = 0;
-    let releaseFrame = 0;
     const paintFrame = window.requestAnimationFrame(() => {
       holdFrame = window.requestAnimationFrame(() => {
-        releaseFrame = window.requestAnimationFrame(() => {
-          setTurn(current => current?.landed ? null : current);
-        });
+        setTurn(current => current?.landed && !current.releasing ? {...current, releasing: true} : current);
       });
     });
     return () => {
       window.cancelAnimationFrame(paintFrame);
       if (holdFrame) window.cancelAnimationFrame(holdFrame);
-      if (releaseFrame) window.cancelAnimationFrame(releaseFrame);
     };
-  }, [turn?.landed]);
+  }, [turn?.landed, turn?.releasing]);
+
+  useEffect(() => {
+    if (!turn?.releasing) return;
+    const releaseTimer = window.setTimeout(() => {
+      setTurn(current => current?.releasing ? null : current);
+    }, 110);
+    return () => window.clearTimeout(releaseTimer);
+  }, [turn?.releasing]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-      if (event.key === 'ArrowLeft') void changePage(-1);
+      if (event.key === 'Escape') {
+        if (showContents) {
+          event.preventDefault();
+          setShowContents(false);
+          collectionsButtonRef.current?.focus();
+          return;
+        }
+        if (editableTarget(event.target)) return;
+        onClose();
+        return;
+      }
+      if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || editableTarget(event.target)) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const pageControl = Boolean(target?.closest('.catalogue-book__nav, .catalogue-book__leaf'));
+      if (showContents) return;
+      if (event.key === 'ArrowLeft') {
+        if (interactiveTarget(event.target) && !pageControl) return;
+        event.preventDefault();
+        void changePage(-1);
+      }
       if (event.key === 'ArrowRight' || event.key === ' ') {
+        if (interactiveTarget(event.target) && (event.key === ' ' || !pageControl)) return;
         event.preventDefault();
         void changePage(1);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [changePage, onClose]);
+  }, [changePage, onClose, showContents]);
+
+  useEffect(() => {
+    const viewport = stageViewportRef.current;
+    const stage = stageRef.current;
+    if (!viewport || !stage) return;
+    const mobile = window.matchMedia('(max-width: 760px)');
+    const alignPage = () => {
+      if (!mobile.matches) {
+        viewport.scrollLeft = 0;
+        return;
+      }
+      const rightPageCentre = stage.offsetLeft + stage.offsetWidth * .75;
+      viewport.scrollTo({left: Math.max(0, rightPageCentre - viewport.clientWidth / 2), behavior: 'auto'});
+    };
+    const animationFrame = window.requestAnimationFrame(alignPage);
+    window.addEventListener('resize', alignPage);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('resize', alignPage);
+    };
+  }, [catalogueIndex, document]);
 
   useEffect(() => {
     onCatalogueChange(catalogueKey(catalogue, catalogueIndex));
@@ -319,13 +428,13 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     ? spreadStart === 1
       ? `Cover · page 1 / ${document.numPages}`
       : `Pages ${visible.left}${visible.right ? `–${visible.right}` : ''} / ${document.numPages}`
-    : 'Preparing pages';
+    : loadError ? 'Catalogue unavailable' : 'Preparing pages';
 
   return <section className="catalogue-book" aria-label="Unified interactive catalogue book">
     <header className="catalogue-book__bar">
       <div><small>NK ELECTRICAL / UNIFIED CATALOGUES</small><strong>{catalogueLabel}</strong></div>
       <div className="catalogue-book__bar-actions">
-        <button type="button" onClick={() => setShowContents(open => !open)} aria-expanded={showContents}>Collections</button>
+        <button ref={collectionsButtonRef} type="button" onClick={() => setShowContents(open => !open)} aria-expanded={showContents} disabled={Boolean(turn) || isPreparingTurn}>Collections</button>
         <button type="button" onClick={onClose} aria-label="Close catalogue book"><X/>Close</button>
       </div>
     </header>
@@ -345,13 +454,15 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     <div className="catalogue-book__reader">
       <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === 0 && spreadStart === 1)} aria-label="Previous page"><ChevronLeft/></button>
 
-      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''}` : ''}`}
-        aria-busy={!ready || isPreparingTurn}
+      <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
+      <div ref={stageRef} className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''} ${turn.releasing ? 'is-turn-releasing' : ''}` : ''}`}
+        aria-busy={!loadError && (!ready || isPreparingTurn)}
         onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
         onTouchEnd={event => {
           if (touchStart.current === null) return;
           const delta = event.changedTouches[0].clientX - touchStart.current;
           touchStart.current = null;
+          if (window.matchMedia('(max-width: 760px)').matches) return;
           if (Math.abs(delta) > 45) void changePage(delta < 0 ? 1 : -1);
         }}>
         <div className="catalogue-book__thickness" aria-hidden="true"/>
@@ -372,7 +483,10 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
             </div>
           </div>}
         </div>
-        {(!ready || status) && <p className="catalogue-book__status" role="status"><LoaderCircle/>{status || 'Preparing real catalogue pages…'}</p>}
+        {loadError
+          ? <div className="catalogue-book__status catalogue-book__status--error" role="alert"><AlertTriangle/><strong>{loadError}</strong><button type="button" onClick={retryCatalogue}><RefreshCw/>Retry</button></div>
+          : (!ready || status) && <p className="catalogue-book__status" role="status"><LoaderCircle/>{status || 'Preparing real catalogue pages…'}</p>}
+      </div>
       </div>
 
       <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === catalogues.length - 1 && spreadStart === finalSpread(document?.numPages || 1))} aria-label="Next page"><ChevronRight/></button>
@@ -381,7 +495,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     <footer className="catalogue-book__footer">
       <span>{pageLabel}</span>
       <span>Catalogue {catalogueIndex + 1} / {catalogues.length}</span>
-      <p>Click a page, use the arrow keys, buttons or swipe. Each sheet turns across the centre spine.</p>
+      <p>Click a page or use the arrow keys. On smaller screens, pan horizontally to read each page at full width.</p>
     </footer>
   </section>;
 }
