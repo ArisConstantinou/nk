@@ -18,6 +18,7 @@ import {routeInteractionForPath} from '../routeInteractions';
 type MegaSection = 'services' | 'shop' | null;
 type MegaOpenMode = 'hover' | 'click' | null;
 type DesktopHeaderPanel = 'highlights' | 'contact' | null;
+type MobileHeaderPanel = 'highlights' | 'contact' | null;
 type LinkItem = {label: string; description?: string; to?: string; url?: string};
 
 const isInternalUrl = (url: string) => url.startsWith('/') && !url.startsWith('//');
@@ -187,6 +188,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopHeaderPanel, setDesktopHeaderPanel] = useState<DesktopHeaderPanel>(() => storedDesktopStoryVisibility() ? 'highlights' : null);
   const [desktopPanelSwap, setDesktopPanelSwap] = useState(false);
+  const [mobileHeaderPanel, setMobileHeaderPanel] = useState<MobileHeaderPanel>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => window.matchMedia('(min-width: 901px)').matches);
   const [searchAnchor, setSearchAnchor] = useState({left: 0, width: 0});
@@ -196,6 +198,8 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const highlightsTriggerRef = useRef<HTMLButtonElement>(null);
+  const contactTriggerRef = useRef<HTMLButtonElement>(null);
   const searchDialogRef = useRef<HTMLElement>(null);
   const megaOpenModeRef = useRef<MegaOpenMode>(null);
   const megaOpenTimerRef = useRef<number | null>(null);
@@ -252,6 +256,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     megaOpenModeRef.current = null;
     setMegaOpen(null);
     setMobileOpen(false);
+    setMobileHeaderPanel(null);
     setSearchOpen(true);
   };
 
@@ -272,6 +277,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     const triggerRect = mobileTriggerRef.current?.getBoundingClientRect();
     if (triggerRect) setMenuAnchor({left: triggerRect.left, width: triggerRect.width});
     if (searchOpen) setSearchOpen(false);
+    setMobileHeaderPanel(null);
     setMobileOpen(true);
   };
 
@@ -281,6 +287,28 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       return;
     }
     openMobileNavigation();
+  };
+
+  const closeMobileHeaderPanel = (restoreFocus = true) => {
+    const activePanel = mobileHeaderPanel;
+    setMobileHeaderPanel(null);
+    if (!restoreFocus) return;
+    window.requestAnimationFrame(() => {
+      (activePanel === 'highlights' ? highlightsTriggerRef.current : contactTriggerRef.current)?.focus();
+    });
+  };
+
+  const toggleMobileHeaderPanel = (target: Exclude<MobileHeaderPanel, null>) => {
+    if (mobileHeaderPanel === target) {
+      closeMobileHeaderPanel(false);
+      return;
+    }
+    clearMegaTimers();
+    megaOpenModeRef.current = null;
+    setMegaOpen(null);
+    setSearchOpen(false);
+    setMobileOpen(false);
+    setMobileHeaderPanel(target);
   };
 
   const supportsMenuHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -335,6 +363,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     megaOpenModeRef.current = null;
     setMegaOpen(null);
     setMobileOpen(false);
+    setMobileHeaderPanel(null);
     setSearchOpen(false);
     window.scrollTo({top: 0, behavior: 'instant'});
   }, [location.pathname, location.search]);
@@ -346,6 +375,10 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         closeHeaderSearch();
         return;
       }
+      if (mobileHeaderPanel) {
+        closeMobileHeaderPanel();
+        return;
+      }
       clearMegaTimers();
       megaOpenModeRef.current = null;
       setMegaOpen(null);
@@ -355,7 +388,33 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     };
     window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);
-  }, [mobileOpen, searchOpen]);
+  }, [mobileHeaderPanel, mobileOpen, searchOpen]);
+
+  useEffect(() => {
+    if (!mobileHeaderPanel) return;
+    const panel = document.getElementById(mobileHeaderPanel === 'highlights' ? 'nk-desktop-header-story' : 'nk-desktop-contact-story');
+    const trigger = mobileHeaderPanel === 'highlights' ? highlightsTriggerRef.current : contactTriggerRef.current;
+    if (!panel || !trigger) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => panel.querySelector<HTMLElement>('button:not(:disabled), a[href]')?.focus(), 0);
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const focusable = [trigger, ...panel.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled)')]
+        .filter(element => getComputedStyle(element).display !== 'none' && getComputedStyle(element).visibility !== 'hidden');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {event.preventDefault(); last.focus();}
+      else if (!event.shiftKey && document.activeElement === last) {event.preventDefault(); first.focus();}
+    };
+    document.addEventListener('keydown', trapFocus);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', trapFocus);
+      document.body.style.overflow = previous;
+    };
+  }, [mobileHeaderPanel]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -513,8 +572,16 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
               </div>}
         </div>
         {showHeaderStory && <>
-          <HomeHeaderPreview desktopStoryOpen={desktopStoryOpen}/>
-          <ContactHeaderPreview open={desktopContactOpen}/>
+          <HomeHeaderPreview
+            desktopStoryOpen={desktopStoryOpen}
+            mobileDialogOpen={mobileHeaderPanel === 'highlights'}
+            onMobileDialogClose={() => closeMobileHeaderPanel()}
+          />
+          <ContactHeaderPreview
+            open={isDesktopViewport ? desktopContactOpen : mobileHeaderPanel === 'contact'}
+            mobileDialogOpen={mobileHeaderPanel === 'contact'}
+            onMobileDialogClose={() => closeMobileHeaderPanel()}
+          />
         </>}
       </>}
       {!useModernHeader && <div className="ia-header-utility" aria-hidden={mobileOpen || undefined}>
@@ -536,6 +603,26 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
             aria-expanded={searchOpen}
             onClick={toggleHeaderSearch}
           ><span>Search</span><Search aria-hidden="true"/></button>
+          <button
+            ref={highlightsTriggerRef}
+            className="ia-header-command-trigger ia-header-highlights-trigger"
+            type="button"
+            aria-label={mobileHeaderPanel === 'highlights' ? 'Close highlights' : 'Open highlights'}
+            aria-haspopup="dialog"
+            aria-controls="nk-desktop-header-story"
+            aria-expanded={mobileHeaderPanel === 'highlights'}
+            onClick={() => toggleMobileHeaderPanel('highlights')}
+          ><span>Highlights</span><Sparkles aria-hidden="true"/></button>
+          <button
+            ref={contactTriggerRef}
+            className="ia-header-command-trigger ia-header-contact-trigger"
+            type="button"
+            aria-label={mobileHeaderPanel === 'contact' ? 'Close contact options' : 'Open contact options'}
+            aria-haspopup="dialog"
+            aria-controls="nk-desktop-contact-story"
+            aria-expanded={mobileHeaderPanel === 'contact'}
+            onClick={() => toggleMobileHeaderPanel('contact')}
+          ><span>Contact</span><Phone aria-hidden="true"/></button>
           <button ref={mobileTriggerRef} className={`ia-header-command-trigger ia-mobile-trigger ${useModernHeader ? 'ia-mobile-trigger--home' : ''}`.trim()} type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
         </div>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
@@ -590,7 +677,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
       </div>}
     </header>
     <SocialLinks links={settings.socialLinks} placement="footer" className="ia-social-links ia-social-links--dock"/>
-    <div className="electrical-stage ia-stage" inert={mobileOpen || searchOpen || undefined} aria-hidden={mobileOpen || searchOpen || undefined}>
+    <div className="electrical-stage ia-stage" inert={mobileOpen || searchOpen || Boolean(mobileHeaderPanel) || undefined} aria-hidden={mobileOpen || searchOpen || Boolean(mobileHeaderPanel) || undefined}>
       <main className="electrical-main ia-main">{children}</main>
       <footer className="ia-footer">
         <div className="ia-footer-lead"><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerEyebrow" data-visual-edit="text" data-visual-label="Footer eyebrow">{settings.footerEyebrow}</span><h2 data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerTitle" data-visual-edit="text" data-visual-label="Footer heading" data-visual-multiline="true">{settings.footerTitle}</h2><SmartLink to={settings.quoteUrl}><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="footerCtaLabel" data-visual-edit="text" data-visual-label="Footer button" data-visual-link-path="quoteUrl">{settings.footerCtaLabel}</span><ArrowRight/></SmartLink></div>

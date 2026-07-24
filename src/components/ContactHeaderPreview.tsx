@@ -1,19 +1,34 @@
-import {ArrowRight, FileText, MapPin, PhoneCall, Siren} from 'lucide-react';
+import {ArrowRight, ChevronDown, FileText, MapPin, PhoneCall, Siren} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import {publicAsset} from '../utils/assets';
 import {ResponsiveImage} from './ResponsiveImage';
 
-export function ContactHeaderPreview({open}: {open: boolean}) {
+export function ContactHeaderPreview({
+  open,
+  mobileDialogOpen = false,
+  onMobileDialogClose,
+}: {
+  open: boolean;
+  mobileDialogOpen?: boolean;
+  onMobileDialogClose?: () => void;
+}) {
   const {settings} = useContent();
   const tel = settings.phone.replace(/[^+\d]/g, '');
 
   return <section
     id="nk-desktop-contact-story"
-    className={`nk-contact-header-preview ${open ? 'is-desktop-open' : 'is-desktop-collapsed'}`}
+    className={`nk-contact-header-preview ${open ? 'is-desktop-open' : 'is-desktop-collapsed'} ${mobileDialogOpen ? 'is-mobile-dialog' : ''}`}
     aria-label="Contact NK Electrical options"
     aria-hidden={!open || undefined}
+    role={mobileDialogOpen ? 'dialog' : undefined}
+    aria-modal={mobileDialogOpen || undefined}
+    aria-labelledby={mobileDialogOpen ? 'nk-mobile-contact-title' : undefined}
   >
+    {mobileDialogOpen && <header className="nk-mobile-expanded-panel__header">
+      <div><PhoneCall aria-hidden="true"/><span><small>DIRECT OPTIONS</small><strong id="nk-mobile-contact-title">Contact</strong></span></div>
+      <button type="button" aria-label="Close contact options" onClick={onMobileDialogClose}><span>Close</span><ChevronDown aria-hidden="true"/></button>
+    </header>}
     <div className="nk-contact-header-story">
       <div className="nk-contact-header-story__copy">
         <p>CONTACT / DIRECT TO SPECIALIST</p>
