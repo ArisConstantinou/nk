@@ -20,9 +20,10 @@ type TurnState = {
   front: number | null;
   back: number | null;
   target: number;
+  catalogueDelta?: -1 | 1;
 };
 
-const TURN_DURATION = 920;
+const MAX_CACHED_PAGES = 8;
 const catalogueKey = (catalogue: Catalogue, index: number) => catalogue.id || `${catalogue.brand}-${catalogue.year}-${index}`;
 
 export function catalogueBookLink(catalogue: Catalogue, index: number) {
@@ -46,9 +47,14 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   const [document, setDocument] = useState<PDFDocumentProxy | null>(null);
   const [status, setStatus] = useState('Loading catalogue…');
   const [turn, setTurn] = useState<TurnState | null>(null);
+  const [isPreparingTurn, setIsPreparingTurn] = useState(false);
   const [showContents, setShowContents] = useState(false);
   const [renderedPages, setRenderedPages] = useState<Record<number, string>>({});
   const pageCacheRef = useRef(new Map<number, string>());
+  const pageRenderRef = useRef(new Map<number, Promise<string>>());
+  const activeDocumentRef = useRef<PDFDocumentProxy | null>(null);
+  const documentDestroyRef = useRef<Promise<void>>(Promise.resolve());
+  const preparingTurnRef = useRef(false);
   const touchStart = useRef<number | null>(null);
   const openLastPageRef = useRef(false);
   const catalogue = catalogues[catalogueIndex];
@@ -63,56 +69,126 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   useEffect(() => {
     let cancelled = false;
     let abort = () => {};
+    let loadedDocument: PDFDocumentProxy | null = null;
+    activeDocumentRef.current = null;
     setDocument(null);
     setRenderedPages({});
+    for (const image of pageCacheRef.current.values()) URL.revokeObjectURL(image);
     pageCacheRef.current.clear();
+    pageRenderRef.current.clear();
     setStatus(`Loading ${catalogue.name}…`);
-    void createCataloguePdfTask(catalogue.url).then(source => {
-      abort = source.abort;
-      return source.task.promise;
-    }).then(pdf => {
-      if (cancelled) { void pdf.destroy(); return; }
-      const destination = openLastPageRef.current ? finalSpread(pdf.numPages) : 1;
-      openLastPageRef.current = false;
-      setSpreadStart(destination);
-      setDocument(pdf);
-      setStatus('Preparing the book…');
-    }).catch(() => {
-      if (!cancelled) setStatus('The catalogue could not be loaded. Please try again.');
-    });
-    return () => { cancelled = true; abort(); };
-  }, [catalogue]);
+    void (async () => {
+      try {
+        await documentDestroyRef.current.catch(() => {});
+        if (cancelled) return;
+        const source = await createCataloguePdfTask(catalogue.url);
+        abort = source.abort;
+        const pdf = await source.task.promise;
+        if (cancelled) {
+          await pdf.destroy();
+          return;
+        }
+        loadedDocument = pdf;
+        activeDocumentRef.current = pdf;
+        const destination = openLastPageRef.current ? finalSpread(pdf.numPages) : 1;
+        openLastPageRef.current = false;
+        setSpreadStart(destination);
+        setDocument(pdf);
+        setStatus('');
+      } catch {
+        if (!cancelled) setStatus('The catalogue could not be loaded. Please try again.');
+      }
+    })();
+    return () => {
+      cancelled = true;
+      abort();
+      if (activeDocumentRef.current === loadedDocument) activeDocumentRef.current = null;
+      for (const image of pageCacheRef.current.values()) URL.revokeObjectURL(image);
+      pageCacheRef.current.clear();
+      pageRenderRef.current.clear();
+      if (loadedDocument) documentDestroyRef.current = loadedDocument.destroy().catch(() => {});
+    };
+  }, [catalogue.name, catalogue.url]);
 
   const renderPageImage = useCallback(async (pageNumber: number | null) => {
     if (!document || !pageNumber || pageNumber < 1 || pageNumber > document.numPages) return null;
     const cached = pageCacheRef.current.get(pageNumber);
-    if (cached) return cached;
-    const page = await document.getPage(pageNumber);
-    const base = page.getViewport({scale: 1});
-    const scale = Math.min(2, 1500 / base.height);
-    const viewport = page.getViewport({scale});
-    const canvas = window.document.createElement('canvas');
-    canvas.width = Math.ceil(viewport.width);
-    canvas.height = Math.ceil(viewport.height);
-    const context = canvas.getContext('2d');
-    if (!context) throw new Error('Canvas is unavailable.');
-    await page.render({canvas, canvasContext: context, viewport}).promise;
-    const image = canvas.toDataURL('image/webp', .94);
-    pageCacheRef.current.set(pageNumber, image);
-    setRenderedPages(current => ({...current, [pageNumber]: image}));
-    return image;
+    if (cached) {
+      pageCacheRef.current.delete(pageNumber);
+      pageCacheRef.current.set(pageNumber, cached);
+      return cached;
+    }
+    const inFlight = pageRenderRef.current.get(pageNumber);
+    if (inFlight) return inFlight;
+
+    const sourceDocument = document;
+    const rendering = (async () => {
+      const page = await sourceDocument.getPage(pageNumber);
+      const base = page.getViewport({scale: 1});
+      const targetHeight = window.innerWidth <= 760 ? 760 : 1200;
+      const scale = Math.min(1.7, targetHeight / base.height);
+      const viewport = page.getViewport({scale});
+      const canvas = window.document.createElement('canvas');
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+      const context = canvas.getContext('2d', {alpha: false});
+      if (!context) throw new Error('Canvas is unavailable.');
+      await page.render({canvas, canvasContext: context, viewport}).promise;
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(result => result ? resolve(result) : reject(new Error('Page image conversion failed.')), 'image/webp', .88);
+      });
+      canvas.width = 1;
+      canvas.height = 1;
+      const image = URL.createObjectURL(blob);
+      if (sourceDocument !== activeDocumentRef.current) {
+        URL.revokeObjectURL(image);
+        throw new Error('Catalogue changed while rendering.');
+      }
+      pageCacheRef.current.set(pageNumber, image);
+      setRenderedPages(current => current[pageNumber] ? current : {...current, [pageNumber]: image});
+      return image;
+    })().finally(() => {
+      if (pageRenderRef.current.get(pageNumber) === rendering) pageRenderRef.current.delete(pageNumber);
+    });
+    pageRenderRef.current.set(pageNumber, rendering);
+    return rendering;
   }, [document]);
 
   useEffect(() => {
     if (!document) return;
     let cancelled = false;
-    const around = spreadStart === 1
-      ? [1, 2, 3]
-      : [spreadStart - 2, spreadStart - 1, spreadStart, spreadStart + 1, spreadStart + 2, spreadStart + 3];
-    const wanted = [...new Set(around.filter(page => page >= 1 && page <= document.numPages))];
-    setStatus('Rendering real catalogue pages…');
-    void Promise.all(wanted.map(page => renderPageImage(page))).then(() => {
-      if (!cancelled) setStatus('');
+    const currentSpread = spreadPages(spreadStart, document.numPages);
+    const visiblePages = [currentSpread.left, currentSpread.right].filter((page): page is number => Boolean(page));
+    const nearbyPages = spreadStart === 1
+      ? [2, 3]
+      : [spreadStart + 2, spreadStart + 3, spreadStart - 2, spreadStart - 1];
+    const preloadPages = [...new Set(nearbyPages.filter(page => page >= 1 && page <= document.numPages))];
+    const keepPages = new Set([...visiblePages, ...preloadPages]);
+
+    for (const [page, image] of pageCacheRef.current) {
+      if (keepPages.has(page) || pageCacheRef.current.size <= MAX_CACHED_PAGES) continue;
+      URL.revokeObjectURL(image);
+      pageCacheRef.current.delete(page);
+      setRenderedPages(current => {
+        const next = {...current};
+        delete next[page];
+        return next;
+      });
+    }
+
+    void Promise.all(visiblePages.map(page => renderPageImage(page))).then(() => {
+      if (cancelled) return;
+      setStatus('');
+      void (async () => {
+        for (const page of preloadPages) {
+          if (cancelled) break;
+          try {
+            await renderPageImage(page);
+          } catch {
+            break;
+          }
+        }
+      })();
     }).catch(() => {
       if (!cancelled) setStatus('A catalogue page could not be rendered.');
     });
@@ -120,29 +196,18 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   }, [document, renderPageImage, spreadStart]);
 
   const changePage = useCallback(async (direction: -1 | 1) => {
-    if (!document || turn) return;
+    if (!document || turn || preparingTurnRef.current) return;
     const atFirst = spreadStart === 1;
     const atLast = spreadStart === finalSpread(document.numPages);
     if (direction < 0 && atFirst && catalogueIndex === 0) return;
     if (direction > 0 && atLast && catalogueIndex === catalogues.length - 1) return;
 
     if (direction > 0 && atLast) {
-      setTurn({direction, front: visible.right, back: null, target: 1});
-      window.setTimeout(() => {
-        setTurn(null);
-        setCatalogueIndex(index => index + 1);
-        setSpreadStart(1);
-      }, TURN_DURATION);
+      setTurn({direction, front: visible.right, back: null, target: 1, catalogueDelta: 1});
       return;
     }
     if (direction < 0 && atFirst) {
-      setTurn({direction, front: visible.left, back: null, target: 1});
-      window.setTimeout(() => {
-        openLastPageRef.current = true;
-        setTurn(null);
-        setCatalogueIndex(index => index - 1);
-        setSpreadStart(1);
-      }, TURN_DURATION);
+      setTurn({direction, front: visible.left, back: null, target: 1, catalogueDelta: -1});
       return;
     }
 
@@ -152,15 +217,33 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     const targetSpread = spreadPages(target, document.numPages);
     const front = direction > 0 ? visible.right : visible.left;
     const back = direction > 0 ? targetSpread.left : targetSpread.right;
-    setStatus('Preparing the turning page…');
-    await Promise.all([renderPageImage(front), renderPageImage(back), renderPageImage(targetSpread.left), renderPageImage(targetSpread.right)]);
-    setStatus('');
-    setTurn({direction, front, back, target});
-    window.setTimeout(() => {
-      setSpreadStart(target);
-      setTurn(null);
-    }, TURN_DURATION);
+    preparingTurnRef.current = true;
+    setIsPreparingTurn(true);
+    try {
+      await Promise.all([renderPageImage(front), renderPageImage(back), renderPageImage(targetSpread.left), renderPageImage(targetSpread.right)]);
+      setTurn({direction, front, back, target});
+    } catch {
+      setStatus('A catalogue page could not be rendered.');
+    } finally {
+      preparingTurnRef.current = false;
+      setIsPreparingTurn(false);
+    }
   }, [catalogueIndex, catalogues.length, document, renderPageImage, spreadStart, turn, visible.left, visible.right]);
+
+  const completeTurn = useCallback(() => {
+    if (!turn) return;
+    if (turn.catalogueDelta === 1) {
+      setCatalogueIndex(index => index + 1);
+      setSpreadStart(1);
+    } else if (turn.catalogueDelta === -1) {
+      openLastPageRef.current = true;
+      setCatalogueIndex(index => index - 1);
+      setSpreadStart(1);
+    } else {
+      setSpreadStart(turn.target);
+    }
+    setTurn(null);
+  }, [turn]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -205,6 +288,9 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     {showContents && <nav className="catalogue-book__contents" aria-label="Catalogue chapters">
       {catalogues.map((item, index) => <button type="button" className={index === catalogueIndex ? 'is-current' : ''} onClick={() => {
         openLastPageRef.current = false;
+        preparingTurnRef.current = false;
+        setIsPreparingTurn(false);
+        setTurn(null);
         setCatalogueIndex(index);
         setSpreadStart(1);
         setShowContents(false);
@@ -212,9 +298,10 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     </nav>}
 
     <div className="catalogue-book__reader">
-      <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={!document || Boolean(turn) || (catalogueIndex === 0 && spreadStart === 1)} aria-label="Previous page"><ChevronLeft/></button>
+      <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === 0 && spreadStart === 1)} aria-label="Previous page"><ChevronLeft/></button>
 
       <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''}`}
+        aria-busy={!ready || isPreparingTurn}
         onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
         onTouchEnd={event => {
           if (touchStart.current === null) return;
@@ -231,7 +318,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
             {rightBase && renderedPages[rightBase] && <img src={renderedPages[rightBase]} alt={`${catalogueLabel}, page ${rightBase}`}/>}
           </button>
           <span className="catalogue-book__spine" aria-hidden="true"/>
-          {turn && <div className="catalogue-book__turning-sheet" aria-hidden="true">
+          {turn && <div className="catalogue-book__turning-sheet" aria-hidden="true" onAnimationEnd={completeTurn}>
             <div className="catalogue-book__turn-face catalogue-book__turn-face--front">
               {turn.front && renderedPages[turn.front] && <img src={renderedPages[turn.front]} alt=""/>}
             </div>
@@ -243,7 +330,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
         {(!ready || status) && <p className="catalogue-book__status" role="status"><LoaderCircle/>{status || 'Preparing real catalogue pages…'}</p>}
       </div>
 
-      <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={!document || Boolean(turn) || (catalogueIndex === catalogues.length - 1 && spreadStart === finalSpread(document?.numPages || 1))} aria-label="Next page"><ChevronRight/></button>
+      <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={!document || Boolean(turn) || isPreparingTurn || (catalogueIndex === catalogues.length - 1 && spreadStart === finalSpread(document?.numPages || 1))} aria-label="Next page"><ChevronRight/></button>
     </div>
 
     <footer className="catalogue-book__footer">
