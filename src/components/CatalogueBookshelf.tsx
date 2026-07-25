@@ -178,6 +178,9 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >
+                    <span className="catalogue-spine__top" aria-hidden="true"/>
+                    <span className="catalogue-spine__page-block" aria-hidden="true"/>
+                    <span className="catalogue-spine__back-cover" aria-hidden="true"/>
                     <span className="catalogue-spine__surface" aria-hidden="true">
                       <span className="catalogue-spine__cover-lines"/>
                       <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
