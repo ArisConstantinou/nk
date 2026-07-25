@@ -2386,7 +2386,7 @@
 
 .catalogue-bookcase {
   --shelf-lip-h: clamp(7px, .56vw, 9px);
-  --shelf-top-rise: clamp(22px, 1.75vw, 27px);
+  --shelf-top-rise: clamp(12px, 1vw, 16px);
   --shelf-back-inset-left: 3.86%;
   --shelf-back-inset-right: 3.53%;
   --book-seat-depth: clamp(7px, .65vw, 10px);
@@ -2864,7 +2864,7 @@
 
   .catalogue-bookcase {
     --shelf-lip-h: 7px;
-    --shelf-top-rise: 13px;
+    --shelf-top-rise: 9px;
     --shelf-back-inset-left: 3.2%;
     --shelf-back-inset-right: 3.2%;
     --book-seat-depth: 6px;
