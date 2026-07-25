@@ -828,7 +828,7 @@
   padding: 4.6% 10.4% 7.4%;
   border: 0;
   border-radius: 0;
-  background: url('/assets/generated/catalogue-bookcase-photoreal-v2.webp') center / 100% 100% no-repeat;
+  background: url('/assets/generated/catalogue-bookcase-styled-v3.webp') center / 100% 100% no-repeat;
   box-shadow: 0 28px 70px rgb(0 0 0 / 35%);
 }
 
@@ -850,7 +850,7 @@
 
 .catalogue-shelf__books {
   justify-content: flex-start;
-  gap: clamp(8px, 1vw, 14px);
+  gap: 0;
   min-width: 0;
   height: 100%;
   padding: clamp(10px, 1vw, 15px) 4% 0 5%;
@@ -965,7 +965,7 @@
   }
 
   .catalogue-shelf__books {
-    gap: 7px;
+    gap: 0;
     padding: 7px 3% 0 5%;
   }
 
@@ -1012,47 +1012,87 @@
 
 /* Real catalogue spines: narrow, tactile and labelled in the natural reading direction. */
 .catalogue-spine {
+  --book-lean: 0deg;
   display: flex;
-  flex: 0 0 44px;
+  isolation: isolate;
+  flex: 0 0 41px;
   align-items: end;
-  justify-content: center;
-  width: 44px;
-  height: 82%;
+  justify-content: flex-start;
+  width: 41px;
+  height: 88%;
   max-height: 116px;
-  padding: 0 6px;
+  padding: 0;
   overflow: visible;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  transform: none;
+  transform: rotateZ(var(--book-lean));
+  transform-origin: center bottom;
   touch-action: manipulation;
 }
 
+.catalogue-spine::before {
+  position: absolute;
+  z-index: 1;
+  top: -3px;
+  right: -1px;
+  left: 3px;
+  display: block;
+  height: 5px;
+  border: 1px solid rgb(78 64 50 / 52%);
+  border-radius: 2px 2px 0 0;
+  content: '';
+  background:
+    repeating-linear-gradient(0deg, #f2eadc 0 1px, #cfc2ad 1px 2px);
+  box-shadow: 1px -1px 2px rgb(0 0 0 / 28%);
+  transform: skewX(-24deg);
+  transform-origin: left bottom;
+}
+
 .catalogue-spine::after {
-  display: none;
+  position: absolute;
+  z-index: 0;
+  top: 2px;
+  right: -2px;
+  bottom: 1px;
+  display: block;
+  width: 7px;
+  border: 1px solid rgb(68 54 42 / 52%);
+  border-left: 0;
+  border-radius: 0 2px 2px 0;
+  content: '';
+  background:
+    repeating-linear-gradient(90deg, #eee5d6 0 1px, #c8baa5 1px 2px);
+  box-shadow:
+    2px 4px 5px rgb(0 0 0 / 42%),
+    inset -2px 0 rgb(91 72 53 / 20%);
+  transform: skewY(-2deg);
+  transform-origin: left bottom;
 }
 
 .catalogue-spine__surface {
   position: relative;
+  z-index: 2;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   align-items: center;
-  width: 32px;
+  width: 40px;
   height: 100%;
   padding: 6px 3px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--book-edge) 74%, #fff);
-  border-radius: 2px 3px 2px 2px;
+  border: 1px solid color-mix(in srgb, var(--book-edge) 48%, #271d17);
+  border-radius: 2px 1px 1px 2px;
   color: var(--book-ink);
   background:
-    linear-gradient(90deg, rgb(255 255 255 / 14%), transparent 18% 78%, rgb(0 0 0 / 28%)),
-    repeating-linear-gradient(0deg, transparent 0 3px, rgb(255 255 255 / 2%) 3px 4px),
+    linear-gradient(90deg, rgb(255 255 255 / 12%), transparent 15% 72%, rgb(0 0 0 / 33%)),
+    repeating-linear-gradient(91deg, transparent 0 2px, rgb(255 255 255 / 2%) 2px 3px),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgb(0 0 0 / 3%) 3px 4px),
     var(--book-cover);
   box-shadow:
-    inset 2px 0 rgb(255 255 255 / 8%),
-    inset -2px 0 rgb(0 0 0 / 18%),
-    2px 6px 9px rgb(0 0 0 / 46%);
+    inset 2px 0 rgb(255 255 255 / 7%),
+    inset -3px 0 rgb(0 0 0 / 22%),
+    1px 5px 7px rgb(0 0 0 / 48%);
 }
 
 .catalogue-spine__surface::before,
@@ -1119,9 +1159,10 @@
 
 .catalogue-spine:hover,
 .catalogue-spine:focus-visible {
+  z-index: 12;
   outline: none;
   filter: none;
-  transform: translateY(-9px);
+  transform: translateY(-9px) rotateY(-4deg);
   box-shadow: none;
 }
 
@@ -1132,11 +1173,26 @@
     inset 2px 0 rgb(255 255 255 / 10%),
     inset -2px 0 rgb(0 0 0 / 15%),
     5px 13px 16px rgb(0 0 0 / 48%),
-    0 0 0 2px var(--shelf-light);
+    0 0 0 1px color-mix(in srgb, var(--shelf-light) 58%, #fff);
 }
 
 .catalogue-spine:active {
-  transform: translateY(-4px);
+  transform: translateY(-4px) rotateY(-2deg);
+}
+
+.catalogue-spine:nth-child(3n + 1) {
+  --book-lean: -.55deg;
+  height: 90%;
+}
+
+.catalogue-spine:nth-child(3n + 2) {
+  --book-lean: .35deg;
+  height: 86%;
+}
+
+.catalogue-spine:nth-child(3n) {
+  --book-lean: -.15deg;
+  height: 92%;
 }
 
 .catalogue-shelf::after {
@@ -1189,15 +1245,15 @@
   }
 
   .catalogue-spine {
-    flex: 0 0 44px;
-    width: 44px;
-    height: 84%;
+    flex: 0 0 41px;
+    width: 41px;
+    height: 88%;
     max-height: 116px;
-    padding: 0 6px;
+    padding: 0;
   }
 
   .catalogue-spine__surface {
-    width: 32px;
+    width: 40px;
   }
 
   .catalogue-shelf-remote {
@@ -1395,7 +1451,7 @@
 }
 
 @media (max-width: 370px) {
-  .catalogue-spine {
+  .catalogue-spine:nth-child(n) {
     height: 98%;
   }
 
