@@ -2548,6 +2548,7 @@
   justify-content: space-between;
   color: var(--book-ink);
   pointer-events: none;
+  visibility: hidden;
   background:
     linear-gradient(145deg, rgb(255 255 255 / 18%), transparent 38%),
     linear-gradient(180deg, transparent 0 56%, rgb(0 0 0 / 22%) 56% 100%),
@@ -2560,7 +2561,11 @@
   transform-origin: left center;
   transform-style: preserve-3d;
   backface-visibility: visible;
-  transition: transform .52s cubic-bezier(.16, 1, .3, 1);
+  opacity: 0;
+  transition:
+    transform .52s cubic-bezier(.16, 1, .3, 1),
+    opacity .16s ease,
+    visibility 0s linear .52s;
 }
 
 .catalogue-spine__front-cover::before {
@@ -2646,7 +2651,10 @@
 
 .catalogue-volume:hover > .catalogue-spine .catalogue-spine__front-cover,
 .catalogue-volume:focus-within > .catalogue-spine .catalogue-spine__front-cover {
+  visibility: visible;
   transform: rotateY(58deg) translateZ(3px);
+  opacity: 1;
+  transition-delay: 0s;
 }
 
 .catalogue-volume:hover > .catalogue-spine + .catalogue-volume__contact,
