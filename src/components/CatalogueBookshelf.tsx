@@ -188,6 +188,11 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                       <span className="catalogue-spine__top" aria-hidden="true"/>
                       <span className="catalogue-spine__page-block" aria-hidden="true"/>
                       <span className="catalogue-spine__back-cover" aria-hidden="true"/>
+                      <span className="catalogue-spine__front-cover" aria-hidden="true">
+                        <span>{brandMark(catalogue.brand)}</span>
+                        <strong>{spineCompactTitle(catalogue)}</strong>
+                        <small>{spineEdition(catalogue.year)}</small>
+                      </span>
                       <span className="catalogue-spine__surface" aria-hidden="true">
                         <span className="catalogue-spine__cover-lines"/>
                         <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
