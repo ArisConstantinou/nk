@@ -1660,64 +1660,90 @@
 }
 
 .catalogue-shelf__books > .catalogue-spine {
+  --book-render-depth: calc(var(--book-depth) + 8px);
+  --book-render-width: calc(var(--book-width) + 10px);
+  --book-turn: -23deg;
   position: relative;
-  flex: 0 0 var(--book-width);
-  width: var(--book-width);
+  flex: 0 0 var(--book-render-width);
+  width: var(--book-render-width);
   height: var(--book-height);
   max-height: none;
-  filter: drop-shadow(2px 5px 4px rgb(10 6 4 / 36%));
-  transform: rotateZ(var(--book-lean));
-  transform-origin: center bottom;
+  filter: drop-shadow(4px 7px 5px rgb(10 6 4 / 46%));
+  transform:
+    perspective(520px)
+    rotateY(var(--book-turn))
+    rotateZ(var(--book-lean));
+  transform-origin: left bottom;
+  transform-style: preserve-3d;
   transition:
     transform .34s cubic-bezier(.2, .84, .24, 1),
     filter .34s ease;
   will-change: transform;
 }
 
+.catalogue-shelf__books > .catalogue-spine:nth-child(3n + 1) {
+  --book-turn: -18deg;
+}
+
+.catalogue-shelf__books > .catalogue-spine:nth-child(3n + 2) {
+  --book-turn: -29deg;
+}
+
+.catalogue-shelf__books > .catalogue-spine:nth-child(3n) {
+  --book-turn: -23deg;
+}
+
 .catalogue-shelf__books > .catalogue-spine::before {
   position: absolute;
-  z-index: 1;
-  top: -3px;
-  right: calc(var(--book-depth) * -.52);
-  left: 4px;
+  z-index: 3;
+  top: 0;
+  right: 2px;
+  left: 5px;
   display: block;
-  height: 6px;
-  border: 1px solid rgb(76 61 45 / 52%);
-  border-radius: 3px 3px 1px 1px;
+  height: var(--book-render-depth);
+  border: 1px solid color-mix(in srgb, var(--book-edge) 64%, #4c3d2d);
+  border-right-width: 2px;
+  border-left-width: 2px;
+  border-radius: 2px 2px 1px 1px;
   content: '';
   background:
     repeating-linear-gradient(0deg, rgb(255 250 239 / 96%) 0 1px, rgb(185 168 140 / 90%) 1px 2px),
     var(--book-page);
   box-shadow:
     0 -1px rgb(255 255 255 / 35%),
-    2px -2px 3px rgb(0 0 0 / 24%);
-  transform: skewX(-22deg);
-  transform-origin: left bottom;
+    inset 0 -2px rgb(94 72 48 / 24%);
+  transform: rotateX(-72deg);
+  transform-origin: center top;
+  backface-visibility: visible;
 }
 
 .catalogue-shelf__books > .catalogue-spine::after {
   position: absolute;
-  z-index: 0;
-  top: 3px;
-  right: calc(var(--book-depth) * -.72);
-  bottom: 3px;
+  z-index: 1;
+  top: 5px;
+  right: calc(var(--book-render-depth) * -1);
+  bottom: 5px;
   display: block;
-  width: var(--book-depth);
+  width: var(--book-render-depth);
   border: 1px solid rgb(69 53 37 / 48%);
+  border-top: 2px solid var(--book-edge);
+  border-right: 2px solid color-mix(in srgb, var(--book-cover) 70%, #24160f);
+  border-bottom: 2px solid var(--book-edge);
   border-left: 0;
   border-radius: 0 3px 3px 0;
   content: '';
   background:
     repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--book-page) 88%, #fff) 0 1px,
-      color-mix(in srgb, var(--book-page) 72%, #856f52) 1px 2px
+      0deg,
+      color-mix(in srgb, var(--book-page) 80%, #fff) 0 1px,
+      color-mix(in srgb, var(--book-page) 66%, #806847) 1px 2px
     );
   box-shadow:
     3px 5px 6px rgb(0 0 0 / 38%),
     inset -2px 0 rgb(91 72 53 / 18%);
-  transform: skewY(-1.5deg);
-  transform-origin: left bottom;
+  transform: rotateY(72deg);
+  transform-origin: left center;
+  backface-visibility: visible;
 }
 
 .catalogue-shelf__books > .catalogue-spine .catalogue-spine__surface {
@@ -1748,7 +1774,9 @@
     inset -4px 0 4px rgb(0 0 0 / 20%),
     inset 0 1px var(--book-edge),
     inset 0 -1px var(--book-edge),
-    1px 5px 7px rgb(0 0 0 / 44%);
+    2px 6px 8px rgb(0 0 0 / 46%);
+  transform: translateZ(.5px);
+  backface-visibility: hidden;
 }
 
 .catalogue-spine__surface::before {
@@ -1941,11 +1969,12 @@
 .catalogue-shelf__books > .catalogue-spine:focus-visible {
   z-index: 18;
   outline: none;
-  filter: drop-shadow(9px 13px 9px rgb(10 6 4 / 48%));
+  filter: drop-shadow(12px 15px 11px rgb(10 6 4 / 54%));
   transform:
-    perspective(420px)
-    translate3d(10px, -11px, 24px)
-    rotateY(-20deg)
+    perspective(520px)
+    translate3d(12px, -12px, 30px)
+    rotateX(-2deg)
+    rotateY(-36deg)
     rotateZ(var(--book-lean));
 }
 
@@ -1956,9 +1985,9 @@
 
 .catalogue-shelf__books > .catalogue-spine:active {
   transform:
-    perspective(420px)
-    translate3d(5px, -5px, 12px)
-    rotateY(-10deg)
+    perspective(520px)
+    translate3d(6px, -6px, 15px)
+    rotateY(-23deg)
     rotateZ(var(--book-lean));
 }
 
