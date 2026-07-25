@@ -86,7 +86,7 @@ export function ModernShopCategoryPage() {
       {pageVisual && <div className="catalogue-hero__ornament" aria-hidden="true"><span>{pageVisual.serial}</span><i/><i/><b/></div>}
     </section>
 
-    <section className="catalogue-controls compact-product-filters category-product-filters section" aria-label="Product filters">
+    <section className="filter-shell compact-product-filters category-product-filters section" aria-label="Product filters">
       <label className="catalogue-search"><Search/><span className="sr-only">Search products</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${isOffers ? 'offers' : mode}…`}/>{query && <button type="button" onClick={() => setQuery('')}>Clear</button>}</label>
       <div className="catalogue-filter-heading">
         <span><SlidersHorizontal/> Refine the collection</span>

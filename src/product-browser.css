@@ -316,11 +316,12 @@
   white-space:nowrap;
 }
 .compact-filter-segment__copy small{
+  display:block;
   overflow:hidden;
-  min-height:1.5em;
-  padding-bottom:2px;
+  min-height:1.8em;
+  padding:2px 0 4px;
   color:#583743;
-  font:650 14px/1.35 var(--display);
+  font:650 14px/1.45 var(--display);
   text-overflow:ellipsis;
   white-space:nowrap;
 }
@@ -383,7 +384,7 @@
   cursor:pointer;
   transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease;
 }
-.compact-filter-options>button span{min-width:0;padding-bottom:2px;line-height:1.35;overflow-wrap:anywhere}
+.compact-filter-options>button span{min-width:0;padding:1px 0 4px;line-height:1.45;overflow-wrap:anywhere}
 .compact-filter-options>button:is(:hover,:focus-visible){
   border-color:#f2bd73;
   background:rgba(242,189,115,.12);

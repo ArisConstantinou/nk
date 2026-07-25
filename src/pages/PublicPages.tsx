@@ -32,6 +32,8 @@ import {pageVisualForPath} from '../pageVisuals';
 import {catalogueBookLink, UnifiedCatalogueBook} from '../components/UnifiedCatalogueBook';
 import {CatalogueCoverPreview} from '../components/CatalogueCoverPreview';
 import {
+  type CompactFilterSegment,
+  type CompactFilterSelections,
   CompactProductFilters,
   type ProductFilterKey,
   type ProductFilterSegment,
@@ -148,10 +150,22 @@ export function AboutPage() {
   </div>;
 }
 
+type ProjectFilterKey = 'sector';
+
+const projectFilterSegments: CompactFilterSegment<ProjectFilterKey>[] = [
+  {
+    key: 'sector',
+    label: 'Project type',
+    index: '01',
+    options: ['Residential', 'Commercial', 'Retail', 'Mixed use'],
+  },
+];
+
 export function ProjectsPage() {
   const {content} = useContent();
   const projectCards = content.projects;
-  const [category, setCategory] = useState('All');
+  const [projectFilters, setProjectFilters] = useState<CompactFilterSelections<ProjectFilterKey>>({sector: []});
+  const [openProjectFilter, setOpenProjectFilter] = useState<ProjectFilterKey | null>('sector');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [discussionOpen, setDiscussionOpen] = useState(false);
   const modalRef = useRef<HTMLElement>(null);
@@ -202,11 +216,37 @@ export function ProjectsPage() {
   const selectedIndex = selectedProject ? projectCards.findIndex(project => project.id === selectedProject.id) : -1;
   const previousProject = selectedIndex >= 0 ? projectCards[(selectedIndex - 1 + projectCards.length) % projectCards.length] : null;
   const nextProject = selectedIndex >= 0 ? projectCards[(selectedIndex + 1) % projectCards.length] : null;
-  const filteredProjects = category === 'All' ? projectCards : projectCards.filter(project => project.category === category);
+  const filteredProjects = projectFilters.sector.length === 0
+    ? projectCards
+    : projectCards.filter(project => projectFilters.sector.includes(project.category));
+  const toggleProjectFilter = (value: string) => {
+    setProjectFilters(current => ({
+      sector: value === 'All'
+        ? []
+        : current.sector.includes(value)
+          ? current.sector.filter(selected => selected !== value)
+          : [...current.sector, value],
+    }));
+  };
 
   return <>
     <PageIntro eyebrow="Complete installed project archive" title="Electrical work," italic="shown on site." body="Filter the installed project archive by sector. Each record now includes a visible completion-date field; dates not present in the source archive are clearly marked for confirmation rather than invented."/>
-    <section className="ia-project-filters section" aria-label="Project filters"><div><SlidersHorizontal/><span>Filter projects</span></div><div>{['All', 'Residential', 'Commercial', 'Retail', 'Mixed use'].map(value => <button type="button" className={category === value ? 'active' : ''} aria-pressed={category === value} onClick={() => setCategory(value)} key={value}>{value}</button>)}</div><b>{filteredProjects.length} projects</b></section>
+    <section className="filter-shell compact-product-filters project-collection-filters section" aria-label="Project filters">
+      <div className="filter-top">
+        <div><SlidersHorizontal/><b>Refine the project archive</b></div>
+        <div className="shop-view-controls"><span>{filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'}</span></div>
+      </div>
+      <CompactProductFilters<ProjectFilterKey>
+        segments={projectFilterSegments}
+        selections={projectFilters}
+        openFilter={openProjectFilter}
+        onOpenFilterChange={setOpenProjectFilter}
+        onToggle={(_key, value) => toggleProjectFilter(value)}
+        onClear={() => setProjectFilters({sector: []})}
+        idPrefix="project-filter"
+        ariaLabel="Project filters"
+      />
+    </section>
     <section className="project-archive-grid section" aria-label="NK Electrical completed projects">{filteredProjects.map(project =>
       <button className="project-archive-card" type="button" aria-haspopup="dialog" onClick={() => setSelectedProject(project)} key={project.id}>
         <span className="project-archive-image"><ResponsiveImage src={project.image} alt={`${project.name} completed installation ${project.number}`} loading="lazy" data-visual-kind="project" data-visual-slug={project.id} data-visual-path="image" data-visual-edit="image" data-visual-label="Project image"/><span>View project <ArrowUpRight/></span></span>
@@ -391,16 +431,48 @@ export function LightingPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [brand, setBrand] = useState('All');
-  const [focus, setFocus] = useState('All');
+  type CatalogueFilterKey = 'brand' | 'focus';
+  const catalogueFilterSegments: CompactFilterSegment<CatalogueFilterKey>[] = [
+    {key: 'brand', label: 'Brand', index: '01', options: ['ACA', 'Nova Luce', 'VIOKEF']},
+    {key: 'focus', label: 'Focus', index: '02', options: ['Decorative', 'Architectural', 'Kids', 'Natural', 'Fans']},
+  ];
+  const [catalogueFilters, setCatalogueFilters] = useState<CompactFilterSelections<CatalogueFilterKey>>({brand: [], focus: []});
+  const [openCatalogueFilter, setOpenCatalogueFilter] = useState<CatalogueFilterKey | null>('brand');
   const selectedCatalogue = params.get('catalogue') || '';
   const updateBookCatalogue = useCallback((catalogue: string) => setParams({catalogue}, {replace: true}), [setParams]);
-  const shown = content.catalogues.filter(catalogue => (brand === 'All' || catalogue.brand === brand) && (focus === 'All' || catalogue.focus === focus));
+  const shown = content.catalogues.filter(catalogue =>
+    (catalogueFilters.brand.length === 0 || catalogueFilters.brand.includes(catalogue.brand))
+    && (catalogueFilters.focus.length === 0 || catalogueFilters.focus.includes(catalogue.focus)));
+  const toggleCatalogueFilter = (key: CatalogueFilterKey, value: string) => {
+    setCatalogueFilters(current => ({
+      ...current,
+      [key]: value === 'All'
+        ? []
+        : current[key].includes(value)
+          ? current[key].filter(selected => selected !== value)
+          : [...current[key], value],
+    }));
+  };
   if (location.pathname.replace(/\/+$/, '').endsWith('/book')) return <UnifiedCatalogueBook catalogues={content.catalogues} initialCatalogue={selectedCatalogue} onCatalogueChange={updateBookCatalogue} onClose={() => navigate('/shop/catalogues')}/>;
   return <>
     <section className="catalogue-entry section" aria-labelledby="catalogue-entry-title"><div className="catalogue-entry__copy"><small>NK ELECTRICAL / CATALOGUE LIBRARY</small><h1 id="catalogue-entry-title">Every collection,<br/><em>one living book.</em></h1><p>Choose any collection to enter one continuous, page-turning catalogue. You will start at that book, then keep browsing naturally through every official collection.</p><Link className="catalogue-entry__cta" to={catalogueBookLink(content.catalogues[0], 0)}>Explore the complete book <ArrowRight/></Link><span>Keyboard, buttons and swipe navigation included.</span></div><CatalogueCoverPreview catalogue={content.catalogues[0]}/></section>
     <PageIntro eyebrow="Choose a starting collection" title="Official collections," italic="ready to explore." body="Every card opens the same continuous book at the first page of the chosen catalogue."/>
-    <section className="catalogue-controls section"><div><b>Brand</b>{['All', 'ACA', 'Nova Luce', 'VIOKEF'].map(value => <button className={brand === value ? 'active' : ''} onClick={() => setBrand(value)} key={value}>{value}</button>)}</div><div><b>Focus</b>{['All', 'Decorative', 'Architectural', 'Kids', 'Natural', 'Fans'].map(value => <button className={focus === value ? 'active' : ''} onClick={() => setFocus(value)} key={value}>{value}</button>)}</div></section>
+    <section className="filter-shell compact-product-filters catalogue-library-filters section" aria-label="Catalogue filters">
+      <div className="filter-top">
+        <div><SlidersHorizontal/><b>Refine the catalogue library</b></div>
+        <div className="shop-view-controls"><span>{shown.length} {shown.length === 1 ? 'collection' : 'collections'}</span></div>
+      </div>
+      <CompactProductFilters<CatalogueFilterKey>
+        segments={catalogueFilterSegments}
+        selections={catalogueFilters}
+        openFilter={openCatalogueFilter}
+        onOpenFilterChange={setOpenCatalogueFilter}
+        onToggle={toggleCatalogueFilter}
+        onClear={() => setCatalogueFilters({brand: [], focus: []})}
+        idPrefix="catalogue-filter"
+        ariaLabel="Catalogue filters"
+      />
+    </section>
     <section className="catalogue-grid section">{shown.map(catalogue => { const sourceIndex = content.catalogues.indexOf(catalogue); return <Link className={`catalogue-card tone-${sourceIndex % 4}`} to={catalogueBookLink(catalogue, sourceIndex)} key={catalogue.url}><div className="catalogue-cover"><span>NK / LIGHTING</span><b data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="brand" data-visual-edit="text" data-visual-label="Catalogue brand">{catalogue.brand}</b><strong data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="year" data-visual-edit="text" data-visual-label="Catalogue year">{catalogue.year}</strong><i/><small data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="focus" data-visual-edit="text" data-visual-label="Catalogue focus">{catalogue.focus}</small></div><div><BookOpen/><h3 data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="$title" data-visual-edit="text" data-visual-label="Catalogue name" data-visual-link-path="url">{catalogue.name}</h3><span>Start here in the unified book <ArrowRight/></span></div></Link>; })}</section>
     <section className="catalogue-help section"><div><BookOpen/><h2>Found a product?</h2></div><p>Email the catalogue name, product code and quantity. Add your name and phone number so the Shop team can respond with the right context.</p><a className="button copper" href="mailto:thelma@nk-electrical.com?subject=Shop%20catalogue%20enquiry">Ask about a catalogue product <ArrowUpRight/></a></section>
   </>;

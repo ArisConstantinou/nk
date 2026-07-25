@@ -359,11 +359,28 @@
   font-size:15px!important;
   line-height:1.7;
 }
-.about-team__filters{
+.about-team__filter-module{
   margin-top:68px;
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
+}
+.about-team__filter-meta{
+  min-height:48px;
+  padding:0 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
   border:1px solid #29404f;
+  border-bottom:0;
+  color:#93a6b6;
+}
+.about-team__filter-meta span{
+  font:800 12px/1.2 var(--mono);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.about-team__filter-meta b{
+  color:#eef5f6;
+  font:650 14px/1.3 var(--display);
 }
 .about-team__filters button{
   min-height:92px;
@@ -684,7 +701,8 @@
   .about-story__facts article:last-child{border-bottom:0}
   .about-story__facts svg{margin:28px 0 16px}
   .about-team__heading h2{font-size:48px}
-  .about-team__filters{margin-top:40px}
+  .about-team__filter-module{margin-top:40px}
+  .about-team__filter-meta{align-items:flex-start;flex-direction:column;gap:4px;padding:12px}
   .about-team__filters button{min-height:76px}
   .about-team__portrait{min-height:440px}
   .about-team__detail{min-height:610px;padding:25px 20px}

@@ -2,23 +2,27 @@ import {Check, ChevronDown, X} from 'lucide-react';
 
 export type ProductFilterKey = 'category' | 'space' | 'season';
 
-export type ProductFilterSelections = Record<ProductFilterKey, string[]>;
+export type CompactFilterSelections<Key extends string> = Record<Key, string[]>;
 
-export type ProductFilterSegment = {
-  key: ProductFilterKey;
+export type CompactFilterSegment<Key extends string> = {
+  key: Key;
   label: string;
   index: string;
   options: string[];
 };
 
-type CompactProductFiltersProps = {
-  segments: ProductFilterSegment[];
-  selections: ProductFilterSelections;
-  openFilter: ProductFilterKey | null;
-  onOpenFilterChange: (key: ProductFilterKey | null) => void;
-  onToggle: (key: ProductFilterKey, value: string) => void;
+export type ProductFilterSelections = CompactFilterSelections<ProductFilterKey>;
+export type ProductFilterSegment = CompactFilterSegment<ProductFilterKey>;
+
+type CompactProductFiltersProps<Key extends string> = {
+  segments: CompactFilterSegment<Key>[];
+  selections: CompactFilterSelections<Key>;
+  openFilter: Key | null;
+  onOpenFilterChange: (key: Key | null) => void;
+  onToggle: (key: Key, value: string) => void;
   onClear: () => void;
   idPrefix?: string;
+  ariaLabel?: string;
 };
 
 const selectionSummary = (values: string[]) => {
@@ -27,7 +31,7 @@ const selectionSummary = (values: string[]) => {
   return `${values.length} selected`;
 };
 
-export function CompactProductFilters({
+export function CompactProductFilters<Key extends string = ProductFilterKey>({
   segments,
   selections,
   openFilter,
@@ -35,13 +39,19 @@ export function CompactProductFilters({
   onToggle,
   onClear,
   idPrefix = 'product-filter',
-}: CompactProductFiltersProps) {
+  ariaLabel = 'Product filters',
+}: CompactProductFiltersProps<Key>) {
   const hasSelections = segments.some(({key}) => selections[key].length > 0);
   const activeFilter = openFilter ?? segments[0]?.key ?? null;
 
   return <div className="compact-filter-bar">
     <div className="compact-filter-module" data-visual-no-edit>
-      <div className="compact-filter-segments" role="group" aria-label="Product filters">
+      <div
+        className="compact-filter-segments"
+        role="group"
+        aria-label={ariaLabel}
+        style={{gridTemplateColumns: `repeat(${Math.max(1, segments.length)}, minmax(0, 1fr))`}}
+      >
         {segments.map(({key, label, index}) => {
           const isOpen = activeFilter === key;
           const selectedValues = selections[key];

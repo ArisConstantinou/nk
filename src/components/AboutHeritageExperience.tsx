@@ -24,6 +24,11 @@ import type {TeamMember} from '../types';
 import {useMotionPreference} from '../interactive/react/useMotionPreference';
 import {AboutHeritageFilm} from '../remotion/AboutHeritageFilm';
 import {publicAsset} from '../utils/assets';
+import {
+  CompactProductFilters,
+  type CompactFilterSegment,
+  type CompactFilterSelections,
+} from './CompactProductFilters';
 
 type AboutHeritageExperienceProps = {
   title: string;
@@ -83,6 +88,17 @@ const practiceGroups: PracticeGroup[] = [
   },
 ];
 
+type TeamFilterKey = 'responsibility';
+
+const teamFilterSegments: CompactFilterSegment<TeamFilterKey>[] = [
+  {
+    key: 'responsibility',
+    label: 'Responsibility',
+    index: '01',
+    options: practiceGroups.slice(1).map(group => group.label),
+  },
+];
+
 const splitHistoryEntry = (entry: string, fallbackLabel: string) => {
   const parts = entry.split(/\s+[—–-]\s+/);
   if (parts.length < 2) return {label: fallbackLabel, detail: entry};
@@ -114,13 +130,34 @@ const frameToEra = (frame: number) => {
 };
 
 function AboutTeamExplorer({members}: {members: TeamMember[]}) {
-  const [groupId, setGroupId] = useState('all');
-  const activeGroup = practiceGroups.find(group => group.id === groupId) || practiceGroups[0];
+  const [teamFilters, setTeamFilters] = useState<CompactFilterSelections<TeamFilterKey>>({responsibility: []});
+  const [openTeamFilter, setOpenTeamFilter] = useState<TeamFilterKey | null>('responsibility');
+  const selectedGroups = practiceGroups.slice(1).filter(group => teamFilters.responsibility.includes(group.label));
+  const activeGroup = selectedGroups.length === 1 ? selectedGroups[0] : practiceGroups[0];
   const filteredMembers = useMemo(
-    () => members.filter(activeGroup.matches),
-    [activeGroup, members],
+    () => selectedGroups.length === 0
+      ? members
+      : members.filter(member => selectedGroups.some(group => group.matches(member))),
+    [members, teamFilters.responsibility],
   );
+  const groupDescription = selectedGroups.length > 1
+    ? `Showing everyone who carries any of the ${selectedGroups.length} selected responsibilities.`
+    : activeGroup.description;
+  const groupLabel = selectedGroups.length > 1
+    ? `${selectedGroups.length} selected responsibilities`
+    : activeGroup.label;
+  const selectionSignature = teamFilters.responsibility.join('|') || 'all';
   const [activeMemberName, setActiveMemberName] = useState(members[0]?.name || '');
+
+  const toggleTeamFilter = (value: string) => {
+    setTeamFilters(current => ({
+      responsibility: value === 'All'
+        ? []
+        : current.responsibility.includes(value)
+          ? current.responsibility.filter(selected => selected !== value)
+          : [...current.responsibility, value],
+    }));
+  };
 
   useEffect(() => {
     if (!filteredMembers.some(member => member.name === activeMemberName)) {
@@ -154,25 +191,25 @@ function AboutTeamExplorer({members}: {members: TeamMember[]}) {
       <p>Choose a part of the work. The interface shows exactly who carries it and what they are accountable for.</p>
     </header>
 
-    <div className="about-team__filters" role="tablist" aria-label="Filter team by responsibility">
-      {practiceGroups.map((group, index) => <button
-        type="button"
-        role="tab"
-        aria-selected={group.id === groupId}
-        className={group.id === groupId ? 'active' : ''}
-        onClick={() => setGroupId(group.id)}
-        key={group.id}
-      >
-        <span>{String(index + 1).padStart(2, '0')}</span>
-        <strong>{group.label}</strong>
-      </button>)}
+    <div className="about-team__filter-module">
+      <div className="about-team__filter-meta"><span>Refine by responsibility</span><b>{filteredMembers.length} {filteredMembers.length === 1 ? 'person' : 'people'}</b></div>
+      <CompactProductFilters<TeamFilterKey>
+        segments={teamFilterSegments}
+        selections={teamFilters}
+        openFilter={openTeamFilter}
+        onOpenFilterChange={setOpenTeamFilter}
+        onToggle={(_key, value) => toggleTeamFilter(value)}
+        onClear={() => setTeamFilters({responsibility: []})}
+        idPrefix="team-filter"
+        ariaLabel="Team responsibility filters"
+      />
     </div>
 
     <div className="about-team__stage" onKeyDown={handleMemberKeys}>
       <AnimatePresence mode="wait">
         <motion.figure
           className="about-team__portrait"
-          key={`${groupId}-${activeMember.name}`}
+          key={`${selectionSignature}-${activeMember.name}`}
           initial={{opacity: 0, x: -18}}
           animate={{opacity: 1, x: 0}}
           exit={{opacity: 0, x: 18}}
@@ -186,7 +223,7 @@ function AboutTeamExplorer({members}: {members: TeamMember[]}) {
         </motion.figure>
       </AnimatePresence>
 
-      <div className="about-team__detail" role="tabpanel">
+      <div className="about-team__detail" aria-live="polite">
         <div className="about-team__signal"><i/><span>ACTIVE RESPONSIBILITY</span><b>{activeMember.responsibility}</b></div>
         <AnimatePresence mode="wait">
           <motion.div
@@ -196,7 +233,7 @@ function AboutTeamExplorer({members}: {members: TeamMember[]}) {
             exit={{opacity: 0, y: -10}}
             transition={{duration: .28, ease: [.16, 1, .3, 1]}}
           >
-            <p className="about-team__group-copy">{activeGroup.description}</p>
+            <p className="about-team__group-copy">{groupDescription}</p>
             <h3>{activeMember.name}</h3>
             <p className="about-team__role">{activeMember.role}</p>
             <p className="about-team__area">{activeMember.workArea}</p>
@@ -223,7 +260,7 @@ function AboutTeamExplorer({members}: {members: TeamMember[]}) {
       </div>
     </div>
 
-    <div className="about-team__member-rail" aria-label={`${activeGroup.label} team members`}>
+    <div className="about-team__member-rail" aria-label={`${groupLabel} team members`}>
       {filteredMembers.map((member, index) => <button
         type="button"
         className={member.name === activeMember.name ? 'active' : ''}
