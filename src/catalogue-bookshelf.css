@@ -1606,13 +1606,7 @@
 }
 
 .catalogue-shelf[data-shelf='5'] .catalogue-shelf__led {
-  top: 0;
-  bottom: auto;
-  height: 2px;
-  opacity: .92;
-  box-shadow:
-    0 4px 10px 2px var(--shelf-glow),
-    0 16px 26px 7px var(--shelf-wash);
+  display: none;
 }
 
 .catalogue-shelf[data-power='off'] .catalogue-shelf__led {
