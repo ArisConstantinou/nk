@@ -152,6 +152,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
               <small>{channel.power ? `${channel.brightness}%` : 'OFF'}</small>
             </div>
             <div className="catalogue-shelf__interior">
+              <span className="catalogue-shelf__backwash" aria-hidden="true"/>
+              <span className="catalogue-shelf__deck" aria-hidden="true"/>
               <div className="catalogue-shelf__books">
                 {shelfCatalogues.map((catalogue, bookIndex) => {
                   const sourceIndex = sourceCatalogues.indexOf(catalogue);
@@ -171,26 +173,31 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     '--book-radius': `${finish.radius}px`,
                     '--book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
                   } as CSSProperties;
-                  return <Link
-                    className="catalogue-spine"
-                    to={catalogueBookLink(catalogue, safeSourceIndex)}
-                    aria-label={`Open ${catalogue.name} catalogue`}
-                    data-material={finish.material}
-                    data-layout={finish.layout}
+                  return <span
+                    className="catalogue-volume"
                     style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >
-                    <span className="catalogue-spine__top" aria-hidden="true"/>
-                    <span className="catalogue-spine__page-block" aria-hidden="true"/>
-                    <span className="catalogue-spine__back-cover" aria-hidden="true"/>
-                    <span className="catalogue-spine__surface" aria-hidden="true">
-                      <span className="catalogue-spine__cover-lines"/>
-                      <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
-                      <strong data-compact-title={spineCompactTitle(catalogue)}>{brandMark(catalogue.brand)} {spineCompactTitle(catalogue)}</strong>
-                      <span className="catalogue-spine__edition">{spineEdition(catalogue.year)}</span>
-                      <span className="catalogue-spine__ornament"/>
-                    </span>
-                  </Link>;
+                    <Link
+                      className="catalogue-spine"
+                      to={catalogueBookLink(catalogue, safeSourceIndex)}
+                      aria-label={`Open ${catalogue.name} catalogue`}
+                      data-material={finish.material}
+                      data-layout={finish.layout}
+                    >
+                      <span className="catalogue-spine__top" aria-hidden="true"/>
+                      <span className="catalogue-spine__page-block" aria-hidden="true"/>
+                      <span className="catalogue-spine__back-cover" aria-hidden="true"/>
+                      <span className="catalogue-spine__surface" aria-hidden="true">
+                        <span className="catalogue-spine__cover-lines"/>
+                        <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
+                        <strong data-compact-title={spineCompactTitle(catalogue)}>{brandMark(catalogue.brand)} {spineCompactTitle(catalogue)}</strong>
+                        <span className="catalogue-spine__edition">{spineEdition(catalogue.year)}</span>
+                        <span className="catalogue-spine__ornament"/>
+                      </span>
+                    </Link>
+                    <span className="catalogue-volume__contact" aria-hidden="true"/>
+                  </span>;
                 })}
               </div>
             </div>
