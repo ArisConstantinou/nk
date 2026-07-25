@@ -2385,8 +2385,9 @@
 }
 
 .catalogue-bookcase {
-  --shelf-lip-h: clamp(12px, .95vw, 16px);
-  --shelf-top-depth: clamp(6px, .52vw, 8px);
+  --shelf-lip-h: clamp(10px, .78vw, 13px);
+  --shelf-top-depth: clamp(12px, 1vw, 15px);
+  --shelf-top-rise: clamp(5px, .45vw, 7px);
   --shelf-canopy-h: clamp(20px, 1.55vw, 27px);
   top: 10.2%;
   left: 22.4%;
@@ -2497,7 +2498,7 @@
   z-index: 6;
   top: 4px;
   right: 23%;
-  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-depth) - 2px);
+  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - 2px);
   left: 4.5%;
   display: flex;
   align-items: flex-end;
@@ -2727,6 +2728,7 @@
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-bookcase {
   --shelf-lip-h: clamp(10px, .78vw, 13px);
   --shelf-top-depth: 0px;
+  --shelf-top-rise: 0px;
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-spine__top,
@@ -2792,17 +2794,10 @@
   bottom: 0;
   left: -.4%;
   display: block;
-  height: calc(var(--shelf-lip-h) + var(--shelf-top-depth));
+  height: var(--shelf-lip-h);
   border-top: 1px solid rgb(245 207 164 / 22%);
   pointer-events: none;
   background:
-    linear-gradient(
-      180deg,
-      rgb(202 151 108 / 46%) 0,
-      rgb(119 72 47 / 48%) calc(var(--shelf-top-depth) - 1px),
-      rgb(42 20 12 / 78%) var(--shelf-top-depth),
-      transparent calc(var(--shelf-top-depth) + 1px)
-    ),
     linear-gradient(180deg, rgb(255 255 255 / 8%), transparent 34%, rgb(0 0 0 / 42%)),
     url('/assets/generated/catalogue-walnut-shelf-front-v1.webp') center / 100% 100% no-repeat;
   box-shadow:
@@ -2813,7 +2808,28 @@
 
 .catalogue-shelf__board::before {
   position: absolute;
-  top: var(--shelf-top-depth);
+  right: -.4%;
+  bottom: 100%;
+  left: -.4%;
+  display: block;
+  height: var(--shelf-top-depth);
+  border-bottom: 1px solid rgb(42 20 12 / 68%);
+  content: '';
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(24 11 7 / 42%), transparent 7% 93%, rgb(24 11 7 / 48%)),
+    linear-gradient(180deg, rgb(205 156 115 / 62%), rgb(91 51 31 / 72%)),
+    url('/assets/generated/catalogue-walnut-shelf-front-v1.webp') center / 100% 100% no-repeat;
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 18%),
+    inset 0 -1px rgb(22 10 6 / 42%);
+  transform: perspective(420px) rotateX(60deg);
+  transform-origin: center bottom;
+}
+
+.catalogue-shelf__board::after {
+  position: absolute;
+  top: 0;
   right: 0;
   left: 0;
   height: 1px;
@@ -2831,7 +2847,8 @@
     0 4px 7px rgb(18 8 4 / 32%);
 }
 
-.catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__board::before {
+.catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__board::before,
+.catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__board::after {
   display: none;
 }
 
@@ -2858,7 +2875,8 @@
 
   .catalogue-bookcase {
     --shelf-lip-h: 10px;
-    --shelf-top-depth: 6px;
+    --shelf-top-depth: 12px;
+    --shelf-top-rise: 5px;
     --shelf-canopy-h: clamp(20px, 6vw, 27px);
     top: 2%;
     left: 50%;
@@ -2879,7 +2897,7 @@
   .catalogue-shelf__books {
     top: 4px;
     right: 17%;
-    bottom: calc(var(--shelf-lip-h) + var(--shelf-top-depth) - 2px);
+    bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - 2px);
     left: 5%;
     gap: 8px;
     padding: 0;
@@ -2897,6 +2915,7 @@
   .catalogue-library-room__scene[data-book-view='flat'] .catalogue-bookcase {
     --shelf-lip-h: 10px;
     --shelf-top-depth: 0px;
+    --shelf-top-rise: 0px;
   }
 
   .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__books {
