@@ -4,7 +4,6 @@ import {Link} from 'react-router-dom';
 import type {Catalogue} from '../types';
 import {publicAsset} from '../utils/assets';
 import {catalogueBookLink} from './UnifiedCatalogueBook';
-import {CatalogueCoverPreview} from './CatalogueCoverPreview';
 
 type ShelfLightChannel = {
   color: string;
@@ -29,6 +28,52 @@ const defaultChannels: ShelfLightChannel[] = [
 ];
 
 const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
+
+const spineFinishes = [
+  {cover: '#55624d', edge: '#c9bda4', ink: '#f7f0dd'},
+  {cover: '#132e54', edge: '#8fa5bf', ink: '#f3f6fb'},
+  {cover: '#e8e0cf', edge: '#b7aa92', ink: '#302b25'},
+  {cover: '#20374a', edge: '#7f9caf', ink: '#f1f5f6'},
+  {cover: '#b57634', edge: '#e0b16b', ink: '#fff7e8'},
+  {cover: '#254b50', edge: '#82aaa9', ink: '#f0f7f3'},
+  {cover: '#704535', edge: '#d09a72', ink: '#fff3e7'},
+  {cover: '#756b61', edge: '#bdb1a4', ink: '#fff9ee'},
+  {cover: '#353b3d', edge: '#8d989a', ink: '#f5f6f3'},
+  {cover: '#8a3d2d', edge: '#d58e72', ink: '#fff4ec'},
+  {cover: '#7d2857', edge: '#c878a3', ink: '#fff0f8'},
+  {cover: '#47566a', edge: '#91a0b4', ink: '#f6f8fa'},
+  {cover: '#eee8dc', edge: '#bbb09c', ink: '#38332c'},
+  {cover: '#5d6251', edge: '#aeb39a', ink: '#f7f5e9'},
+];
+
+const brandMark = (brand: Catalogue['brand']) => (
+  brand === 'Nova Luce' ? 'NOVA' : brand === 'VIOKEF' ? 'VIO' : brand
+);
+
+const spineTitle = (catalogue: Catalogue) => {
+  const fallbackByFocus: Record<Catalogue['focus'], string> = {
+    Decorative: 'LIGHTING',
+    Architectural: 'ARCH.',
+    Kids: 'KIDS',
+    Natural: 'NATURAL',
+    Fans: 'FANS',
+  };
+  const title = catalogue.name
+    .replace(new RegExp(`^${catalogue.brand}\\s*`, 'i'), '')
+    .replace(new RegExp(`\\b${catalogue.year}\\b`, 'i'), '')
+    .replace(/[·–—-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return (title || fallbackByFocus[catalogue.focus])
+    .replace(/ceiling fans/i, 'FANS')
+    .replace(/book\s+(\d+)/i, 'BOOK$1')
+    .replace(/lighting/i, 'LIGHT')
+    .replace(/collection/i, 'EDITION')
+    .replace(/natural/i, 'NAT.')
+    .replace(/decorative/i, 'LIGHT')
+    .replace(/architectural/i, 'ARCH.')
+    .toUpperCase();
+};
 
 const hexToRgba = (hex: string, alpha: number) => {
   const value = hex.replace('#', '');
@@ -65,9 +110,9 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
     <div className="catalogue-library-room__heading">
       <div>
         <span><Sparkles/> THE READING ROOM</span>
-        <h2 id="catalogue-library-room-title">Choose a cover.<br/><em>Open the collection.</em></h2>
+        <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
       </div>
-      <p>Each official cover opens immediately in the shared page-turning reader. Hover or focus a book to lift it from the shelf.</p>
+      <p>Each labelled spine opens immediately in the shared page-turning reader. Hover, focus or tap a book to lift it from the shelf.</p>
     </div>
 
     <div className="catalogue-library-room__scene">
@@ -97,13 +142,24 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                 {shelfCatalogues.map((catalogue, bookIndex) => {
                   const sourceIndex = sourceCatalogues.indexOf(catalogue);
                   const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : bookIndex;
+                  const finish = spineFinishes[safeSourceIndex % spineFinishes.length];
+                  const bookStyle = {
+                    '--book-cover': finish.cover,
+                    '--book-edge': finish.edge,
+                    '--book-ink': finish.ink,
+                  } as CSSProperties;
                   return <Link
                     className="catalogue-spine"
                     to={catalogueBookLink(catalogue, safeSourceIndex)}
                     aria-label={`Open ${catalogue.name} catalogue`}
+                    style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >
-                    <CatalogueCoverPreview catalogue={catalogue} variant="spine"/>
+                    <span className="catalogue-spine__surface" aria-hidden="true">
+                      <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
+                      <strong>{spineTitle(catalogue)}</strong>
+                      <span className="catalogue-spine__year">{catalogue.year === 'Collection' ? 'COLL.' : catalogue.year}</span>
+                    </span>
                   </Link>;
                 })}
               </div>
