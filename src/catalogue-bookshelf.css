@@ -1500,7 +1500,7 @@
   aspect-ratio: 3 / 2;
   background:
     linear-gradient(180deg, rgb(16 10 7 / 2%), rgb(16 10 7 / 12%)),
-    url('/assets/generated/catalogue-reading-room-built-in-v2.webp') center / 100% 100% no-repeat;
+    url('/assets/generated/catalogue-reading-room-built-in-v2.webp?v=no-sixth-light') center / 100% 100% no-repeat;
 }
 
 .catalogue-bookcase {
@@ -1639,7 +1639,7 @@
     aspect-ratio: 2 / 3;
     row-gap: 5.2%;
     padding: 7.2% 4% 0;
-    background: url('/assets/generated/catalogue-built-in-shelves-mobile-v2.webp') center / 100% 100% no-repeat;
+    background: url('/assets/generated/catalogue-built-in-shelves-mobile-v2.webp?v=no-sixth-light') center / 100% 100% no-repeat;
     transform: translateX(-50%);
   }
 
