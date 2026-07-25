@@ -2386,8 +2386,9 @@
 
 .catalogue-bookcase {
   --shelf-lip-h: clamp(7px, .56vw, 9px);
-  --shelf-top-rise: clamp(18px, 1.4vw, 22px);
-  --shelf-back-inset: 3.5%;
+  --shelf-top-rise: clamp(24px, 1.85vw, 30px);
+  --shelf-back-inset: 4.5%;
+  --book-seat-depth: clamp(7px, .65vw, 10px);
   --shelf-canopy-h: clamp(20px, 1.55vw, 27px);
   top: 10.2%;
   left: 22.4%;
@@ -2495,10 +2496,10 @@
 
 .catalogue-shelf__books {
   position: absolute;
-  z-index: 6;
+  z-index: 14;
   top: 0;
   right: 23%;
-  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - 2px);
+  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
   left: 4.5%;
   display: flex;
   align-items: flex-end;
@@ -2728,6 +2729,7 @@
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-bookcase {
   --shelf-lip-h: clamp(10px, .78vw, 13px);
   --shelf-top-rise: 0px;
+  --book-seat-depth: 2px;
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-spine__top,
@@ -2789,9 +2791,9 @@
 .catalogue-shelf__board {
   position: absolute;
   z-index: 12;
-  right: -.4%;
+  right: 0;
   bottom: 0;
-  left: -.4%;
+  left: 0;
   display: block;
   height: calc(var(--shelf-lip-h) + var(--shelf-top-rise));
   border: 0;
@@ -2861,8 +2863,9 @@
 
   .catalogue-bookcase {
     --shelf-lip-h: 7px;
-    --shelf-top-rise: 11px;
-    --shelf-back-inset: 2.5%;
+    --shelf-top-rise: 13px;
+    --shelf-back-inset: 3.2%;
+    --book-seat-depth: 6px;
     --shelf-canopy-h: clamp(20px, 6vw, 27px);
     top: 2%;
     left: 50%;
@@ -2883,7 +2886,7 @@
   .catalogue-shelf__books {
     top: 4px;
     right: 17%;
-    bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - 2px);
+    bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
     left: 5%;
     gap: 8px;
     padding: 0;
@@ -2901,6 +2904,7 @@
   .catalogue-library-room__scene[data-book-view='flat'] .catalogue-bookcase {
     --shelf-lip-h: 10px;
     --shelf-top-rise: 0px;
+    --book-seat-depth: 2px;
   }
 
   .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__books {
