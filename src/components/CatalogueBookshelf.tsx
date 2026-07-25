@@ -97,15 +97,10 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                 {shelfCatalogues.map((catalogue, bookIndex) => {
                   const sourceIndex = sourceCatalogues.indexOf(catalogue);
                   const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : bookIndex;
-                  const bookStyle = {
-                    '--book-lean': `${(bookIndex % 3 - 1) * 1.4}deg`,
-                  } as CSSProperties;
                   return <Link
                     className="catalogue-spine"
                     to={catalogueBookLink(catalogue, safeSourceIndex)}
                     aria-label={`Open ${catalogue.name} catalogue`}
-                    title={`${catalogue.name} · ${catalogue.brand} · ${catalogue.year}`}
-                    style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >
                     <CatalogueCoverPreview catalogue={catalogue} variant="spine"/>

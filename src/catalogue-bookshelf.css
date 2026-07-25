@@ -1009,3 +1009,40 @@
     height: auto;
   }
 }
+
+/* Covers stay upright and preserve the complete PDF page without text clipping. */
+.catalogue-spine {
+  flex: 0 0 auto;
+  width: auto;
+  height: 78%;
+  max-height: 112px;
+  aspect-ratio: .765;
+  overflow: hidden;
+  transform: none;
+}
+
+.catalogue-spine::after {
+  display: none;
+}
+
+.catalogue-spine .catalogue-cover-preview--spine canvas {
+  object-fit: contain;
+}
+
+.catalogue-spine:hover,
+.catalogue-spine:focus-visible {
+  transform: translateY(-9px) scale(1.035);
+}
+
+.catalogue-spine:active {
+  transform: translateY(-5px) scale(1.015);
+}
+
+@media (max-width: 760px) {
+  .catalogue-spine {
+    flex: 0 0 auto;
+    width: auto;
+    height: 78%;
+    max-height: none;
+  }
+}
