@@ -195,7 +195,6 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
             </div>
             <div className="catalogue-shelf__interior">
               <span className="catalogue-shelf__backwash" aria-hidden="true"/>
-              <span className="catalogue-shelf__deck" aria-hidden="true"/>
               <div className="catalogue-shelf__books">
                 {shelfCatalogues.map((catalogue, bookIndex) => {
                   const sourceIndex = sourceCatalogues.indexOf(catalogue);
