@@ -2210,3 +2210,98 @@
     gap: 11px;
   }
 }
+
+/* Front-facing modern catalogue bindings. The photographic spine texture is
+   straight-on at rest; the existing solid geometry appears only while a
+   volume is pulled forward. */
+.catalogue-shelf__books {
+  gap: 5px;
+}
+
+.catalogue-shelf__books > .catalogue-spine,
+.catalogue-shelf__books > .catalogue-spine:nth-child(3n + 1),
+.catalogue-shelf__books > .catalogue-spine:nth-child(3n + 2),
+.catalogue-shelf__books > .catalogue-spine:nth-child(3n) {
+  --book-rest-turn: 0deg;
+  flex-basis: calc(var(--book-width) * .62);
+  width: calc(var(--book-width) * .62);
+  transform:
+    rotateY(0deg)
+    rotateZ(var(--book-lean));
+}
+
+.catalogue-shelf__books > .catalogue-spine .catalogue-spine__surface {
+  display: block;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 2px 2px 3px 3px / 5px 5px 3px 3px;
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 22%), transparent 15% 72%, rgb(0 0 0 / 31%)),
+    linear-gradient(180deg, rgb(255 255 255 / 10%), transparent 17% 82%, rgb(0 0 0 / 19%)),
+    var(--book-texture) center / 100% 100% no-repeat;
+  box-shadow:
+    inset 1px 0 rgb(255 255 255 / 28%),
+    inset -2px 0 2px rgb(0 0 0 / 28%),
+    2px 5px 5px rgb(10 6 4 / 46%),
+    0 1px 1px rgb(255 255 255 / 22%);
+}
+
+.catalogue-spine__surface::before,
+.catalogue-spine__surface::after,
+.catalogue-spine__cover-lines,
+.catalogue-spine__brand,
+.catalogue-spine__edition,
+.catalogue-spine__ornament {
+  display: none;
+}
+
+.catalogue-spine__surface strong {
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  right: 3px;
+  bottom: 8px;
+  left: 3px;
+  display: block;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  padding: 4px 1px;
+  overflow: hidden;
+  border-radius: 2px;
+  color: var(--book-ink);
+  background: rgb(12 14 14 / 68%);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .025em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 40%);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: none;
+}
+
+.catalogue-spine[data-material='paper'] .catalogue-spine__surface strong {
+  color: #fff;
+  background: rgb(12 14 14 / 38%);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 44%);
+}
+
+.catalogue-shelf__books > .catalogue-spine:hover,
+.catalogue-shelf__books > .catalogue-spine:focus-visible {
+  transform:
+    translate3d(15px, -13px, 48px)
+    rotateX(-3deg)
+    rotateY(-52deg)
+    rotateZ(var(--book-lean));
+}
+
+@media (max-width: 420px) {
+  .catalogue-shelf__books {
+    gap: 4px;
+  }
+}

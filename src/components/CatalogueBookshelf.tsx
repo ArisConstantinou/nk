@@ -157,6 +157,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                   const sourceIndex = sourceCatalogues.indexOf(catalogue);
                   const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : bookIndex;
                   const finish = spineFinishes[safeSourceIndex % spineFinishes.length];
+                  const textureNumber = String((safeSourceIndex % 14) + 1).padStart(2, '0');
                   const bookStyle = {
                     '--book-cover': finish.cover,
                     '--book-edge': finish.edge,
@@ -168,6 +169,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     '--book-depth': `${finish.depth}px`,
                     '--book-lean': `${finish.lean}deg`,
                     '--book-radius': `${finish.radius}px`,
+                    '--book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
                   } as CSSProperties;
                   return <Link
                     className="catalogue-spine"
@@ -184,7 +186,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     <span className="catalogue-spine__surface" aria-hidden="true">
                       <span className="catalogue-spine__cover-lines"/>
                       <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
-                      <strong data-compact-title={spineCompactTitle(catalogue)}>{spineTitle(catalogue)}</strong>
+                      <strong data-compact-title={spineCompactTitle(catalogue)}>{brandMark(catalogue.brand)} {spineCompactTitle(catalogue)}</strong>
                       <span className="catalogue-spine__edition">{spineEdition(catalogue.year)}</span>
                       <span className="catalogue-spine__ornament"/>
                     </span>
