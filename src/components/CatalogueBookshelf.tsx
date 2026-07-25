@@ -21,42 +21,14 @@ const shelfCount = 5;
 const initialCapacity = 3;
 
 const defaultChannels: ShelfLightChannel[] = [
-  {color: '#ffb45f', brightness: 78, power: true},
-  {color: '#52dfff', brightness: 74, power: true},
-  {color: '#ad7cff', brightness: 70, power: true},
-  {color: '#ff6f91', brightness: 68, power: true},
-  {color: '#80e58f', brightness: 72, power: true},
+  {color: '#e7b67b', brightness: 78, power: true},
+  {color: '#e7b67b', brightness: 74, power: true},
+  {color: '#e7b67b', brightness: 70, power: true},
+  {color: '#e7b67b', brightness: 68, power: true},
+  {color: '#e7b67b', brightness: 72, power: true},
 ];
 
-const colourPresets = ['#ffb45f', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
-
-const shelfDecor = [
-  {
-    image: 'assets/catalogue-products/lighting/cutouts/table-led-light.webp',
-    label: 'Modern table light',
-    className: 'is-table-light',
-  },
-  {
-    image: 'assets/catalogue-products/lighting/cutouts/wave-led-pendant-light.webp',
-    label: 'Wave LED light',
-    className: 'is-wave-light',
-  },
-  {
-    image: 'assets/catalogue-products/lighting/cutouts/e27.webp',
-    label: 'E27 lamp holder display',
-    className: 'is-lamp-holder',
-  },
-  {
-    image: 'assets/catalogue-products/lighting/cutouts/flexible-led-panels.webp',
-    label: 'Flexible LED panel',
-    className: 'is-flex-panel',
-  },
-  {
-    image: 'assets/catalogue-products/lighting/cutouts/table-led-light-8.webp',
-    label: 'Bendable reading light',
-    className: 'is-bendable-light',
-  },
-];
+const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
 
 const hexToRgba = (hex: string, alpha: number) => {
   const value = hex.replace('#', '');
@@ -93,9 +65,9 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
     <div className="catalogue-library-room__heading">
       <div>
         <span><Sparkles/> THE READING ROOM</span>
-        <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
+        <h2 id="catalogue-library-room-title">Choose a cover.<br/><em>Open the collection.</em></h2>
       </div>
-      <p>Each book opens immediately in the shared page-turning reader. Hover or focus a spine to pull it from the shelf.</p>
+      <p>Each official cover opens immediately in the shared page-turning reader. Hover or focus a book to lift it from the shelf.</p>
     </div>
 
     <div className="catalogue-library-room__scene">
@@ -137,18 +109,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     key={catalogue.id || catalogue.url}
                   >
                     <CatalogueCoverPreview catalogue={catalogue} variant="spine"/>
-                    <span className="catalogue-spine__brand">{catalogue.brand}</span>
-                    <strong>{catalogue.name}</strong>
-                    <span className="catalogue-spine__year">{catalogue.year}</span>
                   </Link>;
                 })}
-                {shelfCatalogues.length < initialCapacity && <div className="catalogue-shelf__future" aria-label="Space reserved for a future catalogue">
-                  <span>+</span><small>FUTURE<br/>COLLECTION</small>
-                </div>}
-              </div>
-              <div className={`catalogue-shelf__decor ${shelfDecor[shelfIndex].className}`}>
-                <img src={publicAsset(shelfDecor[shelfIndex].image)} alt={shelfDecor[shelfIndex].label}/>
-                <span aria-hidden="true"/>
               </div>
             </div>
             <div className="catalogue-shelf__led" aria-hidden="true"/>
