@@ -2386,7 +2386,8 @@
 
 .catalogue-bookcase {
   --shelf-lip-h: clamp(7px, .56vw, 9px);
-  --shelf-top-rise: clamp(8px, .72vw, 11px);
+  --shelf-top-rise: clamp(18px, 1.4vw, 22px);
+  --shelf-back-inset: 3.5%;
   --shelf-canopy-h: clamp(20px, 1.55vw, 27px);
   top: 10.2%;
   left: 22.4%;
@@ -2495,7 +2496,7 @@
 .catalogue-shelf__books {
   position: absolute;
   z-index: 6;
-  top: 4px;
+  top: 0;
   right: 23%;
   bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - 2px);
   left: 4.5%;
@@ -2797,9 +2798,15 @@
   pointer-events: none;
   background:
     linear-gradient(
+      90deg,
+      rgb(26 12 7 / 44%),
+      transparent 5% 95%,
+      rgb(26 12 7 / 48%)
+    ),
+    linear-gradient(
       180deg,
-      rgb(202 151 108 / 42%) 0,
-      rgb(105 59 37 / 48%) calc(var(--shelf-top-rise) - 1px),
+      rgb(183 124 79 / 52%) 0,
+      rgb(112 64 39 / 58%) calc(var(--shelf-top-rise) - 2px),
       rgb(43 21 13 / 92%) var(--shelf-top-rise),
       rgb(73 41 27 / 82%) calc(var(--shelf-top-rise) + 1px),
       rgb(20 9 6 / 82%) 100%
@@ -2811,8 +2818,8 @@
     0 5px 8px rgb(18 8 4 / 38%);
   clip-path: polygon(
     0 var(--shelf-top-rise),
-    1.35% 0,
-    98.65% 0,
+    var(--shelf-back-inset) 0,
+    calc(100% - var(--shelf-back-inset)) 0,
     100% var(--shelf-top-rise),
     100% 100%,
     0 100%
@@ -2854,7 +2861,8 @@
 
   .catalogue-bookcase {
     --shelf-lip-h: 7px;
-    --shelf-top-rise: 8px;
+    --shelf-top-rise: 11px;
+    --shelf-back-inset: 2.5%;
     --shelf-canopy-h: clamp(20px, 6vw, 27px);
     top: 2%;
     left: 50%;
