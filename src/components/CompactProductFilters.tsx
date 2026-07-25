@@ -84,7 +84,13 @@ export function CompactProductFilters<Key extends string = ProductFilterKey>({
           aria-labelledby={`${idPrefix}-${key}-trigger`}
           key={key}
         >
-          <header><span>{label} options · select one or more</span><strong>{summary}</strong></header>
+          <header>
+            <span>{label} options · select one or more</span>
+            <div className="compact-filter-panel__status">
+              <strong>{summary}</strong>
+              {hasSelections && <button className="compact-filter-clear" type="button" onClick={onClear}>Clear filters <X aria-hidden="true"/></button>}
+            </div>
+          </header>
           <div className="compact-filter-options" role="group" aria-label={`${label} options`}>
             {['All', ...options].map(value => {
               const isSelected = value === 'All' ? selectedValues.length === 0 : selectedValues.includes(value);
@@ -103,6 +109,5 @@ export function CompactProductFilters<Key extends string = ProductFilterKey>({
       })}
     </div>
 
-    {hasSelections && <button className="compact-filter-clear" type="button" onClick={onClear}>Clear filters <X aria-hidden="true"/></button>}
   </div>;
 }

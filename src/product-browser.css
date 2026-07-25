@@ -256,11 +256,9 @@
 }
 .compact-product-filters .filter-top{margin-bottom:12px}
 .compact-filter-bar{
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
+  display:block;
 }
-.compact-filter-module{min-width:0;flex:1}
+.compact-filter-module{min-width:0;width:100%}
 .compact-filter-segments{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -361,6 +359,13 @@
   color:var(--system-white);
   font:650 14px/1.2 var(--display);
 }
+.compact-filter-panel__status{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+}
 .compact-filter-options{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -398,12 +403,32 @@
   color:#321d24;
 }
 .compact-filter-options>button svg{grid-column:2;width:16px;height:16px;stroke-width:3}
-.compact-filter-clear{flex:0 0 auto;align-self:flex-start}
+.compact-filter-clear{
+  min-height:38px;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:1px solid #f2bd73;
+  background:#f2bd73;
+  color:#321d24;
+  font:750 13px/1 var(--display);
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease;
+}
+.compact-filter-clear:is(:hover,:focus-visible){
+  border-color:#ffe0a3;
+  background:#ffe0a3;
+  color:#321d24;
+}
+.compact-filter-clear:focus-visible{outline:3px solid rgba(242,189,115,.36);outline-offset:2px}
+.compact-filter-clear svg{width:15px;height:15px}
 @keyframes compact-filter-panel-in{
   from{opacity:0;transform:translateY(-7px)}
   to{opacity:1;transform:translateY(0)}
 }
-.compact-filter-bar>button,
 .shop-find-all{
   min-height:44px;
   padding:0 15px;
@@ -418,8 +443,7 @@
   font-weight:750;
   cursor:pointer;
 }
-.compact-filter-bar>button:disabled{opacity:.42;cursor:default}
-.shop-find-all svg,.compact-filter-bar>button svg{width:16px}
+.shop-find-all svg{width:16px}
 .shop-find-all.is-secondary{border-color:var(--system-line);background:transparent;color:var(--system-ink)}
 .catalogue-filter-heading .shop-find-all{margin-left:auto}
 .category-product-filters .compact-filter-bar{margin-top:14px}
@@ -469,9 +493,6 @@
   .electrical-main .product-browser-grid.product-grid,
   .electrical-main .product-browser-grid.catalogue-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .product-browser-card-shell.is-expanded{grid-column:span 3}
-  .compact-filter-bar{flex-direction:column}
-  .compact-filter-module{width:100%}
-  .compact-filter-clear{width:100%}
   .compact-filter-options{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:760px){
@@ -514,6 +535,7 @@
   .product-expanded-module__visual{min-height:300px}
   .product-expanded-module__content h2{font-size:27px}
   .product-expanded-module__similar>div:last-child{grid-template-columns:1fr 1fr}
+  .compact-filter-panel__status{width:100%;justify-content:space-between}
   .compact-filter-panel>header{align-items:flex-start;flex-direction:column;gap:5px}
   .product-browser-card-shell .product-info p,
   .product-browser-card-shell .catalogue-product-card__copy p{display:none}
