@@ -1525,8 +1525,6 @@
 
 .catalogue-shelf::after,
 .catalogue-shelf__interior::after,
-.catalogue-spine::before,
-.catalogue-spine::after,
 .catalogue-shelf__number {
   display: none;
 }
@@ -1670,5 +1668,343 @@
 
   .catalogue-bookcase {
     width: 100%;
+  }
+}
+
+/* Individually bound catalogue books: page blocks, cover overhang and unique materials. */
+.catalogue-shelf__books {
+  align-items: flex-end;
+  gap: 8px;
+  perspective: 560px;
+}
+
+.catalogue-shelf__books > .catalogue-spine {
+  position: relative;
+  flex: 0 0 var(--book-width);
+  width: var(--book-width);
+  height: var(--book-height);
+  max-height: none;
+  filter: drop-shadow(2px 5px 4px rgb(10 6 4 / 36%));
+  transform: rotateZ(var(--book-lean));
+  transform-origin: center bottom;
+  transition:
+    transform .34s cubic-bezier(.2, .84, .24, 1),
+    filter .34s ease;
+  will-change: transform;
+}
+
+.catalogue-shelf__books > .catalogue-spine::before {
+  position: absolute;
+  z-index: 1;
+  top: -3px;
+  right: calc(var(--book-depth) * -.52);
+  left: 4px;
+  display: block;
+  height: 6px;
+  border: 1px solid rgb(76 61 45 / 52%);
+  border-radius: 3px 3px 1px 1px;
+  content: '';
+  background:
+    repeating-linear-gradient(0deg, rgb(255 250 239 / 96%) 0 1px, rgb(185 168 140 / 90%) 1px 2px),
+    var(--book-page);
+  box-shadow:
+    0 -1px rgb(255 255 255 / 35%),
+    2px -2px 3px rgb(0 0 0 / 24%);
+  transform: skewX(-22deg);
+  transform-origin: left bottom;
+}
+
+.catalogue-shelf__books > .catalogue-spine::after {
+  position: absolute;
+  z-index: 0;
+  top: 3px;
+  right: calc(var(--book-depth) * -.72);
+  bottom: 3px;
+  display: block;
+  width: var(--book-depth);
+  border: 1px solid rgb(69 53 37 / 48%);
+  border-left: 0;
+  border-radius: 0 3px 3px 0;
+  content: '';
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--book-page) 88%, #fff) 0 1px,
+      color-mix(in srgb, var(--book-page) 72%, #856f52) 1px 2px
+    );
+  box-shadow:
+    3px 5px 6px rgb(0 0 0 / 38%),
+    inset -2px 0 rgb(91 72 53 / 18%);
+  transform: skewY(-1.5deg);
+  transform-origin: left bottom;
+}
+
+.catalogue-shelf__books > .catalogue-spine .catalogue-spine__surface {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 1px;
+  width: 100%;
+  height: 100%;
+  padding: 7px 3px;
+  overflow: hidden;
+  border:
+    1px solid color-mix(in srgb, var(--book-edge) 52%, #2c2018);
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+  border-radius:
+    var(--book-radius) 2px 2px var(--book-radius) /
+    calc(var(--book-radius) * .72) 2px 2px calc(var(--book-radius) * .72);
+  color: var(--book-ink);
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 17%), transparent 15% 72%, rgb(0 0 0 / 31%)),
+    linear-gradient(180deg, rgb(255 255 255 / 7%), transparent 22% 76%, rgb(0 0 0 / 13%)),
+    var(--book-cover);
+  box-shadow:
+    inset 3px 0 3px rgb(255 255 255 / 8%),
+    inset -4px 0 4px rgb(0 0 0 / 20%),
+    inset 0 1px var(--book-edge),
+    inset 0 -1px var(--book-edge),
+    1px 5px 7px rgb(0 0 0 / 44%);
+}
+
+.catalogue-spine__surface::before {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 2px;
+  width: 6px;
+  height: auto;
+  content: '';
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 21%), transparent 55%, rgb(0 0 0 / 14%));
+  opacity: .72;
+}
+
+.catalogue-spine__surface::after {
+  position: absolute;
+  z-index: 0;
+  top: 5px;
+  right: 3px;
+  bottom: 5px;
+  left: auto;
+  width: 1px;
+  height: auto;
+  content: '';
+  background: color-mix(in srgb, var(--book-edge) 76%, transparent);
+  opacity: .75;
+}
+
+.catalogue-spine__cover-lines {
+  position: absolute;
+  z-index: 0;
+  inset: 5px 4px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--book-radius) * .55);
+  pointer-events: none;
+}
+
+.catalogue-spine__brand,
+.catalogue-spine__edition,
+.catalogue-spine strong {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  width: 12px;
+  max-width: 12px;
+  max-height: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  color: inherit;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 54%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.catalogue-spine__brand,
+.catalogue-spine__edition {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: .025em;
+  opacity: .86;
+}
+
+.catalogue-spine strong {
+  width: 13px;
+  max-width: 13px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: .045em;
+}
+
+.catalogue-spine__ornament {
+  position: absolute;
+  z-index: 2;
+  bottom: 8px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--book-band);
+  opacity: .82;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.catalogue-spine[data-material='linen'] .catalogue-spine__surface {
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 4%) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, rgb(255 255 255 / 15%), transparent 17% 74%, rgb(0 0 0 / 29%)),
+    var(--book-cover);
+}
+
+.catalogue-spine[data-material='coated'] .catalogue-spine__surface {
+  background:
+    linear-gradient(106deg, transparent 0 28%, rgb(255 255 255 / 18%) 34%, transparent 42% 100%),
+    linear-gradient(90deg, rgb(255 255 255 / 14%), transparent 17% 74%, rgb(0 0 0 / 31%)),
+    var(--book-cover);
+}
+
+.catalogue-spine[data-material='paper'] .catalogue-spine__surface {
+  background:
+    radial-gradient(circle at 28% 18%, rgb(91 72 47 / 8%) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 68% 71%, rgb(91 72 47 / 7%) 0 1px, transparent 1.5px),
+    linear-gradient(90deg, rgb(255 255 255 / 23%), transparent 19% 73%, rgb(0 0 0 / 17%)),
+    var(--book-cover);
+  background-size: 11px 13px, 14px 17px, auto, auto;
+}
+
+.catalogue-spine[data-material='buckram'] .catalogue-spine__surface {
+  background:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 4%) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, rgb(255 255 255 / 13%), transparent 16% 73%, rgb(0 0 0 / 32%)),
+    var(--book-cover);
+}
+
+.catalogue-spine[data-material='canvas'] .catalogue-spine__surface {
+  background:
+    repeating-linear-gradient(76deg, rgb(255 255 255 / 4%) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(-12deg, rgb(0 0 0 / 4%) 0 1px, transparent 1px 6px),
+    linear-gradient(90deg, rgb(255 255 255 / 14%), transparent 16% 74%, rgb(0 0 0 / 29%)),
+    var(--book-cover);
+}
+
+.catalogue-spine[data-material='leather'] .catalogue-spine__surface {
+  background:
+    radial-gradient(circle at 32% 21%, rgb(255 255 255 / 8%) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 66% 73%, rgb(0 0 0 / 10%) 0 1px, transparent 1.8px),
+    linear-gradient(90deg, rgb(255 255 255 / 14%), transparent 18% 72%, rgb(0 0 0 / 34%)),
+    var(--book-cover);
+  background-size: 12px 15px, 15px 11px, auto, auto;
+}
+
+.catalogue-spine[data-layout='classic'] .catalogue-spine__cover-lines {
+  border-color: color-mix(in srgb, var(--book-band) 68%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0 16%,
+      var(--book-band) 16% 18%,
+      transparent 18% 79%,
+      var(--book-band) 79% 81%,
+      transparent 81%
+    );
+}
+
+.catalogue-spine[data-layout='modern'] strong {
+  padding-block: 4px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 11%);
+}
+
+.catalogue-spine[data-layout='framed'] .catalogue-spine__cover-lines {
+  border-color: color-mix(in srgb, var(--book-band) 78%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--book-band) 17%, transparent);
+}
+
+.catalogue-spine[data-layout='label'] strong {
+  padding-block: 5px;
+  border: 1px solid color-mix(in srgb, var(--book-band) 74%, transparent);
+  background: color-mix(in srgb, var(--book-page) 30%, transparent);
+}
+
+.catalogue-spine[data-layout='split'] .catalogue-spine__cover-lines {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 43%,
+      color-mix(in srgb, var(--book-band) 58%, transparent) 43% 57%,
+      transparent 57%
+    );
+}
+
+.catalogue-spine[data-layout='minimal'] .catalogue-spine__brand {
+  opacity: .58;
+}
+
+.catalogue-spine[data-layout='minimal'] .catalogue-spine__cover-lines {
+  border-left-color: color-mix(in srgb, var(--book-band) 72%, transparent);
+}
+
+.catalogue-shelf__books > .catalogue-spine:hover,
+.catalogue-shelf__books > .catalogue-spine:focus-visible {
+  z-index: 18;
+  outline: none;
+  filter: drop-shadow(9px 13px 9px rgb(10 6 4 / 48%));
+  transform:
+    perspective(420px)
+    translate3d(10px, -11px, 24px)
+    rotateY(-20deg)
+    rotateZ(var(--book-lean));
+}
+
+.catalogue-shelf__books > .catalogue-spine:focus-visible .catalogue-spine__surface {
+  outline: 2px solid color-mix(in srgb, var(--shelf-light) 76%, #fff);
+  outline-offset: 3px;
+}
+
+.catalogue-shelf__books > .catalogue-spine:active {
+  transform:
+    perspective(420px)
+    translate3d(5px, -5px, 12px)
+    rotateY(-10deg)
+    rotateZ(var(--book-lean));
+}
+
+@media (max-width: 820px) {
+  .catalogue-shelf__books {
+    gap: 7px;
+  }
+
+  .catalogue-shelf__books > .catalogue-spine {
+    max-height: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .catalogue-shelf__books {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 370px) {
+  .catalogue-spine strong {
+    font-size: 0;
+  }
+
+  .catalogue-spine strong::after {
+    content: attr(data-compact-title);
+    font-size: 12px;
+    line-height: 1;
   }
 }

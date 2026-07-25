@@ -30,20 +30,20 @@ const defaultChannels: ShelfLightChannel[] = [
 const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
 
 const spineFinishes = [
-  {cover: '#55624d', edge: '#c9bda4', ink: '#f7f0dd'},
-  {cover: '#132e54', edge: '#8fa5bf', ink: '#f3f6fb'},
-  {cover: '#e8e0cf', edge: '#b7aa92', ink: '#302b25'},
-  {cover: '#20374a', edge: '#7f9caf', ink: '#f1f5f6'},
-  {cover: '#b57634', edge: '#e0b16b', ink: '#fff7e8'},
-  {cover: '#254b50', edge: '#82aaa9', ink: '#f0f7f3'},
-  {cover: '#704535', edge: '#d09a72', ink: '#fff3e7'},
-  {cover: '#756b61', edge: '#bdb1a4', ink: '#fff9ee'},
-  {cover: '#353b3d', edge: '#8d989a', ink: '#f5f6f3'},
-  {cover: '#8a3d2d', edge: '#d58e72', ink: '#fff4ec'},
-  {cover: '#7d2857', edge: '#c878a3', ink: '#fff0f8'},
-  {cover: '#47566a', edge: '#91a0b4', ink: '#f6f8fa'},
-  {cover: '#eee8dc', edge: '#bbb09c', ink: '#38332c'},
-  {cover: '#5d6251', edge: '#aeb39a', ink: '#f7f5e9'},
+  {cover: '#52604b', edge: '#c8b583', ink: '#fff4d7', page: '#d9cdb7', band: '#b8a46e', material: 'linen', layout: 'classic', width: 44, height: 94, depth: 7, lean: -.8, radius: 5},
+  {cover: '#102d55', edge: '#91a9c7', ink: '#f6f8ff', page: '#e4dccd', band: '#b8c5d8', material: 'coated', layout: 'modern', width: 39, height: 88, depth: 5, lean: .35, radius: 3},
+  {cover: '#e7dfcf', edge: '#9f8d71', ink: '#2d2924', page: '#cfc3ad', band: '#74644f', material: 'paper', layout: 'framed', width: 47, height: 96, depth: 4, lean: -.15, radius: 2},
+  {cover: '#1f3b52', edge: '#87a3b5', ink: '#f2f7f8', page: '#d8cdbb', band: '#9ab4c4', material: 'buckram', layout: 'label', width: 36, height: 84, depth: 6, lean: .9, radius: 4},
+  {cover: '#b47732', edge: '#e1b66e', ink: '#fff8e9', page: '#e0d2b8', band: '#f1cf91', material: 'canvas', layout: 'split', width: 42, height: 90, depth: 7, lean: -.45, radius: 5},
+  {cover: '#24525a', edge: '#81aeb0', ink: '#f3fbf8', page: '#d6ccb9', band: '#a5c8c4', material: 'coated', layout: 'minimal', width: 45, height: 86, depth: 5, lean: .2, radius: 3},
+  {cover: '#744734', edge: '#d09a72', ink: '#fff1df', page: '#d8c7ac', band: '#d5a47a', material: 'leather', layout: 'classic', width: 38, height: 92, depth: 8, lean: -1.1, radius: 6},
+  {cover: '#746b61', edge: '#beb2a4', ink: '#fff9ee', page: '#ddd3c2', band: '#d2c7b7', material: 'linen', layout: 'label', width: 41, height: 82, depth: 6, lean: .65, radius: 4},
+  {cover: '#343b3d', edge: '#93a0a2', ink: '#f5f7f4', page: '#d5c9b5', band: '#a7b0b1', material: 'buckram', layout: 'modern', width: 46, height: 95, depth: 5, lean: -.25, radius: 3},
+  {cover: '#923f2f', edge: '#d88d70', ink: '#fff3e9', page: '#dfd1bc', band: '#efac8e', material: 'leather', layout: 'split', width: 40, height: 89, depth: 8, lean: .8, radius: 6},
+  {cover: '#82285b', edge: '#cb7ba6', ink: '#fff0f8', page: '#d9c9b7', band: '#e29abd', material: 'coated', layout: 'framed', width: 43, height: 93, depth: 5, lean: -.55, radius: 3},
+  {cover: '#475a71', edge: '#94a5ba', ink: '#f7f9fc', page: '#d9cebb', band: '#b0bdcb', material: 'canvas', layout: 'minimal', width: 37, height: 85, depth: 6, lean: .3, radius: 4},
+  {cover: '#eee7d9', edge: '#aa9c83', ink: '#39342d', page: '#cdbfa8', band: '#8d7d64', material: 'paper', layout: 'label', width: 48, height: 91, depth: 4, lean: -.9, radius: 2},
+  {cover: '#5b6351', edge: '#afb59a', ink: '#faf7ea', page: '#d8cdb8', band: '#c4caaa', material: 'linen', layout: 'classic', width: 35, height: 80, depth: 7, lean: .55, radius: 5},
 ];
 
 const brandMark = (brand: Catalogue['brand']) => (
@@ -78,6 +78,15 @@ const spineTitle = (catalogue: Catalogue) => {
     .replace(/architectural/i, 'ARCH.')
     .toUpperCase();
 };
+
+const spineCompactTitle = (catalogue: Catalogue) => (
+  spineTitle(catalogue)
+    .replace(/^LIGHT$/, 'LGT')
+    .replace(/^BOOK(\d+)$/, 'B$1')
+    .replace(/^NETTO$/, 'NET')
+    .replace(/^NAT\.$/, 'NAT')
+    .slice(0, 4)
+);
 
 const hexToRgba = (hex: string, alpha: number) => {
   const value = hex.replace('#', '');
@@ -152,17 +161,29 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     '--book-cover': finish.cover,
                     '--book-edge': finish.edge,
                     '--book-ink': finish.ink,
+                    '--book-page': finish.page,
+                    '--book-band': finish.band,
+                    '--book-width': `${finish.width}px`,
+                    '--book-height': `${finish.height}%`,
+                    '--book-depth': `${finish.depth}px`,
+                    '--book-lean': `${finish.lean}deg`,
+                    '--book-radius': `${finish.radius}px`,
                   } as CSSProperties;
                   return <Link
                     className="catalogue-spine"
                     to={catalogueBookLink(catalogue, safeSourceIndex)}
                     aria-label={`Open ${catalogue.name} catalogue`}
+                    data-material={finish.material}
+                    data-layout={finish.layout}
                     style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >
                     <span className="catalogue-spine__surface" aria-hidden="true">
-                      <span className="catalogue-spine__meta">{brandMark(catalogue.brand)} {spineEdition(catalogue.year)}</span>
-                      <strong>{spineTitle(catalogue)}</strong>
+                      <span className="catalogue-spine__cover-lines"/>
+                      <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
+                      <strong data-compact-title={spineCompactTitle(catalogue)}>{spineTitle(catalogue)}</strong>
+                      <span className="catalogue-spine__edition">{spineEdition(catalogue.year)}</span>
+                      <span className="catalogue-spine__ornament"/>
                     </span>
                   </Link>;
                 })}
