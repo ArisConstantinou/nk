@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import type {Catalogue} from '../types';
 import {publicAsset} from '../utils/assets';
 import {catalogueBookLink} from './UnifiedCatalogueBook';
+import {CatalogueCoverPreview} from './CatalogueCoverPreview';
 
 type ShelfLightChannel = {
   color: string;
@@ -28,15 +29,6 @@ const defaultChannels: ShelfLightChannel[] = [
 ];
 
 const colourPresets = ['#ffb45f', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
-
-const spinePalettes = [
-  {cover: '#b94f35', edge: '#ef9b6a', ink: '#fff4e7'},
-  {cover: '#173f4b', edge: '#5fb8bd', ink: '#e6ffff'},
-  {cover: '#5b355e', edge: '#c58ebd', ink: '#fff0fb'},
-  {cover: '#79552f', edge: '#d4a45f', ink: '#fff5df'},
-  {cover: '#285044', edge: '#76a995', ink: '#edfff7'},
-  {cover: '#30384b', edge: '#7888b1', ink: '#f0f3ff'},
-];
 
 const shelfDecor = [
   {
@@ -133,11 +125,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                 {shelfCatalogues.map((catalogue, bookIndex) => {
                   const sourceIndex = sourceCatalogues.indexOf(catalogue);
                   const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : bookIndex;
-                  const palette = spinePalettes[safeSourceIndex % spinePalettes.length];
                   const bookStyle = {
-                    '--book-cover': palette.cover,
-                    '--book-edge': palette.edge,
-                    '--book-ink': palette.ink,
                     '--book-lean': `${(bookIndex % 3 - 1) * 1.4}deg`,
                   } as CSSProperties;
                   return <Link
@@ -148,10 +136,10 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >
+                    <CatalogueCoverPreview catalogue={catalogue} variant="spine"/>
                     <span className="catalogue-spine__brand">{catalogue.brand}</span>
                     <strong>{catalogue.name}</strong>
                     <span className="catalogue-spine__year">{catalogue.year}</span>
-                    <i aria-hidden="true"/>
                   </Link>;
                 })}
                 {shelfCatalogues.length < initialCapacity && <div className="catalogue-shelf__future" aria-label="Space reserved for a future catalogue">
