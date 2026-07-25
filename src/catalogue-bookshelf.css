@@ -2468,7 +2468,7 @@
 
 .catalogue-shelf__interior {
   position: absolute;
-  z-index: auto;
+  z-index: 13;
   inset: 0;
   display: block;
   overflow: visible;
