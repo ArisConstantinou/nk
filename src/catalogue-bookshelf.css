@@ -828,8 +828,9 @@
   padding: 4.6% 10.4% 7.4%;
   border: 0;
   border-radius: 0;
-  background: url('/assets/generated/catalogue-bookcase-styled-v3.webp') center / 100% 100% no-repeat;
-  box-shadow: 0 28px 70px rgb(0 0 0 / 35%);
+  background: url('/assets/generated/catalogue-bookcase-cutout-v4.webp') center / 100% 100% no-repeat;
+  box-shadow: none;
+  filter: drop-shadow(0 10px 10px rgb(15 7 3 / 15%));
   transform: translateX(-50%);
 }
 
