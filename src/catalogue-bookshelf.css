@@ -854,6 +854,7 @@
   min-width: 0;
   height: 100%;
   padding: clamp(10px, 1vw, 15px) 4% 0 5%;
+  transform: translateY(3px);
 }
 
 .catalogue-spine {
@@ -1074,12 +1075,13 @@
 .catalogue-spine__surface {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 2px;
   width: 40px;
   height: 100%;
-  padding: 6px 3px;
+  padding: 5px 3px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--book-edge) 48%, #271d17);
   border-radius: 2px 1px 1px 2px;
@@ -1114,47 +1116,58 @@
   bottom: 3px;
 }
 
-.catalogue-spine__brand,
-.catalogue-spine__year,
+.catalogue-spine__meta,
 .catalogue-spine strong {
   position: relative;
   z-index: 1;
+  align-self: center;
+  justify-self: center;
+  width: 14px;
+  max-width: 14px;
+  max-height: 100%;
   min-width: 0;
   padding: 0;
   overflow: hidden;
   color: inherit;
   background: transparent;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 48%);
-}
-
-.catalogue-spine__brand,
-.catalogue-spine__year {
-  width: 100%;
   font-size: 12px;
   line-height: 1;
-  letter-spacing: -.045em;
-  text-align: center;
-  text-overflow: clip;
-  white-space: nowrap;
-}
-
-.catalogue-spine strong {
-  align-self: center;
-  justify-self: center;
-  width: 16px;
-  max-width: 100%;
-  max-height: 100%;
-  padding: 3px 0;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: .035em;
   text-align: start;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 48%);
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: none;
+}
+
+.catalogue-spine__meta {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.catalogue-spine strong {
+  font-weight: 700;
+  letter-spacing: .035em;
+}
+
+.catalogue-shelf__interior::after {
+  position: absolute;
+  z-index: 9;
+  right: -1%;
+  bottom: -4px;
+  left: -1%;
+  height: 7px;
+  border-top: 1px solid rgb(224 157 101 / 30%);
+  content: '';
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 9px),
+    linear-gradient(180deg, rgb(92 52 31 / 82%), rgb(43 24 16 / 96%));
+  box-shadow:
+    0 -3px 5px rgb(0 0 0 / 26%),
+    0 4px 5px rgb(0 0 0 / 42%);
 }
 
 .catalogue-spine:hover,
@@ -1456,7 +1469,7 @@
   }
 
   .catalogue-spine__surface {
-    padding-block: 3px;
+    padding-block: 0;
   }
 
   .catalogue-shelf-remote {

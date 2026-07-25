@@ -50,6 +50,10 @@ const brandMark = (brand: Catalogue['brand']) => (
   brand === 'Nova Luce' ? 'NOVA' : brand === 'VIOKEF' ? 'VIO' : brand
 );
 
+const spineEdition = (year: string) => (
+  year === 'Collection' ? 'ED' : year.slice(-2)
+);
+
 const spineTitle = (catalogue: Catalogue) => {
   const fallbackByFocus: Record<Catalogue['focus'], string> = {
     Decorative: 'LIGHTING',
@@ -156,9 +160,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     key={catalogue.id || catalogue.url}
                   >
                     <span className="catalogue-spine__surface" aria-hidden="true">
-                      <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
+                      <span className="catalogue-spine__meta">{brandMark(catalogue.brand)} {spineEdition(catalogue.year)}</span>
                       <strong>{spineTitle(catalogue)}</strong>
-                      <span className="catalogue-spine__year">{catalogue.year === 'Collection' ? 'COLL.' : catalogue.year}</span>
                     </span>
                   </Link>;
                 })}
