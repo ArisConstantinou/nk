@@ -854,7 +854,7 @@
   min-width: 0;
   height: 100%;
   padding: clamp(10px, 1vw, 15px) 4% 0 5%;
-  transform: translateY(3px);
+  transform: none;
 }
 
 .catalogue-spine {
