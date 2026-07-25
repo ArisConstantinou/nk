@@ -31,6 +31,7 @@ import {AboutHeritageExperience} from '../components/AboutHeritageExperience';
 import {pageVisualForPath} from '../pageVisuals';
 import {catalogueBookLink, UnifiedCatalogueBook} from '../components/UnifiedCatalogueBook';
 import {CatalogueCoverPreview} from '../components/CatalogueCoverPreview';
+import {CatalogueBookshelf} from '../components/CatalogueBookshelf';
 import {
   type CompactFilterSegment,
   type CompactFilterSelections,
@@ -473,7 +474,7 @@ export function LightingPage() {
         ariaLabel="Catalogue filters"
       />
     </section>
-    <section className="catalogue-grid section">{shown.map(catalogue => { const sourceIndex = content.catalogues.indexOf(catalogue); return <Link className={`catalogue-card tone-${sourceIndex % 4}`} to={catalogueBookLink(catalogue, sourceIndex)} key={catalogue.url}><div className="catalogue-cover"><span>NK / LIGHTING</span><b data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="brand" data-visual-edit="text" data-visual-label="Catalogue brand">{catalogue.brand}</b><strong data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="year" data-visual-edit="text" data-visual-label="Catalogue year">{catalogue.year}</strong><i/><small data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="focus" data-visual-edit="text" data-visual-label="Catalogue focus">{catalogue.focus}</small></div><div><BookOpen/><h3 data-visual-kind="catalogue" data-visual-slug={catalogue.id || ''} data-visual-path="$title" data-visual-edit="text" data-visual-label="Catalogue name" data-visual-link-path="url">{catalogue.name}</h3><span>Start here in the unified book <ArrowRight/></span></div></Link>; })}</section>
+    <CatalogueBookshelf catalogues={shown} sourceCatalogues={content.catalogues}/>
     <section className="catalogue-help section"><div><BookOpen/><h2>Found a product?</h2></div><p>Email the catalogue name, product code and quantity. Add your name and phone number so the Shop team can respond with the right context.</p><a className="button copper" href="mailto:thelma@nk-electrical.com?subject=Shop%20catalogue%20enquiry">Ask about a catalogue product <ArrowUpRight/></a></section>
   </>;
 }
