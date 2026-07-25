@@ -2317,7 +2317,7 @@
 
 .catalogue-bookcase {
   --shelf-lip-h: clamp(12px, .95vw, 16px);
-  --shelf-deck-d: clamp(16px, 1.35vw, 22px);
+  --shelf-deck-d: clamp(5px, .42vw, 7px);
   --shelf-canopy-h: clamp(20px, 1.55vw, 27px);
   top: 10.2%;
   left: 22.4%;
@@ -2427,17 +2427,18 @@
 .catalogue-shelf__deck {
   position: absolute;
   z-index: 2;
-  right: .5%;
-  bottom: var(--shelf-lip-h);
-  left: .5%;
+  right: 0;
+  bottom: calc(var(--shelf-lip-h) - 1px);
+  left: 0;
   height: var(--shelf-deck-d);
-  clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%);
+  border-top: 1px solid rgb(245 207 164 / 24%);
   background:
-    linear-gradient(180deg, rgb(255 231 198 / 16%), transparent 35%, rgb(24 11 6 / 28%)),
+    linear-gradient(180deg, rgb(255 231 198 / 18%), rgb(54 25 14 / 32%)),
     url('/assets/generated/catalogue-walnut-shelf-front-v1.webp') center / 100% 100% no-repeat;
   box-shadow:
     inset 0 1px rgb(255 255 255 / 18%),
-    inset 0 -7px 9px rgb(20 9 5 / 34%);
+    inset 0 -2px 3px rgb(20 9 5 / 28%);
+  clip-path: none;
 }
 
 .catalogue-shelf__books {
@@ -2445,7 +2446,7 @@
   z-index: 6;
   top: 4px;
   right: 23%;
-  bottom: calc(var(--shelf-lip-h) - 1px);
+  bottom: calc(var(--shelf-lip-h) + var(--shelf-deck-d) - 2px);
   left: 4.5%;
   display: flex;
   align-items: flex-end;
@@ -2731,7 +2732,7 @@
 
   .catalogue-bookcase {
     --shelf-lip-h: 10px;
-    --shelf-deck-d: 16px;
+    --shelf-deck-d: 6px;
     --shelf-canopy-h: clamp(20px, 6vw, 27px);
     top: 2%;
     left: 50%;
@@ -2752,7 +2753,7 @@
   .catalogue-shelf__books {
     top: 4px;
     right: 17%;
-    bottom: calc(var(--shelf-lip-h) - 1px);
+    bottom: calc(var(--shelf-lip-h) + var(--shelf-deck-d) - 2px);
     left: 5%;
     gap: 4px;
     padding: 0;
