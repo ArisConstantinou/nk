@@ -133,6 +133,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
 
           return <div
             className={`catalogue-shelf${activeShelf === shelfIndex ? ' is-active' : ''}`}
+            data-shelf={shelfIndex + 1}
             data-power={channel.power ? 'on' : 'off'}
             style={shelfStyle}
             key={`shelf-${shelfIndex + 1}`}
