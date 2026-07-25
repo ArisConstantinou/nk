@@ -16,8 +16,20 @@ type CatalogueBookshelfProps = {
   sourceCatalogues: Catalogue[];
 };
 
+type CatalogueDisplayMode = '3d' | 'flat';
+
 const shelfCount = 5;
 const initialCapacity = 3;
+const displayModeStorageKey = 'nk:catalogue-display-mode';
+
+const readStoredDisplayMode = (): CatalogueDisplayMode => {
+  if (typeof window === 'undefined') return '3d';
+  try {
+    return window.localStorage.getItem(displayModeStorageKey) === 'flat' ? 'flat' : '3d';
+  } catch {
+    return '3d';
+  }
+};
 
 const defaultChannels: ShelfLightChannel[] = [
   {color: '#e7b67b', brightness: 78, power: true},
@@ -110,6 +122,7 @@ const distributeCatalogues = (catalogues: Catalogue[]) => {
 export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBookshelfProps) {
   const [channels, setChannels] = useState<ShelfLightChannel[]>(defaultChannels);
   const [activeShelf, setActiveShelf] = useState(0);
+  const [displayMode, setDisplayMode] = useState<CatalogueDisplayMode>(readStoredDisplayMode);
   const shelves = distributeCatalogues(catalogues);
   const activeChannel = channels[activeShelf];
 
@@ -119,17 +132,46 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
     )));
   };
 
+  const selectDisplayMode = (mode: CatalogueDisplayMode) => {
+    setDisplayMode(mode);
+    try {
+      window.localStorage.setItem(displayModeStorageKey, mode);
+    } catch {
+      // The visual switch still works when storage is unavailable.
+    }
+  };
+
   return <section className="catalogue-library-room section" aria-labelledby="catalogue-library-room-title">
     <div className="catalogue-library-room__heading">
       <div>
         <span><Sparkles/> THE READING ROOM</span>
         <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
       </div>
-      <p>Each labelled spine opens immediately in the shared page-turning reader. Hover, focus or tap a book to lift it from the shelf.</p>
+      <div className="catalogue-library-room__heading-copy">
+        <p>Each labelled spine opens immediately in the shared page-turning reader. Hover, focus or tap a book to lift it from the shelf.</p>
+        <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
+          <span>Display</span>
+          <button
+            type="button"
+            aria-label="Use 3D catalogue view"
+            aria-pressed={displayMode === '3d'}
+            onClick={() => selectDisplayMode('3d')}
+          ><b aria-hidden="true">3D</b> Depth</button>
+          <button
+            type="button"
+            aria-label="Use flat catalogue view"
+            aria-pressed={displayMode === 'flat'}
+            onClick={() => selectDisplayMode('flat')}
+          ><b aria-hidden="true">2D</b> Flat</button>
+        </div>
+      </div>
     </div>
 
-    <div className="catalogue-library-room__scene">
-      <div className="catalogue-bookcase" aria-label="Five illuminated catalogue shelves">
+    <div className="catalogue-library-room__scene" data-book-view={displayMode}>
+      <div
+        className="catalogue-bookcase"
+        aria-label={`Five illuminated catalogue shelves in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
+      >
         <div className="catalogue-bookcase__crown"><span>NK</span><small>CATALOGUE LIBRARY</small></div>
         {shelves.map((shelfCatalogues, shelfIndex) => {
           const channel = channels[shelfIndex];
