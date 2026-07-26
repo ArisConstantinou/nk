@@ -2518,7 +2518,7 @@
   position: absolute;
   z-index: 15;
   right: 4.8%;
-  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
+  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth) + var(--decor-base-adjust, 0px));
   display: block;
   width: clamp(50px, 6.2vw, 88px);
   height: 78%;
@@ -2528,19 +2528,21 @@
   isolation: isolate;
 }
 
-.catalogue-shelf__decor--roza {
-  width: clamp(70px, 8.2vw, 116px);
-  height: 90%;
+.catalogue-shelf__decor--chempo {
+  --decor-base-adjust: -1px;
+  width: clamp(104px, 10vw, 150px);
+  height: 91%;
 }
 
-.catalogue-shelf__decor--zeta {
-  width: clamp(78px, 8.8vw, 124px);
-  height: 78%;
+.catalogue-shelf__decor--ilanga {
+  --decor-base-adjust: -1px;
+  width: clamp(108px, 10.5vw, 156px);
+  height: 91%;
 }
 
-.catalogue-shelf__decor--reading {
-  width: clamp(78px, 9vw, 128px);
-  height: 90%;
+.catalogue-shelf__decor--acacia {
+  width: clamp(104px, 10vw, 150px);
+  height: 91%;
 }
 
 .catalogue-shelf__decor::before {

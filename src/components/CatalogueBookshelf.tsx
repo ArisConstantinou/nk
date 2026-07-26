@@ -43,24 +43,24 @@ const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
 
 const shelfDecorations = [
   {
-    id: 'rechargeable-roza-table-light',
-    kind: 'roza',
-    name: 'Rechargeable Roza Table Light',
-    src: 'assets/catalogue-products/lighting/cutouts/rechargeable-roza-table-light.webp',
+    id: 'chempo-table-light',
+    kind: 'chempo',
+    name: 'Chempo Table Light',
+    src: 'assets/catalogue-products/shelf-decor/chempo-table-light.webp',
   },
   null,
   {
-    id: 'rechargeable-zeta-table-light',
-    kind: 'zeta',
-    name: 'Rechargeable Zeta Table Light',
-    src: 'assets/catalogue-products/lighting/cutouts/rechargeable-zeta-table-light.webp',
+    id: 'ilanga-table-light',
+    kind: 'ilanga',
+    name: 'Ilanga Table Light',
+    src: 'assets/catalogue-products/shelf-decor/ilanga-table-light.webp',
   },
   null,
   {
-    id: 'reading-table-light',
-    kind: 'reading',
-    name: 'Reading Table Light',
-    src: 'assets/catalogue-products/lighting/cutouts/reading-table-light.webp',
+    id: 'acacia-table-light',
+    kind: 'acacia',
+    name: 'Acacia Table Light',
+    src: 'assets/catalogue-products/shelf-decor/acacia-table-light.webp',
   },
 ] as const;
 
