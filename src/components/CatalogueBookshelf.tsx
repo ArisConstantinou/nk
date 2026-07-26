@@ -281,6 +281,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                 aria-hidden="true"
               >
                 <img src={publicAsset(decoration.src)} alt=""/>
+                <span className="catalogue-shelf__decor-contact" aria-hidden="true"/>
               </span>}
             </div>
             <div className="catalogue-shelf__led" aria-hidden="true"/>
