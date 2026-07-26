@@ -43,18 +43,24 @@ const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
 
 const shelfDecorations = [
   {
-    kind: 'portable-lamp',
-    src: 'assets/generated/catalogue-shelf-decor/travertine-portable-lamp-v1.webp',
+    id: 'rechargeable-roza-table-light',
+    kind: 'roza',
+    name: 'Rechargeable Roza Table Light',
+    src: 'assets/catalogue-products/lighting/cutouts/rechargeable-roza-table-light.webp',
   },
   null,
   {
-    kind: 'ceramic-loop',
-    src: 'assets/generated/catalogue-shelf-decor/ceramic-loop-sculpture-v1.webp',
+    id: 'rechargeable-zeta-table-light',
+    kind: 'zeta',
+    name: 'Rechargeable Zeta Table Light',
+    src: 'assets/catalogue-products/lighting/cutouts/rechargeable-zeta-table-light.webp',
   },
   null,
   {
-    kind: 'articulated-spot',
-    src: 'assets/generated/catalogue-shelf-decor/walnut-articulated-spot-v1.webp',
+    id: 'reading-table-light',
+    kind: 'reading',
+    name: 'Reading Table Light',
+    src: 'assets/catalogue-products/lighting/cutouts/reading-table-light.webp',
   },
 ] as const;
 
@@ -270,6 +276,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                 style={{
                   '--decor-image': `url("${publicAsset(decoration.src)}")`,
                 } as CSSProperties}
+                data-product-id={decoration.id}
+                data-product-name={decoration.name}
                 aria-hidden="true"
               >
                 <img src={publicAsset(decoration.src)} alt=""/>

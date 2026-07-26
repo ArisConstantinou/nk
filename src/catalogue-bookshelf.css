@@ -2528,19 +2528,19 @@
   isolation: isolate;
 }
 
-.catalogue-shelf__decor--portable-lamp {
-  width: clamp(52px, 6.6vw, 92px);
-  height: 88%;
+.catalogue-shelf__decor--roza {
+  width: clamp(70px, 8.2vw, 116px);
+  height: 90%;
 }
 
-.catalogue-shelf__decor--ceramic-loop {
-  width: clamp(46px, 5.7vw, 80px);
-  height: 68%;
+.catalogue-shelf__decor--zeta {
+  width: clamp(78px, 8.8vw, 124px);
+  height: 78%;
 }
 
-.catalogue-shelf__decor--articulated-spot {
-  width: clamp(58px, 7.2vw, 98px);
-  height: 82%;
+.catalogue-shelf__decor--reading {
+  width: clamp(78px, 9vw, 128px);
+  height: 90%;
 }
 
 .catalogue-shelf__decor::before {
