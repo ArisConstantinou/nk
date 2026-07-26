@@ -40,6 +40,12 @@ const defaultChannels: ShelfLightChannel[] = [
 ];
 
 const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
+const catalogueBrandOrder: Catalogue['brand'][] = ['ACA', 'Nova Luce', 'VIOKEF'];
+const catalogueBrandAccents: Record<Catalogue['brand'], string> = {
+  ACA: '#e8c486',
+  'Nova Luce': '#8fc8e8',
+  VIOKEF: '#ef927d',
+};
 
 const shelfDecorations = [
   {
@@ -209,12 +215,26 @@ const hexToRgba = (hex: string, alpha: number) => {
 
 const distributeCatalogues = (catalogues: Catalogue[]) => {
   const shelves = Array.from({length: shelfCount}, () => [] as Catalogue[]);
-  catalogues.forEach((catalogue, index) => {
-    const shelfIndex = index < shelfCount * initialCapacity
-      ? Math.floor(index / initialCapacity)
-      : (index - shelfCount * initialCapacity) % shelfCount;
-    shelves[shelfIndex].push(catalogue);
+
+  const brandGroups = catalogueBrandOrder.flatMap(brand => {
+    const brandCatalogues = catalogues.filter(catalogue => catalogue.brand === brand);
+    return Array.from(
+      {length: Math.ceil(brandCatalogues.length / initialCapacity)},
+      (_, groupIndex) => brandCatalogues.slice(
+        groupIndex * initialCapacity,
+        (groupIndex + 1) * initialCapacity,
+      ),
+    );
   });
+
+  brandGroups.slice(0, shelfCount).forEach((brandGroup, shelfIndex) => {
+    shelves[shelfIndex].push(...brandGroup);
+  });
+
+  brandGroups.slice(shelfCount).flat().forEach((catalogue, overflowIndex) => {
+    shelves[overflowIndex % shelfCount].push(catalogue);
+  });
+
   return shelves;
 };
 
@@ -247,7 +267,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
         <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
       </div>
       <div className="catalogue-library-room__heading-copy">
-        <p>Official branded spines open immediately in the shared page-turning reader. Hover, focus or tap a catalogue to lift it from the shelf.</p>
+        <p>Official highlights are grouped by brand: ACA, Nova Luce and VIOKEF. Choose a brighter spine to open it in the shared page-turning reader.</p>
         <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
           <span>Display</span>
           <button
@@ -313,9 +333,11 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     '--book-lean': `${finish.lean}deg`,
                     '--book-radius': `${finish.radius}px`,
                     '--book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
+                    '--official-accent': catalogueBrandAccents[catalogue.brand],
                   } as CSSProperties;
                   return <span
-                    className="catalogue-volume"
+                    className="catalogue-volume catalogue-volume--official"
+                    data-brand={catalogue.brand}
                     style={bookStyle}
                     key={catalogue.id || catalogue.url}
                   >

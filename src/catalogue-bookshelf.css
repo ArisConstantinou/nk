@@ -2523,6 +2523,8 @@
 
 .catalogue-volume--reference > .catalogue-spine {
   --book-rest-turn: -4deg;
+  filter: saturate(.7) brightness(.82);
+  opacity: .78;
 }
 
 .catalogue-volume--reference > .catalogue-spine .catalogue-spine__surface {
@@ -2534,6 +2536,30 @@
 
 .catalogue-volume--reference .catalogue-spine__brand {
   color: color-mix(in srgb, var(--book-ink) 78%, transparent);
+}
+
+.catalogue-volume--official {
+  z-index: 15;
+}
+
+.catalogue-volume--official > .catalogue-spine .catalogue-spine__surface {
+  filter: saturate(1.08) brightness(1.08);
+  box-shadow:
+    inset 1px 0 rgb(255 255 255 / 34%),
+    inset -2px 0 2px rgb(0 0 0 / 24%),
+    inset 0 0 0 1px color-mix(in srgb, var(--official-accent) 56%, transparent),
+    2px 5px 6px rgb(10 6 4 / 46%),
+    0 0 11px color-mix(in srgb, var(--official-accent) 26%, transparent);
+}
+
+.catalogue-volume--official > .catalogue-volume__contact {
+  background:
+    radial-gradient(
+      ellipse,
+      color-mix(in srgb, var(--official-accent) 58%, rgb(18 8 4 / 72%)),
+      transparent 74%
+    );
+  opacity: .86;
 }
 
 .catalogue-shelf__decor {
