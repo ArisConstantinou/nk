@@ -2503,6 +2503,9 @@
 }
 
 .catalogue-shelf__decor {
+  --decor-depth-x: 6px;
+  --decor-rotate-y: -5deg;
+  --decor-shadow-x: 10px;
   position: absolute;
   z-index: 14;
   right: 4.8%;
@@ -2535,6 +2538,9 @@
 .catalogue-shelf__decor--reading {
   --decor-base-adjust: -1px;
   --decor-contact-width: 32%;
+  --decor-depth-x: 9px;
+  --decor-rotate-y: -14deg;
+  --decor-shadow-x: 13px;
   width: clamp(100px, 8.8vw, 138px);
   height: 88%;
 }
@@ -2548,7 +2554,9 @@
   background: linear-gradient(90deg, #2a1710 0%, #73503a 55%, #24120d 100%);
   -webkit-mask: var(--decor-image) center bottom / contain no-repeat;
   mask: var(--decor-image) center bottom / contain no-repeat;
-  transform: translate3d(6px, -1px, -4px) rotateY(-5deg);
+  transform:
+    translate3d(var(--decor-depth-x), -1px, -4px)
+    rotateY(var(--decor-rotate-y));
   transform-origin: center bottom;
 }
 
@@ -2573,7 +2581,7 @@
     contrast(1.08)
     drop-shadow(1px 2px 1px rgb(10 6 4 / 34%))
     drop-shadow(5px 8px 6px rgb(8 4 2 / 42%));
-  transform: translateZ(0) rotateY(-5deg);
+  transform: translateZ(0) rotateY(var(--decor-rotate-y));
   transform-origin: center bottom;
   transition: filter .22s ease;
 }
@@ -2588,7 +2596,10 @@
   filter: blur(6px);
   mix-blend-mode: multiply;
   opacity: .38;
-  transform: translate3d(10px, 7px, -8px) rotateY(-5deg) scale(.98);
+  transform:
+    translate3d(var(--decor-shadow-x), 7px, -8px)
+    rotateY(var(--decor-rotate-y))
+    scale(.98);
   transform-origin: center bottom;
 }
 
