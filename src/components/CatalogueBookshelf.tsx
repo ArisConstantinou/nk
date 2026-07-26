@@ -53,7 +53,7 @@ const shelfDecorations = [
     id: 'belfast-table-light',
     kind: 'belfast',
     name: 'Belfast Table Light',
-    src: 'assets/catalogue-products/lighting/cutouts/belfast-table-light.webp',
+    src: 'assets/catalogue-products/shelf-decor/belfast-table-light-shelf-v1.webp',
   },
   {
     id: 'rechargeable-zeta-table-light',

@@ -3836,3 +3836,51 @@
     height: 66%;
   }
 }
+
+/* Physical integration cleanup: the brand groups need no translucent cards,
+   and shelf products use one real cutout plus a grounded contact shadow rather
+   than offset masked duplicates that read as reflections or floating shapes. */
+.catalogue-shelf__books--collection .catalogue-shelf__highlight-group::before,
+.catalogue-shelf__product-display .catalogue-shelf__decor::before,
+.catalogue-shelf__product-display .catalogue-shelf__decor::after {
+  display: none;
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor {
+  --decor-image-y: 0px;
+  --decor-rotate-y: -3deg;
+  --decor-scale: 1;
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor img {
+  filter:
+    saturate(.9)
+    sepia(.035)
+    brightness(.94)
+    contrast(1.05)
+    drop-shadow(0 1px 1px rgb(11 6 4 / 44%))
+    drop-shadow(0 5px 4px rgb(8 4 2 / 38%));
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor-contact {
+  z-index: 3;
+  bottom: -1px;
+  height: 6px;
+  background: radial-gradient(ellipse, rgb(11 6 3 / 82%), rgb(11 6 3 / 34%) 52%, transparent 76%);
+  filter: blur(1.3px);
+  opacity: .9;
+  transform: translateX(-50%);
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor--belfast {
+  --decor-contact-width: 32%;
+  width: clamp(70px, 5.4vw, 92px);
+  height: 82%;
+}
+
+@media (max-width: 820px) {
+  .catalogue-shelf__product-display .catalogue-shelf__decor--belfast {
+    width: clamp(54px, 17vw, 72px);
+    height: 70%;
+  }
+}
