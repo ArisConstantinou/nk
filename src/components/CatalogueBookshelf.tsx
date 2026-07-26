@@ -18,7 +18,6 @@ type CatalogueBookshelfProps = {
 
 type CatalogueDisplayMode = '3d' | 'flat';
 
-const shelfCount = 3;
 const displayModeStorageKey = 'nk:catalogue-display-mode';
 
 const readStoredDisplayMode = (): CatalogueDisplayMode => {
@@ -32,7 +31,6 @@ const readStoredDisplayMode = (): CatalogueDisplayMode => {
 
 const defaultChannels: ShelfLightChannel[] = [
   {color: '#e7b67b', brightness: 78, power: true},
-  {color: '#e7b67b', brightness: 72, power: true},
   {color: '#e7b67b', brightness: 76, power: true},
 ];
 
@@ -65,12 +63,6 @@ const shelfDecorations = [
   },
 ] as const;
 
-const referenceVolumes = [
-  ['LUX', 'FORM', 'SPEC', 'MAT', 'PLAN', 'GRID', 'LINE', 'WARM'],
-  ['ARCH', 'LENS', 'BEAM', 'TRIM', 'WALL', 'COVE', 'TASK', 'EDGE'],
-  ['HOME', 'AIR', 'FLOW', 'ECO', 'MOVE', 'ROOM', 'BREEZE', '2027'],
-] as const;
-
 const spineFinishes = [
   {cover: '#52604b', edge: '#c8b583', ink: '#fff4d7', page: '#d9cdb7', band: '#b8a46e', material: 'linen', layout: 'classic', width: 44, height: 94, depth: 7, lean: -.8, radius: 5},
   {cover: '#102d55', edge: '#91a9c7', ink: '#f6f8ff', page: '#e4dccd', band: '#b8c5d8', material: 'coated', layout: 'modern', width: 39, height: 88, depth: 5, lean: .35, radius: 3},
@@ -87,64 +79,6 @@ const spineFinishes = [
   {cover: '#eee7d9', edge: '#aa9c83', ink: '#39342d', page: '#cdbfa8', band: '#8d7d64', material: 'paper', layout: 'label', width: 48, height: 91, depth: 4, lean: -.9, radius: 2},
   {cover: '#5b6351', edge: '#afb59a', ink: '#faf7ea', page: '#d8cdb8', band: '#c4caaa', material: 'linen', layout: 'classic', width: 35, height: 80, depth: 7, lean: .55, radius: 5},
 ];
-
-const referenceVolumeStyle = (shelfIndex: number, bookIndex: number) => {
-  const finish = spineFinishes[(shelfIndex * 4 + bookIndex + 3) % spineFinishes.length];
-  return {
-    '--book-cover': finish.cover,
-    '--book-edge': finish.edge,
-    '--book-ink': finish.ink,
-    '--book-page': finish.page,
-    '--book-band': finish.band,
-    '--book-width': `${finish.width}px`,
-    '--book-height': `${finish.height}%`,
-    '--book-depth': `${finish.depth}px`,
-    '--book-lean': `${finish.lean * .45}deg`,
-    '--book-radius': `${finish.radius}px`,
-    '--book-texture': `linear-gradient(155deg, color-mix(in srgb, ${finish.cover} 78%, #fff), ${finish.cover} 48%, color-mix(in srgb, ${finish.cover} 74%, #111))`,
-  } as CSSProperties;
-};
-
-const ReferenceVolume = ({
-  title,
-  shelfIndex,
-  bookIndex,
-}: {
-  title: string;
-  shelfIndex: number;
-  bookIndex: number;
-}) => {
-  const finish = spineFinishes[(shelfIndex * 4 + bookIndex + 3) % spineFinishes.length];
-  const edition = `R${shelfIndex + 1}`;
-  return <span
-    className="catalogue-volume catalogue-volume--reference"
-    style={referenceVolumeStyle(shelfIndex, bookIndex)}
-    aria-hidden="true"
-  >
-    <span
-      className="catalogue-spine"
-      data-material={finish.material}
-      data-layout={finish.layout}
-    >
-      <span className="catalogue-spine__top"/>
-      <span className="catalogue-spine__page-block"/>
-      <span className="catalogue-spine__back-cover"/>
-      <span className="catalogue-spine__front-cover">
-        <span>NK STUDIO</span>
-        <strong>{title}</strong>
-        <small>{edition}</small>
-      </span>
-      <span className="catalogue-spine__surface">
-        <span className="catalogue-spine__cover-lines"/>
-        <span className="catalogue-spine__brand">NK</span>
-        <strong data-compact-title={title}>NK {title}</strong>
-        <span className="catalogue-spine__edition">{edition}</span>
-        <span className="catalogue-spine__ornament"/>
-      </span>
-    </span>
-    <span className="catalogue-volume__contact"/>
-  </span>;
-};
 
 const brandMark = (brand: Catalogue['brand']) => (
   brand === 'Nova Luce' ? 'NOVA' : brand === 'VIOKEF' ? 'VIO' : brand
@@ -206,7 +140,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
   const [channels, setChannels] = useState<ShelfLightChannel[]>(defaultChannels);
   const [activeShelf, setActiveShelf] = useState(0);
   const [displayMode, setDisplayMode] = useState<CatalogueDisplayMode>(readStoredDisplayMode);
-  const shelves = distributeCatalogues(catalogues);
+  const brandGroups = distributeCatalogues(catalogues);
+  const shelfRows = ['catalogues', 'products'] as const;
   const activeChannel = channels[activeShelf];
 
   const patchActiveChannel = (patch: Partial<ShelfLightChannel>) => {
@@ -231,7 +166,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
         <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
       </div>
       <div className="catalogue-library-room__heading-copy">
-        <p>One dedicated shelf per brand keeps every official ACA, Nova Luce and VIOKEF highlight together. Choose a brighter spine to open the shared page-turning reader.</p>
+        <p>Every official ACA, Nova Luce and VIOKEF highlight now sits together in one focused collection. Choose a spine to open the shared page-turning reader.</p>
         <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
           <span>Display</span>
           <button
@@ -253,13 +188,11 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
     <div className="catalogue-library-room__scene" data-book-view={displayMode}>
       <div
         className="catalogue-bookcase"
-        aria-label={`Three illuminated brand catalogue shelves in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
+        aria-label={`Two illuminated display shelves with grouped brand catalogues in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
       >
         <div className="catalogue-bookcase__crown"><span>NK</span><small>CATALOGUE LIBRARY</small></div>
-        {shelves.map((shelfCatalogues, shelfIndex) => {
+        {shelfRows.map((rowKind, shelfIndex) => {
           const channel = channels[shelfIndex];
-          const decoration = shelfDecorations[shelfIndex];
-          const shelfBrand = shelfCatalogues[0]?.brand;
           const lightStrength = channel.power ? channel.brightness / 100 : 0;
           const shelfStyle = {
             '--shelf-light': channel.color,
@@ -270,10 +203,10 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
           return <div
             className={`catalogue-shelf${activeShelf === shelfIndex ? ' is-active' : ''}`}
             data-shelf={shelfIndex + 1}
-            data-brand={shelfBrand}
+            data-row={rowKind}
             data-power={channel.power ? 'on' : 'off'}
             style={shelfStyle}
-            key={`shelf-${shelfIndex + 1}`}
+            key={rowKind}
           >
             <div className="catalogue-shelf__number">
               <span>{String(shelfIndex + 1).padStart(2, '0')}</span>
@@ -281,96 +214,84 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
             </div>
             <div className="catalogue-shelf__interior">
               <span className="catalogue-shelf__backwash" aria-hidden="true"/>
-              <div className="catalogue-shelf__books">
-                <div
-                  className="catalogue-shelf__highlight-group"
-                  data-brand={shelfBrand}
-                  style={{
-                    '--official-accent': shelfBrand
-                      ? catalogueBrandAccents[shelfBrand]
-                      : catalogueBrandAccents.ACA,
-                  } as CSSProperties}
-                >
-                  <span className="catalogue-shelf__brand-tab" aria-hidden="true">
-                    <strong>{shelfBrand}</strong>
-                    <small>Highlights</small>
-                  </span>
-                  {shelfCatalogues.map((catalogue, bookIndex) => {
-                    const sourceIndex = sourceCatalogues.indexOf(catalogue);
-                    const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : bookIndex;
-                    const finish = spineFinishes[safeSourceIndex % spineFinishes.length];
-                    const textureNumber = String((safeSourceIndex % 14) + 1).padStart(2, '0');
-                    const bookStyle = {
-                      '--book-cover': finish.cover,
-                      '--book-edge': finish.edge,
-                      '--book-ink': finish.ink,
-                      '--book-page': finish.page,
-                      '--book-band': finish.band,
-                      '--book-width': `${finish.width}px`,
-                      '--book-height': `${finish.height}%`,
-                      '--book-depth': `${finish.depth}px`,
-                      '--book-lean': `${finish.lean}deg`,
-                      '--book-radius': `${finish.radius}px`,
-                      '--book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
-                      '--official-accent': catalogueBrandAccents[catalogue.brand],
-                    } as CSSProperties;
-                    return <span
-                      className="catalogue-volume catalogue-volume--official"
-                      data-brand={catalogue.brand}
-                      style={bookStyle}
-                      key={catalogue.id || catalogue.url}
-                    >
-                      <Link
-                        className="catalogue-spine"
+              {rowKind === 'catalogues' ? <div className="catalogue-shelf__books catalogue-shelf__books--collection">
+                {brandGroups.map((shelfCatalogues, brandIndex) => {
+                  const shelfBrand = catalogueBrandOrder[brandIndex];
+                  return <div
+                    className="catalogue-shelf__highlight-group"
+                    data-brand={shelfBrand}
+                    style={{'--official-accent': catalogueBrandAccents[shelfBrand]} as CSSProperties}
+                    key={shelfBrand}
+                  >
+                    <span className="catalogue-shelf__brand-tab" aria-hidden="true">
+                      <strong>{shelfBrand}</strong>
+                      <small>Highlights</small>
+                    </span>
+                    {shelfCatalogues.map((catalogue, bookIndex) => {
+                      const sourceIndex = sourceCatalogues.indexOf(catalogue);
+                      const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : bookIndex;
+                      const finish = spineFinishes[safeSourceIndex % spineFinishes.length];
+                      const textureNumber = String((safeSourceIndex % 14) + 1).padStart(2, '0');
+                      const bookStyle = {
+                        '--book-cover': finish.cover,
+                        '--book-edge': finish.edge,
+                        '--book-ink': finish.ink,
+                        '--book-page': finish.page,
+                        '--book-band': finish.band,
+                        '--book-width': `${finish.width}px`,
+                        '--book-height': `${finish.height}%`,
+                        '--book-depth': `${finish.depth}px`,
+                        '--book-lean': `${finish.lean}deg`,
+                        '--book-radius': `${finish.radius}px`,
+                        '--book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
+                        '--official-accent': catalogueBrandAccents[catalogue.brand],
+                      } as CSSProperties;
+                      return <Link
+                        className="catalogue-volume catalogue-volume--official"
+                        data-brand={catalogue.brand}
+                        style={bookStyle}
                         to={catalogueBookLink(catalogue, safeSourceIndex)}
                         aria-label={`Open ${catalogue.name} catalogue`}
-                        data-material={finish.material}
-                        data-layout={finish.layout}
+                        key={catalogue.id || catalogue.url}
                       >
-                        <span className="catalogue-spine__top" aria-hidden="true"/>
-                        <span className="catalogue-spine__page-block" aria-hidden="true"/>
-                        <span className="catalogue-spine__back-cover" aria-hidden="true"/>
-                        <span className="catalogue-spine__front-cover" aria-hidden="true">
-                          <span>{brandMark(catalogue.brand)}</span>
-                          <strong>{spineCompactTitle(catalogue)}</strong>
-                          <small>{spineEdition(catalogue.year)}</small>
+                        <span
+                          className="catalogue-spine"
+                          data-material={finish.material}
+                          data-layout={finish.layout}
+                        >
+                          <span className="catalogue-spine__top" aria-hidden="true"/>
+                          <span className="catalogue-spine__page-block" aria-hidden="true"/>
+                          <span className="catalogue-spine__back-cover" aria-hidden="true"/>
+                          <span className="catalogue-spine__front-cover" aria-hidden="true">
+                            <span>{brandMark(catalogue.brand)}</span>
+                            <strong>{spineCompactTitle(catalogue)}</strong>
+                            <small>{spineEdition(catalogue.year)}</small>
+                          </span>
+                          <span className="catalogue-spine__surface" aria-hidden="true">
+                            <span className="catalogue-spine__cover-lines"/>
+                            <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
+                            <strong data-compact-title={spineCompactTitle(catalogue)}>{brandMark(catalogue.brand)} {spineCompactTitle(catalogue)}</strong>
+                            <span className="catalogue-spine__edition">{spineEdition(catalogue.year)}</span>
+                            <span className="catalogue-spine__ornament"/>
+                          </span>
                         </span>
-                        <span className="catalogue-spine__surface" aria-hidden="true">
-                          <span className="catalogue-spine__cover-lines"/>
-                          <span className="catalogue-spine__brand">{brandMark(catalogue.brand)}</span>
-                          <strong data-compact-title={spineCompactTitle(catalogue)}>{brandMark(catalogue.brand)} {spineCompactTitle(catalogue)}</strong>
-                          <span className="catalogue-spine__edition">{spineEdition(catalogue.year)}</span>
-                          <span className="catalogue-spine__ornament"/>
-                        </span>
-                      </Link>
-                      <span className="catalogue-volume__contact" aria-hidden="true"/>
-                    </span>;
-                  })}
-                </div>
-                <span
-                  className="catalogue-shelf__reference-books"
-                  aria-hidden="true"
+                        <span className="catalogue-volume__contact" aria-hidden="true"/>
+                      </Link>;
+                    })}
+                  </div>;
+                })}
+              </div> : <div className="catalogue-shelf__product-display" aria-hidden="true">
+                {shelfDecorations.map(decoration => <span
+                  className={`catalogue-shelf__decor catalogue-shelf__decor--${decoration.kind}`}
+                  style={{'--decor-image': `url("${publicAsset(decoration.src)}")`} as CSSProperties}
+                  data-product-id={decoration.id}
+                  data-product-name={decoration.name}
+                  key={decoration.id}
                 >
-                  {referenceVolumes[shelfIndex].map((title, referenceBookIndex) => <ReferenceVolume
-                    title={title}
-                    shelfIndex={shelfIndex}
-                    bookIndex={referenceBookIndex}
-                    key={`${title}-${referenceBookIndex}`}
-                  />)}
-                </span>
-              </div>
-              {decoration && <span
-                className={`catalogue-shelf__decor catalogue-shelf__decor--${decoration.kind}`}
-                style={{
-                  '--decor-image': `url("${publicAsset(decoration.src)}")`,
-                } as CSSProperties}
-                data-product-id={decoration.id}
-                data-product-name={decoration.name}
-                aria-hidden="true"
-              >
-                <img src={publicAsset(decoration.src)} alt=""/>
-                <span className="catalogue-shelf__decor-contact" aria-hidden="true"/>
-              </span>}
+                  <img src={publicAsset(decoration.src)} alt=""/>
+                  <span className="catalogue-shelf__decor-contact" aria-hidden="true"/>
+                </span>)}
+              </div>}
             </div>
             <div className="catalogue-shelf__led" aria-hidden="true"/>
             <div className="catalogue-shelf__board" aria-hidden="true"/>

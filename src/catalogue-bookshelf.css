@@ -3718,3 +3718,121 @@
     height: 68%;
   }
 }
+
+/* Focused two-row gallery. All real catalogues share one brand-grouped shelf;
+   the second row is a deliberate product display, so there are no filler
+   spines or large accidental holes between unrelated clusters. */
+@media (min-width: 821px) {
+  .catalogue-library-room__scene {
+    height: clamp(660px, 46vw, 820px);
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+}
+
+.catalogue-bookcase {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.catalogue-shelf__books--collection {
+  right: 2%;
+  left: 1.5%;
+  justify-content: space-around;
+  gap: clamp(12px, 1.6vw, 28px);
+}
+
+.catalogue-shelf__books--collection .catalogue-shelf__highlight-group {
+  min-width: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.catalogue-shelf__product-display {
+  position: absolute;
+  z-index: 14;
+  inset: 0 4% calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-evenly;
+  pointer-events: none;
+  perspective: 780px;
+  transform-style: preserve-3d;
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  flex: 0 0 auto;
+  height: 78%;
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor--puk {
+  height: 72%;
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor--belfast {
+  height: 78%;
+}
+
+.catalogue-shelf__product-display .catalogue-shelf__decor--zeta {
+  height: 76%;
+}
+
+@media (max-width: 820px) {
+  .catalogue-library-room__scene {
+    height: auto;
+    min-height: clamp(740px, calc(116.67vw + 347px), 900px);
+  }
+
+  .catalogue-bookcase {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalogue-shelf__books--collection {
+    right: 1.5%;
+    justify-content: space-evenly;
+    gap: 5px;
+  }
+
+  .catalogue-shelf__books--collection .catalogue-shelf__highlight-group {
+    flex: 0 1 auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  .catalogue-shelf__books--collection .catalogue-shelf__brand-tab {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: auto;
+    min-width: 58px;
+    min-height: 30px;
+    margin: 0;
+    padding: 5px 7px;
+    transform: translateX(-50%);
+  }
+
+  .catalogue-shelf__books--collection .catalogue-shelf__brand-tab small {
+    display: none;
+  }
+
+  .catalogue-shelf__books--collection .catalogue-volume {
+    flex-basis: calc(var(--book-width) * .42);
+    width: calc(var(--book-width) * .42);
+  }
+
+  .catalogue-shelf__product-display {
+    right: 3%;
+    left: 3%;
+  }
+
+  .catalogue-shelf__product-display .catalogue-shelf__decor {
+    height: 67%;
+    transform: scale(.88);
+  }
+
+  .catalogue-shelf__product-display .catalogue-shelf__decor--belfast {
+    height: 66%;
+  }
+}
