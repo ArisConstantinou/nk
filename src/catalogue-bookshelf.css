@@ -2501,14 +2501,14 @@
   top: 0;
   right: 23%;
   bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
-  left: 4.5%;
+  left: 1%;
   display: flex;
   align-items: flex-end;
   width: auto;
   height: auto;
   min-width: 0;
   padding: 0;
-  gap: clamp(10px, .8vw, 14px);
+  gap: 0;
   perspective: none;
   transform: none;
   transform-style: preserve-3d;
@@ -2746,7 +2746,7 @@
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__books {
-  gap: 5px;
+  gap: 0;
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-volume > .catalogue-spine {
@@ -2889,8 +2889,8 @@
     top: 4px;
     right: 17%;
     bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
-    left: 5%;
-    gap: 8px;
+    left: 1.5%;
+    gap: 0;
     padding: 0;
   }
 
@@ -2910,7 +2910,7 @@
   }
 
   .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__books {
-    gap: 4px;
+    gap: 0;
   }
 
   .catalogue-shelf-remote {
@@ -2943,7 +2943,7 @@
 
   .catalogue-shelf__books {
     right: 14%;
-    gap: 7px;
+    gap: 0;
   }
 
   .catalogue-shelf-remote {
