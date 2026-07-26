@@ -75,19 +75,11 @@ const shelfDecorations = [
 ] as const;
 
 const referenceVolumes = [
-  ['LUX', 'FORM', 'SPEC', 'MAT', 'PLAN', 'GRID', 'LINE', 'WARM', 'VOL1'],
-  ['CTRL', 'DALI', 'KNX', 'SCNE', 'ZONE', 'TECH', 'WIRE', 'LOAD', 'VOL2'],
-  ['ARCH', 'LENS', 'BEAM', 'TRIM', 'WALL', 'COVE', 'TASK', 'EDGE', 'VOL3'],
-  ['HOME', 'DATA', 'SAFE', 'NODE', 'LINK', 'MODE', 'AUTO', 'MESH', 'VOL4'],
-  ['FANS', 'AIR', 'FLOW', 'ECO', 'MOVE', 'QTT', 'ROOM', 'PLAN', 'VOL5'],
-] as const;
-
-const referenceClusterPositions = [
-  ['28%', '57%'],
-  ['31%', '61%'],
-  ['27%', '56%'],
-  ['32%', '62%'],
-  ['29%', '58%'],
+  ['LUX', 'FORM', 'SPEC', 'MAT', 'PLAN', 'GRID', 'LINE', 'WARM', 'VOL1', 'OPTIC', 'FRAME', 'DETAIL', 'AMBIENT', '2027'],
+  ['CTRL', 'DALI', 'KNX', 'SCNE', 'ZONE', 'TECH', 'WIRE', 'LOAD', 'VOL2', 'SENSE', 'LOGIC', 'SMART', 'SYSTEM', '2027'],
+  ['ARCH', 'LENS', 'BEAM', 'TRIM', 'WALL', 'COVE', 'TASK', 'EDGE', 'VOL3', 'FACADE', 'LINEAR', 'SPOT', 'STUDIO', '2027'],
+  ['HOME', 'DATA', 'SAFE', 'NODE', 'LINK', 'MODE', 'AUTO', 'MESH', 'VOL4', 'LIVING', 'COMFORT', 'SCENE', 'CONNECT', '2027'],
+  ['FANS', 'AIR', 'FLOW', 'ECO', 'MOVE', 'QTT', 'ROOM', 'PLAN', 'VOL5', 'BREEZE', 'SILENT', 'CLIMATE', 'MOTION', '2027'],
 ] as const;
 
 const spineFinishes = [
@@ -353,22 +345,18 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                     <span className="catalogue-volume__contact" aria-hidden="true"/>
                   </span>;
                 })}
+                <span
+                  className="catalogue-shelf__reference-books"
+                  aria-hidden="true"
+                >
+                  {referenceVolumes[shelfIndex].map((title, referenceBookIndex) => <ReferenceVolume
+                    title={title}
+                    shelfIndex={shelfIndex}
+                    bookIndex={referenceBookIndex}
+                    key={`${title}-${referenceBookIndex}`}
+                  />)}
+                </span>
               </div>
-              {[referenceVolumes[shelfIndex].slice(0, 5), referenceVolumes[shelfIndex].slice(5)].map((cluster, clusterIndex) => <div
-                className={`catalogue-shelf__reference-books catalogue-shelf__reference-books--${clusterIndex === 0 ? 'primary' : 'secondary'}`}
-                style={{
-                  '--reference-left': referenceClusterPositions[shelfIndex][clusterIndex],
-                } as CSSProperties}
-                aria-hidden="true"
-                key={`reference-cluster-${shelfIndex}-${clusterIndex}`}
-              >
-                {cluster.map((title, clusterBookIndex) => <ReferenceVolume
-                  title={title}
-                  shelfIndex={shelfIndex}
-                  bookIndex={clusterIndex * 5 + clusterBookIndex}
-                  key={`${title}-${clusterBookIndex}`}
-                />)}
-              </div>)}
               {decoration && <span
                 className={`catalogue-shelf__decor catalogue-shelf__decor--${decoration.kind}`}
                 style={{

@@ -2503,14 +2503,13 @@
 }
 
 .catalogue-shelf__reference-books {
-  position: absolute;
+  position: relative;
   z-index: 13;
-  top: 0;
-  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
-  left: var(--reference-left);
   display: flex;
+  flex: 0 0 auto;
   align-items: flex-end;
-  height: auto;
+  align-self: stretch;
+  height: 100%;
   gap: 0;
   pointer-events: none;
   perspective: 780px;
@@ -3083,16 +3082,10 @@
   }
 
   .catalogue-shelf__reference-books {
-    top: 4px;
-    bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
+    height: 100%;
   }
 
-  .catalogue-shelf__reference-books--primary {
-    left: 38%;
-  }
-
-  .catalogue-shelf__reference-books--primary .catalogue-volume:nth-child(n + 4),
-  .catalogue-shelf__reference-books--secondary {
+  .catalogue-shelf__reference-books .catalogue-volume:nth-child(n + 4) {
     display: none;
   }
 
