@@ -1,5 +1,5 @@
 import {useState, type CSSProperties} from 'react';
-import {Lightbulb, Power, SlidersHorizontal, Sparkles} from 'lucide-react';
+import {Lightbulb, Minus, Plus, Power, SlidersHorizontal, Sparkles} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Catalogue} from '../types';
 import {publicAsset} from '../utils/assets';
@@ -333,8 +333,31 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
           ><span>{String(index + 1).padStart(2, '0')}</span></button>)}
         </div>
 
-        <label className="catalogue-shelf-remote__brightness">
-          <span><SlidersHorizontal/> Brightness</span>
+        <div className="catalogue-shelf-remote__brightness">
+          <div className="catalogue-shelf-remote__brightness-head">
+            <span><SlidersHorizontal/> Brightness</span>
+            <div className="catalogue-shelf-remote__stepper">
+              <button
+                type="button"
+                aria-label={`Decrease shelf ${activeShelf + 1} brightness`}
+                disabled={activeChannel.brightness <= 10}
+                onClick={() => patchActiveChannel({
+                  brightness: Math.max(10, activeChannel.brightness - 10),
+                  power: true,
+                })}
+              ><Minus/></button>
+              <output aria-live="polite">{activeChannel.brightness}%</output>
+              <button
+                type="button"
+                aria-label={`Increase shelf ${activeShelf + 1} brightness`}
+                disabled={activeChannel.brightness >= 100}
+                onClick={() => patchActiveChannel({
+                  brightness: Math.min(100, activeChannel.brightness + 10),
+                  power: true,
+                })}
+              ><Plus/></button>
+            </div>
+          </div>
           <input
             type="range"
             min="10"
@@ -343,7 +366,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
             aria-label={`Shelf ${activeShelf + 1} brightness`}
             onChange={event => patchActiveChannel({brightness: Number(event.target.value), power: true})}
           />
-        </label>
+        </div>
 
         <div className="catalogue-shelf-remote__status" aria-live="polite">
           <Lightbulb/>
