@@ -2389,7 +2389,7 @@
   --shelf-top-rise: clamp(12px, 1vw, 16px);
   --shelf-back-inset-left: 3.86%;
   --shelf-back-inset-right: 3.53%;
-  --book-seat-depth: var(--shelf-top-rise);
+  --book-seat-depth: 2px;
   --shelf-canopy-h: clamp(20px, 1.55vw, 27px);
   top: 10.2%;
   left: 22.4%;
@@ -2867,7 +2867,7 @@
     --shelf-top-rise: 9px;
     --shelf-back-inset-left: 3.2%;
     --shelf-back-inset-right: 3.2%;
-    --book-seat-depth: var(--shelf-top-rise);
+    --book-seat-depth: 2px;
     --shelf-canopy-h: clamp(20px, 6vw, 27px);
     top: 2%;
     left: 50%;
