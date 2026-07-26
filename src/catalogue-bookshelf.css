@@ -2530,24 +2530,25 @@
   isolation: isolate;
 }
 
-.catalogue-shelf__decor--chempo {
+.catalogue-shelf__decor--puk {
   --decor-base-adjust: -1px;
-  --decor-contact-width: 34%;
-  width: clamp(104px, 10vw, 150px);
-  height: 84%;
+  --decor-contact-width: 48%;
+  width: clamp(92px, 8vw, 126px);
+  height: 76%;
 }
 
-.catalogue-shelf__decor--ilanga {
+.catalogue-shelf__decor--zeta {
   --decor-base-adjust: -1px;
-  --decor-contact-width: 44%;
-  width: clamp(108px, 10.5vw, 156px);
-  height: 84%;
+  --decor-contact-width: 46%;
+  width: clamp(100px, 8.7vw, 136px);
+  height: 82%;
 }
 
-.catalogue-shelf__decor--acacia {
-  --decor-contact-width: 42%;
-  width: clamp(104px, 10vw, 150px);
-  height: 84%;
+.catalogue-shelf__decor--reading {
+  --decor-base-adjust: -1px;
+  --decor-contact-width: 32%;
+  width: clamp(100px, 8.8vw, 138px);
+  height: 88%;
 }
 
 .catalogue-shelf__decor::before {
