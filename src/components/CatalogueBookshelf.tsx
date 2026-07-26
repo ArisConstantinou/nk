@@ -41,6 +41,23 @@ const defaultChannels: ShelfLightChannel[] = [
 
 const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
 
+const shelfDecorations = [
+  {
+    kind: 'portable-lamp',
+    src: 'assets/generated/catalogue-shelf-decor/travertine-portable-lamp-v1.webp',
+  },
+  null,
+  {
+    kind: 'ceramic-loop',
+    src: 'assets/generated/catalogue-shelf-decor/ceramic-loop-sculpture-v1.webp',
+  },
+  null,
+  {
+    kind: 'articulated-spot',
+    src: 'assets/generated/catalogue-shelf-decor/walnut-articulated-spot-v1.webp',
+  },
+] as const;
+
 const spineFinishes = [
   {cover: '#52604b', edge: '#c8b583', ink: '#fff4d7', page: '#d9cdb7', band: '#b8a46e', material: 'linen', layout: 'classic', width: 44, height: 94, depth: 7, lean: -.8, radius: 5},
   {cover: '#102d55', edge: '#91a9c7', ink: '#f6f8ff', page: '#e4dccd', band: '#b8c5d8', material: 'coated', layout: 'modern', width: 39, height: 88, depth: 5, lean: .35, radius: 3},
@@ -175,11 +192,13 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
         <div className="catalogue-bookcase__crown"><span>NK</span><small>CATALOGUE LIBRARY</small></div>
         {shelves.map((shelfCatalogues, shelfIndex) => {
           const channel = channels[shelfIndex];
+          const decoration = shelfDecorations[shelfIndex];
           const lightStrength = channel.power ? channel.brightness / 100 : 0;
           const shelfStyle = {
             '--shelf-light': channel.color,
             '--shelf-glow': hexToRgba(channel.color, lightStrength * 0.68),
             '--shelf-wash': hexToRgba(channel.color, lightStrength * 0.22),
+            '--decor-reflection-opacity': lightStrength * 0.52,
           } as CSSProperties;
 
           return <div
@@ -246,6 +265,15 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                   </span>;
                 })}
               </div>
+              {decoration && <span
+                className={`catalogue-shelf__decor catalogue-shelf__decor--${decoration.kind}`}
+                style={{
+                  '--decor-image': `url("${publicAsset(decoration.src)}")`,
+                } as CSSProperties}
+                aria-hidden="true"
+              >
+                <img src={publicAsset(decoration.src)} alt=""/>
+              </span>}
             </div>
             <div className="catalogue-shelf__led" aria-hidden="true"/>
             <div className="catalogue-shelf__board" aria-hidden="true"/>
