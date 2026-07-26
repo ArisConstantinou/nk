@@ -2502,9 +2502,46 @@
   transform-style: preserve-3d;
 }
 
+.catalogue-shelf__reference-books {
+  position: absolute;
+  z-index: 13;
+  top: 0;
+  bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
+  left: var(--reference-left);
+  display: flex;
+  align-items: flex-end;
+  height: auto;
+  gap: 0;
+  pointer-events: none;
+  perspective: 780px;
+  transform-style: preserve-3d;
+}
+
+.catalogue-volume--reference {
+  cursor: default;
+  pointer-events: none;
+}
+
+.catalogue-volume--reference > .catalogue-spine {
+  --book-rest-turn: -4deg;
+}
+
+.catalogue-volume--reference > .catalogue-spine .catalogue-spine__surface {
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 20%), transparent 17% 72%, rgb(0 0 0 / 34%)),
+    linear-gradient(180deg, rgb(255 255 255 / 8%), transparent 16% 84%, rgb(0 0 0 / 22%)),
+    var(--book-texture) center / 100% 100% no-repeat;
+}
+
+.catalogue-volume--reference .catalogue-spine__brand {
+  color: color-mix(in srgb, var(--book-ink) 78%, transparent);
+}
+
 .catalogue-shelf__decor {
   --decor-depth-x: 6px;
+  --decor-image-y: 0px;
   --decor-rotate-y: -5deg;
+  --decor-scale: 1;
   --decor-shadow-x: 10px;
   position: absolute;
   z-index: 14;
@@ -2535,6 +2572,30 @@
   height: 82%;
 }
 
+.catalogue-shelf__decor--belfast {
+  --decor-base-adjust: -1px;
+  --decor-contact-width: 34%;
+  --decor-depth-x: 9px;
+  --decor-image-y: 37px;
+  --decor-rotate-y: -11deg;
+  --decor-scale: 1.7;
+  --decor-shadow-x: 13px;
+  width: clamp(98px, 8.2vw, 130px);
+  height: 88%;
+}
+
+.catalogue-shelf__decor--diodus {
+  --decor-base-adjust: -1px;
+  --decor-contact-width: 36%;
+  --decor-depth-x: 8px;
+  --decor-image-y: 22px;
+  --decor-rotate-y: -10deg;
+  --decor-scale: 1.45;
+  --decor-shadow-x: 12px;
+  width: clamp(98px, 8.3vw, 132px);
+  height: 90%;
+}
+
 .catalogue-shelf__decor--reading {
   --decor-base-adjust: -1px;
   --decor-contact-width: 32%;
@@ -2555,8 +2616,9 @@
   -webkit-mask: var(--decor-image) center bottom / contain no-repeat;
   mask: var(--decor-image) center bottom / contain no-repeat;
   transform:
-    translate3d(var(--decor-depth-x), -1px, -4px)
-    rotateY(var(--decor-rotate-y));
+    translate3d(var(--decor-depth-x), calc(var(--decor-image-y) - 1px), -4px)
+    rotateY(var(--decor-rotate-y))
+    scale(var(--decor-scale));
   transform-origin: center bottom;
 }
 
@@ -2581,7 +2643,10 @@
     contrast(1.08)
     drop-shadow(1px 2px 1px rgb(10 6 4 / 34%))
     drop-shadow(5px 8px 6px rgb(8 4 2 / 42%));
-  transform: translateZ(0) rotateY(var(--decor-rotate-y));
+  transform:
+    translate3d(0, var(--decor-image-y), 0)
+    rotateY(var(--decor-rotate-y))
+    scale(var(--decor-scale));
   transform-origin: center bottom;
   transition: filter .22s ease;
 }
@@ -2597,8 +2662,9 @@
   mix-blend-mode: multiply;
   opacity: .38;
   transform:
-    translate3d(var(--decor-shadow-x), 7px, -8px)
+    translate3d(var(--decor-shadow-x), calc(var(--decor-image-y) + 7px), -8px)
     rotateY(var(--decor-rotate-y))
+    scale(var(--decor-scale))
     scale(.98);
   transform-origin: center bottom;
 }
@@ -2634,11 +2700,16 @@
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__decor img {
-  transform: none;
+  transform:
+    translate3d(0, var(--decor-image-y), 0)
+    scale(var(--decor-scale));
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__decor::after {
-  transform: translate3d(6px, 5px, 0) scale(.98);
+  transform:
+    translate3d(6px, calc(var(--decor-image-y) + 5px), 0)
+    scale(var(--decor-scale))
+    scale(.98);
 }
 
 .catalogue-volume {
@@ -2857,6 +2928,7 @@
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__books,
+.catalogue-library-room__scene[data-book-view='flat'] .catalogue-shelf__reference-books,
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-volume {
   perspective: none;
 }
@@ -3008,6 +3080,20 @@
     left: 1.5%;
     gap: 0;
     padding: 0;
+  }
+
+  .catalogue-shelf__reference-books {
+    top: 4px;
+    bottom: calc(var(--shelf-lip-h) + var(--shelf-top-rise) - var(--book-seat-depth));
+  }
+
+  .catalogue-shelf__reference-books--primary {
+    left: 38%;
+  }
+
+  .catalogue-shelf__reference-books--primary .catalogue-volume:nth-child(n + 4),
+  .catalogue-shelf__reference-books--secondary {
+    display: none;
   }
 
   .catalogue-volume {

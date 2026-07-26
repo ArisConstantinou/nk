@@ -48,20 +48,46 @@ const shelfDecorations = [
     name: 'Puk Table LED Light',
     src: 'assets/catalogue-products/shelf-decor/puk-table-led-light-shelf-v1.webp',
   },
-  null,
+  {
+    id: 'belfast-table-light',
+    kind: 'belfast',
+    name: 'Belfast Table Light',
+    src: 'assets/catalogue-products/lighting/cutouts/belfast-table-light.webp',
+  },
   {
     id: 'rechargeable-zeta-table-light',
     kind: 'zeta',
     name: 'Rechargeable Zeta Table Light',
     src: 'assets/catalogue-products/shelf-decor/rechargeable-zeta-table-light-shelf-v1.webp',
   },
-  null,
+  {
+    id: 'diodus-table-light',
+    kind: 'diodus',
+    name: 'Diodus Table Light',
+    src: 'assets/catalogue-products/lighting/cutouts/diodus-table-light.webp',
+  },
   {
     id: 'reading-table-light',
     kind: 'reading',
     name: 'Reading Table Light',
     src: 'assets/catalogue-products/shelf-decor/reading-table-light-shelf-v1.webp',
   },
+] as const;
+
+const referenceVolumes = [
+  ['LUX', 'FORM', 'SPEC', 'MAT', 'PLAN', 'GRID', 'LINE', 'WARM', 'VOL1'],
+  ['CTRL', 'DALI', 'KNX', 'SCNE', 'ZONE', 'TECH', 'WIRE', 'LOAD', 'VOL2'],
+  ['ARCH', 'LENS', 'BEAM', 'TRIM', 'WALL', 'COVE', 'TASK', 'EDGE', 'VOL3'],
+  ['HOME', 'DATA', 'SAFE', 'NODE', 'LINK', 'MODE', 'AUTO', 'MESH', 'VOL4'],
+  ['FANS', 'AIR', 'FLOW', 'ECO', 'MOVE', 'QTT', 'ROOM', 'PLAN', 'VOL5'],
+] as const;
+
+const referenceClusterPositions = [
+  ['28%', '57%'],
+  ['31%', '61%'],
+  ['27%', '56%'],
+  ['32%', '62%'],
+  ['29%', '58%'],
 ] as const;
 
 const spineFinishes = [
@@ -80,6 +106,64 @@ const spineFinishes = [
   {cover: '#eee7d9', edge: '#aa9c83', ink: '#39342d', page: '#cdbfa8', band: '#8d7d64', material: 'paper', layout: 'label', width: 48, height: 91, depth: 4, lean: -.9, radius: 2},
   {cover: '#5b6351', edge: '#afb59a', ink: '#faf7ea', page: '#d8cdb8', band: '#c4caaa', material: 'linen', layout: 'classic', width: 35, height: 80, depth: 7, lean: .55, radius: 5},
 ];
+
+const referenceVolumeStyle = (shelfIndex: number, bookIndex: number) => {
+  const finish = spineFinishes[(shelfIndex * 4 + bookIndex + 3) % spineFinishes.length];
+  return {
+    '--book-cover': finish.cover,
+    '--book-edge': finish.edge,
+    '--book-ink': finish.ink,
+    '--book-page': finish.page,
+    '--book-band': finish.band,
+    '--book-width': `${finish.width}px`,
+    '--book-height': `${finish.height}%`,
+    '--book-depth': `${finish.depth}px`,
+    '--book-lean': `${finish.lean * .45}deg`,
+    '--book-radius': `${finish.radius}px`,
+    '--book-texture': `linear-gradient(155deg, color-mix(in srgb, ${finish.cover} 78%, #fff), ${finish.cover} 48%, color-mix(in srgb, ${finish.cover} 74%, #111))`,
+  } as CSSProperties;
+};
+
+const ReferenceVolume = ({
+  title,
+  shelfIndex,
+  bookIndex,
+}: {
+  title: string;
+  shelfIndex: number;
+  bookIndex: number;
+}) => {
+  const finish = spineFinishes[(shelfIndex * 4 + bookIndex + 3) % spineFinishes.length];
+  const edition = `R${shelfIndex + 1}`;
+  return <span
+    className="catalogue-volume catalogue-volume--reference"
+    style={referenceVolumeStyle(shelfIndex, bookIndex)}
+    aria-hidden="true"
+  >
+    <span
+      className="catalogue-spine"
+      data-material={finish.material}
+      data-layout={finish.layout}
+    >
+      <span className="catalogue-spine__top"/>
+      <span className="catalogue-spine__page-block"/>
+      <span className="catalogue-spine__back-cover"/>
+      <span className="catalogue-spine__front-cover">
+        <span>NK STUDIO</span>
+        <strong>{title}</strong>
+        <small>{edition}</small>
+      </span>
+      <span className="catalogue-spine__surface">
+        <span className="catalogue-spine__cover-lines"/>
+        <span className="catalogue-spine__brand">NK</span>
+        <strong data-compact-title={title}>NK {title}</strong>
+        <span className="catalogue-spine__edition">{edition}</span>
+        <span className="catalogue-spine__ornament"/>
+      </span>
+    </span>
+    <span className="catalogue-volume__contact"/>
+  </span>;
+};
 
 const brandMark = (brand: Catalogue['brand']) => (
   brand === 'Nova Luce' ? 'NOVA' : brand === 'VIOKEF' ? 'VIO' : brand
@@ -171,7 +255,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
         <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
       </div>
       <div className="catalogue-library-room__heading-copy">
-        <p>Each labelled spine opens immediately in the shared page-turning reader. Hover, focus or tap a book to lift it from the shelf.</p>
+        <p>Official branded spines open immediately in the shared page-turning reader. Hover, focus or tap a catalogue to lift it from the shelf.</p>
         <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
           <span>Display</span>
           <button
@@ -270,6 +354,21 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
                   </span>;
                 })}
               </div>
+              {[referenceVolumes[shelfIndex].slice(0, 5), referenceVolumes[shelfIndex].slice(5)].map((cluster, clusterIndex) => <div
+                className={`catalogue-shelf__reference-books catalogue-shelf__reference-books--${clusterIndex === 0 ? 'primary' : 'secondary'}`}
+                style={{
+                  '--reference-left': referenceClusterPositions[shelfIndex][clusterIndex],
+                } as CSSProperties}
+                aria-hidden="true"
+                key={`reference-cluster-${shelfIndex}-${clusterIndex}`}
+              >
+                {cluster.map((title, clusterBookIndex) => <ReferenceVolume
+                  title={title}
+                  shelfIndex={shelfIndex}
+                  bookIndex={clusterIndex * 5 + clusterBookIndex}
+                  key={`${title}-${clusterBookIndex}`}
+                />)}
+              </div>)}
               {decoration && <span
                 className={`catalogue-shelf__decor catalogue-shelf__decor--${decoration.kind}`}
                 style={{
