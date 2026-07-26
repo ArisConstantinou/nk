@@ -2554,7 +2554,7 @@
   transform-origin: center bottom;
   transform-style: preserve-3d;
   transition:
-    transform .46s cubic-bezier(.16, 1, .3, 1),
+    transform .34s cubic-bezier(.16, 1, .3, 1),
     box-shadow .34s ease,
     filter .34s ease;
 }
@@ -2690,10 +2690,8 @@
   z-index: 30;
   filter: none;
   transform:
-    translate3d(10px, -4px, 30px)
-    rotateX(-1deg)
-    rotateY(-22deg)
-    rotateZ(var(--book-lean));
+    translate3d(clamp(1px, calc(.36vw - .4px), 3px), -6px, 8px)
+    rotateY(var(--book-rest-turn));
 }
 
 .catalogue-volume:hover > .catalogue-spine .catalogue-spine__surface,
@@ -2708,15 +2706,14 @@
 
 .catalogue-volume:hover > .catalogue-spine + .catalogue-volume__contact,
 .catalogue-volume:focus-within .catalogue-volume__contact {
-  opacity: .42;
-  transform: translate(4px, 1px) scaleX(1.16) skewX(-13deg);
+  opacity: .38;
+  transform: translate(0, 1px) scaleX(1.06) skewX(-13deg);
 }
 
 .catalogue-volume > .catalogue-spine:active {
   transform:
-    translate3d(6px, -2px, 18px)
-    rotateY(-16deg)
-    rotateZ(var(--book-lean));
+    translate3d(clamp(.4px, calc(.13vw - .16px), 1px), -3px, 3px)
+    rotateY(var(--book-rest-turn));
 }
 
 .catalogue-library-room__scene[data-book-view='flat'] .catalogue-bookcase {
