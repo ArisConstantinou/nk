@@ -18,8 +18,7 @@ type CatalogueBookshelfProps = {
 
 type CatalogueDisplayMode = '3d' | 'flat';
 
-const shelfCount = 5;
-const initialCapacity = 3;
+const shelfCount = 3;
 const displayModeStorageKey = 'nk:catalogue-display-mode';
 
 const readStoredDisplayMode = (): CatalogueDisplayMode => {
@@ -33,10 +32,8 @@ const readStoredDisplayMode = (): CatalogueDisplayMode => {
 
 const defaultChannels: ShelfLightChannel[] = [
   {color: '#e7b67b', brightness: 78, power: true},
-  {color: '#e7b67b', brightness: 74, power: true},
-  {color: '#e7b67b', brightness: 70, power: true},
-  {color: '#e7b67b', brightness: 68, power: true},
   {color: '#e7b67b', brightness: 72, power: true},
+  {color: '#e7b67b', brightness: 76, power: true},
 ];
 
 const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
@@ -66,26 +63,12 @@ const shelfDecorations = [
     name: 'Rechargeable Zeta Table Light',
     src: 'assets/catalogue-products/shelf-decor/rechargeable-zeta-table-light-shelf-v1.webp',
   },
-  {
-    id: 'diodus-table-light',
-    kind: 'diodus',
-    name: 'Diodus Table Light',
-    src: 'assets/catalogue-products/lighting/cutouts/diodus-table-light.webp',
-  },
-  {
-    id: 'reading-table-light',
-    kind: 'reading',
-    name: 'Reading Table Light',
-    src: 'assets/catalogue-products/shelf-decor/reading-table-light-shelf-v1.webp',
-  },
 ] as const;
 
 const referenceVolumes = [
-  ['LUX', 'FORM', 'SPEC', 'MAT', 'PLAN', 'GRID', 'LINE', 'WARM', 'VOL1', 'OPTIC', 'FRAME', 'DETAIL', 'AMBIENT', '2027'],
-  ['CTRL', 'DALI', 'KNX', 'SCNE', 'ZONE', 'TECH', 'WIRE', 'LOAD', 'VOL2', 'SENSE', 'LOGIC', 'SMART', 'SYSTEM', '2027'],
-  ['ARCH', 'LENS', 'BEAM', 'TRIM', 'WALL', 'COVE', 'TASK', 'EDGE', 'VOL3', 'FACADE', 'LINEAR', 'SPOT', 'STUDIO', '2027'],
-  ['HOME', 'DATA', 'SAFE', 'NODE', 'LINK', 'MODE', 'AUTO', 'MESH', 'VOL4', 'LIVING', 'COMFORT', 'SCENE', 'CONNECT', '2027'],
-  ['FANS', 'AIR', 'FLOW', 'ECO', 'MOVE', 'QTT', 'ROOM', 'PLAN', 'VOL5', 'BREEZE', 'SILENT', 'CLIMATE', 'MOTION', '2027'],
+  ['LUX', 'FORM', 'SPEC', 'MAT', 'PLAN', 'GRID', 'LINE', 'WARM'],
+  ['ARCH', 'LENS', 'BEAM', 'TRIM', 'WALL', 'COVE', 'TASK', 'EDGE'],
+  ['HOME', 'AIR', 'FLOW', 'ECO', 'MOVE', 'ROOM', 'BREEZE', '2027'],
 ] as const;
 
 const spineFinishes = [
@@ -214,28 +197,9 @@ const hexToRgba = (hex: string, alpha: number) => {
 };
 
 const distributeCatalogues = (catalogues: Catalogue[]) => {
-  const shelves = Array.from({length: shelfCount}, () => [] as Catalogue[]);
-
-  const brandGroups = catalogueBrandOrder.flatMap(brand => {
-    const brandCatalogues = catalogues.filter(catalogue => catalogue.brand === brand);
-    return Array.from(
-      {length: Math.ceil(brandCatalogues.length / initialCapacity)},
-      (_, groupIndex) => brandCatalogues.slice(
-        groupIndex * initialCapacity,
-        (groupIndex + 1) * initialCapacity,
-      ),
-    );
-  });
-
-  brandGroups.slice(0, shelfCount).forEach((brandGroup, shelfIndex) => {
-    shelves[shelfIndex].push(...brandGroup);
-  });
-
-  brandGroups.slice(shelfCount).flat().forEach((catalogue, overflowIndex) => {
-    shelves[overflowIndex % shelfCount].push(catalogue);
-  });
-
-  return shelves;
+  return catalogueBrandOrder.map(brand => (
+    catalogues.filter(catalogue => catalogue.brand === brand)
+  ));
 };
 
 export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBookshelfProps) {
@@ -267,7 +231,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
         <h2 id="catalogue-library-room-title">Choose a spine.<br/><em>Open the collection.</em></h2>
       </div>
       <div className="catalogue-library-room__heading-copy">
-        <p>Official highlights are grouped by brand: ACA, Nova Luce and VIOKEF. Choose a brighter spine to open it in the shared page-turning reader.</p>
+        <p>One dedicated shelf per brand keeps every official ACA, Nova Luce and VIOKEF highlight together. Choose a brighter spine to open the shared page-turning reader.</p>
         <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
           <span>Display</span>
           <button
@@ -289,7 +253,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
     <div className="catalogue-library-room__scene" data-book-view={displayMode}>
       <div
         className="catalogue-bookcase"
-        aria-label={`Five illuminated catalogue shelves in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
+        aria-label={`Three illuminated brand catalogue shelves in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
       >
         <div className="catalogue-bookcase__crown"><span>NK</span><small>CATALOGUE LIBRARY</small></div>
         {shelves.map((shelfCatalogues, shelfIndex) => {
