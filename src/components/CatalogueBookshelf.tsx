@@ -204,7 +204,6 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
             '--shelf-light': channel.color,
             '--shelf-glow': hexToRgba(channel.color, lightStrength * 0.68),
             '--shelf-wash': hexToRgba(channel.color, lightStrength * 0.22),
-            '--decor-reflection-opacity': lightStrength * 0.52,
           } as CSSProperties;
 
           return <div
