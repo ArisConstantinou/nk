@@ -1,5 +1,5 @@
 import {useState, type CSSProperties, type ReactNode} from 'react';
-import {Lightbulb, Minus, Plus, Power, SlidersHorizontal, Sparkles} from 'lucide-react';
+import {ChevronDown, Lightbulb, Minus, Plus, Power, SlidersHorizontal, Sparkles, Wifi} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Catalogue} from '../types';
 import {publicAsset} from '../utils/assets';
@@ -35,7 +35,13 @@ const defaultChannels: ShelfLightChannel[] = [
   {color: '#e7b67b', brightness: 76, power: true},
 ];
 
-const colourPresets = ['#e7b67b', '#52dfff', '#ad7cff', '#ff6f91', '#80e58f'];
+const colourPresets = [
+  {value: '#e7b67b', label: 'Warm'},
+  {value: '#52dfff', label: 'Ice'},
+  {value: '#ad7cff', label: 'Violet'},
+  {value: '#ff6f91', label: 'Rose'},
+  {value: '#80e58f', label: 'Leaf'},
+];
 const catalogueBrandOrder: Catalogue['brand'][] = ['ACA', 'Nova Luce', 'VIOKEF'];
 const catalogueBrandAccents: Record<Catalogue['brand'], string> = {
   ACA: '#e8c486',
@@ -140,6 +146,7 @@ const distributeCatalogues = (catalogues: Catalogue[]) => {
 export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: CatalogueBookshelfProps) {
   const [channels, setChannels] = useState<ShelfLightChannel[]>(defaultChannels);
   const [activeShelf, setActiveShelf] = useState(0);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<CatalogueDisplayMode>(readStoredDisplayMode);
   const brandGroups = distributeCatalogues(catalogues);
   const shelfRows = ['catalogues', 'products'] as const;
@@ -286,87 +293,160 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
       </div>
 
       <aside
-        className="catalogue-shelf-remote"
-        aria-labelledby="catalogue-remote-title"
-        style={{'--remote-colour': activeChannel.color} as CSSProperties}
+        className="catalogue-knx-panel"
+        aria-labelledby="catalogue-knx-title"
+        data-expanded={isPanelOpen ? 'true' : 'false'}
+        style={{'--knx-colour': activeChannel.color} as CSSProperties}
+        onKeyDown={event => {
+          if (event.key === 'Escape' && isPanelOpen) {
+            setIsPanelOpen(false);
+          }
+        }}
       >
-        <img className="catalogue-shelf-remote__shell" src={publicAsset('assets/generated/nk-rgb-remote-shell-transparent.webp')} alt="" aria-hidden="true"/>
-        <h3 id="catalogue-remote-title">Shelf light remote</h3>
         <button
-          className="catalogue-shelf-remote__power"
+          className="catalogue-knx-panel__wake"
           type="button"
-          aria-label={`${activeChannel.power ? 'Turn off' : 'Turn on'} shelf ${activeShelf + 1} light`}
-          aria-pressed={activeChannel.power}
-          onClick={() => patchActiveChannel({power: !activeChannel.power})}
+          aria-expanded={isPanelOpen}
+          aria-controls="catalogue-knx-interface"
+          aria-label={`${isPanelOpen ? 'Minimise' : 'Open'} KNX shelf lighting controls`}
+          onClick={() => setIsPanelOpen(open => !open)}
         >
-          <Power/><span>{activeChannel.power ? 'ON' : 'OFF'}</span>
+          <span className="catalogue-knx-panel__brand">
+            <span><i aria-hidden="true"/> KNX</span>
+            <small>WALL CONTROL</small>
+          </span>
+          <span className="catalogue-knx-panel__wake-screen">
+            <span>
+              <strong>{String(activeShelf + 1).padStart(2, '0')}</strong>
+              <small>{activeChannel.power ? `${activeChannel.brightness}%` : 'OFF'}</small>
+            </span>
+            <span className="catalogue-knx-panel__channel-glance" aria-hidden="true">
+              {channels.map((channel, index) => <i
+                className={activeShelf === index ? 'is-active' : ''}
+                style={{
+                  '--glance-colour': channel.color,
+                  '--glance-strength': channel.power ? channel.brightness / 100 : 0,
+                } as CSSProperties}
+                key={`glance-${index + 1}`}
+              />)}
+            </span>
+          </span>
+          <span className="catalogue-knx-panel__open-hint">
+            <span>{isPanelOpen ? 'Close' : 'Touch to control'}</span>
+            <ChevronDown aria-hidden="true"/>
+          </span>
         </button>
 
-        <div className="catalogue-shelf-remote__wheel" aria-label="Shelf light colour presets">
-          <span aria-hidden="true"/>
-          <div>
-            {colourPresets.map(colour => <button
-              type="button"
-              aria-label={`Set shelf ${activeShelf + 1} light to ${colour}`}
-              aria-pressed={activeChannel.color === colour}
-              style={{'--preset-colour': colour} as CSSProperties}
-              onClick={() => patchActiveChannel({color: colour, power: true})}
-              key={colour}
-            />)}
-          </div>
-        </div>
+        <div className="catalogue-knx-panel__expansion">
+          <fieldset
+            id="catalogue-knx-interface"
+            className="catalogue-knx-panel__interface"
+            aria-hidden={!isPanelOpen}
+            disabled={!isPanelOpen}
+          >
+            <legend className="sr-only">KNX shelf lighting interface</legend>
 
-        <div className="catalogue-shelf-remote__channels" role="group" aria-label="Choose shelf to control">
-          {channels.map((channel, index) => <button
-            type="button"
-            className={activeShelf === index ? 'is-active' : ''}
-            aria-label={`Control shelf ${index + 1}`}
-            aria-pressed={activeShelf === index}
-            style={{'--channel-colour': channel.color} as CSSProperties}
-            onClick={() => setActiveShelf(index)}
-            key={`channel-${index + 1}`}
-          ><span>{String(index + 1).padStart(2, '0')}</span></button>)}
-        </div>
+            <header className="catalogue-knx-panel__header">
+              <span>
+                <Wifi aria-hidden="true"/>
+                <span><small>CONNECTED</small><strong id="catalogue-knx-title">Shelf lighting</strong></span>
+              </span>
+              <span className="catalogue-knx-panel__zone-count">2 ZONES</span>
+            </header>
 
-        <div className="catalogue-shelf-remote__brightness">
-          <div className="catalogue-shelf-remote__brightness-head">
-            <span><SlidersHorizontal/> Brightness</span>
-            <div className="catalogue-shelf-remote__stepper">
-              <button
+            <div className="catalogue-knx-panel__channels" role="group" aria-label="Choose shelf to control">
+              {channels.map((channel, index) => <button
                 type="button"
-                aria-label={`Decrease shelf ${activeShelf + 1} brightness`}
-                disabled={activeChannel.brightness <= 10}
-                onClick={() => patchActiveChannel({
-                  brightness: Math.max(10, activeChannel.brightness - 10),
-                  power: true,
-                })}
-              ><Minus/></button>
-              <output aria-live="polite">{activeChannel.brightness}%</output>
-              <button
-                type="button"
-                aria-label={`Increase shelf ${activeShelf + 1} brightness`}
-                disabled={activeChannel.brightness >= 100}
-                onClick={() => patchActiveChannel({
-                  brightness: Math.min(100, activeChannel.brightness + 10),
-                  power: true,
-                })}
-              ><Plus/></button>
+                className={activeShelf === index ? 'is-active' : ''}
+                aria-label={`Control shelf ${index + 1}`}
+                aria-pressed={activeShelf === index}
+                style={{
+                  '--channel-colour': channel.color,
+                  '--channel-strength': channel.power ? channel.brightness / 100 : 0,
+                } as CSSProperties}
+                onClick={() => setActiveShelf(index)}
+                key={`channel-${index + 1}`}
+              >
+                <span className="catalogue-knx-panel__channel-icon" aria-hidden="true"><Lightbulb/></span>
+                <span><small>SHELF</small><strong>{String(index + 1).padStart(2, '0')}</strong></span>
+                <output>{channel.power ? `${channel.brightness}%` : 'OFF'}</output>
+              </button>)}
             </div>
-          </div>
-          <input
-            type="range"
-            min="10"
-            max="100"
-            value={activeChannel.brightness}
-            aria-label={`Shelf ${activeShelf + 1} brightness`}
-            onChange={event => patchActiveChannel({brightness: Number(event.target.value), power: true})}
-          />
-        </div>
 
-        <div className="catalogue-shelf-remote__status" aria-live="polite">
-          <Lightbulb/>
-          <span>SHELF {String(activeShelf + 1).padStart(2, '0')}</span>
-          <strong>{activeChannel.power ? `${activeChannel.brightness}%` : 'OFF'}</strong>
+            <div className="catalogue-knx-panel__active-row">
+              <span>
+                <small>ACTIVE ZONE</small>
+                <strong>Shelf {String(activeShelf + 1).padStart(2, '0')}</strong>
+              </span>
+              <button
+                className="catalogue-knx-panel__power"
+                type="button"
+                aria-label={`${activeChannel.power ? 'Turn off' : 'Turn on'} shelf ${activeShelf + 1} light`}
+                aria-pressed={activeChannel.power}
+                onClick={() => patchActiveChannel({power: !activeChannel.power})}
+              >
+                <Power aria-hidden="true"/>
+                <span>{activeChannel.power ? 'On' : 'Off'}</span>
+              </button>
+            </div>
+
+            <div className="catalogue-knx-panel__colour">
+              <span className="catalogue-knx-panel__section-label">Light colour</span>
+              <div role="group" aria-label="Shelf light colour presets">
+                {colourPresets.map(colour => <button
+                  type="button"
+                  aria-label={`Set shelf ${activeShelf + 1} light to ${colour.label}`}
+                  aria-pressed={activeChannel.color === colour.value}
+                  style={{'--preset-colour': colour.value} as CSSProperties}
+                  onClick={() => patchActiveChannel({color: colour.value, power: true})}
+                  key={colour.value}
+                >
+                  <i aria-hidden="true"/>
+                  <span>{colour.label}</span>
+                </button>)}
+              </div>
+            </div>
+
+            <div className="catalogue-knx-panel__brightness">
+              <div className="catalogue-knx-panel__brightness-head">
+                <span><SlidersHorizontal aria-hidden="true"/> Brightness</span>
+                <output aria-live="polite">{activeChannel.brightness}%</output>
+              </div>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                value={activeChannel.brightness}
+                aria-label={`Shelf ${activeShelf + 1} brightness`}
+                onChange={event => patchActiveChannel({brightness: Number(event.target.value), power: true})}
+              />
+              <div className="catalogue-knx-panel__stepper">
+                <button
+                  type="button"
+                  aria-label={`Decrease shelf ${activeShelf + 1} brightness`}
+                  disabled={activeChannel.brightness <= 10}
+                  onClick={() => patchActiveChannel({
+                    brightness: Math.max(10, activeChannel.brightness - 10),
+                    power: true,
+                  })}
+                ><Minus aria-hidden="true"/><span>Dim</span></button>
+                <button
+                  type="button"
+                  aria-label={`Increase shelf ${activeShelf + 1} brightness`}
+                  disabled={activeChannel.brightness >= 100}
+                  onClick={() => patchActiveChannel({
+                    brightness: Math.min(100, activeChannel.brightness + 10),
+                    power: true,
+                  })}
+                ><Plus aria-hidden="true"/><span>Brighten</span></button>
+              </div>
+            </div>
+
+            <footer className="catalogue-knx-panel__status" aria-live="polite">
+              <span><i aria-hidden="true"/> KNX BUS ONLINE</span>
+              <strong>{activeChannel.power ? `${activeChannel.brightness}% · ${colourPresets.find(colour => colour.value === activeChannel.color)?.label}` : 'LIGHT OFF'}</strong>
+            </footer>
+          </fieldset>
         </div>
       </aside>
     </div>
