@@ -2,6 +2,7 @@ import {
   ArrowRight,
   BookOpen,
   Check,
+  ChevronLeft,
   ChevronRight,
   CircuitBoard,
   Eye,
@@ -16,9 +17,10 @@ import {
   Sparkles,
   Sun,
   Wrench,
+  X,
   Zap,
 } from 'lucide-react';
-import {useMemo, useState, type ReactNode} from 'react';
+import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {Link} from 'react-router-dom';
 import {useContent} from '../context/ContentContext';
 import type {Product} from '../types';
@@ -331,10 +333,46 @@ const unifiedStoryImages: Record<HeaderCampaignId, readonly {src: string; alt: s
 };
 
 function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [expandedImageIndex, setExpandedImageIndex] = useState<number | null>(null);
+  const expandedPanelRef = useRef<HTMLElement>(null);
+  const expandedCloseRef = useRef<HTMLButtonElement>(null);
+  const imageToggleRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const details = unifiedStoryDetails[campaign.id];
   const storyImages = unifiedStoryImages[campaign.id];
   const offerProducts = campaign.id === '03' ? (campaign.products || []).slice(0, 3) : [];
+  const expandedImage = expandedImageIndex === null ? null : storyImages[expandedImageIndex];
+
+  useEffect(() => {
+    setExpandedImageIndex(null);
+  }, [campaign.id]);
+
+  useEffect(() => {
+    if (expandedImageIndex === null) return;
+    const focusFrame = window.requestAnimationFrame(() => {
+      expandedPanelRef.current?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+        block: 'nearest',
+      });
+      expandedCloseRef.current?.focus({preventScroll: true});
+    });
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, [expandedImageIndex]);
+
+  const closeExpandedImage = () => {
+    const restoreIndex = expandedImageIndex;
+    setExpandedImageIndex(null);
+    window.requestAnimationFrame(() => {
+      if (restoreIndex !== null) imageToggleRefs.current[restoreIndex]?.focus({preventScroll: true});
+    });
+  };
+
+  const moveExpandedImage = (direction: -1 | 1) => {
+    setExpandedImageIndex(current => {
+      if (current === null || storyImages.length === 0) return current;
+      return (current + direction + storyImages.length) % storyImages.length;
+    });
+  };
+
   return <div className={`nk-campaign-design nk-campaign-design--unified nk-campaign-design--unified-${campaign.slug}`} data-unified-story={campaign.id}>
     <section className="nk-unified-story__copy">
       <p>{campaign.kicker}</p>
@@ -348,8 +386,7 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
         const offerImage = offerProduct ? OFFER_SHOWCASE_CUTOUTS[offerProduct.id] || offerProduct.image : '';
         const installationStep = campaign.id === '09' ? INSTALLATION_STEPS[index] : undefined;
         const storyImage = storyImages[index];
-        const cardKey = `${campaign.id}-${index}`;
-        const isExpanded = expandedCard === cardKey;
+        const isExpanded = expandedImageIndex === index;
         return <article className={`${offerProduct ? 'has-offer-preview' : installationStep ? 'has-step-preview' : 'has-story-preview'} ${isExpanded ? 'is-expanded' : ''}`.trim()} key={point}>
           <b>0{index + 1}</b>
           {offerProduct
@@ -358,7 +395,7 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
               </Link>
             : installationStep
               ? <span className="nk-unified-story__step-thumb"><ResponsiveImage src={installationStep.image} alt={installationStep.alt} loading="eager" decoding="async"/></span>
-              : storyImage && <button className="nk-unified-story__image-toggle" type="button" aria-expanded={isExpanded} aria-label={`${isExpanded ? 'Collapse' : 'Expand'} image for ${point}`} onClick={() => setExpandedCard(current => current === cardKey ? null : cardKey)}>
+              : storyImage && <button ref={element => { imageToggleRefs.current[index] = element; }} className="nk-unified-story__image-toggle" type="button" aria-expanded={isExpanded} aria-controls={isExpanded ? `nk-expanded-story-${campaign.id}` : undefined} aria-label={`${isExpanded ? 'Collapse' : 'Expand'} image for ${point}`} onClick={() => setExpandedImageIndex(current => current === index ? null : index)}>
                   <ResponsiveImage src={storyImage.src} alt={storyImage.alt} loading="eager" decoding="async"/>
                   <span aria-hidden="true">{isExpanded ? 'Collapse' : 'Expand'}</span>
                 </button>}
@@ -371,6 +408,38 @@ function UnifiedCampaignHeader({campaign}: {campaign: Campaign}) {
       <CampaignHeroImage campaign={campaign}/>
       <figcaption><Check aria-hidden="true"/>{unifiedStoryMedia[campaign.id]}</figcaption>
     </figure>
+    {expandedImage && expandedImageIndex !== null && <section
+      className="nk-unified-story__expanded-gallery"
+      id={`nk-expanded-story-${campaign.id}`}
+      ref={expandedPanelRef}
+      aria-label={`Expanded ${campaign.name} image gallery`}
+      tabIndex={-1}
+      onKeyDown={event => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeExpandedImage();
+        } else if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          moveExpandedImage(-1);
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          moveExpandedImage(1);
+        }
+      }}
+    >
+      <header>
+        <span aria-live="polite"><small>IMAGE {String(expandedImageIndex + 1).padStart(2, '0')} / {String(storyImages.length).padStart(2, '0')}</small><strong>{campaign.points[expandedImageIndex]}</strong></span>
+        <button ref={expandedCloseRef} type="button" onClick={closeExpandedImage} aria-label="Close expanded image"><X aria-hidden="true"/><span>Close</span></button>
+      </header>
+      <div className="nk-unified-story__expanded-stage">
+        <button type="button" className="is-previous" onClick={() => moveExpandedImage(-1)} aria-label="Previous image"><ChevronLeft aria-hidden="true"/><span>Previous</span></button>
+        <figure>
+          <ResponsiveImage src={expandedImage.src} alt={expandedImage.alt} loading="eager" decoding="async"/>
+          <figcaption>{expandedImage.alt}</figcaption>
+        </figure>
+        <button type="button" className="is-next" onClick={() => moveExpandedImage(1)} aria-label="Next image"><ChevronRight aria-hidden="true"/><span>Next</span></button>
+      </div>
+    </section>}
   </div>;
 }
 
