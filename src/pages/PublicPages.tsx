@@ -29,8 +29,7 @@ import {ContactCommandCenter} from '../components/ContactCommandCenter';
 import {ContactSignalPlayer} from '../components/ContactSignalPlayer';
 import {AboutHeritageExperience} from '../components/AboutHeritageExperience';
 import {pageVisualForPath} from '../pageVisuals';
-import {catalogueBookLink, UnifiedCatalogueBook} from '../components/UnifiedCatalogueBook';
-import {CatalogueCoverPreview} from '../components/CatalogueCoverPreview';
+import {UnifiedCatalogueBook} from '../components/UnifiedCatalogueBook';
 import {CatalogueBookshelf} from '../components/CatalogueBookshelf';
 import {
   type CompactFilterSegment,
@@ -456,8 +455,7 @@ export function LightingPage() {
   };
   if (location.pathname.replace(/\/+$/, '').endsWith('/book')) return <UnifiedCatalogueBook catalogues={content.catalogues} initialCatalogue={selectedCatalogue} onCatalogueChange={updateBookCatalogue} onClose={() => navigate('/shop/catalogues')}/>;
   return <>
-    <section className="catalogue-entry section" aria-labelledby="catalogue-entry-title"><div className="catalogue-entry__copy"><small>NK ELECTRICAL / CATALOGUE LIBRARY</small><h1 id="catalogue-entry-title">Every collection,<br/><em>one living book.</em></h1><p>Choose any collection to enter one continuous, page-turning catalogue. You will start at that book, then keep browsing naturally through every official collection.</p><Link className="catalogue-entry__cta" to={catalogueBookLink(content.catalogues[0], 0)}>Explore the complete book <ArrowRight/></Link><span>Keyboard, buttons and swipe navigation included.</span></div><CatalogueCoverPreview catalogue={content.catalogues[0]}/></section>
-    <PageIntro eyebrow="Choose a starting collection" title="Official collections," italic="ready to explore." body="Every card opens the same continuous book at the first page of the chosen catalogue."/>
+    <CatalogueBookshelf catalogues={shown} sourceCatalogues={content.catalogues}/>
     <section className="filter-shell compact-product-filters catalogue-library-filters section" aria-label="Catalogue filters">
       <div className="filter-top">
         <div><SlidersHorizontal/><b>Refine the catalogue library</b></div>
@@ -474,7 +472,6 @@ export function LightingPage() {
         ariaLabel="Catalogue filters"
       />
     </section>
-    <CatalogueBookshelf catalogues={shown} sourceCatalogues={content.catalogues}/>
     <section className="catalogue-help section"><div><BookOpen/><h2>Found a product?</h2></div><p>Email the catalogue name, product code and quantity. Add your name and phone number so the Shop team can respond with the right context.</p><a className="button copper" href="mailto:thelma@nk-electrical.com?subject=Shop%20catalogue%20enquiry">Ask about a catalogue product <ArrowUpRight/></a></section>
   </>;
 }

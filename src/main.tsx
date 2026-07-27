@@ -28,7 +28,6 @@ import './unified-theme.css';
 import './header-responsive.css';
 import './product-browser.css';
 import './components/unified-catalogue-book.css';
-import './catalogue-entry.css';
 import './catalogue-bookshelf.css';
 
 document.documentElement.dataset.experience = 'tech';
