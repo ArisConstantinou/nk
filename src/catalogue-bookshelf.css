@@ -5292,7 +5292,34 @@
 }
 
 .catalogue-shelf__led {
-  background: var(--shelf-core);
+  right: 5%;
+  left: 5%;
+  height: 38%;
+  overflow: hidden;
+  border-radius: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--shelf-core) 4%,
+      var(--shelf-core) 96%,
+      transparent
+    ) top / 100% 3px no-repeat,
+    radial-gradient(
+      ellipse 72% 100% at 50% 0%,
+      var(--shelf-glow),
+      var(--shelf-wash) 56%,
+      transparent 100%
+    );
+  box-shadow: none;
+  transition: none;
+}
+
+.catalogue-shelf[data-row='catalogues'] .catalogue-shelf__backwash {
+  right: 5%;
+  left: 5%;
+  filter: blur(4px);
+  transition: none;
 }
 
 .catalogue-shelf[data-row='products'] .catalogue-shelf__led,
