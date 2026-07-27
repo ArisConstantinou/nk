@@ -3884,3 +3884,241 @@
     height: 70%;
   }
 }
+
+/* Catalogue-specific controls live inside the Reading Room so discovery,
+   filtering and the physical shelf read as one focused interaction. */
+.catalogue-library-room__filters {
+  margin: 0 0 clamp(18px, 2vw, 28px);
+}
+
+.catalogue-room-filters {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 11px 13px;
+  border: 1px solid rgb(239 112 87 / 34%);
+  border-left: 4px solid #ef7057;
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, rgb(239 112 87 / 10%), transparent 32%),
+    rgb(8 7 6 / 54%);
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 6%),
+    0 12px 30px rgb(0 0 0 / 18%);
+}
+
+.catalogue-room-filters__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: max-content;
+  color: rgb(255 246 232 / 72%);
+}
+
+.catalogue-room-filters__meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #f4c58f;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.catalogue-room-filters__meta svg {
+  width: 16px;
+  height: 16px;
+}
+
+.catalogue-room-filters__meta strong {
+  padding-left: 10px;
+  border-left: 1px solid rgb(255 255 255 / 16%);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.catalogue-room-filters__meta button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 9px;
+  color: #fff7ed;
+  background: rgb(255 255 255 / 6%);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.catalogue-room-filters__groups {
+  display: grid;
+  grid-template-columns: minmax(260px, .72fr) minmax(430px, 1.28fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.catalogue-room-filter-group {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.catalogue-room-filter-group > span {
+  color: rgb(255 246 232 / 66%);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.catalogue-room-filter-options {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(max-content, 1fr);
+  gap: 4px;
+  min-width: 0;
+}
+
+.catalogue-room-filter-options button {
+  min-height: 36px;
+  padding: 0 9px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 9px;
+  color: rgb(255 246 232 / 76%);
+  background: rgb(255 255 255 / 4%);
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+
+.catalogue-room-filter-options button:is(:hover, :focus-visible),
+.catalogue-room-filters__meta button:is(:hover, :focus-visible) {
+  border-color: #f1bd79;
+  color: #fff;
+}
+
+.catalogue-room-filter-options button:focus-visible,
+.catalogue-room-filters__meta button:focus-visible {
+  outline: 3px solid rgb(241 189 121 / 34%);
+  outline-offset: 2px;
+}
+
+.catalogue-room-filter-options button.is-selected {
+  border-color: #f1bd79;
+  color: #24130d;
+  background: #f1bd79;
+  box-shadow: inset 0 -3px rgb(239 112 87 / 70%);
+}
+
+@media (max-width: 1180px) {
+  .catalogue-room-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogue-room-filters__meta {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 820px) {
+  .catalogue-library-room__filters {
+    margin-bottom: 16px;
+  }
+
+  .catalogue-room-filters {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .catalogue-room-filters__meta {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .catalogue-room-filters__meta strong {
+    margin-left: auto;
+  }
+
+  .catalogue-room-filters__groups {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .catalogue-room-filter-group {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .catalogue-room-filter-options {
+    grid-auto-flow: row;
+  }
+
+  .catalogue-room-filter-group[data-filter-key='brand'] .catalogue-room-filter-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .catalogue-room-filter-group[data-filter-key='focus'] .catalogue-room-filter-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .catalogue-room-filter-options button {
+    min-height: 44px;
+    padding: 5px 7px;
+    white-space: normal;
+  }
+
+  /* On phones the library itself leads the scene and the controller follows it.
+     Normal flow keeps both panels visible at every supported mobile width. */
+  .catalogue-library-room__scene {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    height: auto;
+    min-height: 0;
+    padding: 12px 0 18px;
+    overflow: visible;
+  }
+
+  .catalogue-bookcase {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    order: 1;
+    flex: 0 0 auto;
+    width: min(calc(100% - 16px), 470px);
+    height: auto;
+    aspect-ratio: 6 / 7;
+    transform: none;
+  }
+
+  .catalogue-shelf-remote {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    order: 2;
+    flex: 0 0 auto;
+    width: min(100%, 470px);
+    transform: none;
+  }
+}
+
+@media (max-width: 370px) {
+  .catalogue-room-filter-group[data-filter-key='brand'] .catalogue-room-filter-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -432,17 +432,17 @@ export function LightingPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   type CatalogueFilterKey = 'brand' | 'focus';
-  const catalogueFilterSegments: CompactFilterSegment<CatalogueFilterKey>[] = [
-    {key: 'brand', label: 'Brand', index: '01', options: ['ACA', 'Nova Luce', 'VIOKEF']},
-    {key: 'focus', label: 'Focus', index: '02', options: ['Decorative', 'Architectural', 'Kids', 'Natural', 'Fans']},
+  const catalogueFilterSegments: {key: CatalogueFilterKey; label: string; options: string[]}[] = [
+    {key: 'brand', label: 'Brand', options: ['ACA', 'Nova Luce', 'VIOKEF']},
+    {key: 'focus', label: 'Focus', options: ['Decorative', 'Architectural', 'Kids', 'Natural', 'Fans']},
   ];
   const [catalogueFilters, setCatalogueFilters] = useState<CompactFilterSelections<CatalogueFilterKey>>({brand: [], focus: []});
-  const [openCatalogueFilter, setOpenCatalogueFilter] = useState<CatalogueFilterKey | null>('brand');
   const selectedCatalogue = params.get('catalogue') || '';
   const updateBookCatalogue = useCallback((catalogue: string) => setParams({catalogue}, {replace: true}), [setParams]);
   const shown = content.catalogues.filter(catalogue =>
     (catalogueFilters.brand.length === 0 || catalogueFilters.brand.includes(catalogue.brand))
     && (catalogueFilters.focus.length === 0 || catalogueFilters.focus.includes(catalogue.focus)));
+  const hasCatalogueFilters = catalogueFilters.brand.length > 0 || catalogueFilters.focus.length > 0;
   const toggleCatalogueFilter = (key: CatalogueFilterKey, value: string) => {
     setCatalogueFilters(current => ({
       ...current,
@@ -455,23 +455,35 @@ export function LightingPage() {
   };
   if (location.pathname.replace(/\/+$/, '').endsWith('/book')) return <UnifiedCatalogueBook catalogues={content.catalogues} initialCatalogue={selectedCatalogue} onCatalogueChange={updateBookCatalogue} onClose={() => navigate('/shop/catalogues')}/>;
   return <>
-    <CatalogueBookshelf catalogues={shown} sourceCatalogues={content.catalogues}/>
-    <section className="filter-shell compact-product-filters catalogue-library-filters section" aria-label="Catalogue filters">
-      <div className="filter-top">
-        <div><SlidersHorizontal/><b>Refine the catalogue library</b></div>
-        <div className="shop-view-controls"><span>{shown.length} {shown.length === 1 ? 'collection' : 'collections'}</span></div>
-      </div>
-      <CompactProductFilters<CatalogueFilterKey>
-        segments={catalogueFilterSegments}
-        selections={catalogueFilters}
-        openFilter={openCatalogueFilter}
-        onOpenFilterChange={setOpenCatalogueFilter}
-        onToggle={toggleCatalogueFilter}
-        onClear={() => setCatalogueFilters({brand: [], focus: []})}
-        idPrefix="catalogue-filter"
-        ariaLabel="Catalogue filters"
-      />
-    </section>
+    <CatalogueBookshelf
+      catalogues={shown}
+      sourceCatalogues={content.catalogues}
+      filters={<div className="catalogue-room-filters" aria-label="Catalogue filters">
+        <div className="catalogue-room-filters__meta">
+          <span><SlidersHorizontal aria-hidden="true"/> Filter catalogues</span>
+          <strong>{shown.length} {shown.length === 1 ? 'collection' : 'collections'}</strong>
+          {hasCatalogueFilters && <button type="button" onClick={() => setCatalogueFilters({brand: [], focus: []})}>Clear <X aria-hidden="true"/></button>}
+        </div>
+        <div className="catalogue-room-filters__groups">
+          {catalogueFilterSegments.map(({key, label, options}) => <div className="catalogue-room-filter-group" data-filter-key={key} role="group" aria-label={`${label} catalogue filters`} key={key}>
+            <span>{label}</span>
+            <div className="catalogue-room-filter-options">
+              {['All', ...options].map(value => {
+                const isSelected = value === 'All' ? catalogueFilters[key].length === 0 : catalogueFilters[key].includes(value);
+                return <button
+                  type="button"
+                  className={isSelected ? 'is-selected' : ''}
+                  aria-label={`${label}: ${value}`}
+                  aria-pressed={isSelected}
+                  onClick={() => toggleCatalogueFilter(key, value)}
+                  key={value}
+                >{value}</button>;
+              })}
+            </div>
+          </div>)}
+        </div>
+      </div>}
+    />
     <section className="catalogue-help section"><div><BookOpen/><h2>Found a product?</h2></div><p>Email the catalogue name, product code and quantity. Add your name and phone number so the Shop team can respond with the right context.</p><a className="button copper" href="mailto:thelma@nk-electrical.com?subject=Shop%20catalogue%20enquiry">Ask about a catalogue product <ArrowUpRight/></a></section>
   </>;
 }

@@ -1,4 +1,4 @@
-import {useState, type CSSProperties} from 'react';
+import {useState, type CSSProperties, type ReactNode} from 'react';
 import {Lightbulb, Minus, Plus, Power, SlidersHorizontal, Sparkles} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Catalogue} from '../types';
@@ -14,6 +14,7 @@ type ShelfLightChannel = {
 type CatalogueBookshelfProps = {
   catalogues: Catalogue[];
   sourceCatalogues: Catalogue[];
+  filters?: ReactNode;
 };
 
 type CatalogueDisplayMode = '3d' | 'flat';
@@ -136,7 +137,7 @@ const distributeCatalogues = (catalogues: Catalogue[]) => {
   ));
 };
 
-export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBookshelfProps) {
+export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: CatalogueBookshelfProps) {
   const [channels, setChannels] = useState<ShelfLightChannel[]>(defaultChannels);
   const [activeShelf, setActiveShelf] = useState(0);
   const [displayMode, setDisplayMode] = useState<CatalogueDisplayMode>(readStoredDisplayMode);
@@ -184,6 +185,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues}: CatalogueBook
         </div>
       </div>
     </div>
+
+    {filters && <div className="catalogue-library-room__filters">{filters}</div>}
 
     <div className="catalogue-library-room__scene" data-book-view={displayMode}>
       <div
