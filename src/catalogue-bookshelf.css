@@ -5331,3 +5331,118 @@
 .catalogue-knx-panel__channels button:only-child {
   grid-column: 1 / -1;
 }
+
+/* Seat the closed KNX switch on the plaster beside the built-in. Its compact,
+   warm plate shares the wall palette instead of reading as a floating white
+   appliance; the expanded interface retains the full high-contrast controls. */
+@media (min-width: 821px) {
+  .catalogue-knx-panel {
+    right: auto;
+    left: 67.9%;
+    transition:
+      top .52s cubic-bezier(.22, 1, .36, 1),
+      left .52s cubic-bezier(.22, 1, .36, 1),
+      width .52s cubic-bezier(.22, 1, .36, 1),
+      border-radius .38s ease,
+      box-shadow .42s ease;
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] {
+    top: 43%;
+    width: clamp(64px, 3.6vw, 74px);
+    border-color: rgb(103 89 73 / 28%);
+    border-radius: 7px;
+    outline: 1px solid rgb(242 232 216 / 52%);
+    background:
+      linear-gradient(132deg, rgb(255 255 255 / 26%), transparent 24% 76%, rgb(82 63 46 / 11%)),
+      linear-gradient(145deg, #d8cdbd, #ad9f8e 52%, #d7ccbc);
+    box-shadow:
+      0 1px 1px rgb(255 255 255 / 38%) inset,
+      0 -1px 2px rgb(78 60 43 / 22%) inset,
+      0 2px 3px rgb(54 38 25 / 18%),
+      0 7px 15px rgb(51 35 23 / 14%);
+  }
+
+  .catalogue-knx-panel[data-expanded='false']::before {
+    inset: -3px;
+    border-color: rgb(97 81 63 / 24%);
+    border-radius: 9px;
+    background:
+      linear-gradient(128deg, rgb(255 255 255 / 32%), transparent 30% 76%, rgb(79 59 43 / 8%)),
+      linear-gradient(145deg, #d8cebf, #b3a594 58%, #d8cebf);
+    box-shadow:
+      0 1px 1px rgb(255 255 255 / 30%) inset,
+      0 3px 7px rgb(48 32 20 / 17%);
+  }
+
+  .catalogue-knx-panel[data-expanded='false']::after {
+    inset: -7px -8px -9px;
+    border-radius: 12px;
+    background: radial-gradient(ellipse at 50% 60%, rgb(49 34 22 / 18%), transparent 68%);
+    filter: blur(1px);
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake {
+    min-height: clamp(64px, 3.6vw, 74px);
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background:
+      linear-gradient(
+        to bottom,
+        rgb(238 233 224 / 96%) 0 24%,
+        rgb(122 112 99 / 42%) 24.5% 25.5%,
+        rgb(230 224 214 / 96%) 26% 49%,
+        rgb(122 112 99 / 42%) 49.5% 50.5%,
+        rgb(234 228 218 / 96%) 51% 74%,
+        rgb(122 112 99 / 42%) 74.5% 75.5%,
+        rgb(225 218 207 / 96%) 76% 100%
+      ) left / 27% 100% no-repeat,
+      linear-gradient(
+        to bottom,
+        rgb(238 233 224 / 96%) 0 24%,
+        rgb(122 112 99 / 42%) 24.5% 25.5%,
+        rgb(230 224 214 / 96%) 26% 49%,
+        rgb(122 112 99 / 42%) 49.5% 50.5%,
+        rgb(234 228 218 / 96%) 51% 74%,
+        rgb(122 112 99 / 42%) 74.5% 75.5%,
+        rgb(225 218 207 / 96%) 76% 100%
+      ) right / 27% 100% no-repeat,
+      radial-gradient(circle at 50% 32%, color-mix(in srgb, var(--knx-colour) 12%, transparent), transparent 26%),
+      linear-gradient(160deg, #182328, #080b0d 72%) center / 46% 100% no-repeat;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 38%),
+      0 0 0 2px rgb(91 78 63 / 18%),
+      0 1px rgb(255 255 255 / 34%) inset,
+      0 -1px 2px rgb(0 0 0 / 26%) inset;
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake::before {
+    background:
+      linear-gradient(119deg, rgb(255 255 255 / 8%), transparent 28% 72%, rgb(255 255 255 / 2%)),
+      linear-gradient(90deg, transparent 27%, rgb(255 255 255 / 7%) 27.5% 72.5%, transparent 73%);
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake-screen {
+    inset: 12px 27% 19px;
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake-screen strong {
+    font-size: 16px;
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint {
+    bottom: 5px;
+  }
+
+  .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1100px) {
+  .catalogue-knx-panel[data-expanded='true'] {
+    right: 1%;
+    left: auto;
+  }
+}
