@@ -2369,7 +2369,7 @@
 .catalogue-library-room__scene {
   background:
     linear-gradient(180deg, rgb(16 10 7 / 2%), rgb(16 10 7 / 12%)),
-    url('/assets/generated/catalogue-reading-room-boardless-v4.webp') center / 100% 100% no-repeat;
+    url('/assets/generated/catalogue-reading-room-boardless-v4.webp') center / contain no-repeat;
 }
 
 .catalogue-bookcase {
@@ -3091,7 +3091,7 @@
     border: 1px solid rgb(68 52 43 / 70%);
     background:
       linear-gradient(90deg, rgb(0 0 0 / 12%), transparent 8% 92%, rgb(0 0 0 / 18%)),
-      url('/assets/generated/catalogue-built-in-mobile-boardless-v4.webp') center / 100% 100% no-repeat;
+      url('/assets/generated/catalogue-built-in-mobile-boardless-v4.webp') center / contain no-repeat;
     box-shadow:
       inset 0 0 24px rgb(15 9 6 / 26%),
       0 18px 36px rgb(9 5 3 / 24%);
@@ -3724,9 +3724,9 @@
    spines or large accidental holes between unrelated clusters. */
 @media (min-width: 821px) {
   .catalogue-library-room__scene {
-    height: clamp(660px, 46vw, 820px);
+    height: auto;
     min-height: 0;
-    aspect-ratio: auto;
+    aspect-ratio: 3 / 2;
   }
 }
 
@@ -4118,7 +4118,7 @@
     flex: 0 0 auto;
     width: min(calc(100% - 16px), 470px);
     height: auto;
-    aspect-ratio: 6 / 7;
+    aspect-ratio: 2 / 3;
     transform: none;
   }
 
