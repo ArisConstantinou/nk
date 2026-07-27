@@ -3,6 +3,7 @@ import {ChevronDown, Lightbulb, Minus, Plus, Power, SlidersHorizontal, Sparkles,
 import {Link, useLocation} from 'react-router-dom';
 import type {Catalogue} from '../types';
 import {publicAsset} from '../utils/assets';
+import {CatalogueCoverPreview} from './CatalogueCoverPreview';
 import {catalogueBookLink} from './UnifiedCatalogueBook';
 
 type ShelfLightChannel = {
@@ -256,14 +257,16 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
                         '--book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
                         '--official-accent': catalogueBrandAccents[catalogue.brand],
                       } as CSSProperties;
+                      const isFaceOutCover = bookIndex === 0;
                       return <Link
-                        className="catalogue-volume catalogue-volume--official"
+                        className={`catalogue-volume catalogue-volume--official${isFaceOutCover ? ' catalogue-volume--faceout' : ''}`}
                         data-brand={catalogue.brand}
                         style={bookStyle}
                         to={catalogueBookLink(catalogue, safeSourceIndex)}
                         aria-label={`Open ${catalogue.name} catalogue`}
                         key={catalogue.id || catalogue.url}
                       >
+                        {isFaceOutCover && <CatalogueCoverPreview catalogue={catalogue} variant="shelf"/>}
                         <span
                           className="catalogue-spine"
                           data-material={finish.material}

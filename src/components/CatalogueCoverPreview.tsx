@@ -8,7 +8,7 @@ GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 type CatalogueCoverPreviewProps = {
   catalogue: Catalogue;
-  variant?: 'entry' | 'spine';
+  variant?: 'entry' | 'shelf' | 'spine';
 };
 
 export function CatalogueCoverPreview({catalogue, variant = 'entry'}: CatalogueCoverPreviewProps) {
@@ -25,7 +25,7 @@ export function CatalogueCoverPreview({catalogue, variant = 'entry'}: CatalogueC
     }).then(async pdf => {
       const page = await pdf.getPage(1);
       if (cancelled || !canvasRef.current) return;
-      const viewport = page.getViewport({scale: variant === 'spine' ? .2 : .42});
+      const viewport = page.getViewport({scale: variant === 'spine' ? .2 : variant === 'shelf' ? .32 : .42});
       const canvas = canvasRef.current;
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
@@ -40,7 +40,7 @@ export function CatalogueCoverPreview({catalogue, variant = 'entry'}: CatalogueC
     return () => { cancelled = true; abort(); };
   }, [catalogue, variant]);
 
-  return <div className={`catalogue-cover-preview catalogue-cover-preview--${variant}${ready ? ' is-ready' : ''}${error ? ' has-error' : ''}`} aria-hidden={variant === 'spine'}>
+  return <div className={`catalogue-cover-preview catalogue-cover-preview--${variant}${ready ? ' is-ready' : ''}${error ? ' has-error' : ''}`} aria-hidden={variant !== 'entry'}>
     <canvas ref={canvasRef}/>
     {variant === 'entry' && <span>{ready ? `Preview · ${catalogue.name}` : error ? `Catalogue preview unavailable: ${error}` : 'Loading official catalogue preview…'}</span>}
   </div>;
