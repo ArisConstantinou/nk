@@ -5189,3 +5189,27 @@
     position: relative;
   }
 }
+
+/* The selected shelf is already explicit in the KNX panel. Avoid painting a
+   false perimeter "LED" around the active bay, and compensate the lower
+   photographed strip so equal channel values read at equal brightness. */
+.catalogue-shelf.is-active::after {
+  display: none;
+}
+
+.catalogue-shelf__led {
+  background: var(--shelf-core);
+}
+
+.catalogue-shelf[data-row='products'] .catalogue-shelf__led {
+  background: var(--shelf-core);
+  box-shadow:
+    0 0 3px 1px var(--shelf-core),
+    0 10px 26px 7px var(--shelf-glow);
+}
+
+.catalogue-shelf[data-row='products'] .catalogue-shelf__backwash {
+  background:
+    linear-gradient(180deg, var(--shelf-glow), var(--shelf-glow) 12%, var(--shelf-wash) 46%, transparent 92%),
+    radial-gradient(ellipse 84% 95% at 50% 0%, var(--shelf-wash), transparent 84%);
+}

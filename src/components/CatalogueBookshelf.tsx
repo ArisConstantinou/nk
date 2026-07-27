@@ -32,7 +32,7 @@ const readStoredDisplayMode = (): CatalogueDisplayMode => {
 
 const defaultChannels: ShelfLightChannel[] = [
   {color: '#e7b67b', brightness: 78, power: true},
-  {color: '#e7b67b', brightness: 76, power: true},
+  {color: '#e7b67b', brightness: 78, power: true},
 ];
 
 const colourPresets = [
@@ -204,6 +204,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
           const lightStrength = channel.power ? channel.brightness / 100 : 0;
           const shelfStyle = {
             '--shelf-light': channel.color,
+            '--shelf-core': hexToRgba(channel.color, Math.min(1, lightStrength * 1.1)),
             '--shelf-glow': hexToRgba(channel.color, lightStrength * 0.68),
             '--shelf-wash': hexToRgba(channel.color, lightStrength * 0.22),
           } as CSSProperties;
