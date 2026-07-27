@@ -168,25 +168,8 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
       </div>
       <div className="catalogue-library-room__heading-copy">
         <p>Every official ACA, Nova Luce and VIOKEF highlight now sits together in one focused collection. Choose a spine to open the shared page-turning reader.</p>
-        <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
-          <span>Display</span>
-          <button
-            type="button"
-            aria-label="Use 3D catalogue view"
-            aria-pressed={displayMode === '3d'}
-            onClick={() => selectDisplayMode('3d')}
-          ><b aria-hidden="true">3D</b> Depth</button>
-          <button
-            type="button"
-            aria-label="Use flat catalogue view"
-            aria-pressed={displayMode === 'flat'}
-            onClick={() => selectDisplayMode('flat')}
-          ><b aria-hidden="true">2D</b> Flat</button>
-        </div>
       </div>
     </div>
-
-    {filters && <div className="catalogue-library-room__filters">{filters}</div>}
 
     <div className="catalogue-library-room__scene" data-book-view={displayMode}>
       <div
@@ -386,6 +369,25 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
           <strong>{activeChannel.power ? `${activeChannel.brightness}%` : 'OFF'}</strong>
         </div>
       </aside>
+    </div>
+
+    <div className="catalogue-library-room__controls">
+      <div className="catalogue-display-switch" role="group" aria-label="Catalogue display style">
+        <span>Display</span>
+        <button
+          type="button"
+          aria-label="Use 3D catalogue view"
+          aria-pressed={displayMode === '3d'}
+          onClick={() => selectDisplayMode('3d')}
+        ><b aria-hidden="true">3D</b> Depth</button>
+        <button
+          type="button"
+          aria-label="Use flat catalogue view"
+          aria-pressed={displayMode === 'flat'}
+          onClick={() => selectDisplayMode('flat')}
+        ><b aria-hidden="true">2D</b> Flat</button>
+      </div>
+      {filters && <div className="catalogue-library-room__filters">{filters}</div>}
     </div>
   </section>;
 }

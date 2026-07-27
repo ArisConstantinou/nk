@@ -3887,8 +3887,18 @@
 
 /* Catalogue-specific controls live inside the Reading Room so discovery,
    filtering and the physical shelf read as one focused interaction. */
+.catalogue-library-room__controls {
+  display: grid;
+  gap: 12px;
+  margin-top: clamp(18px, 2vw, 28px);
+}
+
+.catalogue-library-room__controls > .catalogue-display-switch {
+  justify-self: end;
+}
+
 .catalogue-library-room__filters {
-  margin: 0 0 clamp(18px, 2vw, 28px);
+  margin: 0;
 }
 
 .catalogue-room-filters {
@@ -4031,8 +4041,16 @@
 }
 
 @media (max-width: 820px) {
+  .catalogue-library-room__controls {
+    margin-top: 16px;
+  }
+
+  .catalogue-library-room__controls > .catalogue-display-switch {
+    justify-self: stretch;
+  }
+
   .catalogue-library-room__filters {
-    margin-bottom: 16px;
+    margin: 0;
   }
 
   .catalogue-room-filters {
@@ -4120,5 +4138,62 @@
 @media (max-width: 370px) {
   .catalogue-room-filter-group[data-filter-key='brand'] .catalogue-room-filter-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .catalogue-shelf-remote {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px 3px;
+    width: min(calc(100% + 20px), 470px);
+    padding: 12px 10px;
+    border-radius: 16px;
+  }
+
+  .catalogue-shelf-remote h3 {
+    grid-column: 1 / 6;
+  }
+
+  .catalogue-shelf-remote__power {
+    grid-column: 6 / 8;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .catalogue-shelf-remote__wheel,
+  .catalogue-shelf-remote__wheel > div,
+  .catalogue-shelf-remote__channels {
+    display: contents;
+  }
+
+  .catalogue-shelf-remote__wheel button,
+  .catalogue-shelf-remote__wheel button:nth-child(n),
+  .catalogue-shelf-remote__channels button {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .catalogue-shelf-remote__brightness {
+    grid-column: 1 / -1;
+  }
+
+  .catalogue-shelf-remote__status {
+    display: none;
+  }
+}
+
+@media (max-width: 370px) {
+  .catalogue-shelf-remote {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .catalogue-shelf-remote h3 {
+    grid-column: 1 / 4;
+  }
+
+  .catalogue-shelf-remote__power {
+    grid-column: 4 / 6;
   }
 }
