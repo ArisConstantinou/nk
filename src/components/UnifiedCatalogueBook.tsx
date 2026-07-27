@@ -78,7 +78,6 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   const touchStart = useRef<number | null>(null);
   const openLastPageRef = useRef(false);
   const stageViewportRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
   const collectionsButtonRef = useRef<HTMLButtonElement>(null);
   const catalogue = catalogues[catalogueIndex];
   const catalogueLabel = useMemo(() => `${catalogue.brand} · ${catalogue.name}`, [catalogue]);
@@ -402,22 +401,13 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
 
   useEffect(() => {
     const viewport = stageViewportRef.current;
-    const stage = stageRef.current;
-    if (!viewport || !stage) return;
-    const mobile = window.matchMedia('(max-width: 760px)');
-    const alignPage = () => {
-      if (!mobile.matches) {
-        viewport.scrollLeft = 0;
-        return;
-      }
-      const rightPageCentre = stage.offsetLeft + stage.offsetWidth * .75;
-      viewport.scrollTo({left: Math.max(0, rightPageCentre - viewport.clientWidth / 2), behavior: 'auto'});
-    };
-    const animationFrame = window.requestAnimationFrame(alignPage);
-    window.addEventListener('resize', alignPage);
+    if (!viewport) return;
+    const resetPagePosition = () => { viewport.scrollLeft = 0; };
+    const animationFrame = window.requestAnimationFrame(resetPagePosition);
+    window.addEventListener('resize', resetPagePosition);
     return () => {
       window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener('resize', alignPage);
+      window.removeEventListener('resize', resetPagePosition);
     };
   }, [catalogueIndex, document]);
 
@@ -467,14 +457,13 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable || readerBusy} aria-label="Previous page"><ChevronLeft/></button>
 
       <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
-      <div ref={stageRef} className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''} ${turn.releasing ? 'is-turn-releasing' : ''}` : ''}`}
+      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''} ${turn.releasing ? 'is-turn-releasing' : ''}` : ''}`}
         aria-busy={!loadError && (!ready || isPreparingTurn)}
         onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
         onTouchEnd={event => {
           if (touchStart.current === null) return;
           const delta = event.changedTouches[0].clientX - touchStart.current;
           touchStart.current = null;
-          if (window.matchMedia('(max-width: 760px)').matches) return;
           if (Math.abs(delta) > 45) void changePage(delta < 0 ? 1 : -1);
         }}>
         <div className="catalogue-book__thickness" aria-hidden="true"/>
@@ -510,7 +499,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     <footer className="catalogue-book__footer">
       <span>{pageLabel}</span>
       <span>Catalogue {catalogueIndex + 1} / {catalogues.length}</span>
-      <p>Click a page or use the arrow keys. On smaller screens, pan horizontally to read each page at full width.</p>
+      <p>Tap a page, swipe, or use the arrow controls to keep reading.</p>
     </footer>
   </section>;
 }

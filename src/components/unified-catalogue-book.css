@@ -510,18 +510,15 @@
     height:100%;
     padding-inline:12px;
     box-sizing:border-box;
-    place-items:center start;
-    overflow-x:auto;
+    place-items:center;
+    overflow-x:hidden;
     overflow-y:hidden;
-    overscroll-behavior-x:contain;
-    touch-action:pan-x;
-    scrollbar-width:thin;
-    scrollbar-color:#d26b43 rgba(255,255,255,.12);
+    touch-action:pan-y;
   }
   .catalogue-book__stage{
-    width:min(calc(200cqw),calc(100cqh * 1.46));
-    max-width:none;
-    margin:0;
+    width:100%;
+    max-width:100%;
+    margin:auto;
   }
   .catalogue-book__status{left:75%;width:min(330px,calc(50% - 28px))}
   .catalogue-book__nav{position:absolute;z-index:28;top:50%;width:44px;height:44px;transform:translateY(-50%)}
