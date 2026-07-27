@@ -21,6 +21,7 @@ type TurnState = {
   back: number | null;
   target: number;
   active: boolean;
+  landed?: boolean;
   catalogueDelta?: -1 | 1;
 };
 
@@ -327,7 +328,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   }, [turn]);
 
   const completeTurn = useCallback(() => {
-    if (!turn?.active) return;
+    if (!turn?.active || turn.landed) return;
     if (turn.catalogueDelta === 1) {
       setCatalogueIndex(index => index + 1);
       setSpreadStart(1);
@@ -339,9 +340,23 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       setTurn(null);
     } else {
       setSpreadStart(turn.target);
-      setTurn(null);
+      setTurn(current => current?.active && !current.landed ? {...current, landed: true} : current);
     }
   }, [turn]);
+
+  useEffect(() => {
+    if (!turn?.landed) return;
+    let releaseFrame = 0;
+    const paintFrame = window.requestAnimationFrame(() => {
+      releaseFrame = window.requestAnimationFrame(() => {
+        setTurn(current => current?.landed ? null : current);
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(paintFrame);
+      if (releaseFrame) window.cancelAnimationFrame(releaseFrame);
+    };
+  }, [turn?.landed]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -432,7 +447,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable} aria-label="Previous page"><ChevronLeft/></button>
 
       <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
-      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''}` : ''}`}
+      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''}` : ''}`}
         aria-busy={!loadError && (!ready || isPreparingTurn)}
         onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
         onTouchEnd={event => {
