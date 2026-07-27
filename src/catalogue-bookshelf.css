@@ -2369,7 +2369,7 @@
 .catalogue-library-room__scene {
   background:
     linear-gradient(180deg, rgb(16 10 7 / 2%), rgb(16 10 7 / 12%)),
-    url('/assets/generated/catalogue-reading-room-two-shelf-wide-v5.webp') center / contain no-repeat;
+    url('/assets/generated/catalogue-reading-room-two-shelf-compact-narrow-v7.webp') center / contain no-repeat;
 }
 
 .catalogue-bookcase {
@@ -5128,10 +5128,10 @@
     --shelf-lip-h: 0px;
     --shelf-top-rise: 0px;
     --book-seat-depth: 0px;
-    top: 27.9%;
+    top: 36.85%;
     left: 33.2%;
-    width: 39.7%;
-    height: 43.2%;
+    width: 33.6%;
+    height: 30%;
     padding: 0;
     grid-template-rows: repeat(2, minmax(0, 1fr));
   }
@@ -5146,6 +5146,42 @@
   .catalogue-shelf__books,
   .catalogue-shelf__product-display {
     bottom: 0;
+  }
+
+  .catalogue-bookcase .catalogue-shelf__books--collection {
+    right: 0;
+    left: 0;
+    width: 100%;
+    justify-content: space-between;
+    gap: 3px;
+    padding-right: 1.5%;
+    padding-left: 1.5%;
+  }
+
+  .catalogue-bookcase .catalogue-shelf__books--collection .catalogue-shelf__highlight-group {
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .catalogue-bookcase .catalogue-shelf__highlight-group > .catalogue-volume--official {
+    flex-basis: calc(var(--book-width) * .42);
+    width: calc(var(--book-width) * .42);
+  }
+
+  .catalogue-bookcase .catalogue-shelf__brand-tab {
+    flex-basis: 42px;
+    width: 42px;
+    min-height: 34px;
+    margin-left: 2px;
+    padding: 4px 3px;
+  }
+
+  .catalogue-bookcase .catalogue-shelf__brand-tab strong {
+    font-size: 12px;
+  }
+
+  .catalogue-bookcase .catalogue-shelf__brand-tab small {
+    display: none;
   }
 }
 
@@ -5191,8 +5227,8 @@
 }
 
 /* The selected shelf is already explicit in the KNX panel. Avoid painting a
-   false perimeter "LED" around the active bay, and compensate the lower
-   photographed strip so equal channel values read at equal brightness. */
+   false perimeter "LED" around the active bay; the lower decoration bay is
+   intentionally unlit and therefore has no controller channel or DOM glow. */
 .catalogue-shelf.is-active::after {
   display: none;
 }
@@ -5201,15 +5237,11 @@
   background: var(--shelf-core);
 }
 
-.catalogue-shelf[data-row='products'] .catalogue-shelf__led {
-  background: var(--shelf-core);
-  box-shadow:
-    0 0 3px 1px var(--shelf-core),
-    0 10px 26px 7px var(--shelf-glow);
+.catalogue-shelf[data-row='products'] .catalogue-shelf__led,
+.catalogue-shelf[data-row='products'] .catalogue-shelf__backwash {
+  display: none;
 }
 
-.catalogue-shelf[data-row='products'] .catalogue-shelf__backwash {
-  background:
-    linear-gradient(180deg, var(--shelf-glow), var(--shelf-glow) 12%, var(--shelf-wash) 46%, transparent 92%),
-    radial-gradient(ellipse 84% 95% at 50% 0%, var(--shelf-wash), transparent 84%);
+.catalogue-knx-panel__channels button:only-child {
+  grid-column: 1 / -1;
 }

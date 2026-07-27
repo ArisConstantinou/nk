@@ -32,8 +32,8 @@ const readStoredDisplayMode = (): CatalogueDisplayMode => {
 
 const defaultChannels: ShelfLightChannel[] = [
   {color: '#e7b67b', brightness: 78, power: true},
-  {color: '#e7b67b', brightness: 78, power: true},
 ];
+const unlitShelfChannel: ShelfLightChannel = {color: '#e7b67b', brightness: 0, power: false};
 
 const colourPresets = [
   {value: '#e7b67b', label: 'Warm'},
@@ -196,12 +196,13 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
     >
       <div
         className="catalogue-bookcase"
-        aria-label={`Two illuminated display shelves with grouped brand catalogues in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
+        aria-label={`Compact catalogue shelf with an unlit lower decoration bay in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
       >
         <div className="catalogue-bookcase__crown"><span>NK</span><small>CATALOGUE LIBRARY</small></div>
         {shelfRows.map((rowKind, shelfIndex) => {
-          const channel = channels[shelfIndex];
-          const lightStrength = channel.power ? channel.brightness / 100 : 0;
+          const isLitShelf = shelfIndex < channels.length;
+          const channel = channels[shelfIndex] ?? unlitShelfChannel;
+          const lightStrength = isLitShelf && channel.power ? channel.brightness / 100 : 0;
           const shelfStyle = {
             '--shelf-light': channel.color,
             '--shelf-core': hexToRgba(channel.color, Math.min(1, lightStrength * 1.1)),
@@ -213,13 +214,13 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
             className={`catalogue-shelf${activeShelf === shelfIndex ? ' is-active' : ''}`}
             data-shelf={shelfIndex + 1}
             data-row={rowKind}
-            data-power={channel.power ? 'on' : 'off'}
+            data-power={isLitShelf && channel.power ? 'on' : 'off'}
             style={shelfStyle}
             key={rowKind}
           >
             <div className="catalogue-shelf__number">
               <span>{String(shelfIndex + 1).padStart(2, '0')}</span>
-              <small>{channel.power ? `${channel.brightness}%` : 'OFF'}</small>
+              <small>{isLitShelf && channel.power ? `${channel.brightness}%` : 'UNLIT'}</small>
             </div>
             <div className="catalogue-shelf__interior">
               <span className="catalogue-shelf__backwash" aria-hidden="true"/>
@@ -367,7 +368,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
                 <Wifi aria-hidden="true"/>
                 <span><small>CONNECTED</small><strong id="catalogue-knx-title">Shelf lighting</strong></span>
               </span>
-              <span className="catalogue-knx-panel__zone-count">2 ZONES</span>
+              <span className="catalogue-knx-panel__zone-count">{channels.length} ZONE</span>
             </header>
 
             <div className="catalogue-knx-panel__channels" role="group" aria-label="Choose shelf to control">
