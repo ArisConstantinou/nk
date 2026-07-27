@@ -520,6 +520,9 @@
     max-width:100%;
     margin:auto;
   }
+  .catalogue-book__stage.is-open:after{
+    display:none;
+  }
   .catalogue-book__status{left:75%;width:min(330px,calc(50% - 28px))}
   .catalogue-book__nav{position:absolute;z-index:28;top:50%;width:44px;height:44px;transform:translateY(-50%)}
   .catalogue-book__nav:hover:not(:disabled):not([aria-disabled="true"]){transform:translateY(-50%)}
