@@ -21,8 +21,6 @@ type TurnState = {
   back: number | null;
   target: number;
   active: boolean;
-  landed?: boolean;
-  releasing?: boolean;
   catalogueDelta?: -1 | 1;
 };
 
@@ -329,7 +327,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   }, [turn]);
 
   const completeTurn = useCallback(() => {
-    if (!turn?.active || turn.landed) return;
+    if (!turn?.active) return;
     if (turn.catalogueDelta === 1) {
       setCatalogueIndex(index => index + 1);
       setSpreadStart(1);
@@ -341,31 +339,9 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       setTurn(null);
     } else {
       setSpreadStart(turn.target);
-      setTurn(current => current?.active && !current.landed ? {...current, landed: true} : current);
+      setTurn(null);
     }
   }, [turn]);
-
-  useEffect(() => {
-    if (!turn?.landed || turn.releasing) return;
-    let holdFrame = 0;
-    const paintFrame = window.requestAnimationFrame(() => {
-      holdFrame = window.requestAnimationFrame(() => {
-        setTurn(current => current?.landed && !current.releasing ? {...current, releasing: true} : current);
-      });
-    });
-    return () => {
-      window.cancelAnimationFrame(paintFrame);
-      if (holdFrame) window.cancelAnimationFrame(holdFrame);
-    };
-  }, [turn?.landed, turn?.releasing]);
-
-  useEffect(() => {
-    if (!turn?.releasing) return;
-    const releaseTimer = window.setTimeout(() => {
-      setTurn(current => current?.releasing ? null : current);
-    }, 140);
-    return () => window.clearTimeout(releaseTimer);
-  }, [turn?.releasing]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -457,7 +433,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable || readerBusy} aria-label="Previous page"><ChevronLeft/></button>
 
       <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
-      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''} ${turn.releasing ? 'is-turn-releasing' : ''}` : ''}`}
+      <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''}` : ''}`}
         aria-busy={!loadError && (!ready || isPreparingTurn)}
         onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
         onTouchEnd={event => {
