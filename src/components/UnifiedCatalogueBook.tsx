@@ -404,7 +404,6 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       ? `Cover · page 1 / ${document.numPages}`
       : `Pages ${visible.left}${visible.right ? `–${visible.right}` : ''} / ${document.numPages}`
     : loadError ? 'Catalogue unavailable' : 'Preparing pages';
-  const readerBusy = Boolean(turn) || isPreparingTurn;
   const previousUnavailable = !document || (catalogueIndex === 0 && spreadStart === 1);
   const nextUnavailable = !document || (catalogueIndex === catalogues.length - 1 && spreadStart === finalSpread(document?.numPages || 1));
 
@@ -430,7 +429,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     </nav>}
 
     <div className="catalogue-book__reader">
-      <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable || readerBusy} aria-label="Previous page"><ChevronLeft/></button>
+      <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable} aria-label="Previous page"><ChevronLeft/></button>
 
       <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
       <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''}` : ''}`}
@@ -469,7 +468,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       </div>
       </div>
 
-      <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={nextUnavailable} aria-disabled={nextUnavailable || readerBusy} aria-label="Next page"><ChevronRight/></button>
+      <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={nextUnavailable} aria-disabled={nextUnavailable} aria-label="Next page"><ChevronRight/></button>
     </div>
 
     <footer className="catalogue-book__footer">
