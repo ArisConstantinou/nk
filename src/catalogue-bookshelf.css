@@ -5128,6 +5128,7 @@
     --shelf-lip-h: 0px;
     --shelf-top-rise: 0px;
     --book-seat-depth: 0px;
+    --catalogue-book-seat-offset: clamp(4px, .55vw, 12px);
     top: 36.85%;
     left: 33.2%;
     width: 33.6%;
@@ -5150,6 +5151,7 @@
 
   .catalogue-bookcase .catalogue-shelf__books--collection {
     right: 0;
+    bottom: var(--catalogue-book-seat-offset);
     left: 0;
     width: 100%;
     justify-content: space-between;
@@ -5166,6 +5168,7 @@
   .catalogue-bookcase .catalogue-shelf__highlight-group > .catalogue-volume--official {
     flex-basis: calc(var(--book-width) * .42);
     width: calc(var(--book-width) * .42);
+    height: calc(var(--book-height) - var(--catalogue-book-seat-offset));
   }
 
   .catalogue-bookcase .catalogue-shelf__brand-tab {
