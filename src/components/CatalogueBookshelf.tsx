@@ -1,6 +1,6 @@
-import {useState, type CSSProperties, type ReactNode} from 'react';
+import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
 import {ChevronDown, Lightbulb, Minus, Plus, Power, SlidersHorizontal, Sparkles, Wifi} from 'lucide-react';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import type {Catalogue} from '../types';
 import {publicAsset} from '../utils/assets';
 import {catalogueBookLink} from './UnifiedCatalogueBook';
@@ -144,13 +144,23 @@ const distributeCatalogues = (catalogues: Catalogue[]) => {
 };
 
 export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: CatalogueBookshelfProps) {
+  const location = useLocation();
   const [channels, setChannels] = useState<ShelfLightChannel[]>(defaultChannels);
   const [activeShelf, setActiveShelf] = useState(0);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<CatalogueDisplayMode>(readStoredDisplayMode);
+  const sceneRef = useRef<HTMLDivElement>(null);
   const brandGroups = distributeCatalogues(catalogues);
   const shelfRows = ['catalogues', 'products'] as const;
   const activeChannel = channels[activeShelf];
+
+  useEffect(() => {
+    if (location.hash !== '#catalogue-room') return;
+    const frame = window.requestAnimationFrame(() => {
+      sceneRef.current?.scrollIntoView({block: 'start', behavior: 'auto'});
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.hash, location.key]);
 
   const patchActiveChannel = (patch: Partial<ShelfLightChannel>) => {
     setChannels(current => current.map((channel, index) => (
@@ -178,7 +188,12 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
       </div>
     </div>
 
-    <div className="catalogue-library-room__scene" data-book-view={displayMode}>
+    <div
+      ref={sceneRef}
+      className="catalogue-library-room__scene"
+      id="catalogue-room"
+      data-book-view={displayMode}
+    >
       <div
         className="catalogue-bookcase"
         aria-label={`Two illuminated display shelves with grouped brand catalogues in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}

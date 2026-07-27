@@ -2369,7 +2369,7 @@
 .catalogue-library-room__scene {
   background:
     linear-gradient(180deg, rgb(16 10 7 / 2%), rgb(16 10 7 / 12%)),
-    url('/assets/generated/catalogue-reading-room-boardless-v4.webp') center / contain no-repeat;
+    url('/assets/generated/catalogue-reading-room-two-shelf-wide-v5.webp') center / contain no-repeat;
 }
 
 .catalogue-bookcase {
@@ -3726,7 +3726,7 @@
   .catalogue-library-room__scene {
     height: auto;
     min-height: 0;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 2 / 1;
   }
 }
 
@@ -5118,4 +5118,74 @@
 .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint svg {
   width: 15px;
   height: 15px;
+}
+
+/* Native 2:1 room plate: exactly two photographed shelf bays. Interactive
+   books, products and LED state align to those bays without stretching the
+   wall or drawing a second timber structure over the photograph. */
+@media (min-width: 821px) {
+  .catalogue-bookcase {
+    --shelf-lip-h: 0px;
+    --shelf-top-rise: 0px;
+    --book-seat-depth: 0px;
+    top: 27.9%;
+    left: 33.2%;
+    width: 39.7%;
+    height: 43.2%;
+    padding: 0;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalogue-bookcase::before,
+  .catalogue-bookcase::after,
+  .catalogue-bookcase__crown,
+  .catalogue-shelf__board {
+    display: none;
+  }
+
+  .catalogue-shelf__books,
+  .catalogue-shelf__product-display {
+    bottom: 0;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1599px) {
+  .catalogue-bookcase .catalogue-shelf__books--collection {
+    gap: 3px;
+  }
+
+  .catalogue-bookcase .catalogue-shelf__books--collection .catalogue-shelf__highlight-group {
+    margin-right: 2px;
+    padding-right: 1px;
+  }
+
+  .catalogue-shelf__highlight-group > .catalogue-volume--official {
+    flex-basis: calc(var(--book-width) * .4);
+    width: calc(var(--book-width) * .4);
+  }
+
+  .catalogue-shelf__brand-tab {
+    flex-basis: 52px;
+    width: 52px;
+    min-height: 38px;
+    margin-left: 2px;
+    padding: 4px 3px;
+  }
+}
+
+/* Navbar catalogue links target the room itself. Keep the scene clear of the
+   mobile header, and let the desktop header scroll away so the complete 2:1
+   environment fits in one viewport without changing its native scale. */
+.catalogue-library-room__scene#catalogue-room {
+  scroll-margin-top: 130px;
+}
+
+@media (min-width: 821px) {
+  .catalogue-library-room__scene#catalogue-room {
+    scroll-margin-top: 24px;
+  }
+
+  html:has(#catalogue-room) .ia-shell .ia-header {
+    position: relative;
+  }
 }
