@@ -268,7 +268,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
     >
       <figure className="catalogue-mobile-room-plate" aria-hidden="true">
         <img
-          src={publicAsset('assets/generated/catalogue-reading-room-two-shelf-compact-narrow-v7.webp')}
+          src={publicAsset('assets/generated/catalogue-reading-room-two-shelf-compact-narrow-unlit-v8.webp')}
           alt=""
         />
       </figure>

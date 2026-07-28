@@ -2369,7 +2369,7 @@
 .catalogue-library-room__scene {
   background:
     linear-gradient(180deg, rgb(16 10 7 / 2%), rgb(16 10 7 / 12%)),
-    url('/assets/generated/catalogue-reading-room-two-shelf-compact-narrow-v7.webp') center / contain no-repeat;
+    url('/assets/generated/catalogue-reading-room-two-shelf-compact-narrow-unlit-v8.webp') center / contain no-repeat;
 }
 
 .catalogue-bookcase {
@@ -5427,31 +5427,6 @@
 .catalogue-shelf[data-row='products'] .catalogue-shelf__led,
 .catalogue-shelf[data-row='products'] .catalogue-shelf__backwash {
   display: none;
-}
-
-/* The room photograph contains a warm shelf strip in the pixels themselves.
-   Cover only the controlled catalogue bay when KNX power is off so the
-   photographed source and the interactive LED state switch off together. */
-.catalogue-shelf[data-row='catalogues']::after {
-  position: absolute;
-  z-index: 30;
-  inset: -14px -1.5% -8px;
-  display: block;
-  border-radius: 2px;
-  content: '';
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    #080604 0 13%,
-    rgb(9 7 5 / 78%) 24%,
-    rgb(10 8 6 / 70%) 100%
-  );
-  opacity: 0;
-  transition: opacity .22s ease;
-}
-
-.catalogue-shelf[data-row='catalogues'][data-power='off']::after {
-  opacity: 1;
 }
 
 .catalogue-knx-panel__channels button:only-child {
