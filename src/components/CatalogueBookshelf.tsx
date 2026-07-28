@@ -164,6 +164,10 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
   const sceneRef = useRef<HTMLDivElement>(null);
   const brandGroups = distributeCatalogues(catalogues);
   const shelfRows = ['catalogues', 'products'] as const;
+  const mobileCatalogueRows = [
+    catalogues.slice(0, Math.ceil(catalogues.length / 2)),
+    catalogues.slice(Math.ceil(catalogues.length / 2)),
+  ];
   const activeChannel = channels[activeShelf];
 
   useEffect(() => {
@@ -262,9 +266,15 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
       id="catalogue-room"
       data-book-view={displayMode}
     >
+      <figure className="catalogue-mobile-room-plate" aria-hidden="true">
+        <img
+          src={publicAsset('assets/generated/catalogue-reading-room-two-shelf-compact-narrow-v7.webp')}
+          alt=""
+        />
+      </figure>
       <div
         className="catalogue-bookcase"
-        aria-label={`Compact catalogue shelf with an unlit lower decoration bay in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
+        aria-label={`Interactive two-row catalogue display in ${displayMode === '3d' ? 'three-dimensional' : 'flat'} view`}
       >
         <div className="catalogue-bookcase__crown"><span>NK</span><small>CATALOGUE LIBRARY</small></div>
         {shelfRows.map((rowKind, shelfIndex) => {
@@ -372,6 +382,34 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
                   <span className="catalogue-shelf__decor-contact" aria-hidden="true"/>
                 </span>)}
               </div>}
+              <div
+                className="catalogue-mobile-shelf-books"
+                aria-label={`Catalogue shelf ${shelfIndex + 1}`}
+              >
+                {mobileCatalogueRows[shelfIndex].map((catalogue, mobileBookIndex) => {
+                  const sourceIndex = sourceCatalogues.indexOf(catalogue);
+                  const safeSourceIndex = sourceIndex >= 0 ? sourceIndex : mobileBookIndex;
+                  const finish = spineFinishes[safeSourceIndex % spineFinishes.length];
+                  const textureNumber = String((safeSourceIndex % 14) + 1).padStart(2, '0');
+                  return <Link
+                    className="catalogue-mobile-volume"
+                    to={catalogueBookLink(catalogue, safeSourceIndex)}
+                    aria-label={`Open ${catalogue.name} catalogue`}
+                    style={{
+                      '--mobile-book-cover': finish.cover,
+                      '--mobile-book-edge': finish.edge,
+                      '--mobile-book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
+                      '--official-accent': catalogueBrandAccents[catalogue.brand],
+                    } as CSSProperties}
+                    key={`mobile-${shelfIndex}-${catalogue.id || catalogue.url}`}
+                  >
+                    <span aria-hidden="true">
+                      <small>{brandMark(catalogue.brand)}</small>
+                      <strong>{spineCompactTitle(catalogue)}</strong>
+                    </span>
+                  </Link>;
+                })}
+              </div>
             </div>
             <div className="catalogue-shelf__led" aria-hidden="true"/>
             <div className="catalogue-shelf__board" aria-hidden="true"/>
@@ -458,6 +496,16 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
                 key={`glance-${index + 1}`}
               />)}
             </span>
+          </span>
+          <span
+            className="catalogue-knx-panel__mobile-reading"
+            aria-label={activeChannel.power
+              ? `Shelf LED brightness ${activeChannel.brightness}%`
+              : 'Shelf lighting off'}
+            aria-hidden={isPanelOpen}
+          >
+            <small>{activeChannel.power ? 'Brightness' : 'Shelf lighting'}</small>
+            <strong>{activeChannel.power ? `${activeChannel.brightness}%` : 'OFF'}</strong>
           </span>
           <button
             className="catalogue-knx-panel__open-hint"
