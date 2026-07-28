@@ -5951,3 +5951,35 @@
     height: 12px;
   }
 }
+
+/* A compact switch is one tap target. The programmed side keys become
+   interactive only after the hardware has expanded to a usable size. */
+.catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__keys,
+.catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__keys button {
+  pointer-events: none;
+}
+
+.catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  cursor: zoom-in;
+  touch-action: manipulation;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint:hover {
+  background: rgb(255 255 255 / 7%);
+}
+
+.catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint svg {
+  position: absolute;
+  right: 50%;
+  bottom: 6px;
+  width: 14px;
+  height: 14px;
+  transform: translateX(50%);
+}

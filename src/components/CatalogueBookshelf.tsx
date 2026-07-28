@@ -411,12 +411,18 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
             <span><i aria-hidden="true"/> KNX</span>
             <small>WALL CONTROL</small>
           </span>
-          <span className="catalogue-knx-panel__keys" role="group" aria-label="Programmed KNX switch buttons">
+          <span
+            className="catalogue-knx-panel__keys"
+            role="group"
+            aria-label="Programmed KNX switch buttons"
+            aria-hidden={!isPanelOpen}
+          >
             {knxSwitchObjects.map((object, index) => <button
               type="button"
               className={activeSwitchKey === index ? 'is-active' : ''}
               aria-label={`KNX key ${index + 1}: ${object.label}`}
               aria-controls="catalogue-knx-screen"
+              tabIndex={isPanelOpen ? 0 : -1}
               onClick={() => triggerSwitchObject(index)}
               key={object.label}
             >
