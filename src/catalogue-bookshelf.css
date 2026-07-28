@@ -5435,25 +5435,17 @@
 .catalogue-shelf[data-row='catalogues']::after {
   position: absolute;
   z-index: 30;
-  inset: -8px 0 0;
+  inset: -14px -1.5% -8px;
   display: block;
   border-radius: 2px;
   content: '';
   pointer-events: none;
-  background:
-    linear-gradient(
-      180deg,
-      #080604 0 9%,
-      rgb(9 6 4 / 92%) 14%,
-      transparent 30%
-    ),
-    linear-gradient(
-      180deg,
-      rgb(11 8 6 / 82%) 0,
-      rgb(13 9 7 / 48%) 28%,
-      rgb(14 10 8 / 30%) 72%,
-      rgb(14 10 8 / 18%) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    #080604 0 13%,
+    rgb(9 7 5 / 78%) 24%,
+    rgb(10 8 6 / 70%) 100%
+  );
   opacity: 0;
   transition: opacity .22s ease;
 }
