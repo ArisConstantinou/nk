@@ -5557,3 +5557,272 @@
     left: auto;
   }
 }
+
+/* The expanded control is the same physical eight-key KNX switch, enlarged.
+   Its programmed hardware keys remain the only lighting controls. */
+.catalogue-knx-panel__key-mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 7px;
+  color: #4f4a43;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.catalogue-knx-panel__key-mark svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+.catalogue-knx-panel__key-mark i {
+  width: 19px;
+  height: 19px;
+  border: 2px solid rgb(255 255 255 / 92%);
+  border-radius: 50%;
+  background: var(--key-colour);
+  box-shadow:
+    0 1px 2px rgb(54 39 26 / 35%),
+    0 0 12px color-mix(in srgb, var(--key-colour) 58%, transparent);
+}
+
+.catalogue-knx-panel__key-mark small {
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: .015em;
+  line-height: 1;
+}
+
+.catalogue-knx-panel[data-expanded='true'] {
+  width: clamp(310px, 28vw, 380px);
+  max-width: calc(100% - 28px);
+  aspect-ratio: 1;
+  padding: clamp(9px, .8vw, 13px);
+  border: 1px solid rgb(103 89 73 / 34%);
+  border-radius: 20px;
+  outline: 2px solid rgb(247 241 232 / 88%);
+  background:
+    linear-gradient(132deg, rgb(255 255 255 / 42%), transparent 23% 77%, rgb(80 61 45 / 12%)),
+    linear-gradient(145deg, #e1d8cb, #aa9d8c 50%, #ddd3c4);
+  box-shadow:
+    0 2px 2px rgb(255 255 255 / 52%) inset,
+    0 -2px 3px rgb(78 60 43 / 28%) inset,
+    0 5px 9px rgb(54 38 25 / 22%),
+    0 26px 48px rgb(41 27 17 / 30%);
+}
+
+.catalogue-knx-panel[data-expanded='true']::before {
+  z-index: -1;
+  inset: -7px;
+  border-color: rgb(97 81 63 / 30%);
+  border-radius: 25px;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 48%), transparent 29% 76%, rgb(79 59 43 / 10%)),
+    linear-gradient(145deg, #ded5c8, #b1a392 58%, #ded5c8);
+  box-shadow:
+    0 1px 1px rgb(255 255 255 / 48%) inset,
+    0 7px 15px rgb(48 32 20 / 20%);
+}
+
+.catalogue-knx-panel[data-expanded='true']::after {
+  z-index: -2;
+  inset: -18px -22px -25px;
+  border-radius: 30px;
+  background: radial-gradient(ellipse at 50% 62%, rgb(49 34 22 / 27%), transparent 68%);
+  filter: blur(3px);
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgb(96 85 71 / 48%);
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, transparent 31%, rgb(255 255 255 / 7%) 31.2% 68.8%, transparent 69%),
+    linear-gradient(160deg, #172329, #050809 72%) center / 38% 100% no-repeat,
+    linear-gradient(145deg, #e9e4dc, #cfc6ba);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 66%),
+    0 0 0 3px rgb(99 88 75 / 24%),
+    0 2px 2px rgb(255 255 255 / 58%) inset,
+    0 -3px 6px rgb(72 57 42 / 28%) inset;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake::before {
+  z-index: 4;
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 17%), transparent 30% 72%, rgb(255 255 255 / 4%)),
+    linear-gradient(90deg, transparent 31%, rgb(255 255 255 / 8%) 31.2% 68.8%, transparent 69%);
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys {
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 31% 38% 31%;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 2px 0;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button {
+  overflow: hidden;
+  border: 1px solid rgb(104 94 81 / 42%);
+  color: #4f4a43;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 78%), transparent 37%),
+    linear-gradient(155deg, #f2eee7, #c8beb1);
+  box-shadow:
+    0 1px 1px rgb(255 255 255 / 82%) inset,
+    0 -2px 3px rgb(83 67 50 / 18%) inset,
+    0 1px 2px rgb(59 43 30 / 16%);
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:nth-child(1),
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:nth-child(5) {
+  border-radius: 12px 12px 4px 4px;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:nth-child(4),
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:nth-child(8) {
+  border-radius: 4px 4px 12px 12px;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:hover {
+  color: #292622;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 90%), transparent 39%),
+    linear-gradient(155deg, #fffdf8, #d4c9bb);
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:active,
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button.is-active {
+  color: #28241f;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 62%), transparent 42%),
+    color-mix(in srgb, var(--knx-colour) 18%, #d6cec3);
+  box-shadow:
+    0 3px 8px rgb(67 51 35 / 28%) inset,
+    0 0 0 2px color-mix(in srgb, var(--knx-colour) 44%, transparent) inset;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__keys button:focus-visible {
+  outline: 3px solid #152d36;
+  outline-offset: -5px;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__key-mark {
+  opacity: 1;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__brand {
+  position: absolute;
+  z-index: 5;
+  top: 8%;
+  right: 32%;
+  left: 32%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__brand > span {
+  font-size: 12px;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__brand small,
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__brand i,
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__channel-glance {
+  display: none;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake-screen {
+  position: absolute;
+  z-index: 5;
+  inset: 27% 32% 28%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake-screen > span:first-child {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake-screen small {
+  color: color-mix(in srgb, var(--knx-colour) 72%, #fff);
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake-screen strong {
+  font-size: clamp(25px, 2.2vw, 34px);
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint {
+  position: absolute;
+  z-index: 6;
+  right: 36%;
+  bottom: 6%;
+  left: 36%;
+  display: grid;
+  width: auto;
+  min-width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 8px;
+  color: rgb(238 247 247 / 78%);
+  background: rgb(255 255 255 / 7%);
+  box-shadow: 0 1px rgb(255 255 255 / 9%) inset;
+  transform: none;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint:hover {
+  color: #fff;
+  background: color-mix(in srgb, var(--knx-colour) 18%, rgb(255 255 255 / 8%));
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint > span {
+  display: none;
+}
+
+.catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint svg {
+  width: 19px;
+  height: 19px;
+}
+
+@media (max-width: 820px) {
+  .catalogue-knx-panel[data-expanded='true'] {
+    width: min(calc(100% - 24px), 360px);
+    max-width: calc(100% - 24px);
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .catalogue-knx-panel[data-expanded='true'] {
+    width: calc(100% - 16px);
+    max-width: calc(100% - 16px);
+    padding: 8px;
+  }
+
+  .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__key-mark {
+    gap: 5px;
+  }
+
+  .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__key-mark svg {
+    width: 19px;
+    height: 19px;
+  }
+}
