@@ -5429,6 +5429,39 @@
   display: none;
 }
 
+/* The room photograph contains a warm shelf strip in the pixels themselves.
+   Cover only the controlled catalogue bay when KNX power is off so the
+   photographed source and the interactive LED state switch off together. */
+.catalogue-shelf[data-row='catalogues']::after {
+  position: absolute;
+  z-index: 30;
+  inset: -8px 0 0;
+  display: block;
+  border-radius: 2px;
+  content: '';
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      #080604 0 9%,
+      rgb(9 6 4 / 92%) 14%,
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(11 8 6 / 82%) 0,
+      rgb(13 9 7 / 48%) 28%,
+      rgb(14 10 8 / 30%) 72%,
+      rgb(14 10 8 / 18%) 100%
+    );
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+
+.catalogue-shelf[data-row='catalogues'][data-power='off']::after {
+  opacity: 1;
+}
+
 .catalogue-knx-panel__channels button:only-child {
   grid-column: 1 / -1;
 }
@@ -5774,11 +5807,11 @@
 .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint {
   position: absolute;
   z-index: 6;
-  right: 31%;
+  right: auto;
   bottom: 6%;
-  left: 31%;
+  left: 50%;
   display: grid;
-  width: auto;
+  width: clamp(54px, 18%, 72px);
   min-width: 44px;
   height: 44px;
   place-items: center;
@@ -5789,7 +5822,7 @@
   color: rgb(238 247 247 / 78%);
   background: rgb(255 255 255 / 7%);
   box-shadow: 0 1px rgb(255 255 255 / 9%) inset;
-  transform: none;
+  transform: translateX(-50%);
 }
 
 .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint:hover {
