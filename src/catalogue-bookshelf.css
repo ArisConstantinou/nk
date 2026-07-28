@@ -5449,8 +5449,8 @@
   }
 
   .catalogue-knx-panel[data-expanded='false'] {
-    top: 43%;
-    width: clamp(64px, 3.6vw, 74px);
+    top: 38.5%;
+    width: clamp(116px, 6.6vw, 132px);
     border-color: rgb(103 89 73 / 28%);
     border-radius: 7px;
     outline: 1px solid rgb(242 232 216 / 52%);
@@ -5484,7 +5484,7 @@
   }
 
   .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake {
-    min-height: clamp(64px, 3.6vw, 74px);
+    min-height: clamp(116px, 6.6vw, 132px);
     aspect-ratio: 1;
     border-radius: 6px;
     background:
@@ -5532,11 +5532,11 @@
   }
 
   .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake-screen strong {
-    font-size: clamp(9px, .62vw, 12px);
+    font-size: 16px;
   }
 
   .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__wake-screen small {
-    font-size: clamp(6px, .38vw, 8px);
+    font-size: 12px;
   }
 
   .catalogue-knx-panel[data-expanded='false'] .catalogue-knx-panel__open-hint {
@@ -5725,8 +5725,8 @@
   position: absolute;
   z-index: 5;
   top: 8%;
-  right: 32%;
-  left: 32%;
+  right: 31%;
+  left: 31%;
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -5745,14 +5745,17 @@
 .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake-screen {
   position: absolute;
   z-index: 5;
-  inset: 27% 32% 28%;
+  inset: 27% 31% 28%;
   display: grid;
   place-items: center;
   pointer-events: none;
 }
 
 .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__wake-screen > span:first-child {
+  position: absolute;
+  inset: 0;
   display: grid;
+  place-content: center;
   justify-items: center;
   gap: 8px;
   text-align: center;
@@ -5771,14 +5774,15 @@
 .catalogue-knx-panel[data-expanded='true'] .catalogue-knx-panel__open-hint {
   position: absolute;
   z-index: 6;
-  right: 36%;
+  right: 31%;
   bottom: 6%;
-  left: 36%;
+  left: 31%;
   display: grid;
   width: auto;
   min-width: 44px;
   height: 44px;
   place-items: center;
+  justify-content: center;
   padding: 0;
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 8px;
