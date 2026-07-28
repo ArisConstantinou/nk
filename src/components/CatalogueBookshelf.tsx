@@ -162,6 +162,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
   const [activeSwitchKey, setActiveSwitchKey] = useState<number | null>(null);
   const [displayMode, setDisplayMode] = useState<CatalogueDisplayMode>(readStoredDisplayMode);
   const sceneRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const brandGroups = distributeCatalogues(catalogues);
   const shelfRows = ['catalogues', 'products'] as const;
   const activeChannel = channels[activeShelf];
@@ -173,6 +174,17 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
     });
     return () => window.cancelAnimationFrame(frame);
   }, [location.hash, location.key]);
+
+  useEffect(() => {
+    if (!isPanelOpen || !window.matchMedia('(max-width: 820px)').matches) return;
+    const scrollDelay = window.setTimeout(() => {
+      panelRef.current?.scrollIntoView({
+        block: 'center',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    }, 560);
+    return () => window.clearTimeout(scrollDelay);
+  }, [isPanelOpen]);
 
   const patchActiveChannel = (patch: Partial<ShelfLightChannel>) => {
     setChannels(current => current.map((channel, index) => (
@@ -380,6 +392,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
       </div>
 
       <aside
+        ref={panelRef}
         className="catalogue-knx-panel"
         aria-label="KNX shelf lighting wall switch"
         data-expanded={isPanelOpen ? 'true' : 'false'}
