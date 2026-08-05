@@ -2,7 +2,7 @@
 
 ## Architecture
 
-The public React application and the admin interface share the same build, while the admin API is a separate Node.js security boundary under `/api/admin`. Published CMS snapshots are the only records returned by the public endpoint. Draft history, reusable-editor libraries and unpublished global definitions never enter the public payload.
+The public React application, admin interface and Admin API share one origin. Locally, Vite owns the single `127.0.0.1:5191` listener and mounts the server-enforced API boundary under `/api/admin`; in a same-origin Node deployment, the Admin server serves both `dist` and the API. Published CMS snapshots are the only records returned by the public endpoint. Draft history, reusable-editor libraries and unpublished global definitions never enter the public payload.
 
 Persistent state is split between:
 
@@ -23,7 +23,7 @@ Required decisions:
 - Set a long, random `ADMIN_BOOTSTRAP_TOKEN` before the first owner is created, then rotate or remove it after setup.
 - Keep `ADMIN_ALLOW_LOOPBACK_SETUP=false` outside the local development runner.
 - Use absolute persistent paths for `ADMIN_DB_PATH` and `ADMIN_MEDIA_PATH` in container/server deployments.
-- Set `ADMIN_SERVE_SITE=true` only when the Node process should serve `dist` and the API from one origin.
+- Keep `ADMIN_SERVE_SITE=true` when the Node process should serve `dist` and the API from the single origin.
 - Set `ADMIN_TRUST_LOOPBACK_PROXY=true` only when a trusted local reverse proxy overwrites `X-Forwarded-For`.
 
 Terminate TLS at the reverse proxy or hosting platform and proxy `/api/admin/*` without caching. Preserve `Set-Cookie`, `Origin`, range requests and response security headers. Apply request-size limits of at least 36 MB to the media upload routes and smaller limits to all other API routes.
@@ -36,7 +36,7 @@ Firebase web configuration is public by design and is not an administrator crede
 
 ### Optional localhost Firebase sign-in
 
-The development admin can prefer Firebase Google sign-in while retaining the original local credentials as an offline fallback. Put the `VITE_FIREBASE_*` values plus `FIREBASE_API_KEY` and `FIREBASE_ADMIN_EMAILS` in the ignored `.env.local` file, and add `localhost` and `127.0.0.1` to Firebase Authentication's authorised domains. `npm run dev:admin` passes these values to both Vite and the local API.
+The development admin can prefer Firebase Google sign-in while retaining the original local credentials as an offline fallback. Put the `VITE_FIREBASE_*` values plus `FIREBASE_API_KEY` and `FIREBASE_ADMIN_EMAILS` in the ignored `.env.local` file, and add `localhost` and `127.0.0.1` to Firebase Authentication's authorised domains. `npm run dev` and its `npm run dev:admin` alias load these values into the unified local server.
 
 After Firebase signs in, the browser sends its short-lived ID token to `/api/admin/firebase-login`. The local API verifies it with the Firebase Identity Toolkit, requires a verified allow-listed email, and maps that email to an existing active SQLite administrator before issuing the normal HttpOnly/CSRF session. Firebase therefore cannot create a local user, change a role or bypass local API permissions. If token verification cannot reach Firebase, the login screen keeps the original local email/password form active.
 

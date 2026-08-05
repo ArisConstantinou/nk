@@ -13,17 +13,17 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-The development server is fixed to <http://127.0.0.1:5191/>. The secure admin API requires Node.js 22.5 or newer because it uses the built-in SQLite module.
+The unified development server is fixed to <http://127.0.0.1:5191/>. It serves the Vite frontend, hot reload and the secure Admin API from the same listener. The API requires Node.js 22.5 or newer because it uses the built-in SQLite module.
 
 ## Secure admin
 
-The admin is implemented as a separate security boundary while remaining available at `/admin` in the same React application. Start the website and persistent admin API together:
+The admin keeps its server-enforced authentication and authorization boundary while remaining available at `/admin` in the same React application. The normal development command already starts the website and persistent Admin API together. This equivalent command remains available:
 
 ```powershell
 npm.cmd run dev:admin
 ```
 
-Then open <http://127.0.0.1:5191/admin/>. The development runner explicitly permits one-time setup from loopback and locks the endpoint permanently after the owner exists. Every other start mode requires a long random `ADMIN_BOOTSTRAP_TOKEN` before first setup, regardless of proxy topology or `NODE_ENV`.
+Then open <http://127.0.0.1:5191/admin/>. There is no second localhost port. The development server explicitly permits one-time setup from loopback and locks the endpoint permanently after the owner exists. Every standalone production start requires a long random `ADMIN_BOOTSTRAP_TOKEN` before first setup, regardless of proxy topology or `NODE_ENV`.
 
 Admin data is stored in `.data/admin.sqlite` and uploaded media in `.data/media`; both locations are ignored by Git. The API uses server-side scrypt password hashes, HttpOnly same-site sessions, CSRF and origin checks, role permissions, validation, optimistic record versions, revisions and audit logging.
 

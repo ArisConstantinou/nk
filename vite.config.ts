@@ -1,18 +1,17 @@
 import {defineConfig, loadEnv} from 'vite';
 import react from '@vitejs/plugin-react';
+import {singlePortAdminPlugin} from './server/vite-admin-plugin.mjs';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const adminApiTarget = env.ADMIN_API_TARGET || 'http://127.0.0.1:5192';
 
   return {
     base: mode === 'github-pages' ? '/nk/' : '/',
-    plugins: [react()],
+    plugins: [singlePortAdminPlugin(env), react()],
     server: {
       host: '127.0.0.1',
       port: 5191,
       strictPort: true,
-      proxy: {'/api/admin': {target: adminApiTarget, changeOrigin: false}},
     },
     preview: {host: '127.0.0.1', port: 5191, strictPort: true},
     build: {target: 'es2022'},

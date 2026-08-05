@@ -2,7 +2,7 @@ import {createServer} from 'node:http';
 import {accessSync, constants as fsConstants, copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync} from 'node:fs';
 import {extname, resolve, sep} from 'node:path';
 import {isIP} from 'node:net';
-import {URL} from 'node:url';
+import {pathToFileURL, URL} from 'node:url';
 import {audit, contentRecord, db, enquiryRecord, formRecord, mediaRecord, navigationRecord, newId, nowIso, publicUser, safeJson, submissionRecord, transaction} from './db.mjs';
 import {CONTENT_KINDS, validateContentInput, validatePublishReady} from './content-validation.mjs';
 import {NAVIGATION_MENUS, SUBMISSION_STATUSES, validateFormInput, validateNavigationInput, validateSubmission} from './cms-validation.mjs';
@@ -12,7 +12,7 @@ import {validateInteractiveDocument, validateInteractiveInput} from './interacti
 import sharp from 'sharp';
 
 const HOST = process.env.ADMIN_API_HOST || '127.0.0.1';
-const PORT = Number(process.env.ADMIN_API_PORT || 5192);
+const PORT = Number(process.env.ADMIN_API_PORT || 5191);
 const API_PREFIX = '/api/admin';
 const configuredSessionHours = Number(process.env.ADMIN_SESSION_HOURS || 8);
 const SESSION_HOURS = Number.isFinite(configuredSessionHours) ? Math.min(168, Math.max(1, configuredSessionHours)) : 8;
@@ -21,7 +21,7 @@ const ALLOW_LOOPBACK_SETUP = !IS_PRODUCTION && process.env.ADMIN_ALLOW_LOOPBACK_
 const MEDIA_DIR = resolve(process.env.ADMIN_MEDIA_PATH || resolve('.data', 'media'));
 const DIST_DIR = resolve(process.env.ADMIN_DIST_PATH || 'dist');
 const SERVE_SITE = process.env.ADMIN_SERVE_SITE === 'true';
-const ALLOWED_ORIGINS = new Set((process.env.ADMIN_ALLOWED_ORIGINS || 'http://127.0.0.1:5191,http://localhost:5191,http://127.0.0.1:5192').split(',').map(value => value.trim()).filter(Boolean));
+const ALLOWED_ORIGINS = new Set((process.env.ADMIN_ALLOWED_ORIGINS || 'http://127.0.0.1:5191,http://localhost:5191').split(',').map(value => value.trim()).filter(Boolean));
 const TRUST_LOOPBACK_PROXY = process.env.ADMIN_TRUST_LOOPBACK_PROXY === 'true';
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || '';
 const FIREBASE_ALLOWED_EMAILS = new Set(String(process.env.FIREBASE_ADMIN_EMAILS || process.env.VITE_FIREBASE_ADMIN_EMAILS || '').split(',').map(value => value.trim().toLowerCase()).filter(Boolean));
@@ -1714,15 +1714,20 @@ async function handleRequest(req, res) {
   throw new ApiError(404, 'not_found', 'API route not found.');
 }
 
-export const server = createServer((req, res) => {
-  handleRequest(req, res).catch(error => {
+export async function adminRequestHandler(req, res) {
+  try {
+    await handleRequest(req, res);
+  } catch (error) {
     if (error instanceof ApiError) return sendJson(res, error.status, {error: {code: error.code, message: error.message, fields: error.fields}});
     if (String(error?.message || '').includes('UNIQUE constraint failed')) return sendJson(res, 409, {error: {code: 'duplicate', message: 'A record with that email or slug already exists.'}});
     console.error('[admin-api]', error);
     return sendJson(res, 500, {error: {code: 'internal_error', message: 'The admin service could not complete the request.'}});
-  });
-});
+  }
+}
 
-if (process.env.NODE_ENV !== 'test') {
+export const server = createServer(adminRequestHandler);
+
+const isDirectExecution = Boolean(process.argv[1]) && pathToFileURL(resolve(process.argv[1])).href === import.meta.url;
+if (isDirectExecution) {
   server.listen(PORT, HOST, () => console.log(`NK admin API listening on http://${HOST}:${PORT}${API_PREFIX}`));
 }

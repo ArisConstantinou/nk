@@ -6,8 +6,7 @@ const viteEntry = fileURLToPath(new URL('../node_modules/vite/bin/vite.js', impo
 const localEnv = loadEnv('development', process.cwd(), '');
 const developmentEnv = {...process.env, ...localEnv, NODE_ENV: 'development', ADMIN_ALLOW_LOOPBACK_SETUP: 'true'};
 const children = [
-  spawn(process.execPath, ['--watch', 'server/admin-server.mjs'], {stdio: 'inherit', env: developmentEnv}),
-  spawn(process.execPath, [viteEntry], {stdio: 'inherit', env: process.env}),
+  spawn(process.execPath, [viteEntry], {stdio: 'inherit', env: developmentEnv}),
 ];
 
 let stopping = false;
