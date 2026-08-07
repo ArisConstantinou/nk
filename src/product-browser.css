@@ -71,6 +71,38 @@
   font-style:normal;
 }
 
+/*
+ * Mobile product photography was blended with the page canvas to hide white
+ * image mats. On a dark canvas, `multiply` turns the whole photograph almost
+ * black. Keep dark mode around the cards, but render the actual product media
+ * at its source luminance on a neutral showroom surface.
+ */
+@media(max-width:820px){
+  html[data-theme='dark'] .electrical-main :is(
+    .product-image,
+    .catalogue-product-card__image,
+    .product-detail-image,
+    .product-expanded-module__visual,
+    .product-expanded-module__sequence img,
+    .product-expanded-module__similar img
+  ){
+    background:#f2eee6;
+    border-color:rgba(216,164,103,.34);
+  }
+
+  html[data-theme='dark'] .electrical-main :is(
+    .product-image,
+    .catalogue-product-card__image,
+    .product-detail-image,
+    .product-expanded-module__visual,
+    .product-expanded-module__sequence,
+    .product-expanded-module__similar
+  ) img{
+    filter:none;
+    mix-blend-mode:normal;
+  }
+}
+
 .product-expanded-module{
   position:relative;
   min-height:100%;

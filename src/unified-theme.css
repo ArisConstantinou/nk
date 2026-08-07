@@ -134,6 +134,19 @@ html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition]
   background:linear-gradient(90deg,rgba(12,20,22,.91),rgba(12,20,22,.28) 34%,transparent 68%),linear-gradient(0deg,rgba(12,20,22,.64),transparent 52%)!important;
 }
 
+/* Preserve the warm lighting photography when the surrounding UI is dark. */
+html[data-theme='dark'][data-experience='tech'] .ia-shell[data-page-theme='lighting-design'] .system-page-art__wash{
+  background:linear-gradient(90deg,rgba(12,20,22,.48),rgba(12,20,22,.12) 28%,transparent 58%),linear-gradient(0deg,rgba(12,20,22,.38),transparent 44%)!important;
+}
+
+html[data-theme='dark'][data-experience='tech'] .ia-shell[data-page-theme='lighting-design'] .system-page-art img{
+  filter:saturate(1.05) contrast(1.02) brightness(1.08);
+}
+
+html[data-theme='dark'][data-experience='tech'] .ia-shell[data-page-theme='lighting-design'] .lighting-study__plate{
+  filter:saturate(.98) contrast(1.02) brightness(1.04);
+}
+
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-brief,
 html[data-experience='tech'] .ia-shell .system-page-intro[data-hero-composition] .system-page-ornament{
   border-color:#d8a467!important;
