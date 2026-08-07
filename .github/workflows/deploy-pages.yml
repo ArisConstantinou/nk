@@ -56,6 +56,8 @@ jobs:
             appliances
             explore
             admin
+            admin/products
+            admin/products/editor
           )
           for route in "${routes[@]}"; do
             mkdir -p "dist/$route"
