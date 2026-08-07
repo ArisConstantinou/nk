@@ -1,5 +1,5 @@
 import {Component, useEffect, useState, type ErrorInfo, type ReactNode} from 'react';
-import {Navigate, Outlet, Route, Routes, useLocation} from 'react-router-dom';
+import {Link, Navigate, Outlet, Route, Routes, useLocation} from 'react-router-dom';
 import {AdminAuthProvider, useAdminAuth} from './auth/AdminAuth';
 import {LoginPage, ServiceUnavailablePage, SetupPage} from './auth/AuthPages';
 import {AdminError, AdminLoading, PageHeading} from './components/AdminStates';
@@ -87,7 +87,12 @@ function ContentRoute({kind}: {kind: ContentKind}) {
     description: 'Edit this content directly against the live website preview.',
   };
   return <>
-    <PageHeading eyebrow="VISUAL WEBSITE EDITOR" title={heading.title} description={heading.description}/>
+    <PageHeading
+      eyebrow="VISUAL WEBSITE EDITOR"
+      title={heading.title}
+      description={heading.description}
+      actions={kind === 'product' ? <Link to="/admin/products">Manage products</Link> : undefined}
+    />
     <VisualEditor kind={kind}/>
   </>;
 }
@@ -95,6 +100,11 @@ function ContentRoute({kind}: {kind: ContentKind}) {
 function PageManagementRoute() {
   const {user} = useAdminAuth();
   return user && canReadKind(user.role, 'page') ? <RecordManager kind="page"/> : <Navigate to="/admin/dashboard" replace/>;
+}
+
+function ProductManagementRoute() {
+  const {user} = useAdminAuth();
+  return user && canReadKind(user.role, 'product') ? <RecordManager kind="product"/> : <Navigate to="/admin/dashboard" replace/>;
 }
 
 function EnquiriesRoute() {
@@ -152,7 +162,8 @@ function AdminRoutes() {
         <Route path="pages" element={<ContentRoute kind="page"/>}/>
         <Route path="site-pages" element={<PageManagementRoute/>}/>
         <Route path="services" element={<ContentRoute kind="service"/>}/>
-        <Route path="products" element={<ContentRoute kind="product"/>}/>
+        <Route path="products" element={<ProductManagementRoute/>}/>
+        <Route path="products/editor" element={<ContentRoute kind="product"/>}/>
         <Route path="catalogues" element={<ContentRoute kind="catalogue"/>}/>
         <Route path="projects" element={<ContentRoute kind="project"/>}/>
         <Route path="company" element={<ContentRoute kind="company"/>}/>

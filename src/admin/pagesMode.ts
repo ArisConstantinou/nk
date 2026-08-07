@@ -56,6 +56,8 @@ type PagesState = {
   revisions: Record<string, Revision[]>;
   favorites: string[];
   interactive: InteractiveExperienceRecord[];
+  catalogueManaged: boolean;
+  productTombstones: string[];
 };
 
 export type PagesApiResult = {status: number; payload: unknown};
@@ -73,6 +75,8 @@ const emptyState = (): PagesState => ({
   revisions: {},
   favorites: [],
   interactive: [],
+  catalogueManaged: false,
+  productTombstones: [],
 });
 
 const clone = <T,>(value: T): T => structuredClone(value);
@@ -474,6 +478,7 @@ export function readPagesPublicPayload() {
     navigation: state.navigation.filter(item => item.active),
     forms: state.forms.filter(form => form.active),
     media: state.media.filter(item => item.active),
+    managedProductCatalogue: state.catalogueManaged,
   };
 }
 
@@ -498,11 +503,42 @@ function seedWorkspace(state: PagesState, body: Record<string, unknown>) {
   writeState(state);
 }
 
+function syncCatalogueProducts(state: PagesState, body: Record<string, unknown>): PagesApiResult {
+  const seeds = Array.isArray(body.records) ? body.records as Array<Record<string, unknown>> : [];
+  if (!seeds.length || seeds.length > 1000) return fail(400, 'invalid_catalogue_sync', 'The product catalogue is invalid.');
+  const valid = seeds.every(seed => seed.kind === 'product' && typeof seed.slug === 'string' && Boolean(seed.slug) && typeof seed.title === 'string' && Boolean(seed.title) && seed.data && typeof seed.data === 'object' && !Array.isArray(seed.data));
+  const slugs = new Set(seeds.map(seed => String(seed.slug || '')));
+  if (!valid || slugs.size !== seeds.length) return fail(400, 'invalid_catalogue_sync', 'The product catalogue contains invalid or duplicate records.');
+  const stamp = now();
+  const existing = new Set(state.records.filter(record => record.kind === 'product').map(record => record.slug));
+  const deleted = new Set(state.productTombstones);
+  let position = state.records.filter(record => record.kind === 'product').reduce((maximum, record) => Math.max(maximum, record.position), -1) + 1;
+  let inserted = 0;
+  let skippedExisting = 0;
+  let skippedDeleted = 0;
+  for (const seed of seeds) {
+    const slug = String(seed.slug);
+    if (existing.has(slug)) { skippedExisting += 1; continue; }
+    if (deleted.has(slug)) { skippedDeleted += 1; continue; }
+    const draft = clone(seed.data as Record<string, unknown>);
+    state.records.push({id: id(), kind: 'product', slug, title: String(seed.title), status: 'published', draft, published: clone(draft), version: 1, createdAt: stamp, updatedAt: stamp, publishedAt: stamp, position, category: String(seed.category || draft.category || ''), tags: Array.isArray(seed.tags) ? seed.tags.map(String) : [], updatedById: pagesAdminUser.id});
+    existing.add(slug);
+    position += 1;
+    inserted += 1;
+  }
+  const firstSync = !state.catalogueManaged;
+  state.catalogueManaged = true;
+  if (firstSync || inserted) recordAudit(state, 'catalogue.products_synced', 'product', null, {source: seeds.length, inserted, skippedExisting, skippedDeleted});
+  writeState(state);
+  return ok({managed: true, source: seeds.length, inserted, skippedExisting, skippedDeleted});
+}
+
 function contentRequest(state: PagesState, parts: string[], url: URL, method: string, body: Record<string, unknown>): PagesApiResult | null {
   if (parts[1] === 'seed') {
     if (method === 'GET') return ok({needsSeed: !state.records.length || !state.navigation.length || !state.forms.length, content: state.records.length, navigation: state.navigation.length, forms: state.forms.length});
     if (method === 'POST') { seedWorkspace(state, body); return ok({inserted: state.records.length}, 201); }
   }
+  if (parts[1] === 'catalogue-sync' && method === 'POST') return syncCatalogueProducts(state, body);
   if (parts.length === 1 && method === 'GET') {
     const kind = url.searchParams.get('kind');
     const kinds = (url.searchParams.get('kinds') || '').split(',').filter(Boolean);
@@ -534,6 +570,7 @@ function contentRequest(state: PagesState, parts: string[], url: URL, method: st
     const stamp = now();
     const record: ContentRecord = {id: id(), kind: body.kind as ContentKind, slug: String(body.slug || ''), title: String(body.title || ''), status: 'draft', draft: clone((body.data || {}) as Record<string, unknown>), published: null, version: 1, createdAt: stamp, updatedAt: stamp, publishedAt: null, position: state.records.filter(item => item.kind === body.kind).length, category: String(body.category || ''), tags: Array.isArray(body.tags) ? body.tags.map(String) : [], updatedById: pagesAdminUser.id};
     if (!record.title || !record.slug) return fail(400, 'validation_failed', 'Complete the required fields.', {title: record.title ? '' : 'Required.', slug: record.slug ? '' : 'Required.'});
+    if (record.kind === 'product') state.productTombstones = state.productTombstones.filter(slug => slug !== record.slug);
     state.records.push(record); saveRevision(state, record, 'created'); recordAudit(state, 'content.created', record.kind, record.id, {title: record.title}); writeState(state); return ok({record: clone(record)}, 201);
   }
   const recordIndex = state.records.findIndex(record => record.id === parts[1]);
@@ -544,6 +581,7 @@ function contentRequest(state: PagesState, parts: string[], url: URL, method: st
     state.records[recordIndex] = next; saveRevision(state, next, 'updated'); recordAudit(state, 'content.updated', next.kind, next.id, {title: next.title}); writeState(state); return ok({record: clone(next)});
   }
   if (parts.length === 2 && method === 'DELETE') {
+    if (current.kind === 'product') state.productTombstones = [...new Set([...state.productTombstones, current.slug])];
     state.records.splice(recordIndex, 1); delete state.revisions[current.id]; recordAudit(state, 'content.deleted', current.kind, current.id, {title: current.title}); writeState(state); return ok({ok: true});
   }
   if (parts[2] === 'publish' && method === 'POST') {

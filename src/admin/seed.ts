@@ -1,8 +1,20 @@
 import {defaultContent} from '../content';
+import legacyProductData from '../data/legacy-products.json';
+import {publicAsset} from '../utils/assets';
 import {adminApi} from './api';
 import type {ContentKind} from './types';
 
 type SeedRecord = {kind: ContentKind; slug: string; title: string; data: Record<string, unknown>};
+
+type CatalogueProductSource = {
+  id: string;
+  name: string;
+  category: string;
+  season: string;
+  space: string;
+  image: string;
+  note: string;
+};
 
 const services: SeedRecord[] = [
   {kind: 'service', slug: 'electrical-installations', title: 'Electrical installations', data: {code: 'SRV-01', shortTitle: 'Electrical installations from survey to tested handover.', description: 'Electrical planning and installation for homes, renovations, workplaces, retail and hospitality projects.', intro: 'We assess the supply and loads, plan circuits and protection, install containment and cabling, complete final connections, then inspect, test and hand over the system.', deliverables: ['Load, circuit and distribution planning', 'Boards, protection and supply coordination', 'Containment, cabling and final connections', 'Inspection, testing and handover'], applications: ['Homeowners building or renovating', 'Developers, architects and contractors', 'Workplaces, retail and hospitality', 'Extensions and existing-system upgrades']}},
@@ -97,6 +109,25 @@ export function buildAdminSeed(): SeedRecord[] {
   ];
 }
 
+export function buildCatalogueProductSeed(): SeedRecord[] {
+  const curated = new Map(defaultContent.products.map(product => [product.id, product]));
+  return (legacyProductData as CatalogueProductSource[]).map(source => {
+    const product = {...source, ...curated.get(source.id)};
+    return {
+      kind: 'product',
+      slug: product.id,
+      title: product.name,
+      data: {
+        category: product.category,
+        season: product.season,
+        space: product.space,
+        image: curated.has(source.id) ? product.image : publicAsset(product.image),
+        note: product.note,
+      },
+    };
+  });
+}
+
 let seeded = false;
 let seedRequest: Promise<void> | null = null;
 export async function ensureAdminSeed() {
@@ -104,6 +135,7 @@ export async function ensureAdminSeed() {
   if (!seedRequest) {
     seedRequest = adminApi<{needsSeed: boolean}>('/content/seed')
       .then(status => status.needsSeed ? adminApi('/content/seed', {method: 'POST', body: JSON.stringify({records: buildAdminSeed(), navigation: navigationSeed, forms: formsSeed})}) : undefined)
+      .then(() => adminApi('/content/catalogue-sync', {method: 'POST', body: JSON.stringify({records: buildCatalogueProductSeed()})}))
       .then(() => { seeded = true; })
       .finally(() => { seedRequest = null; });
   }

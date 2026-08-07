@@ -62,6 +62,10 @@ function pageData(overrides = {}) {
   };
 }
 
+function productSeed(slug, title, image = `/assets/catalogue-products/lighting/photos/${slug}.png`) {
+  return {kind: 'product', slug, title, data: {category: 'Lighting', season: 'All year', space: 'Living', image, note: `${title} catalogue note.`}};
+}
+
 function interactiveData(sectionName = 'Empty wall') {
   return {
     schemaVersion: 1,
@@ -218,6 +222,38 @@ test('secure admin lifecycle', async t => {
   assert.equal(seed.payload.formsInserted, 1);
   const seedStatusAfter = await request('/content/seed', {cookie});
   assert.equal(seedStatusAfter.payload.needsSeed, false);
+
+  const catalogueSync = await request('/content/catalogue-sync', {method: 'POST', cookie, csrf, body: {records: [productSeed('catalogue-a', 'Catalogue A'), productSeed('catalogue-b', 'Catalogue B')]}});
+  assert.equal(catalogueSync.response.status, 200);
+  assert.deepEqual({managed: catalogueSync.payload.managed, source: catalogueSync.payload.source, inserted: catalogueSync.payload.inserted}, {managed: true, source: 2, inserted: 2});
+  const syncedProducts = await request('/content?kind=product', {cookie});
+  assert.equal(syncedProducts.payload.records.length, 2);
+  const catalogueA = syncedProducts.payload.records.find(item => item.slug === 'catalogue-a');
+  const catalogueB = syncedProducts.payload.records.find(item => item.slug === 'catalogue-b');
+  const repeatSync = await request('/content/catalogue-sync', {method: 'POST', cookie, csrf, body: {records: [productSeed('catalogue-a', 'Must not overwrite'), productSeed('catalogue-b', 'Must not overwrite')]}});
+  assert.equal(repeatSync.payload.inserted, 0);
+  const preservedProducts = await request('/content?kind=product', {cookie});
+  const preservedA = preservedProducts.payload.records.find(item => item.slug === 'catalogue-a');
+  assert.equal(preservedA.title, catalogueA.title);
+  assert.equal(preservedA.version, catalogueA.version);
+  assert.deepEqual(preservedA.draft, catalogueA.draft);
+  const duplicateSync = await request('/content/catalogue-sync', {method: 'POST', cookie, csrf, body: {records: [productSeed('repeated-product', 'Repeated'), productSeed('repeated-product', 'Repeated again')]}});
+  assert.equal(duplicateSync.response.status, 400);
+  assert.equal(duplicateSync.payload.error.code, 'invalid_catalogue_sync');
+  const updatedProduct = await request(`/content/${catalogueA.id}`, {method: 'PUT', cookie, csrf, body: {...productSeed(catalogueA.slug, catalogueA.title, '/assets/catalogue-products/lighting/photos/admin-replacement.png'), expectedVersion: catalogueA.version}});
+  const publishedProduct = await request(`/content/${catalogueA.id}/publish`, {method: 'POST', cookie, csrf, body: {expectedVersion: updatedProduct.payload.record.version}});
+  assert.equal(publishedProduct.response.status, 200);
+  const archivedProduct = await request(`/content/${catalogueB.id}/archive`, {method: 'POST', cookie, csrf, body: {expectedVersion: catalogueB.version}});
+  assert.equal(archivedProduct.response.status, 200);
+  const managedPublicSite = await request('/public/site');
+  assert.equal(managedPublicSite.payload.managedProductCatalogue, true);
+  assert.equal(managedPublicSite.payload.records.find(item => item.kind === 'product' && item.slug === 'catalogue-a').data.image, '/assets/catalogue-products/lighting/photos/admin-replacement.png');
+  assert.equal(managedPublicSite.payload.records.some(item => item.kind === 'product' && item.slug === 'catalogue-b'), false);
+  const deletedProduct = await request(`/content/${catalogueB.id}`, {method: 'DELETE', cookie, csrf});
+  assert.equal(deletedProduct.response.status, 200);
+  const syncAfterDelete = await request('/content/catalogue-sync', {method: 'POST', cookie, csrf, body: {records: [productSeed('catalogue-a', 'Catalogue A'), productSeed('catalogue-b', 'Catalogue B')]}});
+  assert.equal(syncAfterDelete.payload.inserted, 0);
+  assert.equal(syncAfterDelete.payload.skippedDeleted, 1);
 
   const list = await request('/content?kind=page', {cookie});
   assert.equal(list.response.status, 200);
@@ -499,6 +535,8 @@ test('secure admin lifecycle', async t => {
   assert.equal(deniedMixedBatch.response.status, 403);
   const allowedProducts = await request('/content?kind=product', {cookie: shopCookie});
   assert.equal(allowedProducts.response.status, 200);
+  const deniedCatalogueSync = await request('/content/catalogue-sync', {method: 'POST', cookie: shopCookie, csrf: shopCsrf, body: {records: [productSeed('shop-sync', 'Shop sync')]}});
+  assert.equal(deniedCatalogueSync.response.status, 403);
   const deniedEnquiries = await request('/enquiries', {cookie: shopCookie});
   assert.equal(deniedEnquiries.response.status, 403);
   const deniedInteractive = await request('/interactive/test-installation', {cookie: shopCookie});

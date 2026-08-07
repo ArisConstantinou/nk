@@ -226,6 +226,19 @@ db.exec(`
     PRIMARY KEY (user_id, entity_type, entity_id)
   );
 
+  CREATE TABLE IF NOT EXISTS catalogue_product_sync_state (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    source_count INTEGER NOT NULL DEFAULT 0,
+    synced_at TEXT NOT NULL,
+    synced_by TEXT REFERENCES admin_users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS catalogue_product_tombstones (
+    slug TEXT PRIMARY KEY,
+    deleted_at TEXT NOT NULL,
+    deleted_by TEXT REFERENCES admin_users(id)
+  );
+
   CREATE INDEX IF NOT EXISTS idx_content_position ON content_records(kind, position, updated_at DESC);
   CREATE INDEX IF NOT EXISTS idx_navigation_menu_position ON navigation_items(menu, position);
   CREATE INDEX IF NOT EXISTS idx_forms_position ON site_forms(position);
@@ -251,6 +264,7 @@ recordMigration.run(3, 'forms-navigation-and-submissions', migrationAppliedAt);
 recordMigration.run(4, 'content-taxonomy-and-favorites', migrationAppliedAt);
 recordMigration.run(5, 'production-query-indexes', migrationAppliedAt);
 recordMigration.run(6, 'interactive-experience-documents', migrationAppliedAt);
+recordMigration.run(7, 'managed-product-catalogue', migrationAppliedAt);
 
 export const nowIso = () => new Date().toISOString();
 export const newId = () => randomUUID();

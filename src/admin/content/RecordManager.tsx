@@ -14,6 +14,7 @@ import {recordConfigs, type RecordField} from './recordConfigs';
 type EditorState = {id?: string; kind: ContentRecord['kind']; title: string; slug: string; data: Record<string, unknown>; version: number; status: ContentRecord['status']; category: string; tags: string[]};
 type PageNavigationMenu = Extract<NavigationMenu, 'primary' | 'services' | 'shop'>;
 type NavigationRequest = {itemId?: string; newMenu?: NavigationMenu | null};
+const PRODUCT_PAGE_SIZE = 50;
 
 function toEditor(record: ContentRecord): EditorState {
   return {id: record.id, kind: record.kind, title: record.title, slug: record.slug, data: structuredClone(record.draft), version: record.version, status: record.status, category: record.category || '', tags: record.tags || []};
@@ -42,6 +43,7 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   const [notice, setNotice] = useState('');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | ContentRecord['status']>('all');
+  const [visibleCount, setVisibleCount] = useState(PRODUCT_PAGE_SIZE);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -74,7 +76,15 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   useEffect(() => { void loadNavigation(); }, [kind]);
 
   const shown = useMemo(() => records.filter(record => (statusFilter === 'all' || record.status === statusFilter) && (!query || `${record.title} ${record.slug} ${record.status} ${Object.values(record.draft).join(' ')}`.toLowerCase().includes(query.toLowerCase()))), [records, query, statusFilter]);
-  useEffect(() => { if (editor) window.setTimeout(() => titleInputRef.current?.focus(), 20); }, [editor?.id]);
+  const visible = kind === 'product' ? shown.slice(0, visibleCount) : shown;
+  useEffect(() => { setVisibleCount(PRODUCT_PAGE_SIZE); }, [kind, query, statusFilter]);
+  useEffect(() => {
+    if (!editor) return;
+    window.setTimeout(() => {
+      titleInputRef.current?.focus();
+      if (window.matchMedia('(max-width: 840px)').matches) titleInputRef.current?.scrollIntoView({block: 'center', behavior: 'smooth'});
+    }, 20);
+  }, [editor?.id, Boolean(editor)]);
   const startNew = () => {
     const data = structuredClone(config.defaults);
     if (kind === 'page') data.route = '';
@@ -409,8 +419,18 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
   const editorRecord = editor?.id ? records.find(item => item.id === editor.id) : undefined;
 
+  const recordEditorPath = kind === 'page' ? '/admin/pages' : kind === 'product' ? '/admin/products/editor' : '';
+
   return <div className="nk-admin-record-page">
-    <PageHeading eyebrow={config.eyebrow} title={kind === 'page' ? 'Pages & navigation' : config.title} description={kind === 'page' ? 'Create and edit pages, then place them across every website menu from the same workspace.' : config.description} actions={canWrite && (!config.singleton || records.length === 0) ? <button className="nk-admin-primary" data-guide={kind === 'page' ? 'add-page' : undefined} type="button" onClick={startNew}><Plus/>Add {config.singular}</button> : undefined}/>
+    <PageHeading
+      eyebrow={config.eyebrow}
+      title={kind === 'page' ? 'Pages & navigation' : config.title}
+      description={kind === 'page' ? 'Create and edit pages, then place them across every website menu from the same workspace.' : config.description}
+      actions={<>
+        {kind === 'product' && <Link to="/admin/products/editor"><FilePenLine/>Visual editor</Link>}
+        {canWrite && (!config.singleton || records.length === 0) && <button className="nk-admin-primary" data-guide={kind === 'page' ? 'add-page' : kind === 'product' ? 'add-product' : undefined} type="button" onClick={startNew}><Plus/>Add {config.singular}</button>}
+      </>}
+    />
     {error && <p className="nk-admin-alert nk-admin-alert--error" role="alert">{error}<button type="button" onClick={() => setError('')} aria-label="Dismiss error"><X/></button></p>}
     {notice && <p className="nk-admin-alert" role="status"><Check/>{notice}<button type="button" onClick={() => setNotice('')} aria-label="Dismiss message"><X/></button></p>}
     {kind === 'page' && <section className="nk-admin-page-navigation" aria-labelledby="page-navigation-title">
@@ -421,7 +441,20 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
       </div>
     </section>}
     {kind === 'page' && navigationWorkspaceOpen ? <NavigationPage embedded requestedItemId={navigationRequest.itemId} requestedNewMenu={navigationRequest.newMenu} onItemsChange={setNavigationItems} onClose={closeNavigationWorkspace}/> : <div className={`nk-admin-record-workspace ${editor ? 'editor-open' : ''}`}><section className="nk-admin-record-index" aria-label={`${config.title} records`}><div className="nk-admin-record-toolbar"><label><Search/><input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${config.title.toLowerCase()}`} aria-label={`Search ${config.title.toLowerCase()}`}/></label><select value={statusFilter} onChange={event => setStatusFilter(event.target.value as typeof statusFilter)} aria-label="Filter by publication status"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Drafts</option><option value="archived">Archived</option></select><span>{shown.length} shown · {records.filter(item => item.status === 'draft').length} drafts</span></div>
-    {loading ? <div className="nk-admin-list-loading"><RefreshCw className="nk-admin-spin"/>Loading {config.title.toLowerCase()}…</div> : shown.length ? <div className="nk-admin-record-list"><header><span>Record</span><span>Status</span><span>Last updated</span><span/></header>{shown.map((record, index) => <div className={`nk-admin-record-item ${draggingPageId === record.id ? 'is-dragging' : ''}`} draggable={kind === 'page' && canWriteNavigation && record.status === 'published'} onDragStart={event => onPageDragStart(event, record)} onDragEnd={() => {setDraggingPageId(''); setNavigationDropActive(false);}} key={record.id}><button type="button" aria-current={editor?.id === record.id ? 'true' : undefined} className={`nk-admin-record-row ${record.status}`} onClick={() => edit(record)}>{recordImage(record) ? <img src={recordImage(record)} alt=""/> : <span className="nk-admin-record-symbol">{kind === 'seo' ? 'SEO' : kind.slice(0,2).toUpperCase()}</span>}<span className="nk-admin-record-name"><small>{recordSummary(record)}</small><strong>{record.title}</strong><em>{kind === 'page' ? pageRoute(record) : `/${record.slug}`}</em></span><span className={`nk-admin-status nk-admin-status--${record.status}`}><i/>{record.status}</span><span className="nk-admin-record-date"><b>{new Date(record.updatedAt).toLocaleDateString()}</b><small>Version {record.version}</small></span><span className="nk-admin-row-action">{kind === 'page' && <GripVertical/>}<FilePenLine/><ChevronRight/></span></button>{canWrite && !query && statusFilter === 'all' && <div className="nk-admin-record-order"><ActionMenu compact label={`Reorder ${record.title}`}><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, -1)} disabled={busy || index === 0}><ArrowUp/>Move up</button><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, 1)} disabled={busy || index === shown.length - 1}><ArrowDown/>Move down</button></ActionMenu></div>}</div>)}</div> : <EmptyState title={`No ${config.title.toLowerCase()} found`} body={query || statusFilter !== 'all' ? 'Change the search or status filter to see more records.' : canWrite ? `Add the first ${config.singular} to this section.` : 'There are no records available for this section.'}/>}</section>
+    {loading ? <div className="nk-admin-list-loading"><RefreshCw className="nk-admin-spin"/>Loading {config.title.toLowerCase()}…</div> : shown.length ? <div className="nk-admin-record-list">
+      <header><span>Record</span><span>Status</span><span>Last updated</span><span/></header>
+      {visible.map((record, index) => <div className={`nk-admin-record-item ${draggingPageId === record.id ? 'is-dragging' : ''}`} draggable={kind === 'page' && canWriteNavigation && record.status === 'published'} onDragStart={event => onPageDragStart(event, record)} onDragEnd={() => {setDraggingPageId(''); setNavigationDropActive(false);}} key={record.id}>
+        <button type="button" aria-current={editor?.id === record.id ? 'true' : undefined} className={`nk-admin-record-row ${record.status}`} onClick={() => edit(record)}>
+          {recordImage(record) ? <img src={recordImage(record)} alt="" loading="lazy" decoding="async"/> : <span className="nk-admin-record-symbol">{kind === 'seo' ? 'SEO' : kind.slice(0,2).toUpperCase()}</span>}
+          <span className="nk-admin-record-name"><small>{recordSummary(record)}</small><strong>{record.title}</strong><em>{kind === 'page' ? pageRoute(record) : `/${record.slug}`}</em></span>
+          <span className={`nk-admin-status nk-admin-status--${record.status}`}><i/>{record.status}</span>
+          <span className="nk-admin-record-date"><b>{new Date(record.updatedAt).toLocaleDateString()}</b><small>Version {record.version}</small></span>
+          <span className="nk-admin-row-action">{kind === 'page' && <GripVertical/>}<FilePenLine/><ChevronRight/></span>
+        </button>
+        {canWrite && !query && statusFilter === 'all' && <div className="nk-admin-record-order"><ActionMenu compact label={`Reorder ${record.title}`}><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, -1)} disabled={busy || index === 0}><ArrowUp/>Move up</button><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, 1)} disabled={busy || index === shown.length - 1}><ArrowDown/>Move down</button></ActionMenu></div>}
+      </div>)}
+      {visible.length < shown.length && <div className="nk-admin-record-load-more"><span>Showing {visible.length} of {shown.length}</span><button type="button" onClick={() => setVisibleCount(count => count + PRODUCT_PAGE_SIZE)}>Load 50 more</button></div>}
+    </div> : <EmptyState title={`No ${config.title.toLowerCase()} found`} body={query || statusFilter !== 'all' ? 'Change the search or status filter to see more records.' : canWrite ? `Add the first ${config.singular} to this section.` : 'There are no records available for this section.'}/>}</section>
 
     {editor && <section className="nk-admin-editor" role="region" aria-label={`Edit ${config.singular}`}>
       <header><div><span>{editor.id ? `${editor.status} · version ${editor.version}` : `new ${config.singular}`}</span><h2>{editor.title || `New ${config.singular}`}</h2></div><button type="button" onClick={close} aria-label="Close editor"><X/></button></header>
@@ -438,7 +471,7 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
             {kind === 'page' && editorRecord && <button type="button" role="menuitem" onClick={() => void placePageInNavigation(editorRecord, 'primary', 'Primary navigation')} disabled={busy || dirty || editor.status !== 'published'}><ListTree/>Place in main navigation</button>}
             {kind === 'page' && editorRecord && <button type="button" role="menuitem" onClick={() => void placePageInNavigation(editorRecord, 'services', 'Services')} disabled={busy || dirty || editor.status !== 'published'}><Link2/>Place inside Services</button>}
             {kind === 'page' && editorRecord && <button type="button" role="menuitem" onClick={() => void placePageInNavigation(editorRecord, 'shop', 'Shop')} disabled={busy || dirty || editor.status !== 'published'}><Link2/>Place inside Shop</button>}
-            {kind === 'page' && <Link role="menuitem" to={`/admin/pages?record=${encodeURIComponent(editor.id)}`} aria-disabled={dirty} onClick={event => {if (dirty) event.preventDefault();}}><FilePenLine/>Open in Website Editor</Link>}
+            {recordEditorPath && <Link role="menuitem" to={`${recordEditorPath}?record=${encodeURIComponent(editor.id)}`} aria-disabled={dirty} onClick={event => {if (dirty) event.preventDefault();}}><FilePenLine/>Open in Website Editor</Link>}
             {kind === 'page' && canWriteNavigation && <button type="button" role="menuitem" onClick={() => {const record = records.find(item => item.id === editor.id); if (record) void addPageToPrimaryNavigation(record);}} disabled={busy || dirty || editor.status !== 'published' || navigationItems.some(item => item.menu === 'primary' && item.url === String(editor.data.route || `/${editor.slug}`))}><Link2/>{editor.status !== 'published' ? 'Publish before navigation' : navigationItems.some(item => item.menu === 'primary' && item.url === String(editor.data.route || `/${editor.slug}`)) ? 'Already in navigation' : 'Add to navigation'}</button>}
             {editor.status === 'published' && <button type="button" role="menuitem" onClick={() => void unpublish()} disabled={busy || dirty}><EyeOff/>Take offline</button>}
             <button type="button" role="menuitem" onClick={() => void duplicate()} disabled={busy}><Copy/>Duplicate</button>

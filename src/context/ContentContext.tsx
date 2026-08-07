@@ -4,21 +4,24 @@ import legacyProductData from '../data/legacy-products.json';
 import {isPagesAdminMode, PAGES_ADMIN_CHANGED_EVENT, PAGES_ADMIN_STORAGE_KEY, readPagesPublicPayload, savePagesSubmission} from '../admin/pagesMode';
 import type {Catalogue, Product, Project, SiteContent} from '../types';
 import {LIVE_EDITOR_COMMAND_EVENT, LIVE_EDITOR_NONCE} from '../components/liveEditorEvents';
-import {isLocalCatalogueProductAsset, isProductCutoutAsset, resolvePublicUrl} from '../utils/assets';
+import {resolvePublicUrl} from '../utils/assets';
 
 const STORAGE_KEY = 'nk-electrical-content-v3';
 const importedProducts = (legacyProductData as unknown as Product[]).map(product => ({
   ...product,
   image: resolvePublicUrl(product.image),
 }));
-function mergeCatalogueProducts(overrides: Product[] = []) {
+export function mergeCatalogueProducts(overrides: Product[] = [], managed = false) {
   const products = new Map(importedProducts.map(product => [product.id, product]));
   defaultContent.products.forEach(product => products.set(product.id, {...products.get(product.id), ...product}));
+  if (managed) {
+    const managedProducts = new Map(overrides.map(product => [product.id, product]));
+    const canonical = [...products.values()].filter(product => managedProducts.has(product.id)).map(product => ({...product, ...managedProducts.get(product.id)}));
+    const additions = overrides.filter(product => !products.has(product.id));
+    return [...canonical, ...additions];
+  }
   overrides.forEach(product => {
-    const current = products.get(product.id);
-    const merged = {...current, ...product};
-    if (current && (isLocalCatalogueProductAsset(current.image) || isProductCutoutAsset(current.image))) merged.image = current.image;
-    products.set(product.id, merged);
+    products.set(product.id, {...products.get(product.id), ...product});
   });
   return [...products.values()];
 }
@@ -49,7 +52,7 @@ export type VisualPlacementMap = Record<string, {target: string; position: 'befo
 export type VisualRecord = {kind: string; slug: string; overrides: VisualOverrideMap; placements: VisualPlacementMap};
 
 type PublicRecord = {id: string; kind: string; slug: string; title: string; data: Record<string, unknown>; position: number; publishedAt: string};
-type PublicPayload = {records: PublicRecord[]; navigation: PublicNavigationItem[]; forms: PublicForm[]; media: PublicMediaAsset[]};
+type PublicPayload = {records: PublicRecord[]; navigation: PublicNavigationItem[]; forms: PublicForm[]; media: PublicMediaAsset[]; managedProductCatalogue: boolean};
 type MappedPayload = {content: SiteContent; pages: PublicPage[]; navigation: PublicNavigationItem[]; forms: PublicForm[]; media: PublicMediaAsset[]; services: PublicService[]; seo: PublicSeo[]; settings: SiteSettings; company: PublicCompany; visualRecords: Record<string, VisualRecord>};
 
 const defaultSettings: SiteSettings = {
@@ -178,7 +181,7 @@ function normalizePayload(value: unknown): PublicPayload {
   const navigation = Array.isArray(payload.navigation) ? payload.navigation.filter((item): item is PublicNavigationItem => isObject(item) && typeof item.id === 'string' && typeof item.menu === 'string' && typeof item.label === 'string' && typeof item.url === 'string') : [];
   const forms = Array.isArray(payload.forms) ? payload.forms.filter((form): form is PublicForm => isObject(form) && typeof form.id === 'string' && typeof form.slug === 'string' && typeof form.name === 'string' && Array.isArray(form.fields)) : [];
   const media = Array.isArray(payload.media) ? payload.media.filter((item): item is PublicMediaAsset => isObject(item) && typeof item.id === 'string' && typeof item.url === 'string' && typeof item.mimeType === 'string' && Array.isArray(item.variants)) : [];
-  return {records, navigation, forms, media};
+  return {records, navigation, forms, media, managedProductCatalogue: payload.managedProductCatalogue === true};
 }
 
 function mapPayload(payload: PublicPayload): MappedPayload {
@@ -196,7 +199,7 @@ function mapPayload(payload: PublicPayload): MappedPayload {
   const visualRecords = Object.fromEntries(payload.records.map(record => [`${record.kind}:${record.slug}`, {kind: record.kind, slug: record.slug, overrides: visualOverrides(record.data.visualOverrides), placements: visualPlacements(record.data.visualPlacements)}]));
 
   const managedProducts: Product[] = productRecords.map(record => ({id: record.slug, name: record.title, category: stringValue(record.data.category, 'Lighting') as Product['category'], season: stringValue(record.data.season, 'All year') as Product['season'], space: stringValue(record.data.space, 'Living') as Product['space'], image: stringValue(record.data.image), note: stringValue(record.data.note)}));
-  const products = mergeCatalogueProducts(managedProducts);
+  const products = mergeCatalogueProducts(managedProducts, payload.managedProductCatalogue);
   const catalogues: Catalogue[] = catalogueRecords.length ? catalogueRecords.map(record => ({id: record.slug, name: record.title, brand: stringValue(record.data.brand, 'ACA') as Catalogue['brand'], year: stringValue(record.data.year), focus: stringValue(record.data.focus, 'Decorative') as Catalogue['focus'], url: stringValue(record.data.url)})) : defaultContent.catalogues;
   const projects: Project[] = projectRecords.length ? projectRecords.map(record => ({id: record.slug, number: stringValue(record.data.number), name: record.title, image: stringValue(record.data.image), type: stringValue(record.data.type), category: stringValue(record.data.category, 'Residential') as Project['category'], completionDate: stringValue(record.data.completionDate), text: stringValue(record.data.text), systems: stringArray(record.data.systems)})) : defaultContent.projects;
   const pages: PublicPage[] = pageRecords.map(record => ({

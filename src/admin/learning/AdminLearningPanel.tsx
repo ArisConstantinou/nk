@@ -76,7 +76,7 @@ export const adminLearning: Record<string, LearningDefinition> = {
     label: c('Products', 'Προϊόντα'),
     purpose: c('Sellable or browsable product records, kept separate from installation services.', 'Εγγραφές προϊόντων προς πώληση ή περιήγηση, ξεχωριστές από τις υπηρεσίες εγκατάστασης.'),
     need: c('Use Products only for physical items customers can browse. If the website is not operating a product catalogue, keep records unpublished.', 'Χρησιμοποιήστε Προϊόντα μόνο για φυσικά είδη που μπορούν να δουν οι πελάτες. Αν ο ιστότοπος δεν λειτουργεί ως κατάλογος προϊόντων, κρατήστε τα αδημοσίευτα.'),
-    steps: [c('Add the product title, category and image.', 'Προσθέστε τίτλο, κατηγορία και εικόνα προϊόντος.'), c('Add a useful customer description.', 'Προσθέστε χρήσιμη περιγραφή για τον πελάτη.'), c('Preview its shop placement and publish.', 'Ελέγξτε τη θέση του στο κατάστημα και δημοσιεύστε.')],
+    steps: [c('Use Add product, complete the required details and save the draft.', 'Χρησιμοποιήστε την Προσθήκη προϊόντος, συμπληρώστε τα υποχρεωτικά στοιχεία και αποθηκεύστε το πρόχειρο.'), c('Preview the product in the Visual editor, then publish it.', 'Ελέγξτε το προϊόν στον Οπτικό επεξεργαστή και μετά δημοσιεύστε το.'), c('Use Archive to remove it safely; only an owner can delete it permanently.', 'Χρησιμοποιήστε την Αρχειοθέτηση για ασφαλή αφαίρεση· μόνο ο ιδιοκτήτης μπορεί να το διαγράψει οριστικά.')],
     after: c('The product can appear in shop listings and category filters.', 'Το προϊόν μπορεί να εμφανιστεί στις λίστες καταστήματος και στα φίλτρα κατηγορίας.'),
     example: {title: c('Add an outdoor wall light', 'Προσθήκη εξωτερικού φωτιστικού τοίχου'), steps: [c('Select Lighting and Outdoor.', 'Επιλέγονται Φωτισμός και Εξωτερικός χώρος.'), c('Add the optimized product image.', 'Προστίθεται η βελτιστοποιημένη εικόνα προϊόντος.'), c('Publish the complete record.', 'Δημοσιεύεται η ολοκληρωμένη εγγραφή.')], result: c('The item becomes discoverable through relevant shop filters.', 'Το είδος γίνεται διαθέσιμο μέσω των σχετικών φίλτρων καταστήματος.')},
   },
@@ -155,7 +155,11 @@ export const adminLearning: Record<string, LearningDefinition> = {
 };
 
 export function learningForPath(pathname: string) {
-  return adminLearning[pathname] || adminLearning['/admin/dashboard'];
+  if (adminLearning[pathname]) return adminLearning[pathname];
+  const parentPath = Object.keys(adminLearning)
+    .filter(path => pathname.startsWith(`${path}/`))
+    .sort((left, right) => right.length - left.length)[0];
+  return (parentPath && adminLearning[parentPath]) || adminLearning['/admin/dashboard'];
 }
 
 export function learningText(copy: Copy, language: AdminLanguage) {

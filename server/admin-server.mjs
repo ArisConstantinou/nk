@@ -610,7 +610,8 @@ function publicSitePayload() {
   const navigation = db.prepare('SELECT * FROM navigation_items WHERE active = 1 ORDER BY menu, position, created_at').all().map(navigationRecord);
   const forms = db.prepare('SELECT * FROM site_forms WHERE active = 1 ORDER BY position, created_at').all().map(row => formRecord(row, {publicView: true}));
   const media = db.prepare('SELECT * FROM media_assets WHERE active = 1 ORDER BY position, created_at').all().map(mediaRecord);
-  return {records, navigation, forms, media, generatedAt: nowIso()};
+  const managedProductCatalogue = Boolean(db.prepare('SELECT 1 AS managed FROM catalogue_product_sync_state WHERE id = 1').get());
+  return {records, navigation, forms, media, managedProductCatalogue, generatedAt: nowIso()};
 }
 
 function serveMediaFile(row, req, res, {publicCache = false, storedName = row?.stored_name, mimeType = row?.mime_type, filename = row?.filename} = {}) {
@@ -1025,6 +1026,44 @@ async function handleRequest(req, res) {
     return sendJson(res, 201, {inserted, navigationInserted, formsInserted});
   }
 
+  if (parts[0] === 'content' && parts[1] === 'catalogue-sync' && req.method === 'POST') {
+    requireOwner(auth.user);
+    const body = await readJson(req, 5_000_000);
+    if (!Array.isArray(body.records) || body.records.length < 1 || body.records.length > 1000) throw new ApiError(400, 'invalid_catalogue_sync', 'The product catalogue is invalid.');
+    const records = body.records.map(record => validateContentInput(record));
+    if (records.some(record => record.kind !== 'product')) throw new ApiError(400, 'invalid_catalogue_sync', 'Only product records can be synchronized.');
+    const slugs = new Set(records.map(record => record.slug));
+    if (slugs.size !== records.length) throw new ApiError(400, 'invalid_catalogue_sync', 'The product catalogue contains duplicate identifiers.');
+    let inserted = 0;
+    let skippedExisting = 0;
+    let skippedDeleted = 0;
+    let firstSync = false;
+    transaction(() => {
+      firstSync = !db.prepare('SELECT 1 AS managed FROM catalogue_product_sync_state WHERE id = 1').get();
+      const existing = new Set(db.prepare("SELECT slug FROM content_records WHERE kind = 'product'").all().map(row => row.slug));
+      const deleted = new Set(db.prepare('SELECT slug FROM catalogue_product_tombstones').all().map(row => row.slug));
+      let position = Number(db.prepare("SELECT COALESCE(MAX(position), -1) + 1 AS position FROM content_records WHERE kind = 'product'").get().position);
+      const createdAt = nowIso();
+      const insert = db.prepare(`INSERT INTO content_records
+        (id, kind, slug, title, status, draft_data, published_data, version, position, category, tags_json, created_by, updated_by, created_at, updated_at, published_at)
+        VALUES (?, 'product', ?, ?, 'published', ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      for (const record of records) {
+        if (existing.has(record.slug)) { skippedExisting += 1; continue; }
+        if (deleted.has(record.slug)) { skippedDeleted += 1; continue; }
+        const data = JSON.stringify(record.data);
+        insert.run(newId(), record.slug, record.title, data, data, position, record.category, JSON.stringify(record.tags), auth.user.id, auth.user.id, createdAt, createdAt, createdAt);
+        existing.add(record.slug);
+        position += 1;
+        inserted += 1;
+      }
+      db.prepare(`INSERT INTO catalogue_product_sync_state (id, source_count, synced_at, synced_by)
+        VALUES (1, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET source_count = excluded.source_count, synced_at = excluded.synced_at, synced_by = excluded.synced_by`)
+        .run(records.length, createdAt, auth.user.id);
+      if (firstSync || inserted) audit({userId: auth.user.id, action: 'catalogue.products_synced', entityType: 'product', details: {source: records.length, inserted, skippedExisting, skippedDeleted}, ipAddress: requestIp(req)});
+    });
+    return sendJson(res, 200, {managed: true, source: records.length, inserted, skippedExisting, skippedDeleted});
+  }
+
   if (parts[0] === 'content' && parts.length === 1 && req.method === 'GET') {
     const kind = url.searchParams.get('kind');
     const requestedKinds = (url.searchParams.get('kinds') || '').split(',').map(value => value.trim()).filter(Boolean);
@@ -1103,6 +1142,7 @@ async function handleRequest(req, res) {
     const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 AS position FROM content_records WHERE kind = ?').get(input.kind).position;
     let row;
     transaction(() => {
+      if (input.kind === 'product') db.prepare('DELETE FROM catalogue_product_tombstones WHERE slug = ?').run(input.slug);
       db.prepare(`INSERT INTO content_records
         (id, kind, slug, title, status, draft_data, version, position, category, tags_json, created_by, updated_by, created_at, updated_at)
         VALUES (?, ?, ?, ?, 'draft', ?, 1, ?, ?, ?, ?, ?, ?, ?)`)
@@ -1214,6 +1254,8 @@ async function handleRequest(req, res) {
     if (!current) throw new ApiError(404, 'not_found', 'Content record not found.');
     transaction(() => {
       db.prepare("DELETE FROM admin_favorites WHERE entity_type = 'content' AND entity_id = ?").run(current.id);
+      if (current.kind === 'product') db.prepare(`INSERT INTO catalogue_product_tombstones (slug, deleted_at, deleted_by) VALUES (?, ?, ?)
+        ON CONFLICT(slug) DO UPDATE SET deleted_at = excluded.deleted_at, deleted_by = excluded.deleted_by`).run(current.slug, nowIso(), auth.user.id);
       db.prepare('DELETE FROM content_records WHERE id = ?').run(current.id);
       audit({userId: auth.user.id, action: 'content.deleted', entityType: current.kind, entityId: current.id, details: {title: current.title, slug: current.slug}, ipAddress: requestIp(req)});
     });
