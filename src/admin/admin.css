@@ -1528,3 +1528,98 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
   .nk-admin-editor-advanced>div{grid-template-columns:1fr}.nk-admin-editor-advanced>div>label:last-child{grid-column:1}
 }
 @media(max-width:840px){.nk-admin-sidebar nav>.nk-admin-nav-group{grid-column:1/-1}.nk-admin-nav-group>summary{min-height:44px;border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.035)}.nk-admin-nav-group>a{margin:5px 0 0;min-height:46px;background:rgba(255,255,255,.025)}}
+
+/* Visual-editor routes prioritise the website canvas. The full learning panel
+   remains available from Guide, while the page identity and manager link stay
+   visible in a compact workspace header. */
+.nk-admin-workspace > main:has(.nk-visual-editor) {
+  min-height: calc(100dvh - 70px);
+  padding-top: 8px;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor) > .nk-admin-security-line,
+.nk-admin-workspace > main:has(.nk-visual-editor) > .nk-admin-learning {
+  display: none;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor) > .nk-admin-page-heading {
+  min-height: 50px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 7px;
+  padding: 7px 9px;
+  border-radius: 9px;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor)
+  > .nk-admin-page-heading > div:first-child > span,
+.nk-admin-workspace > main:has(.nk-visual-editor)
+  > .nk-admin-page-heading p {
+  display: none;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor)
+  > .nk-admin-page-heading h1 {
+  margin: 0;
+  font-size: clamp(22px, 1.8vw, 28px);
+  letter-spacing: -.035em;
+  line-height: 1.1;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor)
+  > .nk-admin-page-heading .nk-admin-page-actions {
+  align-self: center;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor)
+  > .nk-admin-page-heading .nk-admin-page-actions > * {
+  min-height: 36px;
+  padding: 7px 12px;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor) .nk-visual-toolbar {
+  min-height: 60px;
+  padding-block: 7px;
+}
+
+.nk-admin-workspace > main:has(.nk-visual-editor) .nk-visual-canvas-hint {
+  height: 36px;
+  flex-basis: 36px;
+}
+
+@media (max-width: 680px) {
+  .nk-admin-workspace > main:has(.nk-visual-editor) {
+    min-height: calc(100dvh - 56px);
+    padding-top: 6px;
+  }
+
+  .nk-admin-workspace > main:has(.nk-visual-editor) > .nk-admin-page-heading {
+    min-height: 46px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 5px 7px;
+  }
+
+  .nk-admin-workspace > main:has(.nk-visual-editor)
+    > .nk-admin-page-heading h1 {
+    font-size: clamp(21px, 7vw, 26px);
+  }
+
+  .nk-admin-workspace > main:has(.nk-visual-editor)
+    > .nk-admin-page-heading .nk-admin-page-actions {
+    width: auto;
+  }
+
+  .nk-admin-workspace > main:has(.nk-visual-editor)
+    > .nk-admin-page-heading .nk-admin-page-actions > * {
+    min-height: 36px;
+    padding-inline: 9px;
+    white-space: nowrap;
+  }
+
+  .nk-admin-workspace > main:has(.nk-visual-editor) .nk-visual-toolbar {
+    min-height: 0;
+    gap: 8px;
+    padding: 8px;
+  }
+}
