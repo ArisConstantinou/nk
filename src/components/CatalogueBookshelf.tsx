@@ -140,6 +140,13 @@ const spineCompactTitle = (catalogue: Catalogue) => (
     .slice(0, 4)
 );
 
+const spineReadableTitle = (catalogue: Catalogue) => (
+  spineTitle(catalogue)
+    .replace(/^LIGHT$/, 'LIGHTING')
+    .replace(/^BOOK(\d+)$/, 'BOOK $1')
+    .replace(/^NAT\.$/, 'NATURAL')
+);
+
 const hexToRgba = (hex: string, alpha: number) => {
   const value = hex.replace('#', '');
   const red = Number.parseInt(value.slice(0, 2), 16);
@@ -406,7 +413,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
                   >
                     <span aria-hidden="true">
                       <small>{brandMark(catalogue.brand)}</small>
-                      <strong>{spineCompactTitle(catalogue)}</strong>
+                      <strong>{spineReadableTitle(catalogue)}</strong>
                     </span>
                   </Link>;
                 })}
