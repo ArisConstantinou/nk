@@ -398,6 +398,7 @@ export function CatalogueBookshelf({catalogues, sourceCatalogues, filters}: Cata
                     style={{
                       '--mobile-book-cover': finish.cover,
                       '--mobile-book-edge': finish.edge,
+                      '--mobile-book-ink': finish.ink,
                       '--mobile-book-texture': `url("${publicAsset(`assets/generated/official-catalogue-spines/official-spine-${textureNumber}.webp`)}")`,
                       '--official-accent': catalogueBrandAccents[catalogue.brand],
                     } as CSSProperties}
