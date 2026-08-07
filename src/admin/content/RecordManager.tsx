@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent} from 'react';
-import {Archive, ArrowDown, ArrowUp, Check, ChevronRight, Clock3, Copy, EyeOff, FilePenLine, GripVertical, History, Link2, ListTree, Plus, RefreshCw, Rocket, Save, Search, Trash2, X} from 'lucide-react';
+import {Archive, ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, Clock3, Copy, EyeOff, FilePenLine, GripVertical, History, Link2, ListTree, Plus, RefreshCw, Rocket, Save, Search, Trash2, X} from 'lucide-react';
 import {Link, useSearchParams} from 'react-router-dom';
 import {adminApi, AdminApiError, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
@@ -11,13 +11,13 @@ import type {ContentRecord, NavigationItem, NavigationMenu, Revision} from '../t
 import {NavigationPage} from '../pages/NavigationPage';
 import {recordConfigs, type RecordField} from './recordConfigs';
 
-type EditorState = {id?: string; kind: ContentRecord['kind']; title: string; slug: string; data: Record<string, unknown>; version: number; status: ContentRecord['status']; category: string; tags: string[]};
+type EditorState = {id?: string; kind: ContentRecord['kind']; title: string; slug: string; data: Record<string, unknown>; published: boolean; version: number; status: ContentRecord['status']; category: string; tags: string[]};
 type PageNavigationMenu = Extract<NavigationMenu, 'primary' | 'services' | 'shop'>;
 type NavigationRequest = {itemId?: string; newMenu?: NavigationMenu | null};
 const PRODUCT_PAGE_SIZE = 50;
 
 function toEditor(record: ContentRecord): EditorState {
-  return {id: record.id, kind: record.kind, title: record.title, slug: record.slug, data: structuredClone(record.draft), version: record.version, status: record.status, category: record.category || '', tags: record.tags || []};
+  return {id: record.id, kind: record.kind, title: record.title, slug: record.slug, data: structuredClone(record.draft), published: Boolean(record.published), version: record.version, status: record.status, category: record.category || '', tags: record.tags || []};
 }
 
 function fieldValue(data: Record<string, unknown>, field: RecordField) {
@@ -88,7 +88,7 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   const startNew = () => {
     const data = structuredClone(config.defaults);
     if (kind === 'page') data.route = '';
-    setEditor({kind, title: '', slug: '', data, version: 1, status: 'draft', category: '', tags: []});
+    setEditor({kind, title: '', slug: '', data, published: false, version: 1, status: 'draft', category: '', tags: []});
     setDirty(true); setFieldErrors({}); setRevisions(null);
   };
   useEffect(() => {
@@ -397,9 +397,10 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   const updateEditorTitle = (value: string) => {
     setEditor(current => {
       if (!current) return current;
-      if (kind !== 'page' || current.id) return {...current, title: value};
+      if (current.id) return {...current, title: value};
       const previousAutoSlug = slugFromTitle(current.title);
       const nextSlug = !current.slug || current.slug === previousAutoSlug ? slugFromTitle(value) : current.slug;
+      if (kind !== 'page') return {...current, title: value, slug: nextSlug};
       const currentRoute = String(current.data.route || '');
       const routeWasAutomatic = !currentRoute || currentRoute === `/${current.slug}` || currentRoute === `/${previousAutoSlug}`;
       const navigationTitle = !current.data.navigationTitle || current.data.navigationTitle === current.title ? value : current.data.navigationTitle;
@@ -419,27 +420,28 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
   const editorRecord = editor?.id ? records.find(item => item.id === editor.id) : undefined;
 
-  const recordEditorPath = kind === 'page' ? '/admin/pages' : kind === 'product' ? '/admin/products/editor' : '';
+  const recordEditorPath = kind === 'seo' || kind === 'settings' ? '' : `/admin/${kind === 'company' ? 'company' : `${kind}s`}/editor`;
 
   return <div className="nk-admin-record-page">
     <PageHeading
-      eyebrow={config.eyebrow}
-      title={kind === 'page' ? 'Pages & navigation' : config.title}
-      description={kind === 'page' ? 'Create and edit pages, then place them across every website menu from the same workspace.' : config.description}
+      eyebrow="CONTENT MANAGEMENT"
+      title={kind === 'page' ? 'Pages' : config.title}
+      description={`Add, edit, publish and remove ${config.title.toLowerCase()} from one place.`}
       actions={<>
-        {kind === 'product' && <Link to="/admin/products/editor"><FilePenLine/>Visual editor</Link>}
+        {recordEditorPath && <Link to={recordEditorPath}><FilePenLine/>Visual editor</Link>}
         {canWrite && (!config.singleton || records.length === 0) && <button className="nk-admin-primary" data-guide={kind === 'page' ? 'add-page' : kind === 'product' ? 'add-product' : undefined} type="button" onClick={startNew}><Plus/>Add {config.singular}</button>}
       </>}
     />
     {error && <p className="nk-admin-alert nk-admin-alert--error" role="alert">{error}<button type="button" onClick={() => setError('')} aria-label="Dismiss error"><X/></button></p>}
     {notice && <p className="nk-admin-alert" role="status"><Check/>{notice}<button type="button" onClick={() => setNotice('')} aria-label="Dismiss message"><X/></button></p>}
-    {kind === 'page' && <section className="nk-admin-page-navigation" aria-labelledby="page-navigation-title">
-      <header><span><ListTree/><b id="page-navigation-title">PAGE & NAVIGATION CONNECTION</b><small>Place pages in the main navigation or inside the Services and Shop menus.</small></span><div className="nk-admin-page-navigation-actions">{canWriteNavigation && <button type="button" data-guide="new-primary-navigation-link" onClick={() => openNavigationWorkspace({newMenu: 'primary'})}><Plus/>New navigation link</button>}<button type="button" onClick={() => openNavigationWorkspace()}>Manage all menus <ChevronRight/></button></div></header>
+    {kind === 'page' && <details className="nk-admin-page-navigation" open={params.get('navigation') === '1'}>
+      <summary><span><ListTree/><span><b>Website menus</b><small>Optional: choose where published pages appear in navigation.</small></span></span><ChevronDown/></summary>
+      <header><span><ListTree/><b>PAGE & NAVIGATION CONNECTION</b><small>Place pages in the main navigation or inside the Services and Shop menus.</small></span><div className="nk-admin-page-navigation-actions">{canWriteNavigation && <button type="button" data-guide="new-primary-navigation-link" onClick={() => openNavigationWorkspace({newMenu: 'primary'})}><Plus/>New navigation link</button>}<button type="button" onClick={() => openNavigationWorkspace()}>Manage all menus <ChevronRight/></button></div></header>
       <div className={`nk-admin-page-navigation-drop ${navigationDropActive ? 'active' : ''}`} onDragEnter={event => {event.preventDefault(); if (canWriteNavigation) setNavigationDropActive(true);}} onDragOver={event => {event.preventDefault(); event.dataTransfer.dropEffect = 'copy';}} onDragLeave={event => {if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavigationDropActive(false);}} onDrop={onNavigationDrop}>
         <div className="nk-admin-page-navigation-instruction"><GripVertical/><span><b>{navigationDropTarget ? `Release to place inside ${navigationDropTarget}` : navigationDropActive ? 'Release to add to the main navigation' : 'Drag a published page here'}</b><small>Drop on empty space for a top-level link, or directly on Services or Shop to place the page inside that menu.</small></span></div>
         <div className="nk-admin-page-navigation-links">{navigationLoading ? <span><RefreshCw className="nk-admin-spin"/>Loading menu…</span> : navigationItems.filter(item => item.menu === 'primary').sort((left, right) => left.position - right.position).map(item => {const targetMenu = childMenuForNavigationItem(item); return <button type="button" className={`${item.active ? '' : 'inactive'}${targetMenu ? ' can-nest' : ''}${targetMenu && navigationDropTarget === targetMenu ? ' drop-target' : ''}`} title={targetMenu ? `Edit ${item.label}; drop a page here to place it inside this menu` : 'Edit this navigation link'} onClick={() => openNavigationWorkspace({itemId: item.id})} onDragEnter={event => {if (!targetMenu || !draggingPageId) return; event.preventDefault(); event.stopPropagation(); setNavigationDropTarget(targetMenu);}} onDragOver={event => {if (!targetMenu || !draggingPageId) return; event.preventDefault(); event.stopPropagation(); event.dataTransfer.dropEffect = 'move';}} onDragLeave={event => {if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavigationDropTarget('');}} onDrop={event => onNavigationItemDrop(event, item)} key={item.id}><Link2/><span>{item.label}</span><small>{item.url}</small>{targetMenu && draggingPageId && <em>Drop inside</em>}</button>;})}</div>
       </div>
-    </section>}
+    </details>}
     {kind === 'page' && navigationWorkspaceOpen ? <NavigationPage embedded requestedItemId={navigationRequest.itemId} requestedNewMenu={navigationRequest.newMenu} onItemsChange={setNavigationItems} onClose={closeNavigationWorkspace}/> : <div className={`nk-admin-record-workspace ${editor ? 'editor-open' : ''}`}><section className="nk-admin-record-index" aria-label={`${config.title} records`}><div className="nk-admin-record-toolbar"><label><Search/><input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${config.title.toLowerCase()}`} aria-label={`Search ${config.title.toLowerCase()}`}/></label><select value={statusFilter} onChange={event => setStatusFilter(event.target.value as typeof statusFilter)} aria-label="Filter by publication status"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Drafts</option><option value="archived">Archived</option></select><span>{shown.length} shown · {records.filter(item => item.status === 'draft').length} drafts</span></div>
     {loading ? <div className="nk-admin-list-loading"><RefreshCw className="nk-admin-spin"/>Loading {config.title.toLowerCase()}…</div> : shown.length ? <div className="nk-admin-record-list">
       <header><span>Record</span><span>Status</span><span>Last updated</span><span/></header>
@@ -451,22 +453,24 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
           <span className="nk-admin-record-date"><b>{new Date(record.updatedAt).toLocaleDateString()}</b><small>Version {record.version}</small></span>
           <span className="nk-admin-row-action">{kind === 'page' && <GripVertical/>}<FilePenLine/><ChevronRight/></span>
         </button>
-        {canWrite && !query && statusFilter === 'all' && <div className="nk-admin-record-order"><ActionMenu compact label={`Reorder ${record.title}`}><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, -1)} disabled={busy || index === 0}><ArrowUp/>Move up</button><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, 1)} disabled={busy || index === shown.length - 1}><ArrowDown/>Move down</button></ActionMenu></div>}
+        {canWrite && <div className="nk-admin-record-order"><ActionMenu compact label={`Actions for ${record.title}`}><button type="button" role="menuitem" onClick={() => edit(record)}><FilePenLine/>Edit</button>{!query && statusFilter === 'all' && <><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, -1)} disabled={busy || index === 0}><ArrowUp/>Move up</button><button type="button" role="menuitem" onClick={() => void moveRecord(record.id, 1)} disabled={busy || index === shown.length - 1}><ArrowDown/>Move down</button></>}</ActionMenu></div>}
       </div>)}
       {visible.length < shown.length && <div className="nk-admin-record-load-more"><span>Showing {visible.length} of {shown.length}</span><button type="button" onClick={() => setVisibleCount(count => count + PRODUCT_PAGE_SIZE)}>Load 50 more</button></div>}
     </div> : <EmptyState title={`No ${config.title.toLowerCase()} found`} body={query || statusFilter !== 'all' ? 'Change the search or status filter to see more records.' : canWrite ? `Add the first ${config.singular} to this section.` : 'There are no records available for this section.'}/>}</section>
 
     {editor && <section className="nk-admin-editor" role="region" aria-label={`Edit ${config.singular}`}>
-      <header><div><span>{editor.id ? `${editor.status} · version ${editor.version}` : `new ${config.singular}`}</span><h2>{editor.title || `New ${config.singular}`}</h2></div><button type="button" onClick={close} aria-label="Close editor"><X/></button></header>
+      <header><div><span>{editor.id ? editor.status === 'published' ? 'Live on website' : editor.status === 'archived' ? 'Archived' : editor.published ? 'Draft changes · live version is safe' : 'Draft · not live' : `new ${config.singular}`}</span><h2>{editor.title || `New ${config.singular}`}</h2></div><button type="button" onClick={close} aria-label="Close editor"><X/></button></header>
       <form onSubmit={submit}>
-        <div className="nk-admin-editor-fields"><div className="nk-admin-field-group-title"><span>Basic information</span><p>The title helps editors find this record. The slug controls its stable URL identifier.</p></div><label>Display title<input ref={titleInputRef} data-guide={kind === 'page' ? 'page-title' : undefined} required maxLength={240} value={editor.title} disabled={!canWrite} onChange={event => updateEditorTitle(event.target.value)}/>{fieldErrors.title && <small className="field-error">{fieldErrors.title}</small>}</label><label>URL slug<input required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={100} value={editor.slug} disabled={!canWrite} onChange={event => updateEditorSlug(event.target.value)}/>{fieldErrors.slug && <small className="field-error">{fieldErrors.slug}</small>}</label><label>Admin category<input maxLength={100} value={editor.category} disabled={!canWrite} onChange={event => {setEditor({...editor, category: event.target.value}); setDirty(true);}} placeholder="e.g. Campaign, Residential, Support"/></label><label>Admin tags<input maxLength={600} value={editor.tags.join(', ')} disabled={!canWrite} onChange={event => {setEditor({...editor, tags: event.target.value.split(',').map(value => value.trim()).filter(Boolean).slice(0, 20)}); setDirty(true);}} placeholder="priority, summer, showroom"/><small>Used by global search and the dashboard work queue.</small></label><div className="nk-admin-field-group-title"><span>Content</span><p>Complete the fields below. Required information is validated before saving.</p></div>
+        <div className="nk-admin-editor-fields"><div className="nk-admin-field-group-title"><span>Basic information</span><p>Use a clear title visitors and editors can recognize.</p></div><label>Display title<input ref={titleInputRef} data-guide={kind === 'page' ? 'page-title' : undefined} required maxLength={240} value={editor.title} disabled={!canWrite} onChange={event => updateEditorTitle(event.target.value)}/>{fieldErrors.title && <small className="field-error">{fieldErrors.title}</small>}</label><details className="nk-admin-editor-advanced"><summary>Advanced settings <ChevronDown/></summary><div><label>URL slug<input required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={100} value={editor.slug} disabled={!canWrite} onChange={event => updateEditorSlug(event.target.value)}/>{fieldErrors.slug && <small className="field-error">{fieldErrors.slug}</small>}</label><label>Internal category<input maxLength={100} value={editor.category} disabled={!canWrite} onChange={event => {setEditor({...editor, category: event.target.value}); setDirty(true);}} placeholder="Optional internal grouping"/></label><label>Internal tags<input maxLength={600} value={editor.tags.join(', ')} disabled={!canWrite} onChange={event => {setEditor({...editor, tags: event.target.value.split(',').map(value => value.trim()).filter(Boolean).slice(0, 20)}); setDirty(true);}} placeholder="priority, summer, showroom"/><small>Used only for admin search and organization.</small></label></div></details><div className="nk-admin-field-group-title"><span>Content</span><p>Complete the information below. Required fields are checked before saving.</p></div>
           {config.fields.map(field => <label className={field.type === 'checkbox' ? 'nk-admin-checkbox' : ''} key={field.key}>{field.type === 'checkbox' ? <><input type="checkbox" checked={editor.data[field.key] !== false} disabled={!canWrite} onChange={event => patchData(field.key, event.target.checked)}/><span>{field.label}</span></> : <><span>{field.label}</span>{field.type === 'textarea' ? <textarea rows={5} required={field.required} disabled={!canWrite} value={fieldValue(editor.data, field)} onChange={event => patchData(field.key, event.target.value)}/> : field.type === 'select' ? <select required={field.required} disabled={!canWrite} value={fieldValue(editor.data, field)} onChange={event => patchData(field.key, event.target.value)}>{field.options?.map(option => <option key={option}>{option}</option>)}</select> : <input type={field.type === 'tags' ? 'text' : field.type || 'text'} required={field.required} disabled={!canWrite} value={fieldValue(editor.data, field)} onChange={event => patchData(field.key, field.type === 'tags' ? event.target.value.split(',').map(value => value.trim()).filter(Boolean) : event.target.value)}/>} {field.help && <small>{field.help}</small>}{fieldErrors[field.key] && <small className="field-error">{fieldErrors[field.key]}</small>}</>}</label>)}
         </div>
         <footer className="nk-admin-editor-footer">{canWrite ? <>
           <div className="nk-admin-editor-primary-actions">
-            <button type="submit" className="nk-admin-primary" data-guide={kind === 'page' ? 'create-page' : undefined} disabled={busy || !dirty}><Save/>{busy ? 'Working…' : editor.id ? 'Save draft' : `Create ${config.singular}`}</button>
-            {editor.id && <button type="button" data-guide={kind === 'page' ? 'publish-page' : undefined} onClick={() => void publish()} disabled={busy || dirty}><Rocket/>{editor.status === 'archived' ? 'Reactivate & publish' : 'Publish'}</button>}
+            <button type="submit" className="nk-admin-primary" data-guide={kind === 'page' ? 'create-page' : undefined} disabled={busy || !dirty}><Save/>{busy ? 'Working…' : editor.id ? 'Save changes' : `Create ${config.singular}`}</button>
+            {editor.id && <button type="button" data-guide={kind === 'page' ? 'publish-page' : undefined} onClick={() => void publish()} disabled={busy || dirty}><Rocket/>{editor.status === 'archived' ? 'Restore & publish' : editor.published ? 'Update live' : 'Publish'}</button>}
           </div>
+          {editor.id && editor.status === 'published' && <button type="button" className="nk-admin-remove-live" onClick={() => void unpublish()} disabled={busy || dirty}><EyeOff/>Take offline</button>}
+          {editor.id && editor.status === 'draft' && !editor.published && <button type="button" className="nk-admin-remove-live" onClick={() => void archive()} disabled={busy || dirty}><Archive/>Archive</button>}
           {editor.id && <ActionMenu placement="top" label={`More actions for ${editor.title}`}>
             {kind === 'page' && editorRecord && <button type="button" role="menuitem" onClick={() => void placePageInNavigation(editorRecord, 'primary', 'Primary navigation')} disabled={busy || dirty || editor.status !== 'published'}><ListTree/>Place in main navigation</button>}
             {kind === 'page' && editorRecord && <button type="button" role="menuitem" onClick={() => void placePageInNavigation(editorRecord, 'services', 'Services')} disabled={busy || dirty || editor.status !== 'published'}><Link2/>Place inside Services</button>}

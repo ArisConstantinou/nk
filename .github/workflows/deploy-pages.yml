@@ -56,8 +56,25 @@ jobs:
             appliances
             explore
             admin
+            admin/content
+            admin/dashboard
+            admin/pages
+            admin/pages/editor
             admin/products
             admin/products/editor
+            admin/services
+            admin/services/editor
+            admin/projects
+            admin/projects/editor
+            admin/catalogues
+            admin/catalogues/editor
+            admin/company
+            admin/company/editor
+            admin/media
+            admin/forms
+            admin/enquiries
+            admin/settings
+            admin/seo
           )
           for route in "${routes[@]}"; do
             mkdir -p "dist/$route"

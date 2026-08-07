@@ -66,7 +66,7 @@ export function BeginnerSiteGuide({open, onClose, onNavigate}: {open: boolean; o
     try {
       const {items} = await adminApi<{items: NavigationItem[]}>('/navigation');
       const queue = nextPages.filter(page => page.id && !items.some(item => item.menu === 'primary' && item.active && item.url === page.route));
-      setPages(nextPages); setNavQueue(queue); setNavCursor(0); onNavigate('/admin/site-pages');
+      setPages(nextPages); setNavQueue(queue); setNavCursor(0); onNavigate('/admin/pages');
       if (queue.length) setStage('nav-open'); else beginContent(nextPages);
     } catch (error) {setFailure(errorMessage(error)); setStage('error');}
   }, [beginContent, onNavigate]);
@@ -78,7 +78,7 @@ export function BeginnerSiteGuide({open, onClose, onNavigate}: {open: boolean; o
     try {
       const {items} = await adminApi<{items: NavigationItem[]}>('/navigation');
       if (items.some(item => item.menu === 'footer-company' && item.active && item.url === contactPage.route)) {beginSettings(); return;}
-      onNavigate('/admin/site-pages?navigation=1'); setStage('footer-menu');
+      onNavigate('/admin/pages?navigation=1'); setStage('footer-menu');
     } catch (error) {setFailure(errorMessage(error)); setStage('error');}
   }, [beginSettings, contactPage, onNavigate]);
 
@@ -86,7 +86,7 @@ export function BeginnerSiteGuide({open, onClose, onNavigate}: {open: boolean; o
     setStage('loading'); setFailure('');
     try {
       const {records} = await adminApi<{records: ContentRecord[]}>('/content?kind=page');
-      const next = plannedPages(records); setPages(next); onNavigate('/admin/site-pages');
+      const next = plannedPages(records); setPages(next); onNavigate('/admin/pages');
       if (next.some(item => !item.id)) setStage('add-page'); else await beginNavigation(next);
     } catch (error) {setFailure(errorMessage(error)); setStage('error');}
   };
@@ -98,7 +98,7 @@ export function BeginnerSiteGuide({open, onClose, onNavigate}: {open: boolean; o
       const index = pages.findIndex(item => !item.id); if (index < 0 || !detail?.id) return;
       const next = pages.map((page, pageIndex) => pageIndex === index ? {...page, id: detail.id, title: detail.title, route: detail.route, status: 'draft' as const} : page);
       setPages(next);
-      if (next.some(item => !item.id)) {onNavigate('/admin/site-pages'); setStage('add-page');} else void beginNavigation(next);
+      if (next.some(item => !item.id)) {onNavigate('/admin/pages'); setStage('add-page');} else void beginNavigation(next);
     };
     window.addEventListener('nk-admin-guide:page-saved', saved);
     return () => window.removeEventListener('nk-admin-guide:page-saved', saved);
@@ -136,7 +136,7 @@ export function BeginnerSiteGuide({open, onClose, onNavigate}: {open: boolean; o
       if (detail?.id !== currentPublishPage?.id) return;
       const next = publishCursor + 1;
       setPages(current => current.map(page => page.id === detail.id ? {...page, status: 'published'} : page));
-      if (next < publishQueue.length) {setPublishCursor(next); onNavigate(`/admin/site-pages?record=${encodeURIComponent(publishQueue[next].id)}`);} else setStage('done');
+      if (next < publishQueue.length) {setPublishCursor(next); onNavigate(`/admin/pages?record=${encodeURIComponent(publishQueue[next].id)}`);} else setStage('done');
     };
     window.addEventListener('nk-admin-guide:page-published', published);
     return () => window.removeEventListener('nk-admin-guide:page-published', published);
@@ -149,7 +149,7 @@ export function BeginnerSiteGuide({open, onClose, onNavigate}: {open: boolean; o
   const publishAll = () => {
     const queue = pages.filter(page => page.id && page.status !== 'published');
     if (!queue.length) {setStage('done'); return;}
-    setPublishQueue(queue); setPublishCursor(0); setStage('publish'); onNavigate(`/admin/site-pages?record=${encodeURIComponent(queue[0].id)}`);
+    setPublishQueue(queue); setPublishCursor(0); setStage('publish'); onNavigate(`/admin/pages?record=${encodeURIComponent(queue[0].id)}`);
   };
 
   const selector = useMemo(() => {

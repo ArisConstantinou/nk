@@ -5,6 +5,7 @@ import {createServer} from 'vite';
 let vite;
 let createInteractiveRecoveryRecords;
 let pagesAdminRequest;
+let buildPagesPublicPayload;
 let electricalInstallationTemplate;
 let buildCatalogueProductSeed;
 let mergeCatalogueProducts;
@@ -15,7 +16,7 @@ test.before(async () => {
     logLevel: 'silent',
     server: {middlewareMode: true},
   });
-  ({createInteractiveRecoveryRecords, pagesAdminRequest} = await vite.ssrLoadModule('/src/admin/pagesMode.ts'));
+  ({buildPagesPublicPayload, createInteractiveRecoveryRecords, pagesAdminRequest} = await vite.ssrLoadModule('/src/admin/pagesMode.ts'));
   ({buildCatalogueProductSeed} = await vite.ssrLoadModule('/src/admin/seed.ts'));
   ({mergeCatalogueProducts} = await vite.ssrLoadModule('/src/context/ContentContext.tsx'));
   ({electricalInstallationTemplate} = await vite.ssrLoadModule('/src/interactive/templates/electricalInstallation.ts'));
@@ -100,6 +101,12 @@ test('device catalogue sync is additive, idempotent, and preserves product delet
     const listed = await pagesAdminRequest('/content?kind=product');
     assert.equal(listed.payload.records.length, 2);
     const deviceA = listed.payload.records.find(record => record.slug === 'device-a');
+    const deviceB = listed.payload.records.find(record => record.slug === 'device-b');
+    const editedB = await pagesAdminRequest(`/content/${deviceB.id}`, {method: 'PUT', body: JSON.stringify({...product('device-b', 'Device B updated'), expectedVersion: deviceB.version})});
+    assert.equal(editedB.payload.record.status, 'draft');
+    const publicWhileEditing = buildPagesPublicPayload(JSON.parse(stored));
+    assert.equal(publicWhileEditing.records.find(record => record.slug === 'device-b').title, 'Device B updated');
+    assert.equal(publicWhileEditing.records.find(record => record.slug === 'device-b').data.note, 'Device B note');
     const repeated = await pagesAdminRequest('/content/catalogue-sync', {method: 'POST', body: JSON.stringify({records: [product('device-a', 'Must not overwrite'), product('device-b', 'Must not overwrite')]})});
     assert.equal(repeated.payload.inserted, 0);
     const preserved = await pagesAdminRequest('/content?kind=product');

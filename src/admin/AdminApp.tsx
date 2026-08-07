@@ -18,6 +18,7 @@ import {UsersPage} from './pages/UsersPage';
 import {FormsPage} from './pages/FormsPage';
 import {SettingsPage} from './pages/SettingsPage';
 import {InteractiveStudioPage} from './pages/InteractiveStudioPage';
+import {ContentHubPage} from './pages/ContentHubPage';
 import './admin.css';
 import './productivity.css';
 import {isPagesAdminMode} from './pagesMode';
@@ -78,7 +79,7 @@ function ProtectedRoot() {
   return <Outlet/>;
 }
 
-function ContentRoute({kind}: {kind: ContentKind}) {
+function VisualEditorRoute({kind}: {kind: ContentKind}) {
   const {user} = useAdminAuth();
   if (!user || !canReadKind(user.role, kind)) return <Navigate to="/admin/dashboard" replace/>;
   if (kind === 'seo') return <RecordManager kind={kind}/>;
@@ -91,20 +92,15 @@ function ContentRoute({kind}: {kind: ContentKind}) {
       eyebrow="VISUAL WEBSITE EDITOR"
       title={heading.title}
       description={heading.description}
-      actions={kind === 'product' ? <Link to="/admin/products">Manage products</Link> : undefined}
+      actions={<Link to={kind === 'page' ? '/admin/pages' : `/admin/${kind === 'company' ? 'company' : `${kind}s`}`}>Back to simple manager</Link>}
     />
     <VisualEditor kind={kind}/>
   </>;
 }
 
-function PageManagementRoute() {
+function ManagementRoute({kind}: {kind: ContentKind}) {
   const {user} = useAdminAuth();
-  return user && canReadKind(user.role, 'page') ? <RecordManager kind="page"/> : <Navigate to="/admin/dashboard" replace/>;
-}
-
-function ProductManagementRoute() {
-  const {user} = useAdminAuth();
-  return user && canReadKind(user.role, 'product') ? <RecordManager kind="product"/> : <Navigate to="/admin/dashboard" replace/>;
+  return user && canReadKind(user.role, kind) ? <RecordManager kind={kind}/> : <Navigate to="/admin/dashboard" replace/>;
 }
 
 function EnquiriesRoute() {
@@ -130,7 +126,12 @@ function NavigationRoute() {
   const next = new URLSearchParams({navigation: '1'});
   if (current.get('item')) next.set('navItem', String(current.get('item')));
   if (current.get('new')) next.set('newNav', String(current.get('new')));
-  return <Navigate to={`/admin/site-pages?${next}`} replace/>;
+  return <Navigate to={`/admin/pages?${next}`} replace/>;
+}
+
+function LegacyPagesRoute() {
+  const location = useLocation();
+  return <Navigate to={`/admin/pages${location.search}`} replace/>;
 }
 
 function FormsRoute() {
@@ -159,15 +160,21 @@ function AdminRoutes() {
       <Route element={<AdminLayout/>}>
         <Route index element={<Navigate to="dashboard" replace/>}/>
         <Route path="dashboard" element={<DashboardPage/>}/>
-        <Route path="pages" element={<ContentRoute kind="page"/>}/>
-        <Route path="site-pages" element={<PageManagementRoute/>}/>
-        <Route path="services" element={<ContentRoute kind="service"/>}/>
-        <Route path="products" element={<ProductManagementRoute/>}/>
-        <Route path="products/editor" element={<ContentRoute kind="product"/>}/>
-        <Route path="catalogues" element={<ContentRoute kind="catalogue"/>}/>
-        <Route path="projects" element={<ContentRoute kind="project"/>}/>
-        <Route path="company" element={<ContentRoute kind="company"/>}/>
-        <Route path="seo" element={<ContentRoute kind="seo"/>}/>
+        <Route path="content" element={<ContentHubPage/>}/>
+        <Route path="pages" element={<ManagementRoute kind="page"/>}/>
+        <Route path="pages/editor" element={<VisualEditorRoute kind="page"/>}/>
+        <Route path="site-pages" element={<LegacyPagesRoute/>}/>
+        <Route path="services" element={<ManagementRoute kind="service"/>}/>
+        <Route path="services/editor" element={<VisualEditorRoute kind="service"/>}/>
+        <Route path="products" element={<ManagementRoute kind="product"/>}/>
+        <Route path="products/editor" element={<VisualEditorRoute kind="product"/>}/>
+        <Route path="catalogues" element={<ManagementRoute kind="catalogue"/>}/>
+        <Route path="catalogues/editor" element={<VisualEditorRoute kind="catalogue"/>}/>
+        <Route path="projects" element={<ManagementRoute kind="project"/>}/>
+        <Route path="projects/editor" element={<VisualEditorRoute kind="project"/>}/>
+        <Route path="company" element={<ManagementRoute kind="company"/>}/>
+        <Route path="company/editor" element={<VisualEditorRoute kind="company"/>}/>
+        <Route path="seo" element={<ManagementRoute kind="seo"/>}/>
         <Route path="settings" element={<SettingsRoute/>}/>
         <Route path="enquiries" element={<EnquiriesRoute/>}/>
         <Route path="media" element={<MediaRoute/>}/>

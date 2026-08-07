@@ -392,7 +392,7 @@ function parseTags(value) {
 }
 
 function contentAdminRoute(kind, id) {
-  const sections = {page: 'site-pages', service: 'services', product: 'products', catalogue: 'catalogues', project: 'projects', company: 'company', seo: 'seo', settings: 'settings'};
+  const sections = {page: 'pages', service: 'services', product: 'products', catalogue: 'catalogues', project: 'projects', company: 'company', seo: 'seo', settings: 'settings'};
   return `/admin/${sections[kind] || 'dashboard'}?record=${encodeURIComponent(id)}`;
 }
 
@@ -602,7 +602,7 @@ function publicRecordData(kind, data, globals) {
 
 function publicSitePayload() {
   const rows = db.prepare(`SELECT id, kind, slug, title, published_data, position, published_at, updated_at
-    FROM content_records WHERE status = 'published' AND published_data IS NOT NULL ORDER BY kind, position, updated_at DESC`).all();
+    FROM content_records WHERE status != 'archived' AND published_data IS NOT NULL ORDER BY kind, position, updated_at DESC`).all();
   const settings = rows.find(row => row.kind === 'settings');
   const settingsData = settings ? safeJson(settings.published_data, {}) : {};
   const globalComponents = new Map((Array.isArray(settingsData.globalComponents) ? settingsData.globalComponents : []).flatMap(item => item && typeof item === 'object' && item.id && item.component ? [[String(item.id), item.component]] : []));

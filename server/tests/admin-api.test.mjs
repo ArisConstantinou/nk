@@ -241,6 +241,11 @@ test('secure admin lifecycle', async t => {
   assert.equal(duplicateSync.response.status, 400);
   assert.equal(duplicateSync.payload.error.code, 'invalid_catalogue_sync');
   const updatedProduct = await request(`/content/${catalogueA.id}`, {method: 'PUT', cookie, csrf, body: {...productSeed(catalogueA.slug, catalogueA.title, '/assets/catalogue-products/lighting/photos/admin-replacement.png'), expectedVersion: catalogueA.version}});
+  assert.equal(updatedProduct.payload.record.status, 'draft');
+  const publicWhileProductDraftIsEdited = await request('/public/site');
+  const stillLiveProduct = publicWhileProductDraftIsEdited.payload.records.find(item => item.kind === 'product' && item.slug === 'catalogue-a');
+  assert.ok(stillLiveProduct, 'saving changes must not remove the existing published product');
+  assert.equal(stillLiveProduct.data.image, catalogueA.published.image, 'the saved draft must not replace the live product before publish');
   const publishedProduct = await request(`/content/${catalogueA.id}/publish`, {method: 'POST', cookie, csrf, body: {expectedVersion: updatedProduct.payload.record.version}});
   assert.equal(publishedProduct.response.status, 200);
   const archivedProduct = await request(`/content/${catalogueB.id}/archive`, {method: 'POST', cookie, csrf, body: {expectedVersion: catalogueB.version}});

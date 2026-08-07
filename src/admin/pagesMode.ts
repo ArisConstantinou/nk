@@ -199,7 +199,7 @@ function workItem(record: ContentRecord, favorites: string[]) {
     id: record.id, type: 'content', kind: record.kind, title: record.title, slug: record.slug,
     status: record.status, version: record.version, category: record.category, tags: record.tags,
     updatedAt: record.updatedAt, publishedAt: record.publishedAt, updatedBy: pagesAdminUser.displayName,
-    favorite: favorites.includes(`content:${record.id}`), to: `/admin/${record.kind === 'page' ? 'site-pages' : record.kind === 'settings' ? 'settings' : record.kind === 'seo' ? 'seo' : `${record.kind}s`}?record=${record.id}`,
+    favorite: favorites.includes(`content:${record.id}`), to: `/admin/${record.kind === 'page' ? 'pages' : record.kind === 'settings' ? 'settings' : record.kind === 'seo' ? 'seo' : `${record.kind}s`}?record=${record.id}`,
   };
 }
 
@@ -467,12 +467,10 @@ function planBriefDrivenPagesGuideStep(body: Record<string, unknown>): PagesApiR
   });
 }
 
-export function readPagesPublicPayload() {
-  if (!isPagesAdminMode) return null;
-  const state = readState();
+export function buildPagesPublicPayload(state: PagesState) {
   if (!state.records.length) return null;
   return {
-    records: state.records.filter(record => record.status === 'published' && record.published).map(record => ({
+    records: state.records.filter(record => record.status !== 'archived' && record.published).map(record => ({
       id: record.id, kind: record.kind, slug: record.slug, title: record.title, data: clone(record.published || {}), position: record.position, publishedAt: record.publishedAt || '',
     })),
     navigation: state.navigation.filter(item => item.active),
@@ -480,6 +478,11 @@ export function readPagesPublicPayload() {
     media: state.media.filter(item => item.active),
     managedProductCatalogue: state.catalogueManaged,
   };
+}
+
+export function readPagesPublicPayload() {
+  if (!isPagesAdminMode) return null;
+  return buildPagesPublicPayload(readState());
 }
 
 export function readPagesPublishedInteractive(slug: string) {

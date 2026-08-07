@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent} from 'react';
-import {Activity, BookOpen, Boxes, BriefcaseBusiness, Building2, ChevronRight, ClipboardList, Clapperboard, ExternalLink, FileInput, FileText, FolderKanban, HelpCircle, Image, Languages, LayoutDashboard, LogOut, Menu, Package, Search, Settings, ShieldCheck, ShoppingBag, UserRound, Users, X} from 'lucide-react';
-import {NavLink, Outlet as RouterOutlet, useLocation, useNavigate} from 'react-router-dom';
+import {Activity, BookOpen, BriefcaseBusiness, Building2, ChevronRight, ClipboardList, Clapperboard, ExternalLink, FileInput, FileText, FolderKanban, HelpCircle, Image, Languages, LayoutDashboard, LogOut, Menu, Package, Plus, Search, Settings, ShieldCheck, ShoppingBag, UserRound, Users, X} from 'lucide-react';
+import {Link, NavLink, Outlet as RouterOutlet, useLocation, useNavigate} from 'react-router-dom';
 import {useAdminAuth} from '../auth/AdminAuth';
-import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia} from '../permissions';
+import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia, canWriteKind} from '../permissions';
 import {CommandPalette} from './CommandPalette';
 import {BeginnerSiteGuide} from './BeginnerSiteGuide';
 import {publicAsset} from '../../utils/assets';
@@ -11,20 +11,17 @@ import {AdminTranslationLayer, useAdminLanguage} from '../i18n/AdminLanguage';
 import {AdminLearningPanel, learningForPath, learningText} from '../learning/AdminLearningPanel';
 
 const overview = [
-  {to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard},
-  {to: '/admin/pages', label: 'Website Editor', icon: Boxes},
+  {to: '/admin/dashboard', label: 'Home', icon: LayoutDashboard},
+  {to: '/admin/content', label: 'Manage content', icon: FileText},
+  {to: '/admin/pages', label: 'Pages', icon: FileText},
+  {to: '/admin/products', label: 'Products', icon: ShoppingBag},
 ] as const;
 
 const content = [
-  {to: '/admin/site-pages', label: 'Pages & Navigation', icon: FileText},
   {to: '/admin/services', label: 'Services', icon: BriefcaseBusiness},
   {to: '/admin/projects', label: 'Projects', icon: FolderKanban},
-  {to: '/admin/company', label: 'Company', icon: Building2},
-] as const;
-
-const shop = [
-  {to: '/admin/products', label: 'Products', icon: ShoppingBag},
   {to: '/admin/catalogues', label: 'Catalogues', icon: BookOpen},
+  {to: '/admin/company', label: 'Company', icon: Building2},
 ] as const;
 
 const settings = [
@@ -51,6 +48,7 @@ export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const sidebarNavRef = useRef<HTMLElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
@@ -78,13 +76,14 @@ export function AdminLayout() {
   const openCommand = () => {close(); setCommandOpen(true);};
   const signOut = async () => { await logout(); navigate('/admin/login', {replace: true}); };
   const currentLabel = useMemo(() => learningText(learningForPath(location.pathname).label, language), [language, location.pathname]);
-  const currentGroup = location.pathname.includes('dashboard') || location.pathname === '/admin/pages' ? text('Overview', 'Επισκόπηση') : location.pathname.includes('products') || location.pathname.includes('catalogues') ? text('Shop', 'Κατάστημα') : location.pathname.includes('media') ? text('Media', 'Πολυμέσα') : location.pathname.includes('forms') || location.pathname.includes('enquiries') ? text('Customers', 'Πελάτες') : location.pathname.includes('users') || location.pathname.includes('audit') ? text('Administration', 'Διαχείριση') : location.pathname.includes('navigation') || location.pathname.includes('settings') || location.pathname.includes('seo') ? text('Settings', 'Ρυθμίσεις') : text('Content', 'Περιεχόμενο');
+  const currentGroup = location.pathname.includes('dashboard') ? text('Home', 'Αρχική') : location.pathname.includes('users') || location.pathname.includes('audit') || location.pathname.includes('settings') || location.pathname.includes('seo') ? text('Advanced', 'Προηγμένα') : text('Content', 'Περιεχόμενο');
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {event.preventDefault(); setMobileOpen(false); setCommandOpen(true);}
       if (event.key === 'Escape') {
         if (commandOpen) {closeCommand('dismiss'); return;}
         if (mobileOpen) window.setTimeout(() => mobileTriggerRef.current?.focus(), 0);
+        if (quickAddOpen) setQuickAddOpen(false);
         setMobileOpen(false);
         if (guideOpen) closeGuide();
       }
@@ -93,7 +92,7 @@ export function AdminLayout() {
     window.addEventListener('keydown', shortcut);
     window.addEventListener('nk-admin:open-search', openSearch);
     return () => {window.removeEventListener('keydown', shortcut); window.removeEventListener('nk-admin:open-search', openSearch);};
-  }, [closeCommand, closeGuide, commandOpen, guideOpen, mobileOpen]);
+  }, [closeCommand, closeGuide, commandOpen, guideOpen, mobileOpen, quickAddOpen]);
   useEffect(() => {
     if (!mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
@@ -133,28 +132,21 @@ export function AdminLayout() {
       <div className="nk-admin-logo"><img src={publicAsset('assets/nk-logo-transparent-v2.png')} alt=""/><div><b><span className="nk-admin-logo__desktop-title">NK Electrical</span><span className="nk-admin-logo__mobile-title">{text('All admin areas', 'Όλες οι περιοχές')}</span></b><small>Administration</small></div><button type="button" onClick={close} aria-label="Close admin navigation"><X/></button></div>
       <button className="nk-admin-sidebar-search" type="button" onClick={openCommand} data-admin-tour="search"><Search/><span>Search admin</span><kbd>Ctrl K</kbd></button>
       <nav ref={sidebarNavRef} aria-label="Admin navigation">
+        <small>{text('EVERYDAY', 'ΚΑΘΗΜΕΡΙΝΑ')}</small>
         <NavItem {...overview[0]} close={close}/>
-        {canReadKind(user.role, 'page') && <NavItem {...overview[1]} close={close}/>}
+        {(canReadKind(user.role, 'page') || canReadKind(user.role, 'product')) && <NavItem {...overview[1]} close={close}/>}
+        {canReadKind(user.role, 'page') && <NavItem {...overview[2]} close={close}/>}
+        {canReadKind(user.role, 'product') && <NavItem {...overview[3]} close={close}/>}
 
-        {(canReadKind(user.role, 'service') || canReadKind(user.role, 'project') || canReadKind(user.role, 'company')) && <small data-admin-tour="group-content">{text('CONTENT', 'ΠΕΡΙΕΧΟΜΕΝΟ')}</small>}
-        {content.filter(item => canReadKind(user.role, item.to === '/admin/site-pages' ? 'page' : item.to === '/admin/services' ? 'service' : item.to === '/admin/projects' ? 'project' : 'company')).map(item => <NavItem {...item} close={close} key={item.to}/>)}
+        {(canReadKind(user.role, 'service') || canReadKind(user.role, 'project') || canReadKind(user.role, 'catalogue') || canReadKind(user.role, 'company')) && <details className="nk-admin-nav-group" open={content.some(item => location.pathname.startsWith(item.to))}><summary>{text('Other content', 'Άλλο περιεχόμενο')}<ChevronRight/></summary>{content.filter(item => canReadKind(user.role, item.to === '/admin/services' ? 'service' : item.to === '/admin/projects' ? 'project' : item.to === '/admin/catalogues' ? 'catalogue' : 'company')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
 
-        {(canReadKind(user.role, 'product') || canReadKind(user.role, 'catalogue')) && <small>{text('SHOP', 'ΚΑΤΑΣΤΗΜΑ')}</small>}
-        {shop.filter(item => canReadKind(user.role, item.to === '/admin/products' ? 'product' : 'catalogue')).map(item => <NavItem {...item} close={close} key={item.to}/>)}
+        {(canReadForms(user.role) || canManageEnquiries(user.role)) && <details className="nk-admin-nav-group" open={location.pathname.includes('/forms') || location.pathname.includes('/enquiries')}><summary>{text('Customers', 'Πελάτες')}<ChevronRight/></summary>{canReadForms(user.role) && <NavItem to="/admin/forms" label="Form Submissions" icon={FileInput} close={close}/>} {canManageEnquiries(user.role) && <NavItem to="/admin/enquiries" label="Enquiries" icon={ClipboardList} close={close}/>}</details>}
 
-        {(canReadForms(user.role) || canManageEnquiries(user.role)) && <small data-admin-tour="group-operations">{text('CUSTOMERS', 'ΠΕΛΑΤΕΣ')}</small>}
-        {canReadForms(user.role) && <NavItem to="/admin/forms" label="Form Submissions" icon={FileInput} close={close}/>}
-        {canManageEnquiries(user.role) && <NavItem to="/admin/enquiries" label="Enquiries" icon={ClipboardList} close={close}/>}
+        {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media library" icon={Image} close={close}/>}
 
-        {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media" icon={Image} close={close}/>}
-        {canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Interactive Studio" icon={Clapperboard} close={close}/>}
+        {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo') || canManageInteractive(user.role)) && <details className="nk-admin-nav-group" open={location.pathname.includes('/interactive') || location.pathname.includes('/settings') || location.pathname.includes('/seo')}><summary>{text('Advanced tools', 'Προηγμένα εργαλεία')}<ChevronRight/></summary>{canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Visual studio" icon={Clapperboard} close={close}/>} {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
 
-        {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo')) && <small data-admin-tour="group-system">{text('SETTINGS', 'ΡΥΘΜΙΣΕΙΣ')}</small>}
-        {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}
-
-        <small>{text('ADMINISTRATION', 'ΔΙΑΧΕΙΡΙΣΗ')}</small>
-        {!isPagesAdminMode && canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}
-        <NavItem to="/admin/audit" label={user.role === 'owner' ? 'Audit Log' : 'My Activity'} icon={Activity} close={close}/>
+        <details className="nk-admin-nav-group" open={location.pathname.includes('/users') || location.pathname.includes('/audit')}><summary>{text('Administration', 'Διαχείριση')}<ChevronRight/></summary>{!isPagesAdminMode && canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}<NavItem to="/admin/audit" label={user.role === 'owner' ? 'Audit Log' : 'My Activity'} icon={Activity} close={close}/></details>
       </nav>
       <div className="nk-admin-sidebar-language" role="group" aria-label={text('Admin language', 'Γλώσσα διαχείρισης')}><Languages/><span>{text('Language', 'Γλώσσα')}</span><button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')} aria-pressed={language === 'en'}>EN</button><button type="button" className={language === 'el' ? 'active' : ''} onClick={() => setLanguage('el')} aria-pressed={language === 'el'}>ΕΛ</button></div>
       <button className="nk-admin-guide-trigger" type="button" onClick={openGuide} data-admin-tour="guide"><HelpCircle/><span>Guide / Οδηγός</span></button>
@@ -164,10 +156,12 @@ export function AdminLayout() {
     <section ref={workspaceRef} className="nk-admin-workspace">
       <header className="nk-admin-topbar"><button ref={mobileTriggerRef} className="nk-admin-menu-trigger" type="button" onClick={() => setMobileOpen(true)} aria-label="Open admin navigation" aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/></button><nav aria-label="Breadcrumb"><NavLink to="/admin/dashboard">Admin</NavLink><ChevronRight/><span>{currentGroup}</span><ChevronRight/><b>{currentLabel}</b></nav><div className="nk-admin-topbar-actions"><button className="nk-admin-topbar-guide" type="button" onClick={openGuide} aria-label="Open Guide / Οδηγός"><HelpCircle/><span className="nk-admin-guide-label-full">Guide / Οδηγός</span><span className="nk-admin-guide-label-compact">Guide</span></button><button ref={commandTriggerRef} className="nk-admin-global-search" type="button" aria-label="Search admin" onClick={() => setCommandOpen(true)}><Search/><span>Search</span><kbd>Ctrl K</kbd></button><NavLink className="nk-admin-site-edit-link" to="/?liveEdit=1" aria-label="Visit the live site in edit mode"><span>Visit site</span><ExternalLink/></NavLink>{isPagesAdminMode ? <span className="nk-admin-topbar-avatar" aria-label="Mobile device admin">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</span> : <NavLink className="nk-admin-topbar-avatar" to="/admin/profile" aria-label="Open your profile">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</NavLink>}</div></header>
       <main id="admin-main" tabIndex={-1}><div className={`nk-admin-security-line ${isPagesAdminMode ? 'nk-admin-security-line--device' : ''}`}><ShieldCheck/><span>{isPagesAdminMode ? 'Firebase-authenticated workspace' : 'Secure workspace'}</span><i/>{isPagesAdminMode ? 'Changes are saved in this browser on this device' : 'Changes are recorded in the audit log'}</div><Outlet/></main>
+      {quickAddOpen && <><button type="button" className="nk-admin-quick-add-scrim" aria-label="Close add menu" onClick={() => setQuickAddOpen(false)}/><section className="nk-admin-quick-add" aria-label="Add content"><header><div><Plus/><span><b>Add content</b><small>Choose what you want to create</small></span></div><button type="button" onClick={() => setQuickAddOpen(false)} aria-label="Close add menu"><X/></button></header><div>{canWriteKind(user.role, 'page') && <Link to="/admin/pages?new=1" onClick={() => setQuickAddOpen(false)}><FileText/><span><b>New page</b><small>Add a website page</small></span></Link>}{canWriteKind(user.role, 'product') && <Link to="/admin/products?new=1" onClick={() => setQuickAddOpen(false)}><ShoppingBag/><span><b>New product</b><small>Add to the shop catalogue</small></span></Link>}{canWriteKind(user.role, 'service') && <Link to="/admin/services?new=1" onClick={() => setQuickAddOpen(false)}><BriefcaseBusiness/><span><b>New service</b><small>Add a customer service</small></span></Link>}{canWriteKind(user.role, 'project') && <Link to="/admin/projects?new=1" onClick={() => setQuickAddOpen(false)}><FolderKanban/><span><b>New project</b><small>Add completed work</small></span></Link>}</div></section></>}
       <nav className="nk-admin-mobile-nav" aria-label={text('Mobile admin navigation', 'Κύρια πλοήγηση διαχείρισης')}>
         <NavLink to="/admin/dashboard" className={({isActive}) => isActive ? 'active' : ''}><LayoutDashboard/><span>{text('Home', 'Αρχική')}</span></NavLink>
-        {canReadKind(user.role, 'page') && <NavLink to="/admin/pages" className={({isActive}) => isActive ? 'active' : ''}><Boxes/><span>{text('Website', 'Ιστότοπος')}</span></NavLink>}
-        {canManageInteractive(user.role) && <NavLink to="/admin/interactive" className={({isActive}) => isActive ? 'active' : ''}><Clapperboard/><span>Studio</span></NavLink>}
+        {canReadKind(user.role, 'page') && <NavLink to="/admin/pages" className={({isActive}) => isActive ? 'active' : ''}><FileText/><span>{text('Pages', 'Σελίδες')}</span></NavLink>}
+        <button type="button" className="nk-admin-mobile-add" onClick={() => setQuickAddOpen(open => !open)} aria-label={text('Add content', 'Προσθήκη περιεχομένου')} aria-expanded={quickAddOpen}><Plus/><span>{text('Add', 'Προσθήκη')}</span></button>
+        {canReadKind(user.role, 'product') && <NavLink to="/admin/products" className={({isActive}) => isActive ? 'active' : ''}><ShoppingBag/><span>{text('Products', 'Προϊόντα')}</span></NavLink>}
         <button type="button" onClick={() => setMobileOpen(true)} aria-label={text('Open all admin areas', 'Άνοιγμα όλων των περιοχών')} aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/><span>{text('More', 'Περισσότερα')}</span></button>
       </nav>
     </section>
