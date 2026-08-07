@@ -369,6 +369,7 @@ export function DashboardPage() {
         : canReadKind(user.role, "project")
           ? "/admin/projects"
           : null;
+  const mobileAdvanced = params.get("view") === "advanced";
 
   return (
     <div className="nk-productivity-dashboard">
@@ -425,6 +426,93 @@ export function DashboardPage() {
         </div>
       ) : (
         <>
+          <section
+            className={`nk-admin-mobile-home${mobileAdvanced ? " is-advanced" : ""}`}
+            aria-labelledby="mobile-home-title"
+          >
+            <header>
+              <span>WEBSITE ADMIN</span>
+              <h1 id="mobile-home-title">What do you want to update?</h1>
+              <p>Choose an area and make the change. Everything else remains available under More.</p>
+            </header>
+
+            <div className="nk-admin-mobile-home__actions" aria-label="Website areas">
+              {canWriteKind(user!.role, "page") && (
+                <Link to="/admin/pages">
+                  <FilePenLine />
+                  <span><b>Website pages</b><small>Edit text, images and page sections</small></span>
+                  <ChevronRight />
+                </Link>
+              )}
+              {canWriteKind(user!.role, "product") && (
+                <Link to="/admin/products">
+                  <PackagePlus />
+                  <span><b>Products</b><small>Update the shop or add a product</small></span>
+                  <ChevronRight />
+                </Link>
+              )}
+              {canWriteKind(user!.role, "project") && (
+                <Link to="/admin/projects">
+                  <FolderKanban />
+                  <span><b>Projects</b><small>Add completed work and project photos</small></span>
+                  <ChevronRight />
+                </Link>
+              )}
+              {canReadForms(user!.role) && (
+                <Link to="/admin/forms">
+                  <FileInput />
+                  <span><b>Customer messages</b><small>Open enquiries and form submissions</small></span>
+                  {(data.submissions.new || 0) > 0 && <strong>{data.submissions.new}</strong>}
+                  <ChevronRight />
+                </Link>
+              )}
+              {canManageMedia(user!.role) && (
+                <Link to="/admin/media">
+                  <Image />
+                  <span><b>Photos & files</b><small>Upload and reuse website media</small></span>
+                  <ChevronRight />
+                </Link>
+              )}
+              <Link to="/admin/content">
+                <Settings2 />
+                <span><b>All website content</b><small>Services, catalogues and company details</small></span>
+                <ChevronRight />
+              </Link>
+            </div>
+
+            {(data.statuses.draft > 0 || data.summary.warnings > 0 || (data.submissions.new || 0) > 0) && (
+              <section className="nk-admin-mobile-home__attention" aria-labelledby="mobile-attention-title">
+                <div><BellRing /><span><b id="mobile-attention-title">Needs your attention</b><small>Only items that may need an action</small></span></div>
+                <div>
+                  {data.statuses.draft > 0 && <Link to="/admin/dashboard?view=advanced&status=draft"><b>{data.statuses.draft}</b><span>Drafts</span></Link>}
+                  {(data.submissions.new || 0) > 0 && <Link to="/admin/forms"><b>{data.submissions.new}</b><span>Messages</span></Link>}
+                  {data.summary.warnings > 0 && <Link to="/admin/dashboard?view=advanced"><b>{data.summary.warnings}</b><span>Warnings</span></Link>}
+                </div>
+              </section>
+            )}
+
+            {data.recentlyEdited.length > 0 && (
+              <section className="nk-admin-mobile-home__recent" aria-labelledby="mobile-recent-title">
+                <header><span><RefreshCw /><b id="mobile-recent-title">Continue editing</b></span><small>Your latest website changes</small></header>
+                <div>
+                  {data.recentlyEdited.slice(0, 3).map(item => (
+                    <Link to={item.to} key={item.id}>
+                      <span><b>{item.title}</b><small>{kindLabels[item.kind] || item.kind} · {relativeDate(item.updatedAt)}</small></span>
+                      <ChevronRight />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <footer>
+              <button type="button" onClick={openGlobalSearch}><Search />Search admin</button>
+              <Link to="/admin/dashboard?view=advanced"><Settings2 />Advanced dashboard</Link>
+            </footer>
+          </section>
+
+          <div className={`nk-productivity-dashboard__full${mobileAdvanced ? " is-mobile-visible" : ""}`}>
+            {mobileAdvanced && <Link className="nk-admin-mobile-home__back" to="/admin/dashboard"><ChevronRight />Back to simple Home</Link>}
           {user && (
             <section
               className="nk-admin-quick-actions"
@@ -956,6 +1044,7 @@ export function DashboardPage() {
               change remains versioned and auditable.
             </p>
           )}
+          </div>
         </>
       )}
     </div>
