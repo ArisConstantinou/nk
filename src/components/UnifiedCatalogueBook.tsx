@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {AlertTriangle, ChevronLeft, ChevronRight, LoaderCircle, RefreshCw, X} from 'lucide-react';
+import {useCallback, useEffect, useMemo, useRef, useState, type CSSProperties} from 'react';
+import {AlertTriangle, ChevronLeft, ChevronRight, LoaderCircle, RefreshCw, X, ZoomIn, ZoomOut} from 'lucide-react';
 import {GlobalWorkerOptions, type PDFDocumentProxy} from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import type {Catalogue} from '../types';
@@ -26,6 +26,9 @@ type TurnState = {
 };
 
 const MAX_CACHED_PAGES = 8;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = .25;
 const catalogueKey = (catalogue: Catalogue, index: number) => catalogue.id || `${catalogue.brand}-${catalogue.year}-${index}`;
 const interactiveSelector = 'input, textarea, select, button, a[href], [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"], [role="combobox"], [role="slider"], [role="menuitem"]';
 
@@ -66,6 +69,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   const [isPreparingTurn, setIsPreparingTurn] = useState(false);
   const [showContents, setShowContents] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [zoom, setZoom] = useState(MIN_ZOOM);
   const [renderedPages, setRenderedPages] = useState<Record<number, string>>({});
   const pageCacheRef = useRef(new Map<number, string>());
   const pageRenderRef = useRef(new Map<number, Promise<string>>());
@@ -75,6 +79,8 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
   const documentDestroyRef = useRef<Promise<void>>(Promise.resolve());
   const preparingTurnRef = useRef(false);
   const touchStart = useRef<number | null>(null);
+  const panStartRef = useRef<{pointerId: number; x: number; y: number; left: number; top: number} | null>(null);
+  const didPanRef = useRef(false);
   const openLastPageRef = useRef(false);
   const stageViewportRef = useRef<HTMLDivElement>(null);
   const collectionsButtonRef = useRef<HTMLButtonElement>(null);
@@ -192,9 +198,9 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
       try {
         const base = page.getViewport({scale: 1});
         const targetHeight = window.innerWidth <= 760
-          ? 600
-          : Math.min(1080, Math.max(760, window.innerHeight * .9));
-        const scale = Math.min(1.7, targetHeight / base.height);
+          ? 1200
+          : Math.min(1800, Math.max(1200, window.innerHeight * 1.8));
+        const scale = Math.min(2.5, targetHeight / base.height);
         const viewport = page.getViewport({scale});
         const canvas = window.document.createElement('canvas');
         canvas.width = Math.ceil(viewport.width);
@@ -319,6 +325,10 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     }
   }, [catalogueIndex, catalogues.length, document, failReader, renderPageImage, spreadStart, turn, visible.left, visible.right]);
 
+  const updateZoom = useCallback((nextZoom: number) => {
+    setZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, nextZoom)));
+  }, []);
+
   useEffect(() => {
     if (!turn || turn.active) return;
     const animationFrame = window.requestAnimationFrame(() => {
@@ -372,6 +382,21 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
         return;
       }
       if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || editableTarget(event.target)) return;
+      if (event.key === '+' || event.key === '=') {
+        event.preventDefault();
+        updateZoom(zoom + ZOOM_STEP);
+        return;
+      }
+      if (event.key === '-') {
+        event.preventDefault();
+        updateZoom(zoom - ZOOM_STEP);
+        return;
+      }
+      if (event.key === '0') {
+        event.preventDefault();
+        updateZoom(MIN_ZOOM);
+        return;
+      }
       const target = event.target instanceof Element ? event.target : null;
       const pageControl = Boolean(target?.closest('.catalogue-book__nav, .catalogue-book__leaf'));
       if (showContents) return;
@@ -388,19 +413,22 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [changePage, onClose, showContents]);
+  }, [changePage, onClose, showContents, updateZoom, zoom]);
 
   useEffect(() => {
     const viewport = stageViewportRef.current;
     if (!viewport) return;
-    const resetPagePosition = () => { viewport.scrollLeft = 0; };
+    const resetPagePosition = () => {
+      viewport.scrollLeft = Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2);
+      viewport.scrollTop = Math.max(0, (viewport.scrollHeight - viewport.clientHeight) / 2);
+    };
     const animationFrame = window.requestAnimationFrame(resetPagePosition);
     window.addEventListener('resize', resetPagePosition);
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener('resize', resetPagePosition);
     };
-  }, [catalogueIndex, document]);
+  }, [catalogueIndex, document, zoom]);
 
   useEffect(() => {
     onCatalogueChange(catalogueKey(catalogue, catalogueIndex));
@@ -444,12 +472,41 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     </nav>}
 
     <div className="catalogue-book__reader">
+      <div className="catalogue-book__zoom-controls" role="group" aria-label="Catalogue zoom controls">
+        <button type="button" onClick={() => updateZoom(zoom - ZOOM_STEP)} disabled={zoom <= MIN_ZOOM} aria-label="Zoom out"><ZoomOut/></button>
+        <button type="button" className="catalogue-book__zoom-value" onClick={() => updateZoom(MIN_ZOOM)} disabled={zoom === MIN_ZOOM} aria-label={`Reset zoom, currently ${Math.round(zoom * 100)} percent`}>{Math.round(zoom * 100)}%</button>
+        <button type="button" onClick={() => updateZoom(zoom + ZOOM_STEP)} disabled={zoom >= MAX_ZOOM} aria-label="Zoom in"><ZoomIn/></button>
+      </div>
       <button type="button" className="catalogue-book__nav catalogue-book__nav--previous" onClick={() => void changePage(-1)} disabled={previousUnavailable} aria-disabled={previousUnavailable} aria-label="Previous page"><ChevronLeft/></button>
 
-      <div className="catalogue-book__stage-viewport" ref={stageViewportRef}>
+      <div className={`catalogue-book__stage-viewport ${zoom > MIN_ZOOM ? 'is-zoomed' : ''}`} ref={stageViewportRef}
+        onPointerDown={event => {
+          if (zoom === MIN_ZOOM || event.pointerType !== 'mouse' || event.button !== 0) return;
+          panStartRef.current = {pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: event.currentTarget.scrollLeft, top: event.currentTarget.scrollTop};
+          didPanRef.current = false;
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={event => {
+          const start = panStartRef.current;
+          if (!start || start.pointerId !== event.pointerId) return;
+          const deltaX = event.clientX - start.x;
+          const deltaY = event.clientY - start.y;
+          if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) didPanRef.current = true;
+          event.currentTarget.scrollLeft = start.left - deltaX;
+          event.currentTarget.scrollTop = start.top - deltaY;
+        }}
+        onPointerUp={event => {
+          if (panStartRef.current?.pointerId !== event.pointerId) return;
+          panStartRef.current = null;
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+          if (didPanRef.current) window.setTimeout(() => { didPanRef.current = false; }, 0);
+        }}
+        onPointerCancel={() => { panStartRef.current = null; didPanRef.current = false; }}>
+      <div className="catalogue-book__zoom-layer" style={{width: `${zoom * 100}%`, height: `${zoom * 100}%`}}>
       <div className={`catalogue-book__stage ${spreadStart === 1 && !turn ? 'is-cover' : 'is-open'} ${turn ? `has-turning-sheet has-turning-sheet-${turn.direction > 0 ? 'forward' : 'backward'} ${turn.active ? `is-turning is-turning-${turn.direction > 0 ? 'forward' : 'backward'}` : ''} ${turn.landed ? 'is-turn-landed' : ''}` : ''}`}
+        style={{'--catalogue-zoom': zoom} as CSSProperties}
         aria-busy={!loadError && (!ready || isPreparingTurn)}
-        onTouchStart={event => { touchStart.current = event.changedTouches[0].clientX; }}
+        onTouchStart={event => { touchStart.current = zoom === MIN_ZOOM ? event.changedTouches[0].clientX : null; }}
         onTouchEnd={event => {
           if (touchStart.current === null) return;
           const delta = event.changedTouches[0].clientX - touchStart.current;
@@ -458,10 +515,16 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
         }}>
         <div className="catalogue-book__thickness" aria-hidden="true"/>
         <div className="catalogue-book__spread" aria-live="polite">
-          <button className="catalogue-book__leaf catalogue-book__leaf--left" type="button" onClick={() => void changePage(-1)} aria-label="Turn to previous page">
+          <button className="catalogue-book__leaf catalogue-book__leaf--left" type="button" onClick={() => {
+            if (didPanRef.current) { didPanRef.current = false; return; }
+            void changePage(-1);
+          }} aria-label="Turn to previous page">
             {leftBase && renderedPages[leftBase] && <img src={renderedPages[leftBase]} alt={`${catalogueLabel}, page ${leftBase}`}/>}
           </button>
-          <button className="catalogue-book__leaf catalogue-book__leaf--right" type="button" onClick={() => void changePage(1)} aria-label="Turn to next page">
+          <button className="catalogue-book__leaf catalogue-book__leaf--right" type="button" onClick={() => {
+            if (didPanRef.current) { didPanRef.current = false; return; }
+            void changePage(1);
+          }} aria-label="Turn to next page">
             {rightBase && renderedPages[rightBase] && <img src={renderedPages[rightBase]} alt={`${catalogueLabel}, page ${rightBase}`}/>}
           </button>
           <span className="catalogue-book__spine" aria-hidden="true"/>
@@ -482,6 +545,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
           : (!ready || status) && <p className="catalogue-book__status" role="status"><LoaderCircle/>{status || 'Preparing real catalogue pages…'}</p>}
       </div>
       </div>
+      </div>
 
       <button type="button" className="catalogue-book__nav catalogue-book__nav--next" onClick={() => void changePage(1)} disabled={nextUnavailable} aria-disabled={nextUnavailable} aria-label="Next page"><ChevronRight/></button>
     </div>
@@ -489,7 +553,7 @@ export function UnifiedCatalogueBook({catalogues, initialCatalogue, onCatalogueC
     <footer className="catalogue-book__footer">
       <span>{pageLabel}</span>
       <span>Catalogue {catalogueIndex + 1} / {catalogues.length}</span>
-      <p>Tap a page, swipe, or use the arrow controls to keep reading.</p>
+      <p>{zoom > MIN_ZOOM ? 'Drag or scroll to inspect the page. Reset to 100% to swipe between pages.' : 'Tap a page, swipe, or use the arrow controls to keep reading.'}</p>
     </footer>
   </section>;
 }
