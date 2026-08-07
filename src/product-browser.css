@@ -531,7 +531,8 @@
   .electrical-main .product-browser-grid.product-grid,
   .electrical-main .product-browser-grid.catalogue-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 9px}
   .product-browser-card-shell.is-expanded{grid-column:1/-1}
-  .product-expanded-module{grid-template-columns:1fr}
+  .product-expanded-module,
+  .product-expanded-module.is-standalone{grid-template-columns:minmax(0,1fr)}
   .product-expanded-module__visual{min-height:360px}
   .product-expanded-module__content{padding:18px}
   .compact-product-filters{padding-top:22px!important;padding-bottom:24px!important}
