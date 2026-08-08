@@ -33,11 +33,11 @@ function Outlet() {
   return <><AdminLearningPanel/><RouterOutlet/></>;
 }
 
-function NavItem({to, label, icon: Icon, close}: {to: string; label: string; icon: typeof Package; close: () => void}) {
+function NavItem({to, label, icon: Icon, close, className = ''}: {to: string; label: string; icon: typeof Package; close: () => void; className?: string}) {
   const {language} = useAdminLanguage();
   const learning = learningForPath(to);
   const localizedLabel = learningText(learning.label, language) || label;
-  return <NavLink to={to} onClick={close} title={learningText(learning.purpose, language)} data-admin-tour={to} className={({isActive}) => isActive ? 'active' : ''}><Icon/><span>{localizedLabel}</span><ChevronRight/></NavLink>;
+  return <NavLink to={to} onClick={close} title={learningText(learning.purpose, language)} data-admin-tour={to} className={({isActive}) => `${className}${isActive ? ' active' : ''}`.trim()}><Icon/><span>{localizedLabel}</span><ChevronRight/></NavLink>;
 }
 
 export function AdminLayout() {
@@ -130,24 +130,24 @@ export function AdminLayout() {
     <AdminTranslationLayer/>
     <a className="nk-admin-skip" href="#admin-main">{text('Skip to main content', 'Μετάβαση στο κύριο περιεχόμενο')}</a>
     <aside ref={sidebarRef} id="admin-navigation" className={`nk-admin-sidebar ${mobileOpen ? 'open' : ''}`}>
-      <div className="nk-admin-logo"><img src={publicAsset('assets/nk-logo-transparent-v2.png')} alt=""/><div><b><span className="nk-admin-logo__desktop-title">NK Electrical</span><span className="nk-admin-logo__mobile-title">{text('All admin areas', 'Όλες οι περιοχές')}</span></b><small>Administration</small></div><button type="button" onClick={close} aria-label="Close admin navigation"><X/></button></div>
+      <div className="nk-admin-logo"><img src={publicAsset('assets/nk-logo-transparent-v2.png')} alt=""/><span className="nk-admin-logo-wordmark">ELECTRICAL</span><div><b><span className="nk-admin-logo__desktop-title">NK Electrical</span><span className="nk-admin-logo__mobile-title">{text('All admin areas', 'Όλες οι περιοχές')}</span></b><small>Administration</small></div><button type="button" onClick={close} aria-label="Close admin navigation"><X/></button></div>
       <button className="nk-admin-sidebar-search" type="button" onClick={openCommand} data-admin-tour="search"><Search/><span>Search admin</span><kbd>Ctrl K</kbd></button>
       <nav ref={sidebarNavRef} aria-label="Admin navigation">
         <small>{text('EVERYDAY', 'ΚΑΘΗΜΕΡΙΝΑ')}</small>
-        <NavItem {...overview[0]} close={close}/>
-        {(canReadKind(user.role, 'page') || canReadKind(user.role, 'product')) && <NavItem {...overview[1]} close={close}/>}
-        {canReadKind(user.role, 'page') && <NavItem {...overview[2]} close={close}/>}
-        {canReadKind(user.role, 'product') && <NavItem {...overview[3]} close={close}/>}
+        <NavItem {...overview[0]} close={close} className="nk-admin-nav-primary"/>
+        {(canReadKind(user.role, 'page') || canReadKind(user.role, 'product')) && <NavItem {...overview[1]} close={close} className="nk-admin-nav-primary"/>}
+        {canReadKind(user.role, 'page') && <NavItem {...overview[2]} close={close} className="nk-admin-nav-primary"/>}
+        {canReadKind(user.role, 'product') && <NavItem {...overview[3]} close={close} className="nk-admin-nav-primary"/>}
 
-        {(canReadKind(user.role, 'service') || canReadKind(user.role, 'project') || canReadKind(user.role, 'catalogue') || canReadKind(user.role, 'company')) && <details className="nk-admin-nav-group" open={content.some(item => location.pathname.startsWith(item.to))}><summary>{text('Other content', 'Άλλο περιεχόμενο')}<ChevronRight/></summary>{content.filter(item => canReadKind(user.role, item.to === '/admin/services' ? 'service' : item.to === '/admin/projects' ? 'project' : item.to === '/admin/catalogues' ? 'catalogue' : 'company')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
+        {(canReadKind(user.role, 'service') || canReadKind(user.role, 'project') || canReadKind(user.role, 'catalogue') || canReadKind(user.role, 'company')) && <details className="nk-admin-nav-group nk-admin-nav-row" open={content.some(item => location.pathname.startsWith(item.to))}><summary><span><FolderKanban/>{text('Other content', 'Άλλο περιεχόμενο')}</span><ChevronRight/></summary>{content.filter(item => canReadKind(user.role, item.to === '/admin/services' ? 'service' : item.to === '/admin/projects' ? 'project' : item.to === '/admin/catalogues' ? 'catalogue' : 'company')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
 
-        {(canReadForms(user.role) || canManageEnquiries(user.role)) && <details className="nk-admin-nav-group" open={location.pathname.includes('/forms') || location.pathname.includes('/enquiries')}><summary>{text('Customers', 'Πελάτες')}<ChevronRight/></summary>{canReadForms(user.role) && <NavItem to="/admin/forms" label="Form Submissions" icon={FileInput} close={close}/>} {canManageEnquiries(user.role) && <NavItem to="/admin/enquiries" label="Enquiries" icon={ClipboardList} close={close}/>}</details>}
+        {(canReadForms(user.role) || canManageEnquiries(user.role)) && <details className="nk-admin-nav-group nk-admin-nav-row" open={location.pathname.includes('/forms') || location.pathname.includes('/enquiries')}><summary><span><Users/>{text('Customers', 'Πελάτες')}</span><ChevronRight/></summary>{canReadForms(user.role) && <NavItem to="/admin/forms" label="Form Submissions" icon={FileInput} close={close}/>} {canManageEnquiries(user.role) && <NavItem to="/admin/enquiries" label="Enquiries" icon={ClipboardList} close={close}/>}</details>}
 
-        {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media library" icon={Image} close={close}/>}
+        {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media library" icon={Image} close={close} className="nk-admin-nav-row"/>}
 
-        {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo') || canManageInteractive(user.role)) && <details className="nk-admin-nav-group" open={location.pathname.includes('/interactive') || location.pathname.includes('/settings') || location.pathname.includes('/seo')}><summary>{text('Advanced tools', 'Προηγμένα εργαλεία')}<ChevronRight/></summary>{canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Visual studio" icon={Clapperboard} close={close}/>} {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
+        {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo') || canManageInteractive(user.role)) && <details className="nk-admin-nav-group nk-admin-nav-row" open={location.pathname.includes('/interactive') || location.pathname.includes('/settings') || location.pathname.includes('/seo')}><summary><span><Settings/>{text('Advanced tools', 'Προηγμένα εργαλεία')}</span><ChevronRight/></summary>{canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Visual studio" icon={Clapperboard} close={close}/>} {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
 
-        <details className="nk-admin-nav-group" open={location.pathname.includes('/users') || location.pathname.includes('/audit')}><summary>{text('Administration', 'Διαχείριση')}<ChevronRight/></summary>{!isPagesAdminMode && canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}<NavItem to="/admin/audit" label={user.role === 'owner' ? 'Audit Log' : 'My Activity'} icon={Activity} close={close}/></details>
+        <details className="nk-admin-nav-group nk-admin-nav-row" open={location.pathname.includes('/users') || location.pathname.includes('/audit')}><summary><span><ShieldCheck/>{text('Administration', 'Διαχείριση')}</span><ChevronRight/></summary>{!isPagesAdminMode && canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}<NavItem to="/admin/audit" label={user.role === 'owner' ? 'Audit Log' : 'My Activity'} icon={Activity} close={close}/></details>
       </nav>
       <div className="nk-admin-sidebar-language" role="group" aria-label={text('Admin language', 'Γλώσσα διαχείρισης')}><Languages/><span>{text('Language', 'Γλώσσα')}</span><button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')} aria-pressed={language === 'en'}>EN</button><button type="button" className={language === 'el' ? 'active' : ''} onClick={() => setLanguage('el')} aria-pressed={language === 'el'}>ΕΛ</button></div>
       <button className="nk-admin-guide-trigger" type="button" onClick={openGuide} data-admin-tour="guide"><HelpCircle/><span>Guide / Οδηγός</span></button>
