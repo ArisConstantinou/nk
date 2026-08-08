@@ -375,3 +375,592 @@
     min-height: 112px;
   }
 }
+
+/* Unified mobile Command Deck theme. Keep the desktop workspace light, but
+   carry the mobile navigation's dark green, mint and orange language through
+   every admin route, list, editor and form. */
+@media (max-width: 840px) {
+  .nk-admin-shell {
+    --admin-mobile-command-theme: #ff8a43;
+    --admin-bg: #001b15;
+    --admin-surface: #062d23;
+    --admin-surface-soft: #0a392c;
+    --admin-sidebar: #001b15;
+    --admin-sidebar-soft: #0a392c;
+    --admin-line: rgba(170, 222, 198, .24);
+    --admin-line-strong: rgba(170, 222, 198, .42);
+    --admin-text: #f7f1e8;
+    --admin-muted: #b6c9bf;
+    --admin-accent: #9fe4be;
+    --admin-accent-dark: #ff9a59;
+    --admin-accent-soft: rgba(141, 222, 182, .13);
+    --admin-warning: #ffc276;
+    --admin-warning-soft: rgba(255, 166, 91, .14);
+    --admin-danger: #ff8b83;
+    --admin-danger-soft: rgba(255, 107, 98, .13);
+    --admin-shadow: 0 18px 46px rgba(0, 10, 7, .32);
+    color-scheme: dark;
+    background:
+      radial-gradient(circle at 88% 6%, rgba(83, 198, 152, .13), transparent 27%),
+      radial-gradient(circle at 5% 43%, rgba(42, 154, 116, .11), transparent 35%),
+      linear-gradient(155deg, #001e17 0%, #003125 52%, #001b15 100%);
+    background-attachment: fixed;
+  }
+
+  .nk-admin-workspace,
+  .nk-admin-workspace > main {
+    color: var(--admin-text);
+    background: transparent;
+  }
+
+  .nk-admin-workspace > main {
+    min-height: calc(100dvh - 66px - env(safe-area-inset-bottom));
+    padding-bottom: calc(94px + env(safe-area-inset-bottom));
+  }
+
+  .nk-admin-page-heading,
+  .nk-admin-mobile-home > header {
+    position: relative;
+    margin-bottom: 16px;
+    padding: 10px 2px 18px;
+    border-bottom: 1px solid rgba(255, 138, 67, .42);
+  }
+
+  .nk-admin-record-page > .nk-admin-page-heading,
+  .nk-admin-media-page > .nk-admin-page-heading,
+  .nk-admin-content-hub > .nk-admin-page-heading,
+  .nk-productivity-dashboard > .nk-admin-page-heading {
+    border: 0;
+    border-bottom: 1px solid rgba(255, 138, 67, .42);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .nk-admin-page-heading::after,
+  .nk-admin-mobile-home > header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 58px;
+    height: 3px;
+    border-radius: 999px;
+    background: #ff8a43;
+    box-shadow: 0 0 13px rgba(255, 138, 67, .48);
+  }
+
+  .nk-admin-page-heading span,
+  .nk-admin-mobile-home > header > span,
+  .nk-admin-panel > header > div {
+    color: #ff9a59;
+  }
+
+  .nk-admin-page-heading h1,
+  .nk-admin-page-heading p,
+  .nk-admin-mobile-home > header h1,
+  .nk-admin-mobile-home > header p {
+    color: inherit;
+  }
+
+  .nk-admin-page-heading p,
+  .nk-admin-mobile-home > header p {
+    color: var(--admin-muted);
+  }
+
+  .nk-admin-security-line {
+    color: var(--admin-muted);
+  }
+
+  .nk-admin-security-line span {
+    color: #d9e6df;
+  }
+
+  .nk-admin-quick-actions,
+  .nk-admin-metrics > article,
+  .nk-admin-panel,
+  .nk-admin-content-grid > article,
+  .nk-admin-navigation-embedded,
+  .nk-admin-record-list,
+  .nk-admin-navigation-list,
+  .nk-admin-form-list,
+  .nk-admin-submission-list,
+  .nk-admin-list-loading,
+  .nk-admin-empty,
+  .nk-admin-enquiry-list,
+  .nk-admin-media-grid article,
+  .nk-admin-users,
+  .nk-admin-audit,
+  .nk-admin-editor,
+  .nk-admin-history,
+  .nk-admin-confirm,
+  .nk-admin-learning,
+  .nk-admin-mobile-home__attention,
+  .nk-admin-mobile-home__recent,
+  .nk-productivity-pagination,
+  .nk-audit-load-more {
+    border-color: var(--admin-line);
+    background: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .035));
+    color: var(--admin-text);
+    box-shadow: inset 0 0 30px rgba(126, 222, 181, .025), var(--admin-shadow);
+  }
+
+  .nk-admin-side-editor,
+  .nk-admin-form-editor,
+  .nk-admin-submission-detail {
+    border-color: var(--admin-line);
+    background: #052a20;
+    color: var(--admin-text);
+    box-shadow: var(--admin-shadow);
+  }
+
+  .nk-admin-mobile-home__actions > a {
+    min-height: 142px;
+    border: 2px solid var(--admin-line);
+    background:
+      radial-gradient(circle at 28% 8%, rgba(96, 207, 161, .13), transparent 48%),
+      linear-gradient(145deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .035));
+    color: var(--admin-text);
+    box-shadow: inset 0 0 26px rgba(127, 219, 182, .035), 0 14px 30px rgba(0, 10, 7, .28);
+  }
+
+  .nk-admin-mobile-home__actions > a > svg:first-child,
+  .nk-admin-content-card-main > span,
+  .nk-admin-user-avatar,
+  .nk-admin-record-symbol {
+    border: 1px solid rgba(159, 228, 190, .24);
+    background: rgba(159, 228, 190, .11);
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-home__actions > a::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    bottom: 13px;
+    width: 30px;
+    height: 3px;
+    border-radius: 99px;
+    background: #ff8a43;
+    box-shadow: 0 0 9px rgba(255, 138, 67, .34);
+  }
+
+  .nk-admin-mobile-home__actions > a > strong {
+    background: #ff8a43;
+    color: #06261d;
+  }
+
+  .nk-admin-mobile-home__actions small,
+  .nk-admin-mobile-home__attention small,
+  .nk-admin-mobile-home__recent small,
+  .nk-admin-content-card-main p {
+    color: var(--admin-muted);
+  }
+
+  .nk-admin-mobile-home__attention > div:first-child,
+  .nk-admin-mobile-home__recent > header,
+  .nk-admin-content-grid article > footer,
+  .nk-admin-record-list > header,
+  .nk-admin-record-load-more,
+  .nk-admin-form-fields > article > header,
+  .nk-admin-usage > header,
+  .nk-productivity-pagination {
+    border-color: var(--admin-line);
+    background: rgba(0, 21, 16, .58);
+  }
+
+  .nk-admin-mobile-home__attention > div:first-child > svg,
+  .nk-admin-mobile-home__recent header svg,
+  .nk-admin-content-card-main > span,
+  .nk-admin-metrics svg {
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-home__attention > div:last-child > a,
+  .nk-admin-mobile-home__recent > div > a {
+    border-color: var(--admin-line);
+    color: var(--admin-text);
+  }
+
+  .nk-admin-mobile-home__attention > div:last-child b,
+  .nk-admin-content-grid article > footer a,
+  .nk-admin-metrics a {
+    color: #ff9a59;
+  }
+
+  .nk-admin-mobile-home > footer > button,
+  .nk-admin-mobile-home > footer > a,
+  .nk-admin-mobile-home__back,
+  .nk-admin-page-actions button,
+  .nk-admin-page-actions a,
+  .nk-admin-quick-actions a,
+  .nk-admin-record-load-more button,
+  .nk-productivity-pagination button,
+  .nk-audit-load-more button,
+  .nk-admin-navigation-embedded-header > div:last-child > button,
+  .nk-admin-action-trigger,
+  .nk-admin-editor form > footer button,
+  .nk-admin-editor form > footer .nk-admin-footer-link,
+  .nk-admin-replace-box button {
+    border-color: var(--admin-line-strong);
+    background: rgba(255, 255, 255, .065);
+    color: var(--admin-text);
+    box-shadow: none;
+  }
+
+  .nk-admin-primary,
+  .nk-admin-page-actions .nk-admin-primary,
+  .nk-admin-editor form > footer .nk-admin-primary {
+    border-color: #ff8a43 !important;
+    background: linear-gradient(145deg, #ff9a59, #ff7a35) !important;
+    color: #08261d !important;
+    box-shadow: 0 9px 24px rgba(255, 122, 53, .22);
+  }
+
+  .nk-admin-record-toolbar label,
+  .nk-admin-record-toolbar select,
+  .nk-admin-media-toolbar select,
+  .nk-admin-editor-fields input,
+  .nk-admin-editor-fields textarea,
+  .nk-admin-editor-fields select,
+  .nk-admin-editor-advanced input,
+  .nk-admin-users select,
+  .nk-admin-password-form input,
+  .nk-admin-form-settings input,
+  .nk-admin-form-settings textarea,
+  .nk-admin-form-settings select,
+  .nk-admin-form-fields input,
+  .nk-admin-form-fields textarea,
+  .nk-admin-form-fields select,
+  .nk-admin-inline-search,
+  .nk-admin-navigation-main input,
+  .nk-admin-navigation-main select,
+  .nk-admin-navigation-main textarea {
+    border-color: var(--admin-line-strong);
+    background: rgba(0, 25, 19, .72);
+    color: var(--admin-text);
+    -webkit-text-fill-color: var(--admin-text);
+    caret-color: #ff9a59;
+  }
+
+  .nk-admin-shell input::placeholder,
+  .nk-admin-shell textarea::placeholder {
+    color: #90a99d;
+    -webkit-text-fill-color: #90a99d;
+    opacity: 1;
+  }
+
+  .nk-admin-editor-fields > label,
+  .nk-admin-form-settings label,
+  .nk-admin-form-fields label {
+    color: #dce9e2;
+  }
+
+  .nk-admin-editor-fields input:disabled,
+  .nk-admin-editor-fields textarea:disabled,
+  .nk-admin-editor-fields select:disabled {
+    background: rgba(255, 255, 255, .045);
+    color: #9eb3a8;
+    -webkit-text-fill-color: #9eb3a8;
+  }
+
+  .nk-admin-record-row,
+  .nk-admin-enquiry-list > button,
+  .nk-admin-submission-list > button {
+    border-color: var(--admin-line);
+    background: transparent;
+    color: var(--admin-text);
+  }
+
+  .nk-admin-record-row:hover,
+  .nk-admin-enquiry-list > button:hover,
+  .nk-admin-submission-list > button:hover,
+  .nk-admin-record-row[aria-current='true'] {
+    background: rgba(159, 228, 190, .1);
+  }
+
+  .nk-admin-record-order,
+  .nk-admin-editor form > footer,
+  .nk-admin-form-editor form > footer,
+  .nk-admin-submission-detail form > footer,
+  .nk-admin-editor > header,
+  .nk-admin-editor-advanced,
+  .nk-admin-form-fields > article,
+  .nk-admin-enquiry-detail dl > div,
+  .nk-admin-media-editor-layout > div:first-child,
+  .nk-admin-replace-box,
+  .nk-admin-usage {
+    border-color: var(--admin-line);
+    background: rgba(0, 24, 18, .58);
+    color: var(--admin-text);
+  }
+
+  .nk-admin-record-workspace > .nk-admin-editor,
+  .nk-admin-editor > header,
+  .nk-admin-editor form > footer.nk-admin-editor-footer {
+    background: #052a20;
+  }
+
+  .nk-admin-editor-backdrop,
+  .nk-admin-confirm-backdrop {
+    background: rgba(0, 12, 9, .76);
+    backdrop-filter: blur(9px);
+  }
+
+  .nk-admin-editor > header > button {
+    border-color: var(--admin-line-strong);
+    background: rgba(255, 255, 255, .07);
+    color: var(--admin-text);
+  }
+
+  .nk-admin-status {
+    border: 1px solid currentColor;
+    font-size: 12px;
+  }
+
+  .nk-admin-status--published,
+  .nk-admin-status--active {
+    background: rgba(96, 215, 166, .13);
+    color: #a8e5bd;
+  }
+
+  .nk-admin-status--draft {
+    background: rgba(255, 166, 91, .14);
+    color: #ffc276;
+  }
+
+  .nk-admin-status--archived,
+  .nk-admin-status--inactive {
+    background: rgba(184, 203, 194, .1);
+    color: #bdcec5;
+  }
+
+  .nk-admin-filter-tabs {
+    border-color: var(--admin-line);
+  }
+
+  .nk-admin-filter-tabs button.active {
+    border-color: #ff8a43;
+    color: #ff9a59;
+  }
+
+  .nk-admin-filter-tabs span {
+    background: rgba(159, 228, 190, .12);
+    color: #d7e7df;
+  }
+
+  .nk-admin-record-name > small,
+  .nk-admin-editor > header span,
+  .nk-admin-form-fields > article > header > span,
+  .nk-admin-navigation-embedded-header span,
+  .nk-admin-content-card-main > span,
+  .nk-admin-usage li > span {
+    color: #ff9a59;
+  }
+
+  .nk-admin-record-name > em,
+  .nk-admin-enquiry-list em,
+  .nk-admin-enquiry-detail > p,
+  .nk-admin-audit article > span,
+  .nk-admin-audit time {
+    color: var(--admin-muted);
+  }
+
+  .nk-admin-media-preview,
+  .nk-admin-media-grid article > div,
+  .nk-admin-media-editor-preview {
+    background: rgba(0, 18, 14, .7);
+  }
+
+  .nk-admin-learning-summary,
+  .nk-admin-learning-tabs,
+  .nk-admin-learning-content,
+  .nk-admin-learning-purpose article,
+  .nk-admin-learning-after,
+  .nk-admin-learning-example {
+    border-color: var(--admin-line);
+    background: rgba(255, 255, 255, .035);
+    color: var(--admin-text);
+  }
+
+  .nk-admin-action-popover {
+    --admin-text: #f7f1e8;
+    --admin-muted: #b6c9bf;
+    --admin-line: rgba(170, 222, 198, .24);
+    --admin-line-strong: rgba(170, 222, 198, .42);
+    --admin-surface-soft: #0a392c;
+    --admin-danger: #ff8b83;
+    border-color: var(--admin-line-strong);
+    background: #052a20;
+    color: var(--admin-text);
+    box-shadow: 0 18px 50px rgba(0, 8, 6, .48);
+  }
+
+  .nk-admin-action-popover button,
+  .nk-admin-action-popover a {
+    color: var(--admin-text);
+  }
+
+  .nk-admin-quick-add {
+    --admin-text: #f7f1e8;
+    --admin-muted: #b6c9bf;
+    --admin-line: rgba(170, 222, 198, .24);
+    --admin-line-strong: rgba(170, 222, 198, .42);
+    --admin-surface-soft: rgba(255, 255, 255, .055);
+    border: 2px solid var(--admin-line-strong);
+    background:
+      radial-gradient(circle at 84% 4%, rgba(83, 198, 152, .14), transparent 34%),
+      linear-gradient(155deg, #052d22, #001e17);
+    color: var(--admin-text);
+    box-shadow: 0 -22px 70px rgba(0, 8, 6, .5);
+  }
+
+  .nk-admin-quick-add > header,
+  .nk-admin-quick-add > div > a {
+    border-color: var(--admin-line);
+    background: rgba(255, 255, 255, .055);
+    color: var(--admin-text);
+  }
+
+  .nk-admin-quick-add > header {
+    position: relative;
+  }
+
+  .nk-admin-quick-add > header > div > svg,
+  .nk-admin-quick-add > div > a > svg {
+    color: #a8e5bd;
+  }
+
+  .nk-admin-quick-add > header::after {
+    content: '';
+    position: absolute;
+    left: 13px;
+    bottom: -2px;
+    width: 46px;
+    height: 3px;
+    border-radius: 999px;
+    background: #ff8a43;
+  }
+
+  .nk-admin-quick-add > header > button {
+    border: 1px solid rgba(255, 138, 67, .48);
+    background: rgba(255, 138, 67, .13);
+    color: #fff4e9;
+  }
+
+  .nk-admin-visual-editor,
+  .nk-visual-toolbar,
+  .nk-visual-workspace,
+  .nk-visual-inspector,
+  .nk-visual-canvas-hint,
+  .nk-visual-property-stack,
+  .nk-visual-drawer-header {
+    border-color: var(--admin-line);
+    background-color: #052a20;
+    color: var(--admin-text);
+  }
+
+  .nk-admin-page-navigation,
+  .nk-admin-page-navigation-drop,
+  .nk-admin-page-navigation-instruction,
+  .nk-admin-navigation-main,
+  .nk-admin-navigation-list,
+  .nk-admin-navigation-index {
+    border-color: var(--admin-line);
+    background-color: rgba(0, 24, 18, .58);
+    color: var(--admin-text);
+  }
+
+  .nk-admin-navigation-tabs button,
+  .nk-admin-view-tabs button {
+    border-color: var(--admin-line);
+    background: rgba(255, 255, 255, .055);
+    color: var(--admin-muted);
+  }
+
+  .nk-admin-navigation-tabs button.active,
+  .nk-admin-view-tabs button.active {
+    border-color: rgba(255, 138, 67, .5);
+    background: rgba(255, 138, 67, .13);
+    color: #ff9a59;
+  }
+
+  .nk-settings-page {
+    --settings-border: var(--admin-line);
+  }
+
+  .nk-settings-toolbar,
+  .nk-settings-workspace,
+  .nk-settings-workspace > aside,
+  .nk-settings-workspace > main,
+  .nk-settings-collection,
+  .nk-social-list > article,
+  .nk-settings-seo-preview {
+    border-color: var(--admin-line);
+    background: rgba(0, 24, 18, .66);
+    color: var(--admin-text);
+  }
+
+  .nk-settings-toolbar {
+    backdrop-filter: blur(14px);
+  }
+
+  .nk-settings-devices,
+  .nk-settings-collection > header,
+  .nk-settings-media-field > img,
+  .nk-settings-media-field > svg,
+  .nk-social-upload > label {
+    border-color: var(--admin-line);
+    background: rgba(255, 255, 255, .055);
+  }
+
+  .nk-settings-devices button.active,
+  .nk-settings-workspace > aside nav button.active {
+    border-color: rgba(255, 138, 67, .48);
+    background: rgba(255, 138, 67, .13);
+    color: #ff9a59;
+  }
+
+  .nk-settings-workspace > aside nav button,
+  .nk-settings-fields > label {
+    color: #dce9e2;
+  }
+
+  .nk-settings-fields input,
+  .nk-settings-fields textarea,
+  .nk-settings-fields select {
+    border-color: var(--admin-line-strong);
+    background: rgba(0, 25, 19, .72);
+    color: var(--admin-text);
+    -webkit-text-fill-color: var(--admin-text);
+  }
+
+  .nk-settings-toolbar > button,
+  .nk-settings-section > header > button,
+  .nk-settings-collection > header > button,
+  .nk-settings-collection footer button,
+  .nk-social-list footer button,
+  .nk-social-empty button {
+    border-color: var(--admin-line-strong);
+    background: rgba(255, 255, 255, .065);
+    color: var(--admin-text);
+  }
+
+  .nk-settings-seo-preview > b,
+  .nk-settings-seo-preview > a,
+  .nk-settings-seo-preview > p {
+    color: var(--admin-text);
+  }
+
+  .nk-admin-alert {
+    border-color: rgba(159, 228, 190, .42);
+    background: rgba(159, 228, 190, .12);
+    color: #dff7eb;
+  }
+
+  .nk-admin-alert--error,
+  .nk-admin-form-error {
+    border-color: rgba(255, 139, 131, .44) !important;
+    background: rgba(255, 107, 98, .13) !important;
+    color: #ffc0bb !important;
+  }
+}
