@@ -881,6 +881,155 @@ body::-webkit-scrollbar,
   }
 }
 
+/* Mobile keeps one floating More control; the former header actions live inside its panel. */
+@media(max-width:900px){
+  html[data-experience='tech']{--command-height:0px}
+
+  .ia-shell .ia-header--home-preview,
+  .ia-shell .ia-header--home-preview:not(.ia-header--static){
+    position:relative!important;
+    top:auto;
+    height:0;
+    min-height:0;
+    padding-top:0!important;
+    pointer-events:none;
+    background:transparent!important;
+    border:0;
+    box-shadow:none!important;
+  }
+
+  .ia-shell .ia-header--home-preview::after{content:none}
+
+  .ia-shell .ia-header--home-preview .ia-header-bar,
+  html[data-theme] .ia-shell .ia-header--home-preview .ia-header-bar{
+    position:fixed!important;
+    z-index:222;
+    top:12px;
+    right:12px;
+    left:auto;
+    width:108px;
+    height:52px!important;
+    display:block;
+    padding:0!important;
+    pointer-events:none;
+    background:transparent!important;
+    border:0;
+    box-shadow:none;
+  }
+
+  .ia-shell .ia-header--home-preview .ia-header-bar>.ia-brand,
+  .ia-shell .ia-header--home-preview .ia-header-bar>.ia-header-mobile-phone,
+  .ia-mobile-route-breadcrumb{display:none!important}
+
+  .power-hero-copy .power-kicker{padding-right:116px}
+
+  .ia-shell .ia-header--home-preview .ia-header-command-dock{
+    position:relative;
+    width:108px;
+    height:52px;
+    display:block;
+    pointer-events:auto;
+    color:#f7f1e5;
+    background:#153b45;
+    border:1px solid rgba(242,189,115,.72);
+    border-radius:999px;
+    clip-path:none;
+    box-shadow:0 8px 24px rgba(7,25,31,.24);
+  }
+
+  .ia-shell .ia-header--home-preview .ia-header-command-dock>.ia-header-command-trigger,
+  .ia-shell .ia-header--home-preview .ia-header-bar .ia-header-command-dock>.ia-header-command-trigger.ia-mobile-trigger{
+    width:100%!important;
+    min-width:0!important;
+    height:50px;
+    min-height:50px;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 24px!important;
+    align-items:center;
+    gap:8px;
+    padding:0 11px 0 16px!important;
+    color:#f7f1e5;
+    background:transparent;
+    border:0;
+    border-radius:999px;
+    box-shadow:none;
+    font:760 14px/1 var(--campaign-body)!important;
+  }
+
+  .ia-shell .ia-header--home-preview .ia-header-command-dock>.ia-header-command-trigger span,
+  .ia-shell .ia-header--home-preview .ia-header-bar .ia-header-command-dock>.ia-header-command-trigger.ia-mobile-trigger span{
+    order:initial;
+    justify-self:start;
+    text-align:left;
+  }
+
+  .ia-shell .ia-header--home-preview .ia-header-command-dock>.ia-header-command-trigger svg,
+  .ia-shell .ia-header--home-preview .ia-header-bar .ia-header-command-dock>.ia-header-command-trigger.ia-mobile-trigger svg{
+    order:initial;
+    width:22px;
+    height:22px;
+    padding:0;
+    color:#f2bd73;
+    background:transparent;
+    border:0;
+  }
+
+  .ia-mobile-menu-layer,
+  .ia-header-search-layer{inset:0;pointer-events:auto}
+
+  .ia-shell .ia-mobile-menu,
+  .ia-header-search-dialog{
+    height:100dvh;
+    max-height:100dvh;
+  }
+
+  .ia-shell .ia-mobile-menu{grid-template-rows:auto auto minmax(0,1fr)}
+
+  .ia-mobile-menu__quick-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+    padding:12px 14px;
+    background:rgba(255,255,255,.025);
+    border-bottom:1px solid rgba(242,189,115,.2);
+  }
+
+  .ia-mobile-menu__quick-actions>button{
+    min-width:0;
+    min-height:62px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:8px 4px;
+    color:#f7f1e5;
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(242,189,115,.34);
+    border-radius:10px;
+    font:720 14px/1 var(--campaign-body);
+    cursor:pointer;
+  }
+
+  .ia-mobile-menu__quick-actions>button svg{
+    width:22px;
+    height:22px;
+    color:#f2bd73;
+    stroke-width:2;
+  }
+
+  .ia-mobile-menu__quick-actions>button:is(:hover,:focus-visible){
+    color:#fff;
+    background:rgba(242,189,115,.14);
+    border-color:#f2bd73;
+    outline:3px solid #f2bd73;
+    outline-offset:-3px;
+  }
+
+  .nk-main-header-preview.is-mobile-dialog.is-mobile-open,
+  .nk-contact-header-preview.is-mobile-dialog.is-desktop-open{inset:0}
+}
+
 @media(prefers-reduced-motion:reduce){
   .nk-main-header-preview.is-mobile-dialog.is-mobile-open,
   .nk-contact-header-preview.is-mobile-dialog.is-desktop-open{animation:none}

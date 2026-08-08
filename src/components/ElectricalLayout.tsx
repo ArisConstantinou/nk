@@ -317,7 +317,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
 
   const closeHeaderSearch = (restoreFocus = true) => {
     setSearchOpen(false);
-    if (restoreFocus) window.requestAnimationFrame(() => activeSearchTrigger()?.focus());
+    if (restoreFocus) window.requestAnimationFrame(() => {
+      (isDesktopViewport ? activeSearchTrigger() : mobileTriggerRef.current)?.focus();
+    });
   };
 
   const openHeaderSearch = () => {
@@ -329,14 +331,6 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
     setMobileOpen(false);
     setMobileHeaderPanel(null);
     setSearchOpen(true);
-  };
-
-  const toggleHeaderSearch = () => {
-    if (searchOpen) {
-      closeHeaderSearch(false);
-      return;
-    }
-    openHeaderSearch();
   };
 
   const closeMobileNavigation = (restoreFocus = true) => {
@@ -361,12 +355,9 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   };
 
   const closeMobileHeaderPanel = (restoreFocus = true) => {
-    const activePanel = mobileHeaderPanel;
     setMobileHeaderPanel(null);
     if (!restoreFocus) return;
-    window.requestAnimationFrame(() => {
-      (activePanel === 'highlights' ? highlightsTriggerRef.current : contactTriggerRef.current)?.focus();
-    });
+    window.requestAnimationFrame(() => mobileTriggerRef.current?.focus());
   };
 
   const toggleMobileHeaderPanel = (target: Exclude<MobileHeaderPanel, null>) => {
@@ -665,37 +656,7 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <Link className={`ia-brand ${useModernHeader ? 'ia-brand--home-preview ' : ''}${settings.header.showDinRail ? '' : 'ia-brand--no-rail'}`.trim()} to="/" {...routeLinkAttributes('/')} aria-label={`${settings.brandName} home`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}>{settings.header.showDinRail && <span className="ia-brand-rail" aria-hidden="true"/>}<BrandEnergyMark src={settings.logoUrl || publicAsset('assets/nk-logo-transparent-v2.png')} alt={settings.logoAlt} showWires={settings.header.showBrandWires}/><span className="ia-brand-copy"><strong><span className="ia-brand-depth" aria-hidden="true">{railBrandLabel}</span><span className="ia-brand-face" data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="brandName" data-visual-edit="text" data-visual-label="Brand name">{railBrandLabel}</span></strong></span></Link>
         <a className="ia-header-mobile-phone" href={`tel:${tel}`} aria-label={`Call ${settings.brandName} on ${settings.phone}`} aria-hidden={mobileOpen || undefined} tabIndex={mobileOpen ? -1 : undefined}><Phone aria-hidden="true"/><span data-visual-kind="settings" data-visual-slug="business-details" data-visual-path="phone" data-visual-edit="text" data-visual-label="Phone number">{settings.phone}</span></a>
         <div className="ia-header-command-dock" role="group" aria-label="Search and navigation">
-          <button
-            className={`ia-header-command-trigger ia-header-search-trigger ${useModernHeader ? 'ia-header-search-trigger--home' : ''}`.trim()}
-            ref={searchTriggerRef}
-            type="button"
-            aria-label="Search products, images, catalogues and PDFs"
-            aria-haspopup="dialog"
-            aria-controls="ia-header-search-panel"
-            aria-expanded={searchOpen}
-            onClick={toggleHeaderSearch}
-          ><span>Search</span><Search aria-hidden="true"/></button>
-          <button
-            ref={highlightsTriggerRef}
-            className="ia-header-command-trigger ia-header-highlights-trigger"
-            type="button"
-            aria-label={mobileHeaderPanel === 'highlights' ? 'Close highlights' : 'Open highlights'}
-            aria-haspopup="dialog"
-            aria-controls="nk-desktop-header-story"
-            aria-expanded={mobileHeaderPanel === 'highlights'}
-            onClick={() => toggleMobileHeaderPanel('highlights')}
-          ><span>Highlights</span><Sparkles aria-hidden="true"/></button>
-          <button
-            ref={contactTriggerRef}
-            className="ia-header-command-trigger ia-header-contact-trigger"
-            type="button"
-            aria-label={mobileHeaderPanel === 'contact' ? 'Close contact options' : 'Open contact options'}
-            aria-haspopup="dialog"
-            aria-controls="nk-desktop-contact-story"
-            aria-expanded={mobileHeaderPanel === 'contact'}
-            onClick={() => toggleMobileHeaderPanel('contact')}
-          ><span>Contact</span><Phone aria-hidden="true"/></button>
-          <button ref={mobileTriggerRef} className={`ia-header-command-trigger ia-mobile-trigger ${useModernHeader ? 'ia-mobile-trigger--home' : ''}`.trim()} type="button" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>Menu</span><Menu aria-hidden="true"/></button>
+          <button ref={mobileTriggerRef} className={`ia-header-command-trigger ia-mobile-trigger ${useModernHeader ? 'ia-mobile-trigger--home' : ''}`.trim()} type="button" aria-label={mobileOpen ? 'Close more options' : 'Open more options'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" onClick={toggleMobileNavigation}><span>More</span><Menu aria-hidden="true"/></button>
         </div>
         <nav className="ia-desktop-nav" aria-label="Primary navigation">{primary.map(item => linkTo(item) === '/services'
           ? <button key="services" type="button" data-route-profile="services" className={megaOpen === 'services' || location.pathname.startsWith('/services') ? 'active' : ''} aria-expanded={megaOpen === 'services'} aria-controls="services-mega-menu" onMouseEnter={() => openMegaOnHover('services')} onMouseLeave={closeMegaOnHover} onClick={() => toggleMega('services')}><NavigationPanelContent to="/services" label={item.label} hasMenu/></button>
@@ -754,9 +715,35 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
         <button className="ia-mobile-menu-backdrop" type="button" aria-label="Close navigation" onClick={() => closeMobileNavigation()}/>
         <section ref={mobileNavRef} className="ia-mobile-menu" id="mobile-navigation" role="dialog" aria-modal="true" aria-labelledby="ia-mobile-menu-title">
           <header className="ia-mobile-menu__header">
-            <div><Menu aria-hidden="true"/><span><small>SITE NAVIGATION</small><strong id="ia-mobile-menu-title">Explore</strong></span></div>
+            <div><Menu aria-hidden="true"/><span><small>MORE</small><strong id="ia-mobile-menu-title">Browse &amp; tools</strong></span></div>
             <button type="button" onClick={() => closeMobileNavigation()} aria-label="Close navigation"><span>Close</span><ChevronDown aria-hidden="true"/></button>
           </header>
+          <div className="ia-mobile-menu__quick-actions" role="group" aria-label="Quick actions">
+            <button
+              ref={searchTriggerRef}
+              type="button"
+              aria-label="Search products, images, catalogues and PDFs"
+              aria-haspopup="dialog"
+              aria-controls="ia-header-search-panel"
+              onClick={openHeaderSearch}
+            ><Search aria-hidden="true"/><span>Search</span></button>
+            <button
+              ref={highlightsTriggerRef}
+              type="button"
+              aria-label="Open highlights"
+              aria-haspopup="dialog"
+              aria-controls="nk-desktop-header-story"
+              onClick={() => toggleMobileHeaderPanel('highlights')}
+            ><Sparkles aria-hidden="true"/><span>Highlights</span></button>
+            <button
+              ref={contactTriggerRef}
+              type="button"
+              aria-label="Open contact options"
+              aria-haspopup="dialog"
+              aria-controls="nk-desktop-contact-story"
+              onClick={() => toggleMobileHeaderPanel('contact')}
+            ><Phone aria-hidden="true"/><span>Contact</span></button>
+          </div>
           <nav className="ia-mobile-menu__content" aria-label="Mobile navigation links">
             <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'services'} aria-controls="mobile-services" onClick={() => toggleMobile('services')}><span>Services</span><ChevronDown/></button>{mobileSection === 'services' && <div id="mobile-services">{serviceMenu.map(item => <SmartLink to={linkTo(item)} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
             <div className="ia-mobile-accordion"><button type="button" aria-expanded={mobileSection === 'shop'} aria-controls="mobile-shop" onClick={() => toggleMobile('shop')}><span>Shop</span><ChevronDown/></button>{mobileSection === 'shop' && <div id="mobile-shop">{shopMenu.map(item => <SmartLink to={navbarTarget(linkTo(item))} key={`${item.label}-${linkTo(item)}`}><strong>{item.label}</strong><small>{item.description}</small><ArrowRight/></SmartLink>)}</div>}</div>
