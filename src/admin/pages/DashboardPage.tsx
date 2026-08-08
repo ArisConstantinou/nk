@@ -9,6 +9,7 @@ import {
   ChevronRight,
   CircleAlert,
   ClipboardList,
+  ExternalLink,
   FileInput,
   FilePenLine,
   FolderKanban,
@@ -432,53 +433,29 @@ export function DashboardPage() {
           >
             <header>
               <span>WEBSITE ADMIN</span>
-              <h1 id="mobile-home-title">What do you want to update?</h1>
-              <p>Choose an area and make the change. Everything else remains available under More.</p>
+              <h1 id="mobile-home-title">What would you like to do?</h1>
+              <p>You do not need to understand the admin. Start with the action you want to complete.</p>
             </header>
 
-            <div className="nk-admin-mobile-home__actions" aria-label="Website areas">
-              {canWriteKind(user!.role, "page") && (
-                <Link to="/admin/pages">
-                  <FilePenLine />
-                  <span><b>Website pages</b><small>Edit text, images and page sections</small></span>
-                  <ChevronRight />
-                </Link>
-              )}
-              {canWriteKind(user!.role, "product") && (
-                <Link to="/admin/products">
-                  <PackagePlus />
-                  <span><b>Products</b><small>Update the shop or add a product</small></span>
-                  <ChevronRight />
-                </Link>
-              )}
-              {canWriteKind(user!.role, "project") && (
-                <Link to="/admin/projects">
-                  <FolderKanban />
-                  <span><b>Projects</b><small>Add completed work and project photos</small></span>
-                  <ChevronRight />
-                </Link>
-              )}
-              {canReadForms(user!.role) && (
-                <Link to="/admin/forms">
-                  <FileInput />
-                  <span><b>Customer messages</b><small>Open enquiries and form submissions</small></span>
-                  {(data.submissions.new || 0) > 0 && <strong>{data.submissions.new}</strong>}
-                  <ChevronRight />
-                </Link>
-              )}
-              {canManageMedia(user!.role) && (
-                <Link to="/admin/media">
-                  <Image />
-                  <span><b>Photos & files</b><small>Upload and reuse website media</small></span>
-                  <ChevronRight />
-                </Link>
-              )}
-              <Link to="/admin/content">
-                <Settings2 />
-                <span><b>All website content</b><small>Services, catalogues and company details</small></span>
+            <div className="nk-admin-mobile-home__intents" aria-label="Common website tasks">
+              <button className="nk-admin-mobile-intent is-primary" type="button" onClick={() => window.dispatchEvent(new CustomEvent('nk-admin:open-manage', {detail: {mode: 'edit'}}))}>
+                <FilePenLine />
+                <span><b>Edit something</b><small>Change text, photos, products or any existing content</small></span>
                 <ChevronRight />
-              </Link>
+              </button>
+              <button className="nk-admin-mobile-intent" type="button" onClick={() => window.dispatchEvent(new CustomEvent('nk-admin:open-add'))}>
+                <Plus />
+                <span><b>Add something new</b><small>Add a page, product, service, project, catalogue or photo</small></span>
+                <ChevronRight />
+              </button>
+              <button className="nk-admin-mobile-intent is-remove" type="button" onClick={() => window.dispatchEvent(new CustomEvent('nk-admin:open-manage', {detail: {mode: 'remove'}}))}>
+                <Archive />
+                <span><b>Hide or remove something</b><small>Take it offline safely or keep it recoverable in Archive</small></span>
+                <ChevronRight />
+              </button>
             </div>
+
+            <div className="nk-admin-mobile-home__promise"><CheckCircle2/><span><b>Your live website stays safe</b><small>Nothing changes for visitors until you tap Publish.</small></span></div>
 
             {(data.statuses.draft > 0 || data.summary.warnings > 0 || (data.submissions.new || 0) > 0) && (
               <section className="nk-admin-mobile-home__attention" aria-labelledby="mobile-attention-title">
@@ -507,7 +484,7 @@ export function DashboardPage() {
 
             <footer>
               <button type="button" onClick={openGlobalSearch}><Search />Search admin</button>
-              <Link to="/admin/dashboard?view=advanced"><Settings2 />Advanced dashboard</Link>
+              <Link to="/?liveEdit=1"><ExternalLink />View live website</Link>
             </footer>
           </section>
 

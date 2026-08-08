@@ -80,7 +80,7 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   const visible = kind === 'product' ? shown.slice(0, visibleCount) : shown;
   useEffect(() => { setVisibleCount(PRODUCT_PAGE_SIZE); }, [kind, query, statusFilter]);
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || editor.id) return;
     window.setTimeout(() => {
       titleInputRef.current?.focus();
       if (window.matchMedia('(max-width: 840px)').matches) titleInputRef.current?.scrollIntoView({block: 'center', behavior: 'smooth'});
@@ -88,7 +88,10 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   }, [editor?.id, Boolean(editor)]);
   const startNew = () => {
     const data = structuredClone(config.defaults);
-    if (kind === 'page') data.route = '';
+    if (kind === 'page') {
+      data.route = '';
+      data.eyebrow = 'NK Electrical';
+    }
     setEditor({kind, title: '', slug: '', data, published: false, version: 1, status: 'draft', category: '', tags: []});
     setDirty(true); setFieldErrors({}); setRevisions(null);
   };
@@ -232,19 +235,26 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
     if (record) void placePageInNavigation(record, targetMenu, target.label);
   };
 
+  const saveCurrentEditor = async () => {
+    if (!editor) return null;
+    const isNewRecord = !editor.id;
+    const body = JSON.stringify({kind, title: editor.title, slug: editor.slug, data: editor.data, category: editor.category, tags: editor.tags, expectedVersion: editor.version});
+    const result = editor.id
+      ? await adminApi<{record: ContentRecord}>(`/content/${editor.id}`, {method: 'PUT', body})
+      : await adminApi<{record: ContentRecord}>('/content', {method: 'POST', body});
+    setRecords(current => [result.record, ...current.filter(item => item.id !== result.record.id)]);
+    setEditor(toEditor(result.record)); setDirty(false);
+    if (kind === 'page') window.dispatchEvent(new CustomEvent('nk-admin-guide:page-saved', {detail: {id: result.record.id, title: result.record.title, route: pageRoute(result.record), isNew: isNewRecord}}));
+    return result.record;
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editor) return;
-    const isNewRecord = !editor.id;
     setBusy(true); setError(''); setNotice(''); setFieldErrors({});
     try {
-      const body = JSON.stringify({kind, title: editor.title, slug: editor.slug, data: editor.data, category: editor.category, tags: editor.tags, expectedVersion: editor.version});
-      const result = editor.id
-        ? await adminApi<{record: ContentRecord}>(`/content/${editor.id}`, {method: 'PUT', body})
-        : await adminApi<{record: ContentRecord}>('/content', {method: 'POST', body});
-      setRecords(current => [result.record, ...current.filter(item => item.id !== result.record.id)]);
-      setEditor(toEditor(result.record)); setDirty(false); setNotice(`${config.singular} saved as a draft. Navigation remains on the published route until this draft is published.`);
-      if (kind === 'page') window.dispatchEvent(new CustomEvent('nk-admin-guide:page-saved', {detail: {id: result.record.id, title: result.record.title, route: pageRoute(result.record), isNew: isNewRecord}}));
+      const saved = await saveCurrentEditor();
+      if (saved) setNotice(`${config.singular} saved for later. It is not live until you choose Publish.`);
     } catch (nextError) {
       if (nextError instanceof AdminApiError) setFieldErrors(nextError.fields);
       setError(errorMessage(nextError));
@@ -252,12 +262,13 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   };
 
   const publish = async () => {
-    if (!editor?.id || dirty) return;
-    setBusy(true); setError('');
+    if (!editor) return;
+    setBusy(true); setError(''); setNotice(''); setFieldErrors({});
     try {
-      const current = records.find(item => item.id === editor.id);
-      const publishedBaseline = current?.published ? {...current, draft: structuredClone(current.published)} : current;
-      const result = await adminApi<{record: ContentRecord}>(`/content/${editor.id}/publish`, {method: 'POST', body: JSON.stringify({expectedVersion: editor.version})});
+      const saved = dirty || !editor.id ? await saveCurrentEditor() : records.find(item => item.id === editor.id) || null;
+      if (!saved) return;
+      const publishedBaseline = saved.published ? {...saved, draft: structuredClone(saved.published)} : saved;
+      const result = await adminApi<{record: ContentRecord}>(`/content/${saved.id}/publish`, {method: 'POST', body: JSON.stringify({expectedVersion: saved.version})});
       setRecords(current => current.map(item => item.id === result.record.id ? result.record : item));
       setEditor(toEditor(result.record));
       if (kind === 'page') window.dispatchEvent(new CustomEvent('nk-admin-guide:page-published', {detail: {id: result.record.id, title: result.record.title, route: pageRoute(result.record)}}));
@@ -408,7 +419,8 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
       const currentRoute = String(current.data.route || '');
       const routeWasAutomatic = !currentRoute || currentRoute === `/${current.slug}` || currentRoute === `/${previousAutoSlug}`;
       const navigationTitle = !current.data.navigationTitle || current.data.navigationTitle === current.title ? value : current.data.navigationTitle;
-      return {...current, title: value, slug: nextSlug, data: {...current.data, route: routeWasAutomatic && nextSlug ? `/${nextSlug}` : currentRoute, navigationTitle}};
+      const heroTitle = !current.data.heroTitle || current.data.heroTitle === current.title ? value : current.data.heroTitle;
+      return {...current, title: value, slug: nextSlug, data: {...current.data, route: routeWasAutomatic && nextSlug ? `/${nextSlug}` : currentRoute, navigationTitle, heroTitle}};
     });
     setDirty(true);
   };
@@ -425,6 +437,14 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
   const editorRecord = editor?.id ? records.find(item => item.id === editor.id) : undefined;
 
   const recordEditorPath = kind === 'seo' || kind === 'settings' ? '' : `/admin/${kind === 'company' ? 'company' : `${kind}s`}/editor`;
+  const simplePageEditor = kind === 'page' && window.matchMedia('(max-width: 840px)').matches;
+  const simplePageFields = simplePageEditor ? config.fields.filter(field => field.key === 'heroBody') : config.fields;
+  const optionalPageFields = simplePageEditor ? config.fields.filter(field => !['route', 'navigationTitle', 'eyebrow', 'heroBody', 'heroImage'].includes(field.key)) : [];
+  const renderEditorField = (field: RecordField, activeEditor: EditorState) => {
+    const simpleLabel = simplePageEditor && field.key === 'heroBody' ? 'What should visitors know?' : field.label;
+    const simpleHelp = simplePageEditor && field.key === 'heroBody' ? 'Write a short introduction. You can add more sections later.' : field.help;
+    return <label className={field.type === 'checkbox' ? 'nk-admin-checkbox' : ''} key={field.key}>{field.type === 'checkbox' ? <><input type="checkbox" checked={activeEditor.data[field.key] !== false} disabled={!canWrite} onChange={event => patchData(field.key, event.target.checked)}/><span>{simpleLabel}</span></> : <><span>{simpleLabel}</span>{field.type === 'textarea' ? <textarea rows={5} required={field.required} disabled={!canWrite} value={fieldValue(activeEditor.data, field)} onChange={event => patchData(field.key, event.target.value)}/> : field.type === 'select' ? <select required={field.required} disabled={!canWrite} value={fieldValue(activeEditor.data, field)} onChange={event => patchData(field.key, event.target.value)}>{field.options?.map(option => <option key={option}>{option}</option>)}</select> : <input type={field.type === 'tags' ? 'text' : field.type || 'text'} required={field.required} disabled={!canWrite} value={fieldValue(activeEditor.data, field)} onChange={event => patchData(field.key, field.type === 'tags' ? event.target.value.split(',').map(value => value.trim()).filter(Boolean) : event.target.value)}/>} {simpleHelp && <small>{simpleHelp}</small>}{fieldErrors[field.key] && <small className="field-error">{fieldErrors[field.key]}</small>}</>}</label>;
+  };
 
   return <div className="nk-admin-record-page">
     <PageHeading
@@ -465,13 +485,14 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
     {editor && <section className="nk-admin-editor" role="region" aria-label={`Edit ${config.singular}`}>
       <header><div><span>{editor.id ? editor.status === 'published' ? 'Live on website' : editor.status === 'archived' ? 'Archived' : editor.published ? 'Draft changes · live version is safe' : 'Draft · not live' : `new ${config.singular}`}</span><h2>{editor.title || `New ${config.singular}`}</h2></div><button type="button" onClick={close} aria-label="Close editor"><X/></button></header>
       <form onSubmit={submit}>
-        <div className="nk-admin-editor-fields"><div className="nk-admin-field-group-title"><span>Basic information</span><p>Use a clear title visitors and editors can recognize.</p></div><label>Display title<input ref={titleInputRef} data-guide={kind === 'page' ? 'page-title' : undefined} required maxLength={240} value={editor.title} disabled={!canWrite} onChange={event => updateEditorTitle(event.target.value)}/>{fieldErrors.title && <small className="field-error">{fieldErrors.title}</small>}</label><details className="nk-admin-editor-advanced"><summary>Advanced settings <ChevronDown/></summary><div><label>URL slug<input required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={100} value={editor.slug} disabled={!canWrite} onChange={event => updateEditorSlug(event.target.value)}/>{fieldErrors.slug && <small className="field-error">{fieldErrors.slug}</small>}</label><label>Internal category<input maxLength={100} value={editor.category} disabled={!canWrite} onChange={event => {setEditor({...editor, category: event.target.value}); setDirty(true);}} placeholder="Optional internal grouping"/></label><label>Internal tags<input maxLength={600} value={editor.tags.join(', ')} disabled={!canWrite} onChange={event => {setEditor({...editor, tags: event.target.value.split(',').map(value => value.trim()).filter(Boolean).slice(0, 20)}); setDirty(true);}} placeholder="priority, summer, showroom"/><small>Used only for admin search and organization.</small></label></div></details><div className="nk-admin-field-group-title"><span>Content</span><p>Complete the information below. Required fields are checked before saving.</p></div>
-          {config.fields.map(field => <label className={field.type === 'checkbox' ? 'nk-admin-checkbox' : ''} key={field.key}>{field.type === 'checkbox' ? <><input type="checkbox" checked={editor.data[field.key] !== false} disabled={!canWrite} onChange={event => patchData(field.key, event.target.checked)}/><span>{field.label}</span></> : <><span>{field.label}</span>{field.type === 'textarea' ? <textarea rows={5} required={field.required} disabled={!canWrite} value={fieldValue(editor.data, field)} onChange={event => patchData(field.key, event.target.value)}/> : field.type === 'select' ? <select required={field.required} disabled={!canWrite} value={fieldValue(editor.data, field)} onChange={event => patchData(field.key, event.target.value)}>{field.options?.map(option => <option key={option}>{option}</option>)}</select> : <input type={field.type === 'tags' ? 'text' : field.type || 'text'} required={field.required} disabled={!canWrite} value={fieldValue(editor.data, field)} onChange={event => patchData(field.key, field.type === 'tags' ? event.target.value.split(',').map(value => value.trim()).filter(Boolean) : event.target.value)}/>} {field.help && <small>{field.help}</small>}{fieldErrors[field.key] && <small className="field-error">{fieldErrors[field.key]}</small>}</>}</label>)}
+        <div className="nk-admin-editor-fields"><div className="nk-admin-field-group-title"><span>{simplePageEditor ? editor.id ? 'Edit this page' : 'Create a page' : 'Basic information'}</span><p>{simplePageEditor ? 'Use a clear page name and short introduction. The website address is handled automatically.' : 'Use a clear title visitors and editors can recognize.'}</p></div><label>{simplePageEditor ? 'Page name' : 'Display title'}<input ref={titleInputRef} data-guide={kind === 'page' ? 'page-title' : undefined} required maxLength={240} value={editor.title} disabled={!canWrite} onChange={event => updateEditorTitle(event.target.value)}/>{fieldErrors.title && <small className="field-error">{fieldErrors.title}</small>}</label>{!simplePageEditor && <details className="nk-admin-editor-advanced"><summary>Advanced settings <ChevronDown/></summary><div><label>URL slug<input required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={100} value={editor.slug} disabled={!canWrite} onChange={event => updateEditorSlug(event.target.value)}/>{fieldErrors.slug && <small className="field-error">{fieldErrors.slug}</small>}</label><label>Internal category<input maxLength={100} value={editor.category} disabled={!canWrite} onChange={event => {setEditor({...editor, category: event.target.value}); setDirty(true);}} placeholder="Optional internal grouping"/></label><label>Internal tags<input maxLength={600} value={editor.tags.join(', ')} disabled={!canWrite} onChange={event => {setEditor({...editor, tags: event.target.value.split(',').map(value => value.trim()).filter(Boolean).slice(0, 20)}); setDirty(true);}} placeholder="priority, summer, showroom"/><small>Used only for admin search and organization.</small></label></div></details>}<div className="nk-admin-field-group-title"><span>{simplePageEditor ? 'Page introduction' : 'Content'}</span><p>{simplePageEditor ? 'This is the first text visitors will read.' : 'Complete the information below. Required fields are checked before saving.'}</p></div>
+          {simplePageFields.map(field => renderEditorField(field, editor))}
+          {simplePageEditor && optionalPageFields.length > 0 && <details className="nk-admin-editor-advanced nk-admin-beginner-options"><summary>Optional: add more page text <ChevronDown/></summary><div>{optionalPageFields.map(field => renderEditorField(field, editor))}</div></details>}
         </div>
         <footer className="nk-admin-editor-footer">{canWrite ? <>
           <div className="nk-admin-editor-primary-actions">
-            <button type="submit" className="nk-admin-primary" data-guide={kind === 'page' ? 'create-page' : undefined} disabled={busy || !dirty}><Save/>{busy ? 'Working…' : editor.id ? 'Save changes' : `Create ${config.singular}`}</button>
-            {editor.id && <button type="button" data-guide={kind === 'page' ? 'publish-page' : undefined} onClick={() => void publish()} disabled={busy || dirty}><Rocket/>{editor.status === 'archived' ? 'Restore & publish' : editor.published ? 'Update live' : 'Publish'}</button>}
+            <button type="submit" data-guide={kind === 'page' ? 'create-page' : undefined} disabled={busy || !dirty}><Save/>{busy ? 'Working…' : 'Save for later'}</button>
+            <button type="button" className="nk-admin-primary" data-guide={kind === 'page' ? 'publish-page' : undefined} onClick={() => void publish()} disabled={busy}><Rocket/>{editor.status === 'archived' ? 'Restore & publish' : editor.published ? 'Update live' : 'Publish now'}</button>
           </div>
           {editor.id && editor.status === 'published' && <button type="button" className="nk-admin-remove-live" onClick={() => void unpublish()} disabled={busy || dirty}><EyeOff/>Take offline</button>}
           {editor.id && editor.status === 'draft' && !editor.published && <button type="button" className="nk-admin-remove-live" onClick={() => void archive()} disabled={busy || dirty}><Archive/>Archive</button>}

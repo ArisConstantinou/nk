@@ -2,7 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as Re
 import {Activity, BookOpen, BriefcaseBusiness, Building2, ChevronRight, ClipboardList, Clapperboard, ExternalLink, FileInput, FileText, FolderKanban, HelpCircle, Image, Languages, LayoutDashboard, LogOut, Menu, Package, Plus, Search, Settings, ShieldCheck, ShoppingBag, UserRound, Users, X} from 'lucide-react';
 import {Link, NavLink, Outlet as RouterOutlet, useLocation, useNavigate} from 'react-router-dom';
 import {useAdminAuth} from '../auth/AdminAuth';
-import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation, canWriteKind} from '../permissions';
+import {canManageEnquiries, canManageInteractive, canManageMedia, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation, canWriteKind} from '../permissions';
 import type {AdminRole} from '../types';
 import {CommandPalette} from './CommandPalette';
 import {BeginnerSiteGuide} from './BeginnerSiteGuide';
@@ -45,40 +45,31 @@ function MobileExplorerLink({to, label, icon: Icon, active, close}: {to: string;
   return <NavLink to={to} onClick={close} className={() => active ? 'active' : ''} aria-current={active ? 'page' : undefined}><Icon/><span>{label}</span><ChevronRight/></NavLink>;
 }
 
-function MobileWorkspaceExplorer({role, open, close, panelRef}: {role: AdminRole; open: boolean; close: () => void; panelRef: RefObject<HTMLElement | null>}) {
+type MobileManageMode = 'edit' | 'remove';
+
+function MobileWorkspaceExplorer({role, mode, open, close, panelRef}: {role: AdminRole; mode: MobileManageMode; open: boolean; close: () => void; panelRef: RefObject<HTMLElement | null>}) {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const active = (to: string) => location.pathname === to || location.pathname.startsWith(`${to}/`);
   const pagesActive = location.pathname.startsWith('/admin/pages') && query.get('navigation') !== '1';
   const navigationActive = location.pathname === '/admin/pages' && query.get('navigation') === '1';
   if (!open) return null;
-  return <><button className="nk-admin-workspace-map-scrim" type="button" aria-label="Close website map" onClick={close}/><aside ref={panelRef} id="admin-workspace-map" className="nk-admin-mobile-workspace-map" role="dialog" aria-modal="true" aria-label="Website map">
-    <header><div><span>CURRENT WORKSPACE</span><b>Website map</b><small>Choose the area you want to manage.</small></div><button type="button" onClick={close} aria-label="Close website map"><X/></button></header>
+  const removing = mode === 'remove';
+  return <><button className="nk-admin-workspace-map-scrim" type="button" aria-label="Close Manage" onClick={close}/><aside ref={panelRef} id="admin-workspace-map" className={`nk-admin-mobile-workspace-map is-${mode}`} role="dialog" aria-modal="true" aria-label={removing ? 'Hide or remove website content' : 'Manage website content'}>
+    <header><div><span>{removing ? 'SAFE REMOVAL' : 'MANAGE WEBSITE'}</span><b>{removing ? 'Hide or remove something' : 'What do you want to edit?'}</b><small>{removing ? 'Choose its type, open the item, then use Take offline or Archive.' : 'Choose a content type, then tap the exact item you want to change.'}</small></div><button type="button" onClick={close} aria-label="Close Manage"><X/></button></header>
     <nav>
-      <section><h2>Content</h2>
+      <section><h2>Website content</h2>
         {canReadKind(role, 'page') && <MobileExplorerLink to="/admin/pages" label="Pages" icon={FileText} active={pagesActive} close={close}/>}
-        {canReadNavigation(role) && <MobileExplorerLink to="/admin/pages?navigation=1" label="Navigation" icon={Menu} active={navigationActive} close={close}/>}
         {canReadKind(role, 'product') && <MobileExplorerLink to="/admin/products" label="Products" icon={ShoppingBag} active={active('/admin/products')} close={close}/>}
         {canReadKind(role, 'service') && <MobileExplorerLink to="/admin/services" label="Services" icon={BriefcaseBusiness} active={active('/admin/services')} close={close}/>}
         {canReadKind(role, 'project') && <MobileExplorerLink to="/admin/projects" label="Projects" icon={FolderKanban} active={active('/admin/projects')} close={close}/>}
         {canReadKind(role, 'catalogue') && <MobileExplorerLink to="/admin/catalogues" label="Catalogues" icon={BookOpen} active={active('/admin/catalogues')} close={close}/>}
         {canReadKind(role, 'company') && <MobileExplorerLink to="/admin/company" label="Company" icon={Building2} active={active('/admin/company')} close={close}/>}
+        {canReadMedia(role) && <MobileExplorerLink to="/admin/media" label="Photos & files" icon={Image} active={active('/admin/media')} close={close}/>}
       </section>
-      {(canManageEnquiries(role) || canReadForms(role)) && <section><h2>Customers</h2>
-        {canManageEnquiries(role) && <MobileExplorerLink to="/admin/enquiries" label="Enquiries" icon={ClipboardList} active={active('/admin/enquiries')} close={close}/>}
-        {canReadForms(role) && <MobileExplorerLink to="/admin/forms" label="Forms" icon={FileInput} active={active('/admin/forms')} close={close}/>}
-      </section>}
-      {(canReadMedia(role) || canManageInteractive(role) || canReadKind(role, 'settings') || canReadKind(role, 'seo')) && <section><h2>Tools</h2>
-        {canReadMedia(role) && <MobileExplorerLink to="/admin/media" label="Media" icon={Image} active={active('/admin/media')} close={close}/>}
-        {canManageInteractive(role) && <MobileExplorerLink to="/admin/interactive" label="Interactive" icon={Clapperboard} active={active('/admin/interactive')} close={close}/>}
-        {canReadKind(role, 'settings') && <MobileExplorerLink to="/admin/settings" label="Settings" icon={Settings} active={active('/admin/settings')} close={close}/>}
-        {canReadKind(role, 'seo') && <MobileExplorerLink to="/admin/seo" label="SEO" icon={Search} active={active('/admin/seo')} close={close}/>}
-      </section>}
-      <section><h2>Activity</h2>
-        <MobileExplorerLink to="/admin/audit" label={role === 'owner' ? 'Audit log' : 'My activity'} icon={Activity} active={active('/admin/audit')} close={close}/>
-      </section>
+      {canReadNavigation(role) && <section><h2>Optional website structure</h2><MobileExplorerLink to="/admin/pages?navigation=1" label="Menus & navigation" icon={Menu} active={navigationActive} close={close}/></section>}
     </nav>
-    <footer><ShieldCheck/><span><b>Safe drafts</b><small>Your live content stays protected until publish.</small></span></footer>
+    <footer><ShieldCheck/><span><b>{removing ? 'Nothing is deleted immediately' : 'Safe drafts'}</b><small>{removing ? 'Take offline hides it; Archive keeps it recoverable.' : 'Your live content stays protected until you publish.'}</small></span></footer>
   </aside></>;
 }
 
@@ -92,6 +83,7 @@ export function AdminLayout() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
+  const [manageMode, setManageMode] = useState<MobileManageMode>('edit');
   const sidebarRef = useRef<HTMLElement>(null);
   const sidebarNavRef = useRef<HTMLElement>(null);
   const explorerRef = useRef<HTMLElement>(null);
@@ -146,6 +138,28 @@ export function AdminLayout() {
     window.addEventListener('nk-admin:open-search', openSearch);
     return () => {window.removeEventListener('keydown', shortcut); window.removeEventListener('nk-admin:open-search', openSearch);};
   }, [closeCommand, closeExplorer, closeGuide, commandOpen, explorerOpen, guideOpen, mobileOpen, quickAddOpen]);
+  useEffect(() => {
+    const openManage = (event: Event) => {
+      const requestedMode = (event as CustomEvent<{mode?: MobileManageMode}>).detail?.mode;
+      setCommandOpen(false);
+      setMobileOpen(false);
+      setQuickAddOpen(false);
+      setManageMode(requestedMode === 'remove' ? 'remove' : 'edit');
+      setExplorerOpen(true);
+    };
+    const openAdd = () => {
+      setCommandOpen(false);
+      setMobileOpen(false);
+      setExplorerOpen(false);
+      setQuickAddOpen(true);
+    };
+    window.addEventListener('nk-admin:open-manage', openManage);
+    window.addEventListener('nk-admin:open-add', openAdd);
+    return () => {
+      window.removeEventListener('nk-admin:open-manage', openManage);
+      window.removeEventListener('nk-admin:open-add', openAdd);
+    };
+  }, []);
   useEffect(() => {
     if (!mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
@@ -229,15 +243,15 @@ export function AdminLayout() {
       <div className="nk-admin-sidebar-user">{isPagesAdminMode ? <><div className="nk-admin-device-user"><UserRound/><span><b>{user.displayName}</b><small>Firebase · {user.email}</small></span></div><button type="button" onClick={() => void signOut()} data-admin-tour="signout"><LogOut/>Sign out</button></> : <><NavLink to="/admin/profile" onClick={close} data-admin-tour="profile"><UserRound/><span><b>{user.displayName}</b><small>{user.role} · {user.email}</small></span></NavLink><button type="button" onClick={() => void signOut()} data-admin-tour="signout"><LogOut/>Sign out</button></>}</div>
     </aside>
     {mobileOpen && <button className="nk-admin-scrim" type="button" aria-label="Close navigation" onClick={close}/>}
-    <MobileWorkspaceExplorer role={user.role} open={explorerOpen} close={closeExplorer} panelRef={explorerRef}/>
+    <MobileWorkspaceExplorer role={user.role} mode={manageMode} open={explorerOpen} close={closeExplorer} panelRef={explorerRef}/>
     <section ref={workspaceRef} className="nk-admin-workspace">
       <header className="nk-admin-topbar"><button ref={mobileTriggerRef} className="nk-admin-menu-trigger" type="button" onClick={() => setMobileOpen(true)} aria-label="Open admin navigation" aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/></button><nav aria-label="Breadcrumb"><NavLink to="/admin/dashboard">Admin</NavLink><ChevronRight/><span>{currentGroup}</span><ChevronRight/><b>{currentLabel}</b></nav><div className="nk-admin-topbar-actions"><button className="nk-admin-topbar-guide" type="button" onClick={openGuide} aria-label="Open Guide / Οδηγός"><HelpCircle/><span className="nk-admin-guide-label-full">Guide / Οδηγός</span><span className="nk-admin-guide-label-compact">Guide</span></button><button ref={commandTriggerRef} className="nk-admin-global-search" type="button" aria-label="Search admin" onClick={() => setCommandOpen(true)}><Search/><span>Search</span><kbd>Ctrl K</kbd></button><NavLink className="nk-admin-site-edit-link" to="/?liveEdit=1" aria-label="Visit the live site in edit mode"><span>Visit site</span><ExternalLink/></NavLink>{isPagesAdminMode ? <span className="nk-admin-topbar-avatar" aria-label="Mobile device admin">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</span> : <NavLink className="nk-admin-topbar-avatar" to="/admin/profile" aria-label="Open your profile">{user.displayName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()}</NavLink>}</div></header>
       <main id="admin-main" className={visualEditorRoute ? 'nk-admin-main--visual-editor' : undefined} tabIndex={-1}><div className={`nk-admin-security-line ${isPagesAdminMode ? 'nk-admin-security-line--device' : ''}`}><ShieldCheck/><span>{isPagesAdminMode ? 'Firebase-authenticated workspace' : 'Secure workspace'}</span><i/>{isPagesAdminMode ? 'Changes are saved in this browser on this device' : 'Changes are recorded in the audit log'}</div><Outlet/></main>
-      {quickAddOpen && <><button type="button" className="nk-admin-quick-add-scrim" aria-label="Close add menu" onClick={() => setQuickAddOpen(false)}/><section className="nk-admin-quick-add" aria-label="Add content"><header><div><Plus/><span><b>Add content</b><small>Choose what you want to create</small></span></div><button type="button" onClick={() => setQuickAddOpen(false)} aria-label="Close add menu"><X/></button></header><div>{canWriteKind(user.role, 'page') && <Link to="/admin/pages?new=1" onClick={() => setQuickAddOpen(false)}><FileText/><span><b>New page</b><small>Add a website page</small></span></Link>}{canWriteKind(user.role, 'product') && <Link to="/admin/products?new=1" onClick={() => setQuickAddOpen(false)}><ShoppingBag/><span><b>New product</b><small>Add to the shop catalogue</small></span></Link>}{canWriteKind(user.role, 'service') && <Link to="/admin/services?new=1" onClick={() => setQuickAddOpen(false)}><BriefcaseBusiness/><span><b>New service</b><small>Add a customer service</small></span></Link>}{canWriteKind(user.role, 'project') && <Link to="/admin/projects?new=1" onClick={() => setQuickAddOpen(false)}><FolderKanban/><span><b>New project</b><small>Add completed work</small></span></Link>}</div></section></>}
+      {quickAddOpen && <><button type="button" className="nk-admin-quick-add-scrim" aria-label="Close add menu" onClick={() => setQuickAddOpen(false)}/><section className="nk-admin-quick-add" aria-label="Add content"><header><div><Plus/><span><b>Add something new</b><small>Choose one type to continue</small></span></div><button type="button" onClick={() => setQuickAddOpen(false)} aria-label="Close add menu"><X/></button></header><div>{canWriteKind(user.role, 'page') && <Link to="/admin/pages?new=1" onClick={() => setQuickAddOpen(false)}><FileText/><span><b>Page</b><small>Add a website page</small></span></Link>}{canWriteKind(user.role, 'product') && <Link to="/admin/products?new=1" onClick={() => setQuickAddOpen(false)}><ShoppingBag/><span><b>Product</b><small>Add to the shop catalogue</small></span></Link>}{canWriteKind(user.role, 'service') && <Link to="/admin/services?new=1" onClick={() => setQuickAddOpen(false)}><BriefcaseBusiness/><span><b>Service</b><small>Add a customer service</small></span></Link>}{canWriteKind(user.role, 'project') && <Link to="/admin/projects?new=1" onClick={() => setQuickAddOpen(false)}><FolderKanban/><span><b>Project</b><small>Add completed work</small></span></Link>}{canWriteKind(user.role, 'catalogue') && <Link to="/admin/catalogues?new=1" onClick={() => setQuickAddOpen(false)}><BookOpen/><span><b>Catalogue</b><small>Add an official PDF</small></span></Link>}{canManageMedia(user.role) && <Link to="/admin/media?upload=1" onClick={() => setQuickAddOpen(false)}><Image/><span><b>Photos & files</b><small>Upload reusable media</small></span></Link>}</div></section></>}
     </section>
     <nav className="nk-admin-mobile-nav" aria-label={text('Mobile admin navigation', 'Κύρια πλοήγηση διαχείρισης')}>
       <NavLink to="/admin/dashboard" onClick={() => {closeCommand('dismiss'); close(); setExplorerOpen(false);}} className={({isActive}) => isActive ? 'active' : ''}><LayoutDashboard/><span>{text('Home', 'Αρχική')}</span></NavLink>
-      <button ref={explorerTriggerRef} type="button" className={explorerOpen ? 'active' : ''} onClick={() => {closeCommand('dismiss'); setMobileOpen(false); setQuickAddOpen(false); setExplorerOpen(open => !open);}} aria-label={text(explorerOpen ? 'Close website map' : 'Open website map', explorerOpen ? 'Κλείσιμο χάρτη ιστοσελίδας' : 'Άνοιγμα χάρτη ιστοσελίδας')} aria-expanded={explorerOpen} aria-controls="admin-workspace-map"><FolderKanban/><span>{text('Explorer', 'Εξερεύνηση')}</span></button>
+      <button ref={explorerTriggerRef} type="button" className={explorerOpen ? 'active' : ''} onClick={() => {closeCommand('dismiss'); setMobileOpen(false); setQuickAddOpen(false); setManageMode('edit'); setExplorerOpen(open => !open);}} aria-label={text(explorerOpen ? 'Close Manage' : 'Manage website content', explorerOpen ? 'Κλείσιμο διαχείρισης' : 'Διαχείριση περιεχομένου')} aria-expanded={explorerOpen} aria-controls="admin-workspace-map"><FileText/><span>{text('Manage', 'Διαχείριση')}</span></button>
       <button type="button" className="nk-admin-mobile-add" onClick={() => {closeCommand('dismiss'); setMobileOpen(false); setExplorerOpen(false); setQuickAddOpen(open => !open);}} aria-label={text('Add content', 'Προσθήκη περιεχομένου')} aria-expanded={quickAddOpen}><Plus/><span>{text('Add', 'Προσθήκη')}</span></button>
       <button type="button" className={commandOpen ? 'active' : ''} onClick={openCommand} aria-label={text('Search admin', 'Αναζήτηση διαχείρισης')} aria-expanded={commandOpen}><Search/><span>{text('Search', 'Αναζήτηση')}</span></button>
       <button ref={mobileNavTriggerRef} type="button" className="nk-admin-mobile-more" onClick={() => {closeCommand('dismiss'); setExplorerOpen(false); mobileOpen ? close() : setMobileOpen(true);}} aria-label={text(mobileOpen ? 'Close all admin areas' : 'Open all admin areas', mobileOpen ? 'Κλείσιμο όλων των περιοχών' : 'Άνοιγμα όλων των περιοχών')} aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/><span>{text('More', 'Περισσότερα')}</span></button>
