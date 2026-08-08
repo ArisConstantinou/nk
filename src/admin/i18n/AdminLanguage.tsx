@@ -28,6 +28,8 @@ const greekUi: Record<string, string> = {
   'Enquiries': 'Αιτήματα',
   'Media': 'Πολυμέσα',
   'Media library': 'Βιβλιοθήκη πολυμέσων',
+  'Gallery': 'Συλλογή',
+  'Upload files': 'Ανέβασμα αρχείων',
   'Site Settings': 'Ρυθμίσεις ιστοτόπου',
   'Website settings': 'Ρυθμίσεις ιστοτόπου',
   'SEO': 'SEO',

@@ -21,7 +21,7 @@ const commands: Omit<Command, 'id'>[] = [
   {label: 'Catalogues', group: 'Content', description: 'PDFs and official catalogue links', to: '/admin/catalogues'},
   {label: 'Form Submissions', group: 'Customers', description: 'Public forms and stored submissions', to: '/admin/forms'},
   {label: 'Enquiries', group: 'Customers', description: 'Customer requests and lead follow-up', to: '/admin/enquiries'},
-  {label: 'Media', group: 'Media', description: 'Images, video and PDF files', to: '/admin/media'},
+  {label: 'Gallery', group: 'Gallery', description: 'Photos, videos, PDFs and catalogue files', to: '/admin/media'},
   {label: 'Interactive Studio', group: 'Content', description: 'Build frame-based reusable interactive experiences', to: '/admin/interactive'},
   {label: 'Site Settings', group: 'Settings', description: 'Global layout, CTAs and contact details', to: '/admin/settings'},
   {label: 'Navigation', group: 'Content', description: 'Primary, mega-menu and footer links inside Pages', to: '/admin/pages?navigation=1'},
@@ -52,7 +52,7 @@ function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
   return true;
 }
 
-const groupLabel = (type: AdminSearchResult['type']) => ({content: 'Website content', media: 'Media library', navigation: 'Navigation', forms: 'Forms', enquiries: 'Enquiries', users: 'Team'}[type]);
+const groupLabel = (type: AdminSearchResult['type']) => ({content: 'Website content', media: 'Gallery', navigation: 'Navigation', forms: 'Forms', enquiries: 'Enquiries', users: 'Team'}[type]);
 
 export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = false, docked = false}: {
   open: boolean;
