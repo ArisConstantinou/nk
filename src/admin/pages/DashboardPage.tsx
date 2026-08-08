@@ -4,28 +4,29 @@ import {
   AlertTriangle,
   Archive,
   BellRing,
+  BookOpen,
+  BriefcaseBusiness,
+  Building2,
   Check,
   CheckCircle2,
   ChevronRight,
   CircleAlert,
   ClipboardList,
-  ExternalLink,
   FileInput,
+  FileText,
   FilePenLine,
   FolderKanban,
   Image,
-  ListFilter,
   PackagePlus,
   Pin,
   PinOff,
-  Plus,
   RefreshCw,
   Rocket,
   Search,
   ServerCog,
   Settings2,
+  ShoppingBag,
   Tags,
-  Users,
   X,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -38,6 +39,7 @@ import {
   canManageMedia,
   canReadForms,
   canReadKind,
+  canReadMedia,
   canWriteKind,
 } from "../permissions";
 import type { ContentKind, ContentStatus } from "../types";
@@ -433,26 +435,18 @@ export function DashboardPage() {
           >
             <header>
               <span>WEBSITE ADMIN</span>
-              <h1 id="mobile-home-title">What would you like to do?</h1>
-              <p>You do not need to understand the admin. Start with the action you want to complete.</p>
+              <h1 id="mobile-home-title">Choose what you want to manage</h1>
+              <p>Each button opens one content area. Pages, products, services, projects, catalogues and files never mix.</p>
             </header>
 
-            <div className="nk-admin-mobile-home__intents" aria-label="Common website tasks">
-              <button className="nk-admin-mobile-intent is-primary" type="button" onClick={() => window.dispatchEvent(new CustomEvent('nk-admin:open-manage', {detail: {mode: 'edit'}}))}>
-                <FilePenLine />
-                <span><b>Edit something</b><small>Change text, photos, products or any existing content</small></span>
-                <ChevronRight />
-              </button>
-              <button className="nk-admin-mobile-intent" type="button" onClick={() => window.dispatchEvent(new CustomEvent('nk-admin:open-add'))}>
-                <Plus />
-                <span><b>Add something new</b><small>Add a page, product, service, project, catalogue or photo</small></span>
-                <ChevronRight />
-              </button>
-              <button className="nk-admin-mobile-intent is-remove" type="button" onClick={() => window.dispatchEvent(new CustomEvent('nk-admin:open-manage', {detail: {mode: 'remove'}}))}>
-                <Archive />
-                <span><b>Hide or remove something</b><small>Take it offline safely or keep it recoverable in Archive</small></span>
-                <ChevronRight />
-              </button>
+            <div className="nk-admin-mobile-home__actions" aria-label="Website content areas">
+              {canReadKind(user!.role, 'page') && <Link to="/admin/pages"><FileText/><span><b>Pages</b><small>Website pages and their text</small></span><ChevronRight/><strong>{data.content.page || 0}</strong></Link>}
+              {canReadKind(user!.role, 'product') && <Link to="/admin/products"><ShoppingBag/><span><b>Products</b><small>Items shown in the shop</small></span><ChevronRight/><strong>{data.content.product || 0}</strong></Link>}
+              {canReadKind(user!.role, 'service') && <Link to="/admin/services"><BriefcaseBusiness/><span><b>Services</b><small>Services offered to customers</small></span><ChevronRight/><strong>{data.content.service || 0}</strong></Link>}
+              {canReadKind(user!.role, 'project') && <Link to="/admin/projects"><FolderKanban/><span><b>Projects</b><small>Completed work and project stories</small></span><ChevronRight/><strong>{data.content.project || 0}</strong></Link>}
+              {canReadKind(user!.role, 'catalogue') && <Link to="/admin/catalogues"><BookOpen/><span><b>Catalogues</b><small>Catalogue records and PDF links</small></span><ChevronRight/><strong>{data.content.catalogue || 0}</strong></Link>}
+              {canReadMedia(user!.role) && <Link to="/admin/media"><Image/><span><b>Gallery</b><small>Photos, videos and PDF files</small></span><ChevronRight/><strong>{data.summary.media}</strong></Link>}
+              {canReadKind(user!.role, 'company') && <Link to="/admin/company"><Building2/><span><b>Company</b><small>Company story and partnerships</small></span><ChevronRight/></Link>}
             </div>
 
             <div className="nk-admin-mobile-home__promise"><CheckCircle2/><span><b>Your live website stays safe</b><small>Nothing changes for visitors until you tap Publish.</small></span></div>
@@ -482,10 +476,7 @@ export function DashboardPage() {
               </section>
             )}
 
-            <footer>
-              <button type="button" onClick={openGlobalSearch}><Search />Search admin</button>
-              <Link to="/?liveEdit=1"><ExternalLink />View live website</Link>
-            </footer>
+            <footer><Link to="/admin/dashboard?view=advanced"><Activity/>Detailed dashboard and reports</Link></footer>
           </section>
 
           <div className={`nk-productivity-dashboard__full${mobileAdvanced ? " is-mobile-visible" : ""}`}>
