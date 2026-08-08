@@ -2096,7 +2096,12 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
    persistent destinations stay predictable across every everyday screen. */
 .nk-admin-mobile-home-logo,
 .nk-admin-mobile-help-button,
+.nk-admin-mobile-website-button,
 .nk-admin-mobile-account-button {
+  display: none;
+}
+
+.nk-admin-topbar-actions > a.nk-admin-mobile-website-button {
   display: none;
 }
 
@@ -2339,6 +2344,7 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
 
 @media (max-width: 840px) {
   .nk-admin-topbar {
+    position: sticky;
     height: calc(60px + env(safe-area-inset-top));
     padding: env(safe-area-inset-top) 12px 0;
     display: flex !important;
@@ -2347,6 +2353,10 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
   }
 
   .nk-admin-mobile-home-logo {
+    position: absolute;
+    z-index: 2;
+    top: calc(env(safe-area-inset-top) + 8px);
+    left: 50%;
     width: 44px;
     height: 44px;
     flex: 0 0 44px;
@@ -2357,6 +2367,7 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
     background: #001f18;
     box-shadow: 0 5px 14px rgba(0, 34, 26, .18);
     overflow: hidden;
+    transform: translateX(-50%);
   }
 
   .nk-admin-mobile-home-logo img {
@@ -2377,31 +2388,18 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
   }
 
   .nk-admin-topbar > nav {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .nk-admin-topbar > nav > a,
-  .nk-admin-topbar > nav > svg,
-  .nk-admin-topbar > nav > span {
     display: none;
   }
 
-  .nk-admin-topbar > nav > b {
-    max-width: 100%;
-    overflow: hidden;
-    color: #14382d !important;
-    font-size: 15px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .nk-admin-topbar-actions {
+    width: 100%;
     margin-left: 0;
+    justify-content: flex-end;
     gap: 7px;
   }
 
   .nk-admin-mobile-help-button,
+  .nk-admin-mobile-website-button,
   .nk-admin-mobile-account-button {
     width: 42px;
     height: 42px;
@@ -2414,8 +2412,30 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
     color: var(--admin-accent-dark);
   }
 
+  .nk-admin-mobile-help-button {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 9px);
+    left: 12px;
+  }
+
   .nk-admin-mobile-help-button svg {
     width: 21px;
+  }
+
+  .nk-admin-topbar-actions > a.nk-admin-mobile-website-button {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--admin-line-strong);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--admin-accent-dark);
+  }
+
+  .nk-admin-mobile-website-button svg {
+    width: 20px;
   }
 
   .nk-admin-mobile-account-button {
