@@ -1638,6 +1638,10 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
 }
 
 @media (max-width: 840px) {
+  .nk-admin-topbar {
+    display: none;
+  }
+
   .nk-admin-sidebar {
     --command-orange: #ff8a43;
     --command-mint: #a8e5bd;
@@ -1682,6 +1686,10 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
 
   body:has(.nk-admin-sidebar.open) .nk-admin-mobile-more svg {
     color: #ff9a59;
+  }
+
+  .nk-admin-workspace > main:has(.nk-visual-editor) {
+    min-height: calc(100dvh - 66px - env(safe-area-inset-bottom));
   }
 
   .nk-admin-logo {

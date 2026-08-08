@@ -53,6 +53,7 @@ export function AdminLayout() {
   const sidebarNavRef = useRef<HTMLElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileNavTriggerRef = useRef<HTMLButtonElement>(null);
   const commandTriggerRef = useRef<HTMLButtonElement>(null);
   const guideTriggerRef = useRef<HTMLButtonElement | null>(null);
   const closeCommand = useCallback((reason: 'dismiss' | 'select' = 'dismiss') => {
@@ -71,7 +72,7 @@ export function AdminLayout() {
   const close = () => {
     const shouldRestoreFocus = mobileOpen;
     setMobileOpen(false);
-    if (shouldRestoreFocus) window.setTimeout(() => mobileTriggerRef.current?.focus(), 0);
+    if (shouldRestoreFocus) window.setTimeout(() => mobileNavTriggerRef.current?.focus(), 0);
   };
   const openCommand = () => {close(); setCommandOpen(true);};
   const signOut = async () => { await logout(); navigate('/admin/login', {replace: true}); };
@@ -83,7 +84,7 @@ export function AdminLayout() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {event.preventDefault(); setMobileOpen(false); setCommandOpen(true);}
       if (event.key === 'Escape') {
         if (commandOpen) {closeCommand('dismiss'); return;}
-        if (mobileOpen) window.setTimeout(() => mobileTriggerRef.current?.focus(), 0);
+        if (mobileOpen) window.setTimeout(() => mobileNavTriggerRef.current?.focus(), 0);
         if (quickAddOpen) setQuickAddOpen(false);
         setMobileOpen(false);
         if (guideOpen) closeGuide();
@@ -145,6 +146,8 @@ export function AdminLayout() {
 
         {canReadMedia(user.role) && <NavItem to="/admin/media" label="Media library" icon={Image} close={close} className="nk-admin-nav-row"/>}
 
+        <Link to="/?liveEdit=1" onClick={close} className="nk-admin-nav-row nk-admin-nav-visit" aria-label={text('Visit the live site in edit mode', 'Προβολή της ιστοσελίδας σε λειτουργία επεξεργασίας')}><ExternalLink/><span>{text('Visit live site', 'Προβολή ιστοσελίδας')}</span><ChevronRight/></Link>
+
         {(canReadKind(user.role, 'settings') || canReadKind(user.role, 'seo') || canManageInteractive(user.role)) && <details className="nk-admin-nav-group nk-admin-nav-row" open={location.pathname.includes('/interactive') || location.pathname.includes('/settings') || location.pathname.includes('/seo')}><summary><span><Settings/>{text('Advanced tools', 'Προηγμένα εργαλεία')}</span><ChevronRight/></summary>{canManageInteractive(user.role) && <NavItem to="/admin/interactive" label="Visual studio" icon={Clapperboard} close={close}/>} {settings.filter(item => canReadKind(user.role, item.to === '/admin/seo' ? 'seo' : 'settings')).map(item => <NavItem {...item} close={close} key={item.to}/>)}</details>}
 
         <details className="nk-admin-nav-group nk-admin-nav-row" open={location.pathname.includes('/users') || location.pathname.includes('/audit')}><summary><span><ShieldCheck/>{text('Administration', 'Διαχείριση')}</span><ChevronRight/></summary>{!isPagesAdminMode && canManageUsers(user.role) && <NavItem to="/admin/users" label="Users" icon={Users} close={close}/>}<NavItem to="/admin/audit" label={user.role === 'owner' ? 'Audit Log' : 'My Activity'} icon={Activity} close={close}/></details>
@@ -164,7 +167,7 @@ export function AdminLayout() {
       {canReadKind(user.role, 'page') && <NavLink to="/admin/pages" onClick={close} className={({isActive}) => isActive ? 'active' : ''}><FileText/><span>{text('Pages', 'Σελίδες')}</span></NavLink>}
       <button type="button" className="nk-admin-mobile-add" onClick={() => {setMobileOpen(false); setQuickAddOpen(open => !open);}} aria-label={text('Add content', 'Προσθήκη περιεχομένου')} aria-expanded={quickAddOpen}><Plus/><span>{text('Add', 'Προσθήκη')}</span></button>
       {canReadKind(user.role, 'product') && <NavLink to="/admin/products" onClick={close} className={({isActive}) => isActive ? 'active' : ''}><ShoppingBag/><span>{text('Products', 'Προϊόντα')}</span></NavLink>}
-      <button type="button" className="nk-admin-mobile-more" onClick={() => mobileOpen ? close() : setMobileOpen(true)} aria-label={text(mobileOpen ? 'Close all admin areas' : 'Open all admin areas', mobileOpen ? 'Κλείσιμο όλων των περιοχών' : 'Άνοιγμα όλων των περιοχών')} aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/><span>{text('More', 'Περισσότερα')}</span></button>
+      <button ref={mobileNavTriggerRef} type="button" className="nk-admin-mobile-more" onClick={() => mobileOpen ? close() : setMobileOpen(true)} aria-label={text(mobileOpen ? 'Close all admin areas' : 'Open all admin areas', mobileOpen ? 'Κλείσιμο όλων των περιοχών' : 'Άνοιγμα όλων των περιοχών')} aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu/><span>{text('More', 'Περισσότερα')}</span></button>
     </nav>
     <CommandPalette open={commandOpen} onClose={closeCommand} role={user.role} fallbackFocusRef={commandTriggerRef} guided={false}/>
     <BeginnerSiteGuide open={guideOpen && !commandOpen} onClose={closeGuide} onNavigate={to => navigate(to)}/>
