@@ -10,6 +10,7 @@ import {canManageNavigation, canWriteKind} from '../permissions';
 import type {ContentRecord, NavigationItem, NavigationMenu, Revision} from '../types';
 import {NavigationPage} from '../pages/NavigationPage';
 import {recordConfigs, type RecordField} from './recordConfigs';
+import {withoutRecordEditorSearchParams} from './recordEditorRouting';
 
 type EditorState = {id?: string; kind: ContentRecord['kind']; title: string; slug: string; data: Record<string, unknown>; published: boolean; version: number; status: ContentRecord['status']; category: string; tags: string[]};
 type PageNavigationMenu = Extract<NavigationMenu, 'primary' | 'services' | 'shop'>;
@@ -113,6 +114,9 @@ export function RecordManager({kind}: {kind: ContentRecord['kind']}) {
       tone: 'warning',
     })) return;
     setEditor(null);
+    setDirty(false);
+    setRevisions(null);
+    setParams(withoutRecordEditorSearchParams(params), {replace: true});
   };
   const openNavigationWorkspace = async (request: NavigationRequest = {}) => {
     if (dirty && !await confirm({
