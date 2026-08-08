@@ -32,6 +32,14 @@ export const adminLearning: Record<string, LearningDefinition> = {
     after: c('The underlying record changes; the dashboard simply updates its counts and activity feed.', 'Αλλάζει η αντίστοιχη εγγραφή· ο πίνακας απλώς ενημερώνει τους αριθμούς και τη ροή δραστηριότητας.'),
     example: {title: c('Resolve a forgotten draft', 'Τακτοποίηση ξεχασμένου πρόχειρου'), steps: [c('A draft appears in the work queue.', 'Ένα πρόχειρο εμφανίζεται στην ουρά εργασιών.'), c('You review and publish it.', 'Το ελέγχετε και το δημοσιεύετε.'), c('The draft count decreases and the published count increases.', 'Ο αριθμός προχείρων μειώνεται και των δημοσιευμένων αυξάνεται.')], result: c('The example changes no real data.', 'Το παράδειγμα δεν αλλάζει πραγματικά δεδομένα.')},
   },
+  '/admin/changes': {
+    label: c('Changes', 'Αλλαγές'),
+    purpose: c('Shows recent website activity and groups work that is not live, offline or archived.', 'Δείχνει την πρόσφατη δραστηριότητα του ιστοτόπου και ομαδοποιεί ό,τι δεν είναι δημοσιευμένο, είναι εκτός σύνδεσης ή αρχειοθετημένο.'),
+    need: c('Use it when you want to check what happened, continue unfinished work or restore something safely.', 'Χρησιμοποιήστε το όταν θέλετε να ελέγξετε τι έγινε, να συνεχίσετε μια εκκρεμή αλλαγή ή να επαναφέρετε κάτι με ασφάλεια.'),
+    steps: [c('Choose a status or search by name.', 'Επιλέξτε κατάσταση ή αναζητήστε με το όνομα.'), c('Open the item you want to review.', 'Ανοίξτε το στοιχείο που θέλετε να ελέγξετε.'), c('Publish it, leave it offline or restore it.', 'Δημοσιεύστε το, αφήστε το εκτός σύνδεσης ή επαναφέρετέ το.')],
+    after: c('Nothing changes on the live website just by opening this screen.', 'Τίποτα δεν αλλάζει στον ζωντανό ιστότοπο μόνο επειδή ανοίξατε αυτή την οθόνη.'),
+    example: {title: c('Find an unfinished edit', 'Βρείτε μια εκκρεμή αλλαγή'), steps: [c('Tap Changes not live.', 'Πατήστε Αλλαγές που δεν δημοσιεύτηκαν.'), c('Open the item.', 'Ανοίξτε το στοιχείο.'), c('Review it and publish only when ready.', 'Ελέγξτε το και δημοσιεύστε μόνο όταν είναι έτοιμο.')], result: c('You can see and finish the work without searching through every section.', 'Μπορείτε να δείτε και να ολοκληρώσετε την εργασία χωρίς να ψάχνετε σε κάθε ενότητα.')},
+  },
   '/admin/content': {
     label: c('Manage content', 'Διαχείριση περιεχομένου'),
     purpose: c('A simple starting point for every website content type.', 'Ένα απλό σημείο εκκίνησης για κάθε τύπο περιεχομένου του ιστοτόπου.'),

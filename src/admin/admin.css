@@ -2091,3 +2091,480 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
     padding-left: 13px;
   }
 }
+
+/* Beginner mobile control system: Home lives in the header and the five
+   persistent destinations stay predictable across every everyday screen. */
+.nk-admin-mobile-home-logo,
+.nk-admin-mobile-help-button,
+.nk-admin-mobile-account-button {
+  display: none;
+}
+
+.nk-admin-change-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nk-admin-change-summary > button {
+  min-height: 104px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--admin-line);
+  border-radius: 13px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(15, 45, 33, .05);
+}
+
+.nk-admin-change-summary > button > svg {
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  flex: 0 0 40px;
+  border-radius: 10px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-dark);
+}
+
+.nk-admin-change-summary > button > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.nk-admin-change-summary b {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.nk-admin-change-summary small {
+  margin-top: 5px;
+  color: var(--admin-muted);
+  font-size: 14px !important;
+}
+
+.nk-admin-change-summary > button.active {
+  border-color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  box-shadow: 0 0 0 2px rgba(20, 122, 89, .1);
+}
+
+.nk-admin-change-toolbar {
+  min-height: 58px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  background: var(--admin-surface);
+}
+
+.nk-admin-change-toolbar > label {
+  min-width: 220px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nk-admin-change-toolbar > label > svg {
+  width: 18px;
+  color: var(--admin-muted);
+}
+
+.nk-admin-change-toolbar input {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+}
+
+.nk-admin-change-toolbar > span {
+  color: var(--admin-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nk-admin-change-toolbar > button,
+.nk-admin-change-actions > button,
+.nk-admin-change-actions > a {
+  min-height: 42px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--admin-line-strong);
+  border-radius: 9px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  text-decoration: none;
+  font-weight: 750;
+}
+
+.nk-admin-change-toolbar button svg,
+.nk-admin-change-actions svg {
+  width: 16px;
+}
+
+.nk-admin-change-list {
+  margin-top: 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: 13px;
+  background: var(--admin-surface);
+  overflow: hidden;
+}
+
+.nk-admin-change-list > article {
+  min-height: 102px;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.nk-admin-change-list > article:last-child {
+  border-bottom: 0;
+}
+
+.nk-admin-change-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-dark);
+}
+
+.nk-admin-change-icon svg {
+  width: 22px;
+}
+
+.nk-admin-change-list .is-pending .nk-admin-change-icon {
+  background: var(--admin-warning-soft);
+  color: var(--admin-warning);
+}
+
+.nk-admin-change-list .is-archived .nk-admin-change-icon,
+.nk-admin-change-list .is-offline .nk-admin-change-icon {
+  background: #eef1ef;
+  color: #56665e;
+}
+
+.nk-admin-change-copy {
+  min-width: 0;
+  display: grid;
+}
+
+.nk-admin-change-copy > span {
+  color: var(--admin-accent-dark);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.nk-admin-change-copy > b {
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nk-admin-change-copy > small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size: 13px !important;
+}
+
+.nk-admin-change-copy > time {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--admin-muted);
+  font-size: 12px !important;
+}
+
+.nk-admin-change-copy > time svg {
+  width: 14px;
+}
+
+.nk-admin-change-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.nk-admin-change-actions > a {
+  border-color: var(--admin-accent);
+  background: var(--admin-accent);
+  color: #fff;
+}
+
+.nk-admin-change-safety {
+  margin-top: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #b9ddcc;
+  border-radius: 12px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-dark);
+}
+
+.nk-admin-change-safety > svg {
+  width: 22px;
+  flex: 0 0 auto;
+}
+
+.nk-admin-change-safety > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.nk-admin-change-safety small {
+  margin-top: 2px;
+  font-size: 13px !important;
+}
+
+@media (max-width: 840px) {
+  .nk-admin-topbar {
+    height: calc(60px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 12px 0;
+    display: flex !important;
+    gap: 10px;
+    background: rgba(255, 255, 255, .97);
+  }
+
+  .nk-admin-mobile-home-logo {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(255, 125, 55, .85);
+    border-radius: 50%;
+    background: #001f18;
+    box-shadow: 0 5px 14px rgba(0, 34, 26, .18);
+    overflow: hidden;
+  }
+
+  .nk-admin-mobile-home-logo img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+  }
+
+  .nk-admin-menu-trigger,
+  .nk-admin-topbar-guide,
+  .nk-admin-global-search,
+  .nk-admin-topbar-avatar {
+    display: none !important;
+  }
+
+  .nk-admin-topbar-actions > a.nk-admin-site-edit-link {
+    display: none !important;
+  }
+
+  .nk-admin-topbar > nav {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nk-admin-topbar > nav > a,
+  .nk-admin-topbar > nav > svg,
+  .nk-admin-topbar > nav > span {
+    display: none;
+  }
+
+  .nk-admin-topbar > nav > b {
+    max-width: 100%;
+    overflow: hidden;
+    color: #14382d !important;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nk-admin-topbar-actions {
+    margin-left: 0;
+    gap: 7px;
+  }
+
+  .nk-admin-mobile-help-button,
+  .nk-admin-mobile-account-button {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--admin-line-strong);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--admin-accent-dark);
+  }
+
+  .nk-admin-mobile-help-button svg {
+    width: 21px;
+  }
+
+  .nk-admin-mobile-account-button {
+    border-color: #14382d;
+    background: var(--admin-sidebar);
+    color: #fff;
+    font-size: 12px !important;
+    font-weight: 850;
+  }
+
+  .nk-admin-workspace > main,
+  .nk-admin-workspace > main:has(.nk-visual-editor) {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .nk-admin-mobile-nav {
+    min-height: calc(70px + env(safe-area-inset-bottom));
+    grid-auto-flow: unset;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .nk-admin-mobile-nav > a,
+  .nk-admin-mobile-nav > button {
+    min-height: 54px;
+    font-size: 12px !important;
+  }
+
+  .nk-admin-mobile-nav > button.active,
+  .nk-admin-mobile-nav > a.active {
+    color: #fff8ee;
+    border-color: rgba(168, 229, 189, .34);
+    background: rgba(255, 255, 255, .09);
+  }
+
+  .nk-admin-mobile-nav > button.active svg,
+  .nk-admin-mobile-nav > a.active svg {
+    color: #ff9a59;
+  }
+
+  .nk-admin-mobile-nav-placeholder {
+    min-width: 0;
+  }
+
+  .nk-admin-quick-add {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .nk-admin-sidebar {
+    inset: calc(60px + env(safe-area-inset-top)) 0 calc(70px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 130px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  .nk-admin-sidebar .nk-admin-logo {
+    display: none;
+  }
+
+  .nk-admin-change-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .nk-admin-change-summary > button {
+    min-height: 100px;
+    padding: 11px 8px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nk-admin-change-summary > button > svg {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .nk-admin-change-summary b {
+    font-size: 24px;
+  }
+
+  .nk-admin-change-summary small {
+    margin-top: 3px;
+    font-size: 12px !important;
+  }
+
+  .nk-admin-change-toolbar {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .nk-admin-change-toolbar > label {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .nk-admin-change-toolbar > span {
+    flex: 1;
+    align-self: center;
+    padding-left: 5px;
+  }
+
+  .nk-admin-change-list > article {
+    min-height: 122px;
+    padding: 13px 11px;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+  }
+
+  .nk-admin-change-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nk-admin-change-copy > b {
+    white-space: normal;
+  }
+
+  .nk-admin-change-actions {
+    grid-column: 2;
+    flex-wrap: wrap;
+  }
+
+  .nk-admin-change-actions > button,
+  .nk-admin-change-actions > a {
+    min-height: 44px;
+    flex: 1;
+  }
+}
+
+@media (max-width: 360px) {
+  .nk-admin-mobile-nav > a,
+  .nk-admin-mobile-nav > button {
+    padding-right: 1px;
+    padding-left: 1px;
+    font-size: 12px !important;
+  }
+
+  .nk-admin-mobile-nav svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .nk-admin-change-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .nk-admin-change-summary > button {
+    min-height: 74px;
+    align-items: center;
+    flex-direction: row;
+  }
+}

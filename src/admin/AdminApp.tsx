@@ -10,6 +10,7 @@ import {ensureAdminSeed} from './seed';
 import {canManageEnquiries, canManageInteractive, canManageUsers, canReadForms, canReadKind, canReadMedia, canReadNavigation} from './permissions';
 import type {ContentKind} from './types';
 import {AuditPage} from './pages/AuditPage';
+import {ChangesPage} from './pages/ChangesPage';
 import {DashboardPage} from './pages/DashboardPage';
 import {EnquiriesPage} from './pages/EnquiriesPage';
 import {MediaPage} from './pages/MediaPage';
@@ -183,6 +184,7 @@ function AdminRoutes() {
         <Route path="forms" element={<FormsRoute/>}/>
         <Route path="users" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <OwnerRoute><UsersPage/></OwnerRoute>}/>
         <Route path="audit" element={<AuditPage/>}/>
+        <Route path="changes" element={<ChangesPage/>}/>
         <Route path="profile" element={isPagesAdminMode ? <Navigate to="/admin/dashboard" replace/> : <ProfilePage/>}/>
         <Route path="*" element={<div className="nk-admin-not-found"><span>ADMIN / 404</span><h1>Section not found.</h1><a href="/admin/dashboard">Return to dashboard</a></div>}/>
       </Route>

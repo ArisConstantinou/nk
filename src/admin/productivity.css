@@ -429,6 +429,7 @@
   .nk-admin-record-page > .nk-admin-page-heading,
   .nk-admin-media-page > .nk-admin-page-heading,
   .nk-admin-content-hub > .nk-admin-page-heading,
+  .nk-admin-changes-page > .nk-admin-page-heading,
   .nk-productivity-dashboard > .nk-admin-page-heading {
     border: 0;
     border-bottom: 1px solid rgba(255, 138, 67, .42);
@@ -1444,6 +1445,36 @@
     gap: 10px;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+
+  .nk-admin-mobile-help__header {
+    min-height: 48px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(170, 222, 198, .22);
+  }
+
+  .nk-admin-mobile-help__header b {
+    color: #f7f1e8;
+    font-size: 16px;
+  }
+
+  .nk-admin-mobile-help__header button {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(170, 222, 198, .35);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .07);
+    color: #f7f1e8;
+  }
+
+  .nk-admin-mobile-help__header button svg {
+    width: 21px;
   }
 
   .nk-admin-mobile-help__intro {

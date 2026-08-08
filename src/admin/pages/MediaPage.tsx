@@ -119,7 +119,7 @@ export function MediaPage() {
   const copyUrl = async (item: MediaAsset) => {try {await navigator.clipboard.writeText(new URL(item.url, window.location.origin).href); setNotice('Public media URL copied.');} catch {setError('The browser could not copy the URL. Select it from the media details instead.');}};
 
   return <div className="nk-admin-media-page" onDragEnter={event => {if (canWrite && event.dataTransfer.types.includes('Files')) setDragActive(true);}} onDragOver={event => {if (canWrite) event.preventDefault();}} onDrop={onDrop}>
-    <PageHeading eyebrow="ASSETS / CONTROLLED LIBRARY" title="Media library" description="Upload, organize, optimize, replace and trace every file used by the website." actions={canWrite ? <button className="nk-admin-primary" onClick={() => setUploadOpen(true)}><Plus/>Upload assets</button> : undefined}/>
+    <PageHeading eyebrow="PHOTOS & FILES" title="Photos & files" description="Choose, upload and reuse the photos, PDFs and videos used on the website." actions={canWrite ? <button className="nk-admin-primary" onClick={() => setUploadOpen(true)}><Plus/>Add photos or files</button> : undefined}/>
     {error && <p className="nk-admin-alert nk-admin-alert--error" role="alert">{error}<button onClick={() => setError('')} aria-label="Dismiss error"><X/></button></p>}
     {notice && <p className="nk-admin-alert" role="status">{notice}<button onClick={() => setNotice('')} aria-label="Dismiss message"><X/></button></p>}
     {dragActive && <div className="nk-admin-drop-overlay" onDragLeave={() => setDragActive(false)}><Upload/><b>Drop files to add them to the library</b><span>They remain unpublished until the validated upload completes.</span></div>}
