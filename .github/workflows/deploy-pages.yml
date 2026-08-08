@@ -73,8 +73,10 @@ jobs:
             admin/media
             admin/forms
             admin/enquiries
+            admin/interactive
             admin/settings
             admin/seo
+            admin/audit
           )
           for route in "${routes[@]}"; do
             mkdir -p "dist/$route"

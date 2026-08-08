@@ -964,3 +964,156 @@
     color: #ffc0bb !important;
   }
 }
+
+/* Concept 04 — mobile Workspace Explorer. The existing command deck remains the
+   full-screen "More" layer; this rail is the everyday website map. */
+.nk-admin-mobile-explorer-tree {
+  display: none;
+}
+
+@media (max-width: 840px) {
+  .nk-admin-shell {
+    --nk-admin-explorer-width: clamp(138px, 38vw, 154px);
+  }
+
+  .nk-admin-mobile-explorer-tree {
+    position: fixed;
+    z-index: 35;
+    inset: 0 auto calc(66px + env(safe-area-inset-bottom, 0px)) 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    width: var(--nk-admin-explorer-width);
+    overflow: hidden;
+    border-right: 1px solid rgba(170, 222, 198, .22);
+    background:
+      radial-gradient(circle at 18% 0%, rgba(83, 198, 152, .11), transparent 25%),
+      linear-gradient(180deg, #031f18 0%, #001812 100%);
+    color: #f7f1e8;
+    box-shadow: 8px 0 28px rgba(0, 10, 7, .2);
+  }
+
+  .nk-admin-mobile-explorer-tree > header {
+    min-height: 74px;
+    padding: max(14px, env(safe-area-inset-top, 0px)) 12px 10px;
+    border-bottom: 1px solid rgba(170, 222, 198, .18);
+  }
+
+  .nk-admin-mobile-explorer-tree > header span,
+  .nk-admin-mobile-explorer-tree h2 {
+    display: block;
+    margin: 0;
+    color: #8fb6a5;
+    font: 700 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .nk-admin-mobile-explorer-tree > header b {
+    display: block;
+    margin-top: 5px;
+    font: 750 18px/1.1 Manrope, sans-serif;
+    letter-spacing: -.02em;
+  }
+
+  .nk-admin-mobile-explorer-tree > nav {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    padding: 7px;
+  }
+
+  .nk-admin-mobile-explorer-tree section + section {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(170, 222, 198, .12);
+  }
+
+  .nk-admin-mobile-explorer-tree h2 {
+    padding: 0 6px 5px;
+  }
+
+  .nk-admin-mobile-explorer-tree nav a {
+    display: grid;
+    grid-template-columns: 17px minmax(0, 1fr);
+    align-items: center;
+    min-height: 42px;
+    padding: 7px 6px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: #d5e5dc;
+    font: 650 12px/1.2 "DM Sans", sans-serif;
+    text-decoration: none;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+  }
+
+  .nk-admin-mobile-explorer-tree nav a svg {
+    width: 15px;
+    height: 15px;
+    color: #8fb6a5;
+  }
+
+  .nk-admin-mobile-explorer-tree nav a.active {
+    border-color: rgba(255, 154, 89, .42);
+    background: linear-gradient(90deg, rgba(255, 138, 67, .18), rgba(159, 228, 190, .08));
+    color: #fff8ef;
+    box-shadow: inset 3px 0 #ff8a43;
+  }
+
+  .nk-admin-mobile-explorer-tree nav a.active svg {
+    color: #ff9a59;
+  }
+
+  .nk-admin-mobile-explorer-tree > footer {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 8px 12px;
+    border-top: 1px solid rgba(170, 222, 198, .18);
+    color: #9fe4be;
+    font: 650 12px/1.2 "DM Sans", sans-serif;
+  }
+
+  .nk-admin-mobile-explorer-tree > footer svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .nk-admin-workspace {
+    width: calc(100% - var(--nk-admin-explorer-width));
+    margin-left: var(--nk-admin-explorer-width);
+  }
+
+  .nk-admin-workspace > main {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .nk-admin-workspace .nk-admin-page-heading h1,
+  .nk-admin-workspace .nk-admin-dashboard h1 {
+    font-size: clamp(24px, 7vw, 31px);
+  }
+
+  .nk-admin-workspace .nk-admin-page-heading,
+  .nk-admin-workspace .nk-admin-record-toolbar {
+    gap: 10px;
+  }
+
+  .nk-admin-shell:has(.nk-admin-main--visual-editor) .nk-admin-mobile-explorer-tree,
+  .nk-admin-shell:has(.ix-studio) .nk-admin-mobile-explorer-tree {
+    display: none;
+  }
+
+  .nk-admin-shell:has(.nk-admin-main--visual-editor) .nk-admin-workspace,
+  .nk-admin-shell:has(.ix-studio) .nk-admin-workspace {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 359px) {
+  .nk-admin-shell {
+    --nk-admin-explorer-width: 132px;
+  }
+}
