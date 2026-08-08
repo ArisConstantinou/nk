@@ -54,12 +54,13 @@ function permitted(command: Omit<Command, 'id'>, role: AdminRole) {
 
 const groupLabel = (type: AdminSearchResult['type']) => ({content: 'Website content', media: 'Media library', navigation: 'Navigation', forms: 'Forms', enquiries: 'Enquiries', users: 'Team'}[type]);
 
-export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = false}: {
+export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = false, docked = false}: {
   open: boolean;
   onClose: (reason?: CloseReason) => void;
   role: AdminRole;
   fallbackFocusRef: RefObject<HTMLButtonElement | null>;
   guided?: boolean;
+  docked?: boolean;
 }) {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +91,7 @@ export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = 
         onClose('dismiss');
         return;
       }
-      if (event.key !== 'Tab' || !dialogRef.current) return;
+      if (docked || event.key !== 'Tab' || !dialogRef.current) return;
       const focusable = [...dialogRef.current.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href]')];
       if (!focusable.length) return;
       const first = focusable[0];
@@ -113,7 +114,7 @@ export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = 
         else fallbackFocusRef.current?.focus();
       }, 0);
     };
-  }, [fallbackFocusRef, onClose, open]);
+  }, [docked, fallbackFocusRef, onClose, open]);
 
   useEffect(() => {
     if (!open || query.trim().length < 2) {
@@ -163,8 +164,8 @@ export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = 
     }
   };
 
-  return <div className="nk-admin-command-backdrop" role="presentation" onMouseDown={event => {if (event.target === event.currentTarget) onClose('dismiss');}}>
-    <section ref={dialogRef} className="nk-admin-command nk-admin-command--global" role="dialog" aria-modal="true" aria-label="Search all website data">
+  return <div className={`nk-admin-command-backdrop ${docked ? 'nk-admin-command-backdrop--docked' : ''}`} role="presentation" onMouseDown={event => {if (!docked && event.target === event.currentTarget) onClose('dismiss');}}>
+    <section id="admin-command-panel" ref={dialogRef} className="nk-admin-command nk-admin-command--global" role={docked ? 'region' : 'dialog'} aria-modal={docked ? undefined : true} aria-label="Search all website data">
       <header className="nk-admin-command-searchbar">
         <label className="nk-admin-command-searchfield">
           <span className="nk-admin-command-searchmark" aria-hidden="true"><Search/></span>

@@ -1732,3 +1732,114 @@
   }
 
 }
+
+/* Bottom-dock controls expand into anchored panels. They deliberately leave
+   the page visible and interactive instead of creating a modal overlay. */
+@media (max-width: 840px) {
+  .nk-admin-workspace-map-scrim,
+  .nk-admin-quick-add-scrim {
+    display: none !important;
+  }
+
+  body:has(.nk-admin-mobile-workspace-map) .nk-admin-mobile-nav,
+  body:has(.nk-admin-quick-add) .nk-admin-mobile-nav,
+  body:has(.nk-admin-command-backdrop--docked) .nk-admin-mobile-nav {
+    z-index: 1400;
+  }
+
+  .nk-admin-mobile-workspace-map,
+  .nk-admin-quick-add,
+  .nk-admin-command-backdrop--docked .nk-admin-command {
+    max-height: min(68dvh, 620px);
+    border: 1px solid rgba(170, 222, 198, .42);
+    border-radius: 18px 18px 12px 12px;
+    box-shadow: 0 -16px 48px rgba(0, 18, 13, .3);
+    animation: nk-admin-dock-panel-open .2s ease-out;
+  }
+
+  .nk-admin-mobile-workspace-map::after,
+  .nk-admin-quick-add::after,
+  .nk-admin-command-backdrop--docked .nk-admin-command::after {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    bottom: 0;
+    width: 52px;
+    height: 4px;
+    border-radius: 999px 999px 0 0;
+    background: #ff8a43;
+  }
+
+  .nk-admin-mobile-workspace-map::after {
+    left: calc(10% - 26px);
+  }
+
+  .nk-admin-quick-add::after {
+    left: calc(50% - 26px);
+  }
+
+  .nk-admin-command-backdrop--docked .nk-admin-command::after {
+    right: calc(10% - 26px);
+  }
+
+  .nk-admin-mobile-workspace-map {
+    z-index: 1350;
+    right: 8px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    left: 8px;
+    transform-origin: 8% bottom;
+  }
+
+  .nk-admin-quick-add {
+    z-index: 1350;
+    right: 8px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    left: 8px;
+    transform-origin: 50% bottom;
+  }
+
+  .nk-admin-command-backdrop--docked {
+    z-index: 1350;
+    inset: auto 8px calc(78px + env(safe-area-inset-bottom, 0px)) 8px;
+    display: block;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: none;
+  }
+
+  .nk-admin-command-backdrop--docked .nk-admin-command.nk-admin-command--global {
+    position: relative;
+    width: 100%;
+    height: auto;
+    max-height: min(68dvh, 620px);
+    overflow: hidden;
+    pointer-events: auto;
+    transform-origin: 92% bottom;
+  }
+
+  .nk-admin-command-backdrop--docked .nk-admin-command > .nk-admin-command-body {
+    min-height: 0;
+    max-height: none;
+  }
+
+  @keyframes nk-admin-dock-panel-open {
+    from { opacity: 0; transform: translateY(14px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}
+
+@media (max-width: 359px) {
+  .nk-admin-command-backdrop--docked {
+    right: 5px;
+    left: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-admin-mobile-workspace-map,
+  .nk-admin-quick-add,
+  .nk-admin-command-backdrop--docked .nk-admin-command {
+    animation: none;
+  }
+}
