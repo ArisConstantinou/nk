@@ -1421,6 +1421,274 @@
 
 }
 
+/* Mobile Help replaces the duplicated "All admin areas" command deck. */
+.nk-admin-mobile-help {
+  display: none;
+}
+
+@media (max-width: 840px) {
+  .nk-admin-sidebar > .nk-admin-sidebar-search,
+  .nk-admin-sidebar > nav,
+  .nk-admin-sidebar > .nk-admin-sidebar-language,
+  .nk-admin-sidebar > .nk-admin-guide-trigger,
+  .nk-admin-sidebar > .nk-admin-sidebar-user {
+    display: none;
+  }
+
+  .nk-admin-mobile-help {
+    min-height: 0;
+    flex: 1;
+    padding: 18px 16px max(14px, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .nk-admin-mobile-help__intro {
+    flex: 0 0 auto;
+    padding: 2px 2px 8px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nk-admin-mobile-help__intro b {
+    color: #f7f1e8;
+    font: 750 21px/1.2 Manrope, sans-serif;
+    letter-spacing: -.02em;
+  }
+
+  .nk-admin-mobile-help__intro small {
+    margin-top: 5px;
+    color: #a9c3b7;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .nk-admin-mobile-help__action {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 78px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) 20px;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(170, 222, 198, .34);
+    border-radius: 14px;
+    background: linear-gradient(120deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .025));
+    color: #f7f1e8;
+    text-align: left;
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(0, 10, 7, .2);
+  }
+
+  .nk-admin-mobile-help__action.is-guide {
+    border-color: rgba(255, 151, 83, .7);
+    background: linear-gradient(120deg, rgba(255, 138, 67, .18), rgba(159, 228, 190, .06));
+  }
+
+  .nk-admin-mobile-help__action > svg:first-child {
+    width: 46px;
+    height: 46px;
+    padding: 11px;
+    border-radius: 12px;
+    background: rgba(159, 228, 190, .1);
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-help__action > svg:last-child {
+    width: 20px;
+    color: #ff9a59;
+  }
+
+  .nk-admin-mobile-help__action > span {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nk-admin-mobile-help__action b {
+    font-size: 17px;
+    line-height: 1.25;
+  }
+
+  .nk-admin-mobile-help__action small {
+    margin-top: 3px;
+    color: #a9c3b7;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .nk-admin-mobile-help__owner {
+    flex: 0 0 auto;
+    border: 1px solid rgba(170, 222, 198, .2);
+    border-radius: 12px;
+    background: rgba(0, 22, 17, .42);
+    overflow: hidden;
+  }
+
+  .nk-admin-mobile-help__owner > summary {
+    min-height: 60px;
+    padding: 9px 13px;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 10px;
+    color: #d9e7e0;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .nk-admin-mobile-help__owner > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nk-admin-mobile-help__owner > summary > svg:first-child {
+    width: 38px;
+    height: 38px;
+    padding: 9px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .05);
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-help__owner > summary > span {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nk-admin-mobile-help__owner > summary b {
+    font-size: 15px;
+  }
+
+  .nk-admin-mobile-help__owner > summary small {
+    margin-top: 2px;
+    color: #93aa9f;
+    font-size: 12px;
+  }
+
+  .nk-admin-mobile-help__owner > summary > svg:last-child {
+    width: 18px;
+    color: #ff9a59;
+    transition: transform .18s ease;
+  }
+
+  .nk-admin-mobile-help__owner[open] > summary > svg:last-child {
+    transform: rotate(90deg);
+  }
+
+  .nk-admin-mobile-help__owner > div {
+    padding: 0 10px 10px;
+    display: grid;
+    gap: 5px;
+  }
+
+  .nk-admin-mobile-help__owner > div > a {
+    min-height: 46px;
+    padding: 8px 11px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .045);
+    color: #dce9e3;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  .nk-admin-mobile-help__owner > div > a svg {
+    width: 19px;
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-help__account {
+    flex: 0 0 auto;
+    min-height: 76px;
+    margin-top: auto;
+    padding: 10px 11px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    border: 1px solid rgba(170, 222, 198, .25);
+    border-radius: 13px;
+    background: rgba(0, 22, 17, .64);
+  }
+
+  .nk-admin-mobile-help__account > svg {
+    width: 42px;
+    height: 42px;
+    padding: 9px;
+    border: 1px solid rgba(153, 227, 191, .55);
+    border-radius: 50%;
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-help__account > span {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nk-admin-mobile-help__account b,
+  .nk-admin-mobile-help__account small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nk-admin-mobile-help__account b {
+    color: #f7f1e8;
+    font-size: 14px;
+  }
+
+  .nk-admin-mobile-help__account small {
+    margin-top: 2px;
+    color: #93aa9f;
+    font-size: 12px;
+  }
+
+  .nk-admin-mobile-help__account > button {
+    min-width: 46px;
+    min-height: 46px;
+    padding: 5px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 0;
+    border-left: 1px solid rgba(170, 222, 198, .2);
+    background: transparent;
+    color: #f7f1e8;
+    font-size: 13px;
+  }
+
+  .nk-admin-mobile-help__account > button svg {
+    width: 20px;
+    color: #ff9a59;
+  }
+}
+
+@media (max-width: 359px) {
+  .nk-admin-mobile-help {
+    padding: 12px;
+  }
+
+  .nk-admin-mobile-help__intro {
+    padding-bottom: 2px;
+  }
+
+  .nk-admin-mobile-help__action {
+    min-height: 70px;
+  }
+
+  .nk-admin-mobile-help__account > button span {
+    display: none;
+  }
+}
+
 @media (max-width: 359px) {
   .nk-admin-mobile-intent {
     grid-template-columns: 40px minmax(0, 1fr) 18px;
