@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -104,6 +104,8 @@ type Dashboard = {
   };
 };
 
+const DASHBOARD_LOAD_TIMEOUT_MS = 8_000;
+
 type BulkAction =
   | "publish"
   | "unpublish"
@@ -169,20 +171,42 @@ export function DashboardPage() {
   const [bulkAction, setBulkAction] = useState<BulkAction>("publish");
   const [bulkValue, setBulkValue] = useState("");
   const [visibleCount, setVisibleCount] = useState(20);
+  const dashboardRequest = useRef<AbortController | null>(null);
 
   const load = async () => {
+    dashboardRequest.current?.abort();
+    const controller = new AbortController();
+    dashboardRequest.current = controller;
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      DASHBOARD_LOAD_TIMEOUT_MS,
+    );
     setLoading(true);
     setError("");
     try {
-      setData(await adminApi<Dashboard>("/dashboard"));
+      setData(await adminApi<Dashboard>("/dashboard", { signal: controller.signal }));
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      if (dashboardRequest.current !== controller) return;
+      setError(
+        controller.signal.aborted
+          ? "The secure admin service did not answer in time. Check the connection and try again."
+          : errorMessage(nextError),
+      );
     } finally {
-      setLoading(false);
+      window.clearTimeout(timeout);
+      if (dashboardRequest.current === controller) {
+        dashboardRequest.current = null;
+        setLoading(false);
+      }
     }
   };
   useEffect(() => {
     void load();
+    return () => {
+      const activeRequest = dashboardRequest.current;
+      dashboardRequest.current = null;
+      activeRequest?.abort();
+    };
   }, []);
 
   const writable = useMemo(
@@ -397,7 +421,7 @@ export function DashboardPage() {
           </>
         }
       />
-      {error && (
+      {error && data && (
         <p className="nk-admin-alert nk-admin-alert--error" role="alert">
           {error}
           <button
@@ -422,11 +446,23 @@ export function DashboardPage() {
           </button>
         </p>
       )}
-      {loading || !data ? (
+      {loading ? (
         <div className="nk-admin-list-loading">
           <RefreshCw className="nk-admin-spin" />
           Loading live website status…
         </div>
+      ) : !data ? (
+        <section className="nk-admin-dashboard-load-failure" role="alert">
+          <CircleAlert />
+          <div>
+            <strong>Website status could not be loaded</strong>
+            <p>{error || "The dashboard is temporarily unavailable."}</p>
+          </div>
+          <button type="button" onClick={() => void load()}>
+            <RefreshCw />
+            Try again
+          </button>
+        </section>
       ) : (
         <>
           <section

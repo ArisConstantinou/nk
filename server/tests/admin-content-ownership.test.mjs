@@ -19,6 +19,15 @@ test('mobile admin keeps both navigation bars pinned to the viewport', async () 
   assert.match(styles, /\.nk-admin-workspace\s*\{\s*padding-top:\s*calc\(70px \+ env\(safe-area-inset-top\)\);/);
 });
 
+test('dashboard loading is bounded and failed requests offer a retry', async () => {
+  const source = await read('src/admin/pages/DashboardPage.tsx');
+  assert.match(source, /const DASHBOARD_LOAD_TIMEOUT_MS = 8_000;/);
+  assert.match(source, /adminApi<Dashboard>\("\/dashboard", \{ signal: controller\.signal \}\)/);
+  assert.match(source, /loading \? \([\s\S]{0,500}\) : !data \? \(/);
+  assert.match(source, /Website status could not be loaded/);
+  assert.match(source, /onClick=\{\(\) => void load\(\)\}/);
+});
+
 test('each everyday action has one owner and content types stay separate', async () => {
   const source = await read('src/admin/layout/AdminLayout.tsx');
   assert.doesNotMatch(source, /to="\/admin\/media\?upload=1"/, 'Create must not duplicate the Gallery uploader');

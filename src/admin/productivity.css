@@ -552,6 +552,52 @@
   }
 }
 
+.nk-admin-dashboard-load-failure {
+  min-height: 180px;
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+}
+
+.nk-admin-dashboard-load-failure > svg {
+  width: 28px;
+  color: var(--admin-danger);
+}
+
+.nk-admin-dashboard-load-failure strong {
+  display: block;
+  font-size: 17px;
+}
+
+.nk-admin-dashboard-load-failure p {
+  margin: 5px 0 0;
+  color: var(--admin-muted);
+  font-size: 14px;
+}
+
+.nk-admin-dashboard-load-failure button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--admin-accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 15px;
+  font-weight: 800;
+}
+
+.nk-admin-dashboard-load-failure button svg {
+  width: 17px;
+}
+
 /* Unified mobile Command Deck theme. Keep the desktop workspace light, but
    carry the mobile navigation's dark green, mint and orange language through
    every admin route, list, editor and form. */
@@ -592,6 +638,33 @@
   .nk-admin-workspace > main {
     min-height: calc(100dvh - 66px - env(safe-area-inset-bottom));
     padding-bottom: calc(94px + env(safe-area-inset-bottom));
+  }
+
+  .nk-productivity-dashboard > .nk-admin-list-loading,
+  .nk-admin-dashboard-load-failure {
+    min-height: calc(100dvh - 70px - 88px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .nk-admin-dashboard-load-failure {
+    grid-template-columns: 1fr;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+    padding: 28px 18px;
+  }
+
+  .nk-admin-dashboard-load-failure p {
+    max-width: 330px;
+  }
+
+  .nk-productivity-dashboard > .nk-admin-list-loading {
+    flex-direction: column;
+    font-size: 14px;
   }
 
   .nk-admin-page-heading,
