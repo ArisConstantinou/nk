@@ -9,7 +9,7 @@ import {BeginnerSiteGuide} from './BeginnerSiteGuide';
 import {publicAsset} from '../../utils/assets';
 import {isPagesAdminMode} from '../pagesMode';
 import {AdminTranslationLayer, useAdminLanguage} from '../i18n/AdminLanguage';
-import {AdminLearningPanel, learningForPath, learningText} from '../learning/AdminLearningPanel';
+import {learningForPath, learningText} from '../learning/AdminLearningPanel';
 
 const overview = [
   {to: '/admin/dashboard', label: 'Home', icon: LayoutDashboard},
@@ -31,7 +31,7 @@ const settings = [
 ] as const;
 
 function Outlet() {
-  return <><AdminLearningPanel/><RouterOutlet/></>;
+  return <RouterOutlet/>;
 }
 
 function NavItem({to, label, icon: Icon, close, className = ''}: {to: string; label: string; icon: typeof Package; close: () => void; className?: string}) {

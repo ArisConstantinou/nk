@@ -165,7 +165,7 @@ export function CommandPalette({open, onClose, role, fallbackFocusRef, guided = 
   };
 
   return <div className={`nk-admin-command-backdrop ${docked ? 'nk-admin-command-backdrop--docked' : ''}`} role="presentation" onMouseDown={event => {if (!docked && event.target === event.currentTarget) onClose('dismiss');}}>
-    <section id="admin-command-panel" ref={dialogRef} className="nk-admin-command nk-admin-command--global" role={docked ? 'region' : 'dialog'} aria-modal={docked ? undefined : true} aria-label="Search all website data">
+    <section id="admin-command-panel" ref={dialogRef} className={`nk-admin-command nk-admin-command--global${docked && trimmedQuery.length >= 2 ? ' is-querying' : ''}`} role={docked ? 'region' : 'dialog'} aria-modal={docked ? undefined : true} aria-label="Search all website data">
       <header className="nk-admin-command-searchbar">
         <label className="nk-admin-command-searchfield">
           <span className="nk-admin-command-searchmark" aria-hidden="true"><Search/></span>

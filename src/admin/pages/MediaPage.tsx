@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent} from 'react';
-import {ArchiveRestore, BookOpenCheck, Check, Copy, FileText, Folder, Image as ImageIcon, Link2, ListFilter, LoaderCircle, RefreshCw, Save, Search, Trash2, Upload, Video, X} from 'lucide-react';
+import {ArchiveRestore, Check, Copy, FileText, Folder, Image as ImageIcon, Link2, ListFilter, LoaderCircle, RefreshCw, Save, Search, Trash2, Upload, Video, X} from 'lucide-react';
 import {createPortal} from 'react-dom';
 import {useSearchParams} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
@@ -178,7 +178,7 @@ export function MediaPage() {
   const copyUrl = async (item: MediaAsset) => {try {await navigator.clipboard.writeText(new URL(item.url, window.location.origin).href); setNotice('Public media URL copied.');} catch {setError('The browser could not copy the URL. Select it from the media details instead.');}};
 
   return <div className="nk-admin-media-page" onDragEnter={event => {if (canWrite && event.dataTransfer.types.includes('Files')) setDragActive(true);}} onDragOver={event => {if (canWrite) event.preventDefault();}} onDrop={onDrop}>
-    {topbarHost && createPortal(<><button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--help" type="button" onClick={() => window.dispatchEvent(new Event('nk-admin:gallery-help'))} aria-label="Open Gallery help" title="Gallery help"><BookOpenCheck/><span>Help</span></button>{canWrite && <button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--upload" type="button" onClick={() => setUploadOpen(true)} aria-label="Upload files" title="Upload files"><Upload/><span>Upload</span></button>}<button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--filters" type="button" onClick={() => setControlsOpen(true)} aria-label="Browse and filter Gallery" title="Browse and filter Gallery"><ListFilter/><span>Filters</span>{activeControlCount > 0 && <b>{activeControlCount}</b>}</button></>, topbarHost)}
+    {topbarHost && createPortal(<>{canWrite && <button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--upload" type="button" onClick={() => setUploadOpen(true)} aria-label="Upload files" title="Upload files"><Upload/><span>Upload</span></button>}<button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--filters" type="button" onClick={() => setControlsOpen(true)} aria-label="Browse and filter Gallery" title="Browse and filter Gallery"><ListFilter/><span>Filters</span>{activeControlCount > 0 && <b>{activeControlCount}</b>}</button></>, topbarHost)}
     <PageHeading eyebrow="MEDIA GALLERY" title="Gallery" description="Browse, upload and reuse all website photos, videos, PDFs and catalogue files in one place."/>
     {error && <p className="nk-admin-alert nk-admin-alert--error" role="alert">{error}<button onClick={() => setError('')} aria-label="Dismiss error"><X/></button></p>}
     {notice && <p className="nk-admin-alert" role="status">{notice}<button onClick={() => setNotice('')} aria-label="Dismiss message"><X/></button></p>}

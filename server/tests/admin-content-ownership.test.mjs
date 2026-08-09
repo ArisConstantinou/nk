@@ -72,12 +72,12 @@ test('each everyday action has one owner and content types stay separate', async
 });
 
 test('Gallery is the shared picker for images and PDF catalogues', async () => {
-  const [configs, hub, media, styles, learning] = await Promise.all([
+  const [configs, hub, media, styles, layout] = await Promise.all([
     read('src/admin/content/recordConfigs.ts'),
     read('src/admin/pages/ContentHubPage.tsx'),
     read('src/admin/pages/MediaPage.tsx'),
     read('src/admin/admin.css'),
-    read('src/admin/learning/AdminLearningPanel.tsx'),
+    read('src/admin/layout/AdminLayout.tsx'),
   ]);
   assert.match(hub, /<h2>Gallery<\/h2>/);
   assert.match(configs, /label: 'Product photo', gallery: 'image'/);
@@ -92,8 +92,7 @@ test('Gallery is the shared picker for images and PDF catalogues', async () => {
   assert.match(media, /gallery-browse-panel/);
   assert.match(media, /nk-admin-gallery-top-action--upload/);
   assert.match(media, /nk-admin-gallery-top-action--filters/);
-  assert.match(media, /nk-admin-gallery-top-action--help/);
-  assert.match(learning, /Need help with Gallery/);
-  assert.match(learning, /nk-admin:gallery-help/);
+  assert.doesNotMatch(media, /nk-admin-gallery-top-action--help/);
+  assert.doesNotMatch(layout, /<AdminLearningPanel/);
   assert.match(styles, /\.nk-admin-media-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
