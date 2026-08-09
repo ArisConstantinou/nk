@@ -1,5 +1,7 @@
+import {execFile} from 'node:child_process';
 import {readdir, readFile, stat, writeFile} from 'node:fs/promises';
 import {extname, join, relative, resolve} from 'node:path';
+import {promisify} from 'node:util';
 import sharp from 'sharp';
 
 const root = resolve('public');
@@ -10,6 +12,7 @@ const imageTypes = new Map([
   ['.avif', 'image/avif'], ['.gif', 'image/gif'], ['.jpeg', 'image/jpeg'], ['.jpg', 'image/jpeg'],
   ['.png', 'image/png'], ['.svg', 'image/svg+xml'], ['.webp', 'image/webp'],
 ]);
+const execFileAsync = promisify(execFile);
 
 const titleCase = value => String(value || '')
   .replace(/\.[^.]+$/, '')
@@ -58,9 +61,20 @@ async function walk(directory) {
   return files;
 }
 
+async function websiteFiles() {
+  try {
+    const {stdout} = await execFileAsync('git', ['ls-files', '-z', '--', 'public'], {maxBuffer: 4 * 1024 * 1024});
+    return stdout.split('\0')
+      .filter(path => imageTypes.has(extname(path).toLowerCase()))
+      .map(path => resolve(path));
+  } catch {
+    return walk(root);
+  }
+}
+
 const catalogueManifest = JSON.parse(await readFile(catalogueManifestPath, 'utf8'));
 const catalogueByPath = new Map(catalogueManifest.products.map(product => [String(product.path).replaceAll('\\', '/'), product]));
-const files = await walk(root);
+const files = await websiteFiles();
 let latestModified = 0;
 const images = [];
 

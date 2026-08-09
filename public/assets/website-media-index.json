@@ -1,18 +1,18 @@
 {
   "generatedAt": "2026-08-08T08:52:29.515Z",
-  "imageCount": 1245,
+  "imageCount": 1213,
   "groups": [
     {
       "tag": "Website",
-      "count": 1245
+      "count": 1213
     },
     {
       "tag": "Catalogues",
-      "count": 689
+      "count": 687
     },
     {
       "tag": "Lighting",
-      "count": 481
+      "count": 480
     },
     {
       "tag": "Products",
@@ -44,11 +44,11 @@
     },
     {
       "tag": "Generated visuals",
-      "count": 62
+      "count": 60
     },
     {
       "tag": "Fans",
-      "count": 52
+      "count": 50
     },
     {
       "tag": "Beauty & Care",
@@ -57,10 +57,6 @@
     {
       "tag": "Kids Lights",
       "count": 35
-    },
-    {
-      "tag": "Headers",
-      "count": 33
     },
     {
       "tag": "Projects",
@@ -128,6 +124,10 @@
     },
     {
       "tag": "Air Coolers",
+      "count": 3
+    },
+    {
+      "tag": "Headers",
       "count": 3
     },
     {
@@ -5798,40 +5798,6 @@
       ]
     },
     {
-      "id": "website:assets/generated/catalogue-bookcase-cutout-key-v4.png",
-      "path": "assets/generated/catalogue-bookcase-cutout-key-v4.png",
-      "filename": "catalogue-bookcase-cutout-key-v4.png",
-      "title": "Catalogue Bookcase Cutout Key V4",
-      "mimeType": "image/png",
-      "size": 2037079,
-      "width": 1024,
-      "height": 1536,
-      "folder": "Website / Generated",
-      "category": "Generated visuals",
-      "tags": [
-        "Generated visuals",
-        "Catalogues",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/catalogue-bookcase-cutout-v4.png",
-      "path": "assets/generated/catalogue-bookcase-cutout-v4.png",
-      "filename": "catalogue-bookcase-cutout-v4.png",
-      "title": "Catalogue Bookcase Cutout V4",
-      "mimeType": "image/png",
-      "size": 1691538,
-      "width": 1024,
-      "height": 1536,
-      "folder": "Website / Generated",
-      "category": "Generated visuals",
-      "tags": [
-        "Generated visuals",
-        "Catalogues",
-        "Website"
-      ]
-    },
-    {
       "id": "website:assets/generated/catalogue-bookcase-cutout-v4.webp",
       "path": "assets/generated/catalogue-bookcase-cutout-v4.webp",
       "filename": "catalogue-bookcase-cutout-v4.webp",
@@ -6668,489 +6634,6 @@
       "tags": [
         "Generated visuals",
         "Catalogues",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/01-luminous-aperture.webp",
-      "path": "assets/generated/header-studio/01-luminous-aperture.webp",
-      "filename": "01-luminous-aperture.webp",
-      "title": "01 Luminous Aperture",
-      "mimeType": "image/webp",
-      "size": 41160,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/01-natural-fan-out-header.webp",
-      "path": "assets/generated/header-cables/01-natural-fan-out-header.webp",
-      "filename": "01-natural-fan-out-header.webp",
-      "title": "01 Natural Fan Out Header",
-      "mimeType": "image/webp",
-      "size": 5492,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Fans",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/01-natural-fan-out-thumb.webp",
-      "path": "assets/generated/header-cables/01-natural-fan-out-thumb.webp",
-      "filename": "01-natural-fan-out-thumb.webp",
-      "title": "01 Natural Fan Out Thumb",
-      "mimeType": "image/webp",
-      "size": 6228,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Fans",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/02-oxidized-copper-portal.webp",
-      "path": "assets/generated/header-studio/02-oxidized-copper-portal.webp",
-      "filename": "02-oxidized-copper-portal.webp",
-      "title": "02 Oxidized Copper Portal",
-      "mimeType": "image/webp",
-      "size": 278312,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/02-retrofit-offsets-header.webp",
-      "path": "assets/generated/header-cables/02-retrofit-offsets-header.webp",
-      "filename": "02-retrofit-offsets-header.webp",
-      "title": "02 Retrofit Offsets Header",
-      "mimeType": "image/webp",
-      "size": 6456,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/02-retrofit-offsets-thumb.webp",
-      "path": "assets/generated/header-cables/02-retrofit-offsets-thumb.webp",
-      "filename": "02-retrofit-offsets-thumb.webp",
-      "title": "02 Retrofit Offsets Thumb",
-      "mimeType": "image/webp",
-      "size": 9800,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/03-folded-architectural-paper.webp",
-      "path": "assets/generated/header-studio/03-folded-architectural-paper.webp",
-      "filename": "03-folded-architectural-paper.webp",
-      "title": "03 Folded Architectural Paper",
-      "mimeType": "image/webp",
-      "size": 170198,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/03-staggered-lift-header.webp",
-      "path": "assets/generated/header-cables/03-staggered-lift-header.webp",
-      "filename": "03-staggered-lift-header.webp",
-      "title": "03 Staggered Lift Header",
-      "mimeType": "image/webp",
-      "size": 6920,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/03-staggered-lift-thumb.webp",
-      "path": "assets/generated/header-cables/03-staggered-lift-thumb.webp",
-      "filename": "03-staggered-lift-thumb.webp",
-      "title": "03 Staggered Lift Thumb",
-      "mimeType": "image/webp",
-      "size": 7984,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/04-smoked-glass-library.webp",
-      "path": "assets/generated/header-studio/04-smoked-glass-library.webp",
-      "filename": "04-smoked-glass-library.webp",
-      "title": "04 Smoked Glass Library",
-      "mimeType": "image/webp",
-      "size": 71620,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/04-two-pair-finish-header.webp",
-      "path": "assets/generated/header-cables/04-two-pair-finish-header.webp",
-      "filename": "04-two-pair-finish-header.webp",
-      "title": "04 Two Pair Finish Header",
-      "mimeType": "image/webp",
-      "size": 5424,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/04-two-pair-finish-thumb.webp",
-      "path": "assets/generated/header-cables/04-two-pair-finish-thumb.webp",
-      "filename": "04-two-pair-finish-thumb.webp",
-      "title": "04 Two Pair Finish Thumb",
-      "mimeType": "image/webp",
-      "size": 5944,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/05-porcelain-signal.webp",
-      "path": "assets/generated/header-studio/05-porcelain-signal.webp",
-      "filename": "05-porcelain-signal.webp",
-      "title": "05 Porcelain Signal",
-      "mimeType": "image/webp",
-      "size": 86492,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/05-real-wall-contour-header.webp",
-      "path": "assets/generated/header-cables/05-real-wall-contour-header.webp",
-      "filename": "05-real-wall-contour-header.webp",
-      "title": "05 Real Wall Contour Header",
-      "mimeType": "image/webp",
-      "size": 9214,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/05-real-wall-contour-thumb.webp",
-      "path": "assets/generated/header-cables/05-real-wall-contour-thumb.webp",
-      "filename": "05-real-wall-contour-thumb.webp",
-      "title": "05 Real Wall Contour Thumb",
-      "mimeType": "image/webp",
-      "size": 11830,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/06-cobalt-enamel-horizon.webp",
-      "path": "assets/generated/header-studio/06-cobalt-enamel-horizon.webp",
-      "filename": "06-cobalt-enamel-horizon.webp",
-      "title": "06 Cobalt Enamel Horizon",
-      "mimeType": "image/webp",
-      "size": 110148,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/06-late-added-grey-header.webp",
-      "path": "assets/generated/header-cables/06-late-added-grey-header.webp",
-      "filename": "06-late-added-grey-header.webp",
-      "title": "06 Late Added Grey Header",
-      "mimeType": "image/webp",
-      "size": 6924,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/06-late-added-grey-thumb.webp",
-      "path": "assets/generated/header-cables/06-late-added-grey-thumb.webp",
-      "filename": "06-late-added-grey-thumb.webp",
-      "title": "06 Late Added Grey Thumb",
-      "mimeType": "image/webp",
-      "size": 7776,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/07-natural-tension-header.webp",
-      "path": "assets/generated/header-cables/07-natural-tension-header.webp",
-      "filename": "07-natural-tension-header.webp",
-      "title": "07 Natural Tension Header",
-      "mimeType": "image/webp",
-      "size": 5980,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/07-natural-tension-thumb.webp",
-      "path": "assets/generated/header-cables/07-natural-tension-thumb.webp",
-      "filename": "07-natural-tension-thumb.webp",
-      "title": "07 Natural Tension Thumb",
-      "mimeType": "image/webp",
-      "size": 7736,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/07-terracotta-light-shelf.webp",
-      "path": "assets/generated/header-studio/07-terracotta-light-shelf.webp",
-      "filename": "07-terracotta-light-shelf.webp",
-      "title": "07 Terracotta Light Shelf",
-      "mimeType": "image/webp",
-      "size": 90380,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Lighting",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/08-burgundy-rose-gold-fold.webp",
-      "path": "assets/generated/header-studio/08-burgundy-rose-gold-fold.webp",
-      "filename": "08-burgundy-rose-gold-fold.webp",
-      "title": "08 Burgundy Rose Gold Fold",
-      "mimeType": "image/webp",
-      "size": 40718,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/08-staggered-drop-header.webp",
-      "path": "assets/generated/header-cables/08-staggered-drop-header.webp",
-      "filename": "08-staggered-drop-header.webp",
-      "title": "08 Staggered Drop Header",
-      "mimeType": "image/webp",
-      "size": 7540,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/08-staggered-drop-thumb.webp",
-      "path": "assets/generated/header-cables/08-staggered-drop-thumb.webp",
-      "filename": "08-staggered-drop-thumb.webp",
-      "title": "08 Staggered Drop Thumb",
-      "mimeType": "image/webp",
-      "size": 6658,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/09-champagne-stone-instrument.webp",
-      "path": "assets/generated/header-studio/09-champagne-stone-instrument.webp",
-      "filename": "09-champagne-stone-instrument.webp",
-      "title": "09 Champagne Stone Instrument",
-      "mimeType": "image/webp",
-      "size": 230904,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/09-phased-installation-header.webp",
-      "path": "assets/generated/header-cables/09-phased-installation-header.webp",
-      "filename": "09-phased-installation-header.webp",
-      "title": "09 Phased Installation Header",
-      "mimeType": "image/webp",
-      "size": 5024,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/09-phased-installation-thumb.webp",
-      "path": "assets/generated/header-cables/09-phased-installation-thumb.webp",
-      "filename": "09-phased-installation-thumb.webp",
-      "title": "09 Phased Installation Thumb",
-      "mimeType": "image/webp",
-      "size": 5428,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-studio/10-amber-resin-current.webp",
-      "path": "assets/generated/header-studio/10-amber-resin-current.webp",
-      "filename": "10-amber-resin-current.webp",
-      "title": "10 Amber Resin Current",
-      "mimeType": "image/webp",
-      "size": 157240,
-      "width": 2400,
-      "height": 800,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/10-loose-to-tidy-header.webp",
-      "path": "assets/generated/header-cables/10-loose-to-tidy-header.webp",
-      "filename": "10-loose-to-tidy-header.webp",
-      "title": "10 Loose To Tidy Header",
-      "mimeType": "image/webp",
-      "size": 6666,
-      "width": 2048,
-      "height": 64,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
-        "Website"
-      ]
-    },
-    {
-      "id": "website:assets/generated/header-cables/10-loose-to-tidy-thumb.webp",
-      "path": "assets/generated/header-cables/10-loose-to-tidy-thumb.webp",
-      "filename": "10-loose-to-tidy-thumb.webp",
-      "title": "10 Loose To Tidy Thumb",
-      "mimeType": "image/webp",
-      "size": 6280,
-      "width": 480,
-      "height": 240,
-      "folder": "Website / Generated",
-      "category": "Headers",
-      "tags": [
-        "Headers",
         "Website"
       ]
     },

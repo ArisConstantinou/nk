@@ -1,24 +1,22 @@
 import assert from 'node:assert/strict';
-import {readdir, readFile} from 'node:fs/promises';
+import {execFile} from 'node:child_process';
+import {readFile} from 'node:fs/promises';
 import {extname} from 'node:path';
 import test from 'node:test';
+import {promisify} from 'node:util';
 
 const imageExtensions = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
 const publicRoot = new URL('../../public/', import.meta.url);
+const execFileAsync = promisify(execFile);
 
-async function imageCount(directory) {
-  const entries = await readdir(directory, {withFileTypes: true});
-  let count = 0;
-  for (const entry of entries) {
-    const target = new URL(entry.isDirectory() ? `${entry.name}/` : entry.name, directory);
-    count += entry.isDirectory() ? await imageCount(target) : Number(imageExtensions.has(extname(entry.name).toLowerCase()));
-  }
-  return count;
+async function trackedImageCount() {
+  const {stdout} = await execFileAsync('git', ['ls-files', '-z', '--', 'public'], {maxBuffer: 4 * 1024 * 1024});
+  return stdout.split('\0').filter(path => imageExtensions.has(extname(path).toLowerCase())).length;
 }
 
 test('website media index covers every public image and groups catalogue photos by useful tags', async () => {
   const index = JSON.parse(await readFile(new URL('assets/website-media-index.json', publicRoot), 'utf8'));
-  const publicImages = await imageCount(publicRoot);
+  const publicImages = await trackedImageCount();
   assert.equal(index.imageCount, publicImages, 'every public website image must be present in the Photos index');
   assert.equal(index.images.length, publicImages);
   assert.equal(new Set(index.images.map(image => image.path)).size, publicImages, 'website image paths must stay unique');
