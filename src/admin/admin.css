@@ -2603,3 +2603,472 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
     flex-direction: row;
   }
 }
+
+/* Compact Gallery landing and off-canvas browse controls */
+.nk-admin-learning.is-compact {
+  margin-bottom: 10px;
+}
+
+.nk-admin-learning.is-compact > .nk-admin-learning-summary {
+  min-height: 48px;
+  padding: 8px 12px;
+}
+
+.nk-admin-learning.is-compact > .nk-admin-learning-summary > svg:first-child {
+  width: 20px;
+  height: 20px;
+}
+
+.nk-admin-learning.is-compact > .nk-admin-learning-summary > span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.nk-admin-learning.is-compact > .nk-admin-learning-summary > span small,
+.nk-admin-learning.is-compact > .nk-admin-learning-summary > span b {
+  margin: 0;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+}
+
+.nk-admin-learning.is-compact > .nk-admin-learning-summary > span b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nk-admin-learning.is-compact > .nk-admin-learning-summary > strong {
+  font-size: 12px;
+}
+
+.nk-admin-media-page > .nk-admin-page-heading {
+  min-height: 0;
+  margin-bottom: 10px;
+  padding: 16px 18px;
+}
+
+.nk-admin-media-page > .nk-admin-page-heading h1 {
+  margin-top: 2px;
+  font-size: clamp(30px, 3vw, 40px);
+}
+
+.nk-admin-media-page > .nk-admin-page-heading p {
+  max-width: 690px;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.nk-admin-media-browse-toggle {
+  width: 100%;
+  min-height: 56px;
+  margin: 0 0 18px;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto 20px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--admin-accent) 45%, var(--admin-line));
+  border-radius: 13px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--admin-accent-soft) 72%, #fff), var(--admin-surface));
+  color: var(--admin-text);
+  text-align: left;
+  box-shadow: 0 7px 20px rgba(12, 67, 47, .08);
+}
+
+.nk-admin-media-browse-toggle > svg:first-child {
+  width: 38px;
+  height: 38px;
+  padding: 9px;
+  border-radius: 10px;
+  background: var(--admin-accent);
+  color: #fff;
+}
+
+.nk-admin-media-browse-toggle > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nk-admin-media-browse-toggle b {
+  font-size: 15px;
+}
+
+.nk-admin-media-browse-toggle span small {
+  overflow: hidden;
+  color: var(--admin-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nk-admin-media-browse-toggle > strong {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-dark);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.nk-admin-media-browse-toggle > strong small {
+  font-size: 12px;
+  opacity: .72;
+}
+
+.nk-admin-media-browse-toggle > svg:last-child {
+  width: 18px;
+  color: var(--admin-accent);
+  transition: transform .18s ease;
+}
+
+.nk-admin-media-browse-toggle:hover > svg:last-child {
+  transform: translateX(3px);
+}
+
+.nk-admin-media-controls-backdrop {
+  position: fixed;
+  z-index: 520;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(4, 29, 20, .5);
+  backdrop-filter: blur(3px);
+}
+
+.nk-admin-media-controls {
+  width: min(450px, calc(100vw - 30px));
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border-left: 1px solid var(--admin-line-strong);
+  background: var(--admin-surface);
+  box-shadow: -22px 0 70px rgba(2, 28, 18, .24);
+  animation: nk-admin-media-panel-in .2s ease both;
+}
+
+@keyframes nk-admin-media-panel-in {
+  from { transform: translateX(32px); opacity: 0; }
+}
+
+.nk-admin-media-controls > header {
+  min-height: 78px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--admin-line);
+  background: linear-gradient(135deg, var(--admin-accent-soft), var(--admin-surface));
+}
+
+.nk-admin-media-controls > header small,
+.nk-admin-media-controls-body > section > span {
+  color: var(--admin-accent);
+  font: 800 12px/1.25 ui-monospace, monospace;
+  letter-spacing: .08em;
+}
+
+.nk-admin-media-controls > header h2 {
+  margin: 3px 0 0;
+  font-size: 25px;
+}
+
+.nk-admin-media-controls > header button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--admin-line);
+  border-radius: 11px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+}
+
+.nk-admin-media-controls > header button svg {
+  width: 19px;
+}
+
+.nk-admin-media-controls-body {
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  overflow-y: auto;
+}
+
+.nk-admin-media-controls-body > section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.nk-admin-media-controls .nk-admin-gallery-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+  overflow: visible;
+}
+
+.nk-admin-media-controls .nk-admin-gallery-types button {
+  min-width: 0;
+  justify-content: center;
+}
+
+.nk-admin-media-control-search {
+  min-height: 46px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--admin-line);
+  border-radius: 11px;
+  background: var(--admin-surface-soft);
+}
+
+.nk-admin-media-control-search svg {
+  width: 18px;
+  color: var(--admin-muted);
+}
+
+.nk-admin-media-control-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--admin-text);
+  font-size: 14px;
+}
+
+.nk-admin-media-control-selects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.nk-admin-media-control-selects select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: 13px;
+}
+
+.nk-admin-media-control-selects select:last-child {
+  grid-column: 1 / -1;
+}
+
+.nk-admin-media-controls .nk-admin-media-tags {
+  max-height: 230px;
+  margin: 0;
+  padding: 0 2px 4px 0;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  overflow-y: auto;
+}
+
+.nk-admin-media-controls .nk-admin-media-tags button {
+  min-height: 36px;
+}
+
+.nk-admin-media-controls > footer {
+  min-height: 72px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--admin-line);
+  background: var(--admin-surface);
+}
+
+.nk-admin-media-controls > footer > button {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface-soft);
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.nk-admin-media-controls > footer > button:disabled {
+  opacity: .45;
+}
+
+.nk-admin-media-controls > footer > span {
+  color: var(--admin-muted);
+  font: 700 12px ui-monospace, monospace;
+  text-align: center;
+}
+
+.nk-admin-media-controls > footer > .nk-admin-primary {
+  border-color: var(--admin-accent);
+  background: linear-gradient(135deg, var(--admin-accent-dark), var(--admin-accent));
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .nk-admin-learning.is-compact > .nk-admin-learning-summary > span small,
+  .nk-admin-learning.is-compact > .nk-admin-learning-summary > strong {
+    display: none;
+  }
+
+  .nk-admin-learning.is-compact > .nk-admin-learning-summary > span b {
+    font-size: 13px !important;
+  }
+
+  .nk-admin-media-page > .nk-admin-page-heading {
+    padding: 12px;
+  }
+
+  .nk-admin-media-page > .nk-admin-page-heading h1 {
+    font-size: 30px;
+  }
+
+  .nk-admin-media-page > .nk-admin-page-heading p {
+    margin-top: 1px;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .nk-admin-media-page > .nk-admin-page-heading .nk-admin-page-actions {
+    margin-top: 9px;
+  }
+
+  .nk-admin-media-page > .nk-admin-page-heading .nk-admin-page-actions > * {
+    min-height: 42px;
+  }
+
+  .nk-admin-media-browse-toggle {
+    min-height: 52px;
+    margin-bottom: 12px;
+    grid-template-columns: 34px minmax(0, 1fr) auto 16px;
+    gap: 8px;
+    border-radius: 11px;
+  }
+
+  .nk-admin-media-browse-toggle > svg:first-child {
+    width: 34px;
+    height: 34px;
+    padding: 8px;
+  }
+
+  .nk-admin-media-browse-toggle > strong small {
+    display: none;
+  }
+
+  .nk-admin-media-controls {
+    width: calc(100vw - 12px);
+  }
+
+  .nk-admin-media-controls > header {
+    min-height: 68px;
+    padding: 11px 13px;
+  }
+
+  .nk-admin-media-controls > header h2 {
+    font-size: 23px;
+  }
+
+  .nk-admin-media-controls-body {
+    padding: 13px;
+    gap: 18px;
+  }
+
+  .nk-admin-media-controls > footer {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Gallery actions live in the persistent white topbar. */
+.nk-admin-gallery-top-action {
+  order: -1;
+  position: relative;
+  min-width: 42px;
+  height: 38px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--admin-line-strong);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff, var(--admin-surface-soft));
+  color: var(--admin-accent-dark);
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(9, 54, 38, .06);
+}
+
+.nk-admin-gallery-top-action svg {
+  width: 18px;
+}
+
+.nk-admin-gallery-top-action--upload {
+  border-color: #ff8b4b;
+  background: linear-gradient(135deg, #ff9b63, #ff7838);
+  color: #122d24;
+}
+
+.nk-admin-gallery-top-action--filters b {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--admin-accent);
+  color: #fff;
+  font-size: 10px;
+}
+
+@media (max-width: 840px) {
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-help-button,
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-website-button {
+    display: none !important;
+  }
+
+  .nk-admin-gallery-top-action {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+  }
+
+  .nk-admin-gallery-top-action span {
+    display: none;
+  }
+
+  .nk-admin-gallery-top-action--upload {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 9px);
+    left: 12px;
+  }
+
+  .nk-admin-gallery-top-action--filters {
+    background: linear-gradient(145deg, #f4fff9, #e1f5eb);
+  }
+
+  .nk-admin-gallery-top-action svg {
+    width: 20px;
+  }
+}

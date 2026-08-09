@@ -1,5 +1,6 @@
 import {useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent} from 'react';
-import {ArchiveRestore, Check, ChevronDown, Copy, FileText, Folder, Image as ImageIcon, Link2, ListFilter, LoaderCircle, Plus, RefreshCw, Save, Search, Trash2, Upload, Video, X} from 'lucide-react';
+import {ArchiveRestore, Check, Copy, FileText, Folder, Image as ImageIcon, Link2, ListFilter, LoaderCircle, Plus, RefreshCw, Save, Search, Trash2, Upload, Video, X} from 'lucide-react';
+import {createPortal} from 'react-dom';
 import {useSearchParams} from 'react-router-dom';
 import {adminApi, errorMessage} from '../api';
 import {useAdminAuth} from '../auth/AdminAuth';
@@ -71,11 +72,13 @@ export function MediaPage() {
   const [folder, setFolder] = useState('all');
   const [category, setCategory] = useState('all');
   const [tag, setTag] = useState('all');
+  const [controlsOpen, setControlsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
+  const [topbarHost, setTopbarHost] = useState<HTMLElement | null>(null);
   const [params, setParams] = useSearchParams();
   const replaceInput = useRef<HTMLInputElement>(null);
 
@@ -93,19 +96,21 @@ export function MediaPage() {
     } catch (nextError) {setError(errorMessage(nextError));} finally {setLoading(false);}
   };
   useEffect(() => {void load();}, []);
+  useEffect(() => {setTopbarHost(document.querySelector<HTMLElement>('.nk-admin-topbar-actions'));}, []);
   useEffect(() => {if (canWrite && params.get('upload') === '1') {setUploadOpen(true); const next = new URLSearchParams(params); next.delete('upload'); setParams(next, {replace: true});}}, [canWrite, params, setParams]);
   useEffect(() => {const assetId = params.get('asset'); if (assetId && items.length && selected?.id !== assetId) {const asset = items.find(item => item.id === assetId); if (asset) setSelected(asset);}}, [items, params, selected?.id]);
   useEffect(() => {if (!selected) {setUsage([]); return;} if (selected.origin === 'website') {setUsage([]); setUsageLoading(false); return;} setUsageLoading(true); adminApi<{usage: MediaUsage[]}>(`/media/${selected.id}/usage`).then(result => setUsage(result.usage)).catch(nextError => setError(errorMessage(nextError))).finally(() => setUsageLoading(false));}, [selected?.id, selected?.origin, selected?.updatedAt]);
   useEffect(() => {
-    if (!uploadOpen && !selected) return;
+    if (!uploadOpen && !selected && !controlsOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || busy) return;
       if (uploadOpen) {setUploadOpen(false); setUploadFiles([]);}
-      else setSelected(null);
+      else if (selected) setSelected(null);
+      else setControlsOpen(false);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [busy, selected, uploadOpen]);
+  }, [busy, controlsOpen, selected, uploadOpen]);
 
   const folders = useMemo(() => [...new Set(items.map(item => item.folder).filter(Boolean))].sort(), [items]);
   const categories = useMemo(() => [...new Set(items.map(item => item.category).filter(Boolean))].sort(), [items]);
@@ -122,6 +127,8 @@ export function MediaPage() {
     });
     return [...groups].map(([label, assets]) => ({label, assets}));
   }, [shown, tag]);
+  const activeControlCount = [type !== 'all', folder !== 'all', category !== 'all', status !== 'all', tag !== 'all', Boolean(query)].filter(Boolean).length;
+  const resetControls = () => {setType('all'); setFolder('all'); setCategory('all'); setStatus('all'); setTag('all'); setQuery('');};
 
   const chooseFiles = (files: FileList | File[]) => {
     const next = [...files].filter(file => acceptedTypes.includes(file.type) && file.size > 0 && file.size <= 25 * 1024 * 1024);
@@ -171,13 +178,12 @@ export function MediaPage() {
   const copyUrl = async (item: MediaAsset) => {try {await navigator.clipboard.writeText(new URL(item.url, window.location.origin).href); setNotice('Public media URL copied.');} catch {setError('The browser could not copy the URL. Select it from the media details instead.');}};
 
   return <div className="nk-admin-media-page" onDragEnter={event => {if (canWrite && event.dataTransfer.types.includes('Files')) setDragActive(true);}} onDragOver={event => {if (canWrite) event.preventDefault();}} onDrop={onDrop}>
-    <PageHeading eyebrow="MEDIA GALLERY" title="Gallery" description="Browse, upload and reuse all website photos, videos, PDFs and catalogue files in one place." actions={canWrite ? <button className="nk-admin-primary" onClick={() => setUploadOpen(true)}><Plus/>Upload files</button> : undefined}/>
+    {topbarHost && createPortal(<>{canWrite && <button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--upload" type="button" onClick={() => setUploadOpen(true)} aria-label="Upload files"><Plus/><span>Upload</span></button>}<button className="nk-admin-gallery-top-action nk-admin-gallery-top-action--filters" type="button" onClick={() => setControlsOpen(true)} aria-label="Browse and filter Gallery"><ListFilter/><span>Filters</span>{activeControlCount > 0 && <b>{activeControlCount}</b>}</button></>, topbarHost)}
+    <PageHeading eyebrow="MEDIA GALLERY" title="Gallery" description="Browse, upload and reuse all website photos, videos, PDFs and catalogue files in one place."/>
     {error && <p className="nk-admin-alert nk-admin-alert--error" role="alert">{error}<button onClick={() => setError('')} aria-label="Dismiss error"><X/></button></p>}
     {notice && <p className="nk-admin-alert" role="status">{notice}<button onClick={() => setNotice('')} aria-label="Dismiss message"><X/></button></p>}
     {dragActive && <div className="nk-admin-drop-overlay" onDragLeave={() => setDragActive(false)}><Upload/><b>Drop files to add them to Gallery</b><span>They remain unpublished until the validated upload completes.</span></div>}
-    <div className="nk-admin-gallery-types" role="group" aria-label="Choose Gallery content type"><button type="button" className={type === 'all' ? 'active' : ''} onClick={() => setType('all')}>All</button><button type="button" className={type === 'image' ? 'active' : ''} onClick={() => setType('image')}><ImageIcon/>Photos</button><button type="button" className={type === 'video' ? 'active' : ''} onClick={() => {setType('video'); setTag('all');}}><Video/>Videos</button><button type="button" className={type === 'document' ? 'active' : ''} onClick={() => {setType('document'); setTag('all');}}><FileText/>PDFs & catalogues</button></div>
-    <div className="nk-admin-media-toolbar nk-admin-media-toolbar--simple"><label><Search/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search Gallery" aria-label="Search Gallery"/></label><details className="nk-admin-media-more-filters"><summary><ListFilter/>More filters <ChevronDown/></summary><div><select value={folder} onChange={event => setFolder(event.target.value)} aria-label="Filter Gallery folder"><option value="all">All folders</option>{folders.map(value => <option key={value}>{value}</option>)}</select><select value={category} onChange={event => setCategory(event.target.value)} aria-label="Filter Gallery category"><option value="all">All categories</option>{categories.map(value => <option key={value}>{value}</option>)}</select><select value={status} onChange={event => setStatus(event.target.value as typeof status)} aria-label="Filter Gallery status"><option value="all">All states</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div></details><span>{shown.length} of {items.length}</span></div>
-    {(type === 'all' || type === 'image') && <div className="nk-admin-media-tags" role="group" aria-label="Organise Photos by tag"><span>PHOTO TAGS</span><button type="button" className={tag === 'all' ? 'active' : ''} onClick={() => setTag('all')}>All photos</button>{tags.map(value => <button type="button" className={tag === value ? 'active' : ''} onClick={() => setTag(value)} key={value}>{value}</button>)}</div>}
+    {controlsOpen && <div className="nk-admin-media-controls-backdrop" onMouseDown={event => {if (event.target === event.currentTarget) setControlsOpen(false);}}><aside className="nk-admin-media-controls" id="gallery-browse-panel" role="dialog" aria-modal="true" aria-label="Browse and filter Gallery"><header><div><small>GALLERY TOOLS</small><h2>Browse & filters</h2></div><button type="button" onClick={() => setControlsOpen(false)} aria-label="Close Gallery filters"><X/></button></header><div className="nk-admin-media-controls-body"><section><span>MEDIA TYPE</span><div className="nk-admin-gallery-types" role="group" aria-label="Choose Gallery content type"><button type="button" className={type === 'all' ? 'active' : ''} onClick={() => setType('all')}>All</button><button type="button" className={type === 'image' ? 'active' : ''} onClick={() => setType('image')}><ImageIcon/>Photos</button><button type="button" className={type === 'video' ? 'active' : ''} onClick={() => {setType('video'); setTag('all');}}><Video/>Videos</button><button type="button" className={type === 'document' ? 'active' : ''} onClick={() => {setType('document'); setTag('all');}}><FileText/>PDFs</button></div></section><section><span>FIND MEDIA</span><label className="nk-admin-media-control-search"><Search/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search Gallery" aria-label="Search Gallery"/></label><div className="nk-admin-media-control-selects"><select value={folder} onChange={event => setFolder(event.target.value)} aria-label="Filter Gallery folder"><option value="all">All folders</option>{folders.map(value => <option key={value}>{value}</option>)}</select><select value={category} onChange={event => setCategory(event.target.value)} aria-label="Filter Gallery category"><option value="all">All categories</option>{categories.map(value => <option key={value}>{value}</option>)}</select><select value={status} onChange={event => setStatus(event.target.value as typeof status)} aria-label="Filter Gallery status"><option value="all">All states</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div></section>{(type === 'all' || type === 'image') && <section><span>PHOTO TAGS</span><div className="nk-admin-media-tags" role="group" aria-label="Organise Photos by tag"><button type="button" className={tag === 'all' ? 'active' : ''} onClick={() => setTag('all')}>All photos</button>{tags.map(value => <button type="button" className={tag === value ? 'active' : ''} onClick={() => setTag(value)} key={value}>{value}</button>)}</div></section>}</div><footer><button type="button" onClick={resetControls} disabled={!activeControlCount}>Clear all</button><span>{shown.length} of {items.length}</span><button className="nk-admin-primary" type="button" onClick={() => setControlsOpen(false)}>Show media</button></footer></aside></div>}
     {loading
       ? <div className="nk-admin-list-loading"><RefreshCw className="nk-admin-spin"/>Loading Gallery…</div>
       : shown.length

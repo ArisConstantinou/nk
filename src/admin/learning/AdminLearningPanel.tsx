@@ -193,15 +193,16 @@ export function AdminLearningPanel() {
   const [demoStep, setDemoStep] = useState(0);
   useEffect(() => {setOpen(false); setTab('purpose'); setDemoStep(0);}, [location.pathname]);
   const label = learningText(content.label, language);
+  const compact = location.pathname.endsWith('/admin/media');
   const tabs: Array<{id: LearningTab; label: string; icon: typeof HelpCircle}> = [
     {id: 'purpose', label: text('Purpose', 'Σκοπός'), icon: HelpCircle},
     {id: 'example', label: text('Try an example', 'Δοκιμή παραδείγματος'), icon: FlaskConical},
     {id: 'steps', label: text('How to use it', 'Πώς χρησιμοποιείται'), icon: Workflow},
     {id: 'after', label: text('What happens next', 'Τι γίνεται μετά'), icon: Lightbulb},
   ];
-  return <section className={`nk-admin-learning${open ? ' is-open' : ''}`} aria-label={text(`Learn about ${label}`, `Μάθετε για: ${label}`)}>
+  return <section className={`nk-admin-learning${compact ? ' is-compact' : ''}${open ? ' is-open' : ''}`} aria-label={text(`Learn about ${label}`, `Μάθετε για: ${label}`)}>
     <button className="nk-admin-learning-summary" type="button" onClick={() => setOpen(value => !value)} aria-expanded={open}>
-      <BookOpenCheck/><span><small>{text('UNDERSTAND THIS AREA', 'ΚΑΤΑΝΟΗΣΗ ΕΝΟΤΗΤΑΣ')}</small><b>{text(`What is ${label}, and what happens when I use it?`, `Τι είναι «${label}» και τι συμβαίνει όταν το χρησιμοποιώ;`)}</b><em>{learningText(content.purpose, language)}</em></span><strong>{open ? text('Close explanation', 'Κλείσιμο εξήγησης') : text('Open interactive guide', 'Άνοιγμα διαδραστικού οδηγού')}</strong><ChevronDown/>
+      <BookOpenCheck/><span><small>{compact ? text('GALLERY HELP', 'ΒΟΗΘΕΙΑ GALLERY') : text('UNDERSTAND THIS AREA', 'ΚΑΤΑΝΟΗΣΗ ΕΝΟΤΗΤΑΣ')}</small><b>{compact ? text('Need help with Gallery?', 'Χρειάζεστε βοήθεια με το Gallery;') : text(`What is ${label}, and what happens when I use it?`, `Τι είναι «${label}» και τι συμβαίνει όταν το χρησιμοποιώ;`)}</b>{!compact && <em>{learningText(content.purpose, language)}</em>}</span><strong>{open ? text('Close', 'Κλείσιμο') : text('Open', 'Άνοιγμα')}</strong><ChevronDown/>
     </button>
     {open && <div className="nk-admin-learning-body">
       <div className="nk-admin-learning-tabs" role="tablist" aria-label={text('Learning topics', 'Θέματα εκμάθησης')}>{tabs.map(item => <button type="button" role="tab" aria-selected={tab === item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)} key={item.id}><item.icon/>{item.label}</button>)}</div>
