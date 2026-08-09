@@ -12,6 +12,8 @@ import {
 } from 'firebase/auth';
 import type {AdminUser} from '../types';
 
+const FIREBASE_AUTH_READY_TIMEOUT_MS = 12_000;
+
 const firebaseConfig: FirebaseOptions = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -54,6 +56,21 @@ function authInstance() {
   return getAuth(app);
 }
 
+async function waitForInitialAuthState(auth: ReturnType<typeof getAuth>) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<false>(resolve => {
+    timeoutId = setTimeout(() => resolve(false), FIREBASE_AUTH_READY_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([
+      auth.authStateReady().then(() => true as const),
+      timedOut,
+    ]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
+
 function displayName(user: User) {
   if (user.displayName?.trim()) return user.displayName.trim();
   const emailName = user.email?.split('@')[0].replace(/[._-]+/g, ' ').trim();
@@ -81,7 +98,10 @@ export function firebaseUserToAdmin(user: User): AdminUser {
 
 export async function currentFirebaseAdmin() {
   const auth = authInstance();
-  await auth.authStateReady();
+  const ready = await waitForInitialAuthState(auth);
+  // Some mobile webviews can leave Firebase persistence initialization pending.
+  // Treat an empty timed-out state as signed out so the login screen stays reachable.
+  if (!ready && !auth.currentUser) return null;
   if (!auth.currentUser) return null;
   try {
     return firebaseUserToAdmin(auth.currentUser);
@@ -93,7 +113,8 @@ export async function currentFirebaseAdmin() {
 
 export async function currentFirebaseAdminIdToken() {
   const auth = authInstance();
-  await auth.authStateReady();
+  const ready = await waitForInitialAuthState(auth);
+  if (!ready && !auth.currentUser) throw new Error('Firebase sign-in is taking too long. Reload the page and try again.');
   if (!auth.currentUser) throw new Error('Firebase sign-in did not return an administrator session.');
   ensureAllowed(auth.currentUser);
   return auth.currentUser.getIdToken();
