@@ -194,6 +194,12 @@ export function AdminLearningPanel() {
   useEffect(() => {setOpen(false); setTab('purpose'); setDemoStep(0);}, [location.pathname]);
   const label = learningText(content.label, language);
   const compact = location.pathname.endsWith('/admin/media');
+  useEffect(() => {
+    if (!compact) return;
+    const openGalleryHelp = () => setOpen(true);
+    window.addEventListener('nk-admin:gallery-help', openGalleryHelp);
+    return () => window.removeEventListener('nk-admin:gallery-help', openGalleryHelp);
+  }, [compact]);
   const tabs: Array<{id: LearningTab; label: string; icon: typeof HelpCircle}> = [
     {id: 'purpose', label: text('Purpose', 'Σκοπός'), icon: HelpCircle},
     {id: 'example', label: text('Try an example', 'Δοκιμή παραδείγματος'), icon: FlaskConical},

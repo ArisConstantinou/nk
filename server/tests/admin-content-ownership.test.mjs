@@ -53,6 +53,8 @@ test('Gallery is the shared picker for images and PDF catalogues', async () => {
   assert.match(media, /gallery-browse-panel/);
   assert.match(media, /nk-admin-gallery-top-action--upload/);
   assert.match(media, /nk-admin-gallery-top-action--filters/);
+  assert.match(media, /nk-admin-gallery-top-action--help/);
   assert.match(learning, /Need help with Gallery/);
+  assert.match(learning, /nk-admin:gallery-help/);
   assert.match(styles, /\.nk-admin-media-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
