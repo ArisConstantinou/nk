@@ -28,6 +28,8 @@ const systems = [
     route: '/services/electrical-installations',
     Icon: PlugZap,
     detail: 'Loads, distribution, wiring, protection, testing and handover.',
+    image: 'assets/heroes/electrical-installations-cyprus-v3.webp',
+    imageAlt: 'Electrical installation work in progress in Cyprus',
     signal: 'Survey → scope → install → test',
   },
   {
@@ -37,6 +39,8 @@ const systems = [
     route: '/services/lighting-design',
     Icon: Lightbulb,
     detail: 'Layouts, fittings, colour temperature, glare control and scenes.',
+    image: 'assets/heroes/lighting-design.webp',
+    imageAlt: 'Architectural lighting design in a completed interior',
     signal: 'Review → plan → specify → coordinate',
   },
   {
@@ -46,6 +50,8 @@ const systems = [
     route: '/services/smart-home-automation',
     Icon: CircuitBoard,
     detail: 'KNX controls for lighting, shading, climate and daily routines.',
+    image: 'assets/heroes/smart-home-automation.webp',
+    imageAlt: 'Smart home controls coordinating lighting and daily routines',
     signal: 'Map → connect → programme → test',
   },
   {
@@ -55,6 +61,8 @@ const systems = [
     route: '/services/security-systems',
     Icon: ShieldCheck,
     detail: 'CCTV, alarms, access control and entry systems.',
+    image: 'assets/heroes/security-systems.webp',
+    imageAlt: 'Security system monitoring and access control equipment',
     signal: 'Review → cover → install → test',
   },
   {
@@ -64,6 +72,8 @@ const systems = [
     route: '/services/maintenance',
     Icon: Wrench,
     detail: 'Fault finding, corrective repairs, retesting and planned maintenance.',
+    image: 'assets/heroes/maintenance.webp',
+    imageAlt: 'Electrical maintenance and diagnostic work',
     signal: 'Report → diagnose → repair → retest',
   },
 ];
@@ -92,6 +102,7 @@ export default function ElectricalHome() {
   const servicesTitle = previousServicesTitles.has(theme.sectionTitle.trim()) ? compactServicesTitle : theme.sectionTitle;
   const servicesBody = previousServicesBodies.has(theme.sectionBody.trim()) ? compactServicesBody : theme.sectionBody;
   const [activePaletteId, setActivePaletteId] = useState<HomePaletteId>(() => getHomePalette());
+  const [activeService, setActiveService] = useState(0);
   const visualPalettes = homePaletteOptions.map(palette => ({...palette, image: palette.image ? publicAsset(palette.image) : content.heroImage}));
   const activePalette = Math.max(0, visualPalettes.findIndex(palette => palette.id === activePaletteId));
   const active = visualPalettes[activePalette];
@@ -166,16 +177,51 @@ export default function ElectricalHome() {
       <Link to="/shop"><small>02 / SHOP</small><h2>Need a product or catalogue?</h2><p>Choose the Shop for lighting products, appliances and official catalogues.</p><span>Browse products and catalogues <ArrowRight/></span></Link>
     </section>
 
-    <section className="power-routing power-routing--compact" aria-labelledby="home-services-title">
+    <section className="power-routing power-routing--selector" aria-labelledby="home-services-title">
       <header><span>01 / SERVICES</span><h2 id="home-services-title" data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionTitle" data-visual-edit="text" data-visual-label="Capabilities heading" data-visual-multiline="true">{servicesTitle}</h2><p data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionBody" data-visual-edit="text" data-visual-label="Capabilities description" data-visual-multiline="true">{servicesBody}</p></header>
-      <div className="power-routing-map">
-        {systems.map((system, index) => <Link to={system.route} className="power-route" key={system.code}>
-          <span className="power-route-index">{String(index + 1).padStart(2, '0')}</span>
-          <span className="power-route-icon"><system.Icon/></span>
-          <span className="power-route-copy"><small>{system.code}</small><strong>{system.label}</strong><p>{system.detail}</p></span>
-          <span className="power-route-state"><i/>{system.short}</span>
-          <ArrowDownRight/>
-        </Link>)}
+      <div className="power-service-selector" data-active-service={activeService}>
+        <div className="power-service-stage" aria-live="polite">
+          <motion.img
+            key={systems[activeService].code}
+            src={publicAsset(systems[activeService].image)}
+            alt={systems[activeService].imageAlt}
+            initial={{opacity: .2, scale: 1.035}}
+            animate={{opacity: 1, scale: 1}}
+            transition={{duration: .46, ease: 'easeOut'}}
+          />
+          <span className="power-service-stage__shade" aria-hidden="true"/>
+          <div className="power-service-stage__readout">
+            <small>{systems[activeService].code} / {systems[activeService].short}</small>
+            <strong>{systems[activeService].label}</strong>
+            <span>{systems[activeService].signal}</span>
+          </div>
+        </div>
+        <div className="power-service-options">
+          {systems.map((system, index) => {
+            const isActive = activeService === index;
+            const detailId = `home-service-${system.code.toLowerCase()}`;
+            return <article className={`power-service-option ${isActive ? 'is-active' : ''}`} key={system.code}>
+              <button
+                type="button"
+                aria-expanded={isActive}
+                aria-controls={detailId}
+                onClick={() => setActiveService(index)}
+              >
+                <span className="power-service-option__index">{String(index + 1).padStart(2, '0')}</span>
+                <span className="power-service-option__icon"><system.Icon/></span>
+                <span className="power-service-option__title"><small>{system.code}</small><strong>{system.label}</strong></span>
+                <span className="power-service-option__toggle" aria-hidden="true">{isActive ? '−' : '+'}</span>
+              </button>
+              <div className="power-service-option__detail" id={detailId} aria-hidden={!isActive}>
+                <div>
+                  <p>{system.detail}</p>
+                  <span>{system.signal}</span>
+                  <Link to={system.route} tabIndex={isActive ? undefined : -1}>Explore this service <ArrowRight/></Link>
+                </div>
+              </div>
+            </article>;
+          })}
+        </div>
       </div>
     </section>
 
