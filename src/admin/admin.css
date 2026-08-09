@@ -3226,7 +3226,16 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
 
 /* Persistent mobile command dock: the same five-position language on every page. */
 @media (max-width: 840px) {
+  .nk-admin-workspace {
+    padding-top: calc(70px + env(safe-area-inset-top));
+  }
+
   .nk-admin-workspace > .nk-admin-topbar {
+    position: fixed;
+    z-index: 40;
+    top: 0;
+    right: 0;
+    left: 0;
     height: calc(70px + env(safe-area-inset-top));
     padding: env(safe-area-inset-top) 8px 0;
     gap: 4px;

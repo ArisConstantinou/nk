@@ -12,6 +12,13 @@ test('mobile dock keeps its five navigation actions in the approved order', asyn
   assert.deepEqual([...positions].sort((a, b) => a - b), positions, 'dock order must remain Edit, Gallery, Create, Changes, Search');
 });
 
+test('mobile admin keeps both navigation bars pinned to the viewport', async () => {
+  const styles = await read('src/admin/admin.css');
+  assert.match(styles, /\.nk-admin-workspace\s*>\s*\.nk-admin-topbar\s*\{[\s\S]{0,180}position:\s*fixed;[\s\S]{0,180}top:\s*0;/);
+  assert.match(styles, /\.nk-admin-mobile-nav\s*\{[\s\S]{0,180}position:\s*fixed;[\s\S]{0,180}bottom:\s*0;/);
+  assert.match(styles, /\.nk-admin-workspace\s*\{\s*padding-top:\s*calc\(70px \+ env\(safe-area-inset-top\)\);/);
+});
+
 test('each everyday action has one owner and content types stay separate', async () => {
   const source = await read('src/admin/layout/AdminLayout.tsx');
   assert.doesNotMatch(source, /to="\/admin\/media\?upload=1"/, 'Create must not duplicate the Gallery uploader');
