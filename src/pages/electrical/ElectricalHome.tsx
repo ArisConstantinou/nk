@@ -179,15 +179,15 @@ export default function ElectricalHome() {
 
     <section className="power-routing power-routing--selector" aria-labelledby="home-services-title">
       <header><span>01 / SERVICES</span><h2 id="home-services-title" data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionTitle" data-visual-edit="text" data-visual-label="Capabilities heading" data-visual-multiline="true">{servicesTitle}</h2><p data-visual-kind="page" data-visual-slug="homepage" data-visual-path="sectionBody" data-visual-edit="text" data-visual-label="Capabilities description" data-visual-multiline="true">{servicesBody}</p></header>
-      <div className="power-service-selector" data-active-service={activeService}>
+      <div className="power-service-selector">
         <div className="power-service-stage" aria-live="polite">
           <motion.img
             key={systems[activeService].code}
             src={publicAsset(systems[activeService].image)}
             alt={systems[activeService].imageAlt}
-            initial={{opacity: .2, scale: 1.035}}
-            animate={{opacity: 1, scale: 1}}
-            transition={{duration: .46, ease: 'easeOut'}}
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            transition={{duration: .3, ease: 'easeOut'}}
           />
           <span className="power-service-stage__shade" aria-hidden="true"/>
           <div className="power-service-stage__readout">
@@ -201,6 +201,9 @@ export default function ElectricalHome() {
             const isActive = activeService === index;
             const detailId = `home-service-${system.code.toLowerCase()}`;
             return <article className={`power-service-option ${isActive ? 'is-active' : ''}`} key={system.code}>
+              <svg className="power-service-option__connector" viewBox="0 0 20 32" aria-hidden="true">
+                <path d="M20 32V0C20 5.396 15.517 9.781 10 9.781S0 5.416 0 0v32c0-5.396 4.483-9.781 10-9.781S20 26.604 20 32Z" fill="currentColor"/>
+              </svg>
               <button
                 type="button"
                 aria-expanded={isActive}
@@ -210,7 +213,7 @@ export default function ElectricalHome() {
                 <span className="power-service-option__index">{String(index + 1).padStart(2, '0')}</span>
                 <span className="power-service-option__icon"><system.Icon/></span>
                 <span className="power-service-option__title"><small>{system.code}</small><strong>{system.label}</strong></span>
-                <span className="power-service-option__toggle" aria-hidden="true">{isActive ? '−' : '+'}</span>
+                <span className="power-service-option__toggle" aria-hidden="true">{isActive ? '' : '+'}</span>
               </button>
               <div className="power-service-option__detail" id={detailId} aria-hidden={!isActive}>
                 <div>
