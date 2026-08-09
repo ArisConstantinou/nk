@@ -6,23 +6,23 @@ const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
 
 test('mobile dock keeps its five navigation actions in the approved order', async () => {
   const source = await read('src/admin/layout/AdminLayout.tsx');
-  const labels = ["text('Edit'", "text('Gallery'", "text('Add'", "text('Changes'", "text('Search'"];
+  const labels = ["text('Edit'", "text('Gallery'", "text('Create'", "text('Changes'", "text('Search'"];
   const positions = labels.map(label => source.indexOf(label));
   assert.ok(positions.every(position => position >= 0), 'all five dock labels must remain present');
-  assert.deepEqual([...positions].sort((a, b) => a - b), positions, 'dock order must remain Edit, Gallery, Add, Changes, Search');
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions, 'dock order must remain Edit, Gallery, Create, Changes, Search');
 });
 
 test('each everyday action has one owner and content types stay separate', async () => {
   const source = await read('src/admin/layout/AdminLayout.tsx');
-  assert.doesNotMatch(source, /to="\/admin\/media\?upload=1"/, 'Add must not duplicate the Gallery uploader');
+  assert.doesNotMatch(source, /to="\/admin\/media\?upload=1"/, 'Create must not duplicate the Gallery uploader');
   assert.doesNotMatch(source, /<MobileExplorerLink to="\/admin\/media"/, 'Edit must not duplicate the Gallery destination');
 
   for (const [label, route] of [
-    ['Add page', '/admin/pages?new=1'],
-    ['Add product', '/admin/products?new=1'],
-    ['Add service', '/admin/services?new=1'],
-    ['Add project', '/admin/projects?new=1'],
-    ['Add catalogue', '/admin/catalogues?new=1'],
+    ['Create page', '/admin/pages?new=1'],
+    ['Create product', '/admin/products?new=1'],
+    ['Create service', '/admin/services?new=1'],
+    ['Create project', '/admin/projects?new=1'],
+    ['Create catalogue', '/admin/catalogues?new=1'],
   ]) {
     assert.match(source, new RegExp(`to="${route.replace(/[?]/g, '\\?')}"[\\s\\S]{0,160}<b>${label}</b>`));
   }

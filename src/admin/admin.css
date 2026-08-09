@@ -1391,16 +1391,7 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
   }
 
   .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-account-button::before {
-    content: 'M';
-    width: 22px;
-    height: 22px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(168, 229, 189, .34);
-    border-radius: 50%;
-    color: #fff8ee;
-    font-size: 11px;
-    font-weight: 850;
+    content: none;
   }
 
   .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-account-button::after {
@@ -3230,5 +3221,236 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
 
   .nk-admin-gallery-top-action svg {
     width: 20px;
+  }
+}
+
+/* Persistent mobile command dock: the same five-position language on every page. */
+@media (max-width: 840px) {
+  .nk-admin-workspace > .nk-admin-topbar {
+    height: calc(70px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 8px 0;
+    gap: 4px;
+    background:
+      radial-gradient(circle at 50% 100%, rgba(83, 194, 151, .12), transparent 45%),
+      linear-gradient(180deg, rgba(0, 47, 36, .98), rgba(0, 27, 21, .99));
+    border-bottom: 2px solid rgba(255, 138, 67, .82);
+    box-shadow: 0 12px 34px rgba(0, 20, 15, .3), 0 2px 16px rgba(255, 138, 67, .08);
+    backdrop-filter: blur(18px);
+  }
+
+  .nk-admin-topbar-actions {
+    width: 100%;
+    height: 100%;
+    margin-left: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .nk-admin-mobile-help-button,
+  .nk-admin-topbar-actions > a.nk-admin-mobile-website-button,
+  .nk-admin-global-search,
+  .nk-admin-mobile-account-button {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    min-height: 54px;
+    padding: 5px 3px;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #b9cec4;
+    box-shadow: none;
+    transform: none;
+    text-decoration: none;
+    font-size: 0 !important;
+  }
+
+  .nk-admin-mobile-help-button {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .nk-admin-topbar-actions > a.nk-admin-mobile-website-button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .nk-admin-global-search {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .nk-admin-mobile-account-button {
+    grid-column: 5;
+    grid-row: 1;
+  }
+
+  .nk-admin-mobile-help-button svg,
+  .nk-admin-mobile-website-button svg,
+  .nk-admin-global-search svg {
+    width: 20px;
+    height: 20px;
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-help-button::after,
+  .nk-admin-mobile-website-button::after,
+  .nk-admin-global-search::after,
+  .nk-admin-mobile-account-button::after {
+    color: #b9cec4;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .nk-admin-mobile-help-button::after {
+    content: 'Help';
+  }
+
+  .nk-admin-mobile-website-button::after {
+    content: 'Website';
+  }
+
+  .nk-admin-global-search::after {
+    content: 'Search';
+  }
+
+  .nk-admin-global-search span,
+  .nk-admin-global-search kbd {
+    display: none !important;
+  }
+
+  .nk-admin-mobile-account-button::before {
+    content: none;
+  }
+
+  .nk-admin-mobile-account-initials {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(168, 229, 189, .34);
+    border-radius: 50%;
+    color: #fff8ee;
+    font-size: 11px;
+    font-weight: 850;
+  }
+
+  .nk-admin-mobile-account-button::after {
+    content: 'Account';
+  }
+
+  .nk-admin-mobile-home-logo,
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-home-logo {
+    position: absolute;
+    z-index: 2;
+    top: calc(env(safe-area-inset-top) + 3px);
+    left: 50%;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #ffc39a;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #ffad73, #ff8138);
+    box-shadow: 0 9px 24px rgba(255, 121, 47, .3);
+    overflow: visible;
+    transform: translateX(-50%);
+  }
+
+  .nk-admin-mobile-home-logo img,
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-home-logo img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #001f18;
+  }
+
+  .nk-admin-mobile-home-logo::after,
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-home-logo::after {
+    content: 'Home';
+    position: absolute;
+    top: 49px;
+    left: 50%;
+    width: 60px;
+    color: #fff8ee;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-global-search {
+    display: none !important;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    min-height: 54px;
+    padding: 5px 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #b9cec4;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--help {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--upload {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--filters {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action span {
+    display: block;
+    color: #b9cec4;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action svg {
+    color: #a8e5bd;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--upload svg {
+    color: #ff9a59;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--filters b {
+    top: 2px;
+    right: calc(50% - 18px);
+    border-color: #00271e;
   }
 }
