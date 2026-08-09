@@ -94,6 +94,7 @@ export type MediaAsset = {
   updatedAt: string;
   createdAt: string;
   url: string;
+  origin?: 'managed' | 'website';
 };
 
 export type NavigationMenu = 'primary' | 'services' | 'shop' | 'footer-services' | 'footer-shop' | 'footer-company';

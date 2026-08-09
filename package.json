@@ -14,11 +14,15 @@
     "admin:create-owner": "node server/create-owner.mjs",
     "products:localize-images": "node scripts/localize-product-images.mjs",
     "products:verify-images": "node scripts/verify-product-images.mjs",
+    "media:index": "node scripts/build-website-media-index.mjs",
+    "prebuild": "npm run media:index",
+    "prebuild:pages": "npm run media:index",
     "build": "tsc -b && vite build",
     "build:pages": "tsc -b && vite build --mode github-pages",
     "check:admin": "npm run test:admin-api && npm run build",
     "preview": "vite preview --host 127.0.0.1 --port 5191 --strictPort",
     "test": "npm run test:admin-api",
+    "pretest:admin-api": "npm run media:index",
     "test:admin-api": "node --test server/tests/*.test.mjs"
   },
   "dependencies": {
