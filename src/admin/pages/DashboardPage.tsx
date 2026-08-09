@@ -467,14 +467,8 @@ export function DashboardPage() {
         <>
           <section
             className={`nk-admin-mobile-home${mobileAdvanced ? " is-advanced" : ""}`}
-            aria-labelledby="mobile-home-title"
+            aria-label="Website content areas"
           >
-            <header>
-              <span>WEBSITE ADMIN</span>
-              <h1 id="mobile-home-title">Choose what you want to manage</h1>
-              <p>Each button opens one content area. Pages, products, services, projects, catalogues and files never mix.</p>
-            </header>
-
             <div className="nk-admin-mobile-home__actions" aria-label="Website content areas">
               {canReadKind(user!.role, 'page') && <Link to="/admin/pages"><FileText/><span><b>Pages</b><small>Website pages and their text</small></span><ChevronRight/><strong>{data.content.page || 0}</strong></Link>}
               {canReadKind(user!.role, 'product') && <Link to="/admin/products"><ShoppingBag/><span><b>Products</b><small>Items shown in the shop</small></span><ChevronRight/><strong>{data.content.product || 0}</strong></Link>}

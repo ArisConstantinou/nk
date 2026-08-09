@@ -28,6 +28,13 @@ test('dashboard loading is bounded and failed requests offer a retry', async () 
   assert.match(source, /onClick=\{\(\) => void load\(\)\}/);
 });
 
+test('mobile dashboard opens directly on the content cards', async () => {
+  const source = await read('src/admin/pages/DashboardPage.tsx');
+  assert.doesNotMatch(source, /Choose what you want to manage/);
+  assert.doesNotMatch(source, /Each button opens one content area/);
+  assert.match(source, /className="nk-admin-mobile-home__actions"/);
+});
+
 test('each everyday action has one owner and content types stay separate', async () => {
   const source = await read('src/admin/layout/AdminLayout.tsx');
   assert.doesNotMatch(source, /to="\/admin\/media\?upload=1"/, 'Create must not duplicate the Gallery uploader');
