@@ -1307,6 +1307,149 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
   }
 }
 
+/* Gallery top navigation mirrors the persistent bottom dock. */
+@media (max-width: 840px) {
+  .nk-admin-workspace:has(.nk-admin-media-page) > .nk-admin-topbar {
+    height: calc(70px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 8px 0;
+    gap: 4px;
+    background:
+      radial-gradient(circle at 50% 100%, rgba(83, 194, 151, .12), transparent 45%),
+      linear-gradient(180deg, rgba(0, 47, 36, .98), rgba(0, 27, 21, .99));
+    border-bottom: 2px solid rgba(255, 138, 67, .82);
+    box-shadow: 0 12px 34px rgba(0, 20, 15, .3), 0 2px 16px rgba(255, 138, 67, .08);
+    backdrop-filter: blur(18px);
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-topbar-actions {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action,
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-account-button {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    min-height: 54px;
+    padding: 5px 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #b9cec4;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--help {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--upload {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--filters {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-account-button {
+    grid-column: 5;
+    grid-row: 1;
+    font-size: 0 !important;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action span {
+    display: block;
+    color: #b9cec4;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action svg {
+    width: 20px;
+    height: 20px;
+    color: #a8e5bd;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--upload svg {
+    color: #ff9a59;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-account-button::before {
+    content: 'M';
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(168, 229, 189, .34);
+    border-radius: 50%;
+    color: #fff8ee;
+    font-size: 11px;
+    font-weight: 850;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-account-button::after {
+    content: 'Account';
+    color: #b9cec4;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-home-logo {
+    top: calc(env(safe-area-inset-top) + 3px);
+    width: 46px;
+    height: 46px;
+    border-color: #ffc39a;
+    background: linear-gradient(145deg, #ffad73, #ff8138);
+    box-shadow: 0 9px 24px rgba(255, 121, 47, .3);
+    overflow: visible;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-home-logo img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #001f18;
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-mobile-home-logo::after {
+    content: 'Home';
+    position: absolute;
+    top: 49px;
+    left: 50%;
+    width: 60px;
+    color: #fff8ee;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  .nk-admin-workspace:has(.nk-admin-media-page) .nk-admin-gallery-top-action--filters b {
+    top: 2px;
+    right: calc(50% - 18px);
+    border-color: #00271e;
+  }
+}
+
 /* Task-first admin: everyday content is prominent; advanced tools stay available. */
 .nk-admin-task-banner{
   display:flex;align-items:center;justify-content:space-between;gap:18px;
