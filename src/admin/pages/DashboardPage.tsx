@@ -479,8 +479,6 @@ export function DashboardPage() {
               {canReadKind(user!.role, 'company') && <Link to="/admin/company"><Building2/><span><b>Company</b><small>Company story and partnerships</small></span><ChevronRight/></Link>}
             </div>
 
-            <div className="nk-admin-mobile-home__promise"><CheckCircle2/><span><b>Your live website stays safe</b><small>Nothing changes for visitors until you tap Publish.</small></span></div>
-
             {(data.statuses.draft > 0 || data.summary.warnings > 0 || (data.submissions.new || 0) > 0) && (
               <section className="nk-admin-mobile-home__attention" aria-labelledby="mobile-attention-title">
                 <div><BellRing /><span><b id="mobile-attention-title">Needs your attention</b><small>Only items that may need an action</small></span></div>

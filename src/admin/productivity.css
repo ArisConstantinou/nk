@@ -2096,3 +2096,173 @@
     animation: none;
   }
 }
+
+/* Category Rail Hybrid: desktop navigation hierarchy translated into a
+   compact mobile sub-navigation. Search replaces this rail in normal flow;
+   it never creates a page-covering backdrop. */
+.nk-admin-mobile-subnav-slot {
+  display: none;
+}
+
+@media (max-width: 840px) {
+  .nk-admin-mobile-subnav-slot {
+    position: relative;
+    z-index: 32;
+    display: block;
+    flex: 0 0 auto;
+    background: rgba(0, 35, 27, .98);
+    border-bottom: 1px solid rgba(170, 222, 198, .24);
+  }
+
+  .nk-admin-mobile-subnav {
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .nk-admin-mobile-subnav > a,
+  .nk-admin-mobile-subnav > span {
+    position: relative;
+    min-width: 0;
+    min-height: 58px;
+  }
+
+  .nk-admin-mobile-subnav > a {
+    padding: 7px 3px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #b9cec4;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .nk-admin-mobile-subnav > a svg {
+    width: 19px;
+    height: 19px;
+    color: #a8e5bd;
+  }
+
+  .nk-admin-mobile-subnav > a.active {
+    color: #ff9a59;
+  }
+
+  .nk-admin-mobile-subnav > a.active svg {
+    color: #ff8a43;
+  }
+
+  .nk-admin-mobile-subnav > a.active::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    bottom: 0;
+    left: 12px;
+    height: 3px;
+    border-radius: 999px 999px 0 0;
+    background: #ff8a43;
+    box-shadow: 0 0 10px rgba(255, 138, 67, .38);
+  }
+
+  .nk-admin-global-search.active,
+  .nk-admin-mobile-nav > button[aria-expanded="true"] {
+    color: #fff8ee;
+    background: rgba(255, 255, 255, .09);
+  }
+
+  .nk-admin-global-search.active svg,
+  .nk-admin-mobile-nav > button[aria-expanded="true"] svg {
+    color: #ff9a59;
+  }
+
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked {
+    position: relative;
+    z-index: auto;
+    inset: auto;
+    width: 100%;
+    padding: 0;
+    display: block;
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: auto;
+  }
+
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked .nk-admin-command.nk-admin-command--global {
+    position: relative;
+    width: 100%;
+    height: auto;
+    max-height: min(58dvh, 560px);
+    border: 0;
+    border-radius: 0;
+    background:
+      radial-gradient(circle at 84% 0%, rgba(83, 198, 152, .15), transparent 35%),
+      linear-gradient(155deg, #06382b 0%, #00251c 82%);
+    box-shadow: 0 18px 34px rgba(0, 15, 11, .24);
+    animation: nk-admin-subnav-search-open .18s ease-out;
+    transform-origin: top center;
+  }
+
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked .nk-admin-command::after {
+    content: none;
+  }
+
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked .nk-admin-command > .nk-admin-command-searchbar {
+    min-height: 76px;
+    padding: 9px 10px;
+  }
+
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked .nk-admin-command > .nk-admin-command-body {
+    min-height: 0;
+    max-height: min(39dvh, 365px);
+  }
+
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked .nk-admin-command-body > #admin-command-results {
+    max-height: min(39dvh, 365px);
+  }
+
+  .nk-admin-mobile-subnav-slot.is-search-open {
+    border-bottom-color: rgba(255, 138, 67, .7);
+  }
+
+  /* Concept 5 keeps the mobile shell dark but borrows the desktop/tablet
+     dashboard's quiet white cards and stronger information contrast. */
+  .nk-admin-mobile-home__actions > a {
+    border: 1px solid rgba(205, 220, 213, .92);
+    background: linear-gradient(150deg, #fff 0%, #f3f7f4 100%);
+    color: #102019;
+    box-shadow: 0 12px 28px rgba(0, 13, 9, .22);
+  }
+
+  .nk-admin-mobile-home__actions > a > svg:first-child {
+    border-color: #cfe6db;
+    background: #e5f3ec;
+    color: #0d7052;
+  }
+
+  .nk-admin-mobile-home__actions b {
+    color: #102019;
+  }
+
+  .nk-admin-mobile-home__actions small {
+    color: #53665d;
+  }
+
+  .nk-admin-mobile-home__actions > a > svg:last-child {
+    color: #ff7f38;
+  }
+
+  @keyframes nk-admin-subnav-search-open {
+    from { opacity: 0; transform: translateY(-7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-admin-mobile-subnav-slot > .nk-admin-command-backdrop--docked .nk-admin-command.nk-admin-command--global {
+    animation: none;
+  }
+}

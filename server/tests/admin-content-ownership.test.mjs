@@ -35,6 +35,22 @@ test('mobile dashboard opens directly on the content cards', async () => {
   assert.match(source, /className="nk-admin-mobile-home__actions"/);
 });
 
+test('mobile search replaces the category rail without a page overlay', async () => {
+  const [layout, dashboard, styles] = await Promise.all([
+    read('src/admin/layout/AdminLayout.tsx'),
+    read('src/admin/pages/DashboardPage.tsx'),
+    read('src/admin/productivity.css'),
+  ]);
+  for (const label of ['Content', 'Customers', 'Tools', 'Activity']) {
+    assert.match(layout, new RegExp(`<span>${label}</span>`));
+  }
+  assert.match(layout, /nk-admin-mobile-subnav-slot[^\n]*is-search-open/);
+  assert.match(layout, /commandOpen && commandDocked \? <CommandPalette open/);
+  assert.match(layout, /<CommandPalette open=\{commandOpen && !commandDocked\}/);
+  assert.match(styles, /\.nk-admin-mobile-subnav-slot > \.nk-admin-command-backdrop--docked\s*\{[\s\S]{0,240}position:\s*relative;[\s\S]{0,240}background:\s*transparent;/);
+  assert.doesNotMatch(dashboard, /Your live website stays safe/);
+});
+
 test('each everyday action has one owner and content types stay separate', async () => {
   const source = await read('src/admin/layout/AdminLayout.tsx');
   assert.doesNotMatch(source, /to="\/admin\/media\?upload=1"/, 'Create must not duplicate the Gallery uploader');
