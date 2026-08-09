@@ -19,6 +19,11 @@ test('mobile admin keeps both navigation bars pinned to the viewport', async () 
   assert.match(styles, /\.nk-admin-workspace\s*\{\s*padding-top:\s*calc\(70px \+ env\(safe-area-inset-top\)\);/);
 });
 
+test('mobile admin search does not inherit the desktop white hover state', async () => {
+  const styles = await read('src/admin/admin.css');
+  assert.match(styles, /\.nk-admin-global-search:hover\s*\{\s*border-color:\s*transparent;\s*background:\s*transparent;/);
+});
+
 test('dashboard loading is bounded and failed requests offer a retry', async () => {
   const source = await read('src/admin/pages/DashboardPage.tsx');
   assert.match(source, /const DASHBOARD_LOAD_TIMEOUT_MS = 8_000;/);

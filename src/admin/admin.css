@@ -3298,6 +3298,11 @@ body:has(.nk-admin-state)::-webkit-scrollbar,
     grid-row: 1;
   }
 
+  .nk-admin-global-search:hover {
+    border-color: transparent;
+    background: transparent;
+  }
+
   .nk-admin-mobile-account-button {
     grid-column: 5;
     grid-row: 1;
