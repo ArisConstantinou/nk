@@ -19,8 +19,8 @@ test('mobile admin keeps all three navigation bars pinned to the viewport', asyn
   ]);
   assert.match(styles, /\.nk-admin-workspace\s*>\s*\.nk-admin-topbar\s*\{[\s\S]{0,180}position:\s*fixed;[\s\S]{0,180}top:\s*0;/);
   assert.match(styles, /\.nk-admin-mobile-nav\s*\{[\s\S]{0,180}position:\s*fixed;[\s\S]{0,180}bottom:\s*0;/);
-  assert.match(styles, /\.nk-admin-workspace\s*\{\s*padding-top:\s*calc\(70px \+ env\(safe-area-inset-top\)\);/);
-  assert.match(productivity, /\.nk-admin-mobile-subnav-slot\s*\{[\s\S]{0,180}position:\s*sticky;[\s\S]{0,180}top:\s*calc\(70px \+ env\(safe-area-inset-top\)\);/);
+  assert.match(styles, /\.nk-admin-workspace\s*\{\s*padding-top:\s*calc\(129px \+ env\(safe-area-inset-top\)\);/);
+  assert.match(productivity, /\.nk-admin-mobile-subnav-slot\s*\{[\s\S]{0,240}position:\s*fixed;[\s\S]{0,240}top:\s*calc\(70px \+ env\(safe-area-inset-top\)\);[\s\S]{0,240}right:\s*0;[\s\S]{0,240}left:\s*0;/);
 });
 
 test('mobile admin search does not inherit the desktop white hover state', async () => {
