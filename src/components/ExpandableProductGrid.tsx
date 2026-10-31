@@ -255,14 +255,37 @@ export function ExpandableProductGrid({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProduct = products.find(product => product.id === selectedId)
     || allProducts.find(product => product.id === selectedId);
+  const alignmentFrame = useRef(0);
 
   const alignDetails = useCallback(() => {
     const details = gridRef.current?.querySelector('.product-browser-details');
     if (!details) return;
-    window.scrollTo({
-      top: details.getBoundingClientRect().top + scrollY - productViewportTop() - 16,
-      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-    });
+    cancelAnimationFrame(alignmentFrame.current);
+    const initialY = scrollY;
+    const start = performance.now();
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let settledFrames = 0;
+    const align = (now: number) => {
+      if (!details.isConnected) return;
+      // Offscreen cards reveal their actual heights while a distant row comes into view.
+      const destination = details.getBoundingClientRect().top + scrollY - productViewportTop() - 16;
+      const progress = reduced ? 1 : Math.min(1, (now - start) / 480);
+      const eased = progress < .5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
+      window.scrollTo({top:initialY + (destination - initialY) * eased, behavior:'instant'});
+      if (progress === 1) settledFrames += 1;
+      if (settledFrames < 4) alignmentFrame.current = requestAnimationFrame(align);
+      else alignmentFrame.current = 0;
+    };
+    alignmentFrame.current = requestAnimationFrame(align);
+  }, []);
+  useEffect(() => {
+    const cancel = () => cancelAnimationFrame(alignmentFrame.current);
+    const events = ['wheel', 'pointerdown', 'touchstart', 'keydown', 'resize'] as const;
+    for (const event of events) window.addEventListener(event, cancel, {passive:true});
+    return () => {
+      cancel();
+      for (const event of events) window.removeEventListener(event, cancel);
+    };
   }, []);
   useLayoutEffect(() => {
     if (!anchorId) return;

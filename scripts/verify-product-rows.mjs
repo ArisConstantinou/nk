@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {mkdir, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const require = createRequire(import.meta.url);
@@ -87,6 +87,25 @@ try {
     assert.equal(await page.locator('[data-product-expand]').nth(5).evaluate(e => e === document.activeElement), true);
     report.checks.push(`${width}: open first/middle/end-of-row, full width, header clearance, next/previous/similar, Escape/focus`);
   }
+
+  await page.setViewportSize({width:1280,height:720});
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto(`${base}/shop?view=all`,{waitUntil:'domcontentloaded'});
+  await page.locator('[data-product-expand]').first().waitFor();
+  await page.evaluate(()=>document.fonts.ready);
+  const catalogue = JSON.parse(await readFile(new URL('../src/data/legacy-products.json', import.meta.url), 'utf8'));
+  const longest = catalogue.sort((a,b)=>b.name.length-a.name.length).slice(0,8);
+  for (const product of longest) {
+    await page.locator(`[data-product-expand="${product.id}"]`).click();
+    await page.waitForTimeout(800);
+    const result = await geometry();
+    assert.ok(Math.abs(result.panel.top-result.header-16)<3 && result.panel.bottom<=720-13,
+      `A distant catalogue product must remain fully visible: ${JSON.stringify(result)}`);
+    assert.deepEqual(result.clippedRegions,[]);
+    assert.ok((await page.getByRole('link',{name:/Product page/}).getAttribute('href')).endsWith(`/shop/product/${product.id}`));
+  }
+  report.checks.push('Full catalogue: eight longest titles in distant rows fit completely at 1280×720');
+  await page.emulateMedia({reducedMotion:'no-preference'});
 
   await page.setViewportSize({width: 2048, height: 1018});
   await page.goto(`${base}/shop`, {waitUntil: 'domcontentloaded'});
