@@ -92,6 +92,15 @@ try {
   if (await page.getByRole('button', {name: 'Show highlights', exact: true}).count()) await page.getByRole('button', {name: 'Show highlights', exact: true}).click();
   await page.locator('[data-product-expand]').nth(1).click();
   await wait();
+  for (const name of ['Hide highlights', 'Show highlights']) {
+    await page.getByRole('button', {name, exact:true}).click();
+    await wait();
+    const result = await geometry();
+    assert.ok(Math.abs(result.panel.top - result.header - 16) < 3 && result.panel.bottom <= 1018 - 13,
+      'An open panel must remain fully visible when Highlights is toggled');
+    assert.deepEqual(result.clippedRegions, []);
+  }
+  report.checks.push('Highlights on/off: open desktop details remain aligned and entirely visible');
   await page.screenshot({path: join(output, 'desktop-after.png'), scale: 'css'});
   await page.mouse.move(700,650);
   const start = await page.evaluate(() => scrollY);

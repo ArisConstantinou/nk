@@ -272,6 +272,26 @@ export function ExpandableProductGrid({
   }, [anchorId, selectedId, columns, alignDetails]);
 
   useEffect(() => {
+    if (!anchorId) return;
+    let previousTop = productViewportTop();
+    let timer = 0;
+    let keepAligned = false;
+    const observer = new ResizeObserver(() => {
+      const top = productViewportTop();
+      const details = gridRef.current?.querySelector('.product-browser-details');
+      if (!details || Math.abs(top - previousTop) < 1) return;
+      const panelTop = details.getBoundingClientRect().top;
+      keepAligned ||= Math.abs(panelTop - previousTop - 16) < 32;
+      previousTop = top;
+      if (!keepAligned) return;
+      clearTimeout(timer);
+      timer = window.setTimeout(() => { alignDetails(); keepAligned = false; }, 120);
+    });
+    for (const element of document.querySelectorAll('.ia-header, .ia-header-bar')) observer.observe(element);
+    return () => { observer.disconnect(); clearTimeout(timer); };
+  }, [anchorId, alignDetails]);
+
+  useEffect(() => {
     if (anchorId && !products.some(product => product.id === anchorId)) {
       setAnchorId(null);
       setSelectedId(null);
