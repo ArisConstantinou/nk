@@ -33,7 +33,13 @@ const geometry = () => page.evaluate(() => {
   const details = rect('.product-browser-details');
   const grid = document.querySelector('.product-browser-grid');
   const style = getComputedStyle(grid);
+  const clippedRegions = [...document.querySelectorAll('.product-expanded-module__content, .product-expanded-module__content header, .product-expanded-module__content>p, .product-expanded-module dl, .product-expanded-module__actions, .product-expanded-module__similar')]
+    .filter(element => {
+      const box = element.getBoundingClientRect();
+      return box.top < panel.top || box.bottom > panel.bottom + 1 || element.scrollHeight > element.clientHeight + 2;
+    }).map(element => element.className || element.tagName);
   return {viewport: [innerWidth, innerHeight], header, panel, details,
+    clippedRegions,
     availableWidth: grid.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
     overflow: document.documentElement.scrollWidth > innerWidth,
     count: document.querySelectorAll('[data-product-expand]').length};
@@ -57,6 +63,10 @@ try {
       assert.ok(Math.abs(result.panel.width - result.availableWidth) < 2, 'Details must fill the row');
       assert.ok(result.panel.top >= result.header + 13 && result.panel.top <= result.header + 20,
         `Panel is not aligned below header: ${JSON.stringify(result)}`);
+      if (width >= 981) {
+        assert.ok(result.panel.bottom <= height - 13, 'Desktop details must fit within the available viewport');
+        assert.deepEqual(result.clippedRegions, [], 'Every detail must remain visible inside the desktop panel');
+      }
       assert.equal(await page.locator('[data-product-expand][aria-expanded="true"]').count(), 1);
       if (index === 5) report.viewports.push(result);
     }
@@ -101,20 +111,20 @@ try {
   });
   report.checks.push('Wheel down/up: intermediate animation frames and exact return to previous row');
 
-  // A tall panel needs a reading stop before advancing beyond its remaining content.
+  // Desktop details must fit together; the next gesture advances to the next row.
   await page.setViewportSize({width:1366,height:768});
   await page.locator('[data-product-expand]').nth(2).click();
   await wait();
   const tallStart = await page.evaluate(() => scrollY);
   const tallBefore = await geometry();
+  assert.ok(tallBefore.panel.bottom <= 768 - 13, 'Image and every detail must fit below Highlights');
   await page.mouse.move(650,600);
   await page.mouse.wheel(0,100);
   await wait();
   const tallEnd = await page.evaluate(() => scrollY);
   report.tallPanel = {before:tallBefore, after:await geometry(), scrollBefore:tallStart, scrollAfter:tallEnd};
-  assert.ok(tallEnd > tallStart && tallEnd - tallStart < 200, 'Tall details must reveal the remaining content before leaving the panel');
-  assert.ok((await geometry()).panel.bottom <= 768 - 10);
-  report.checks.push('Short desktop viewport: bottom of tall details remains reachable');
+  assert.ok(tallEnd - tallStart > tallBefore.panel.height, 'One gesture must advance past the complete panel to the next row');
+  report.checks.push('Short desktop viewport: complete details fit, next gesture advances to the next row');
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.mouse.wheel(0,100);
   await page.waitForTimeout(80);
