@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
+import {productViewportTop} from '../utils/productViewport';
 import {ArrowRight, ChevronDown, ChevronRight, CircuitBoard, FileText, House, Mail, MapPin, Menu, Monitor, Moon, Phone, Search, Sparkles, Sun, Zap} from 'lucide-react';
 import {Link, NavLink, useLocation} from 'react-router-dom';
 import {useContent, type PublicNavigationItem, type SiteSocialLink} from '../context/ContentContext';
@@ -254,6 +255,22 @@ export function ElectricalLayout({children}: {children: ReactNode}) {
   const [menuAnchor, setMenuAnchor] = useState({left: 0, width: 0});
   const [mobileSection, setMobileSection] = useState<MegaSection>('services');
   const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const measure = () => document.documentElement.style.setProperty('--site-header-height', `${productViewportTop()}px`);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    const bar = header.querySelector('.ia-header-bar');
+    if (bar) observer.observe(bar);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+      document.documentElement.style.removeProperty('--site-header-height');
+    };
+  }, []);
   const mobileNavRef = useRef<HTMLElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);

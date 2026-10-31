@@ -1,10 +1,12 @@
-import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, ArrowUpRight, ExternalLink, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Product} from '../types';
 import {isProductCutoutAsset} from '../utils/assets';
 import {ProductShareActions} from './ProductShareActions';
 import {ResponsiveImage} from './ResponsiveImage';
+import {useProductRowScroll} from './useProductRowScroll';
+import {productViewportTop} from '../utils/productViewport';
 
 type ProductGridVariant = 'standard' | 'catalogue';
 
@@ -70,10 +72,6 @@ export function ExpandedProductModule({
   useEffect(() => {
     if (!onClose) return;
     const focusFrame = window.requestAnimationFrame(() => {
-      visualRef.current?.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'start',
-      });
       closeRef.current?.focus({preventScroll: true});
     });
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -157,6 +155,7 @@ type ProductBrowserCardProps = {
   variant: ProductGridVariant;
   eager: boolean;
   onOpen: (product: Product) => void;
+  expanded: boolean;
 };
 
 const ProductBrowserCard = memo(function ProductBrowserCard({
@@ -164,6 +163,7 @@ const ProductBrowserCard = memo(function ProductBrowserCard({
   variant,
   eager,
   onOpen,
+  expanded,
 }: ProductBrowserCardProps) {
   if (variant === 'catalogue') return <article className="catalogue-product-card-shell product-browser-card-shell">
     <div className="catalogue-product-card">
@@ -171,7 +171,7 @@ const ProductBrowserCard = memo(function ProductBrowserCard({
         className={`catalogue-product-card__image product-expand-trigger${isProductCutoutAsset(product.image) ? ' catalogue-product-card__image--cutout' : ' catalogue-product-card__image--photo'}`}
         type="button"
         data-product-expand={product.id}
-        aria-expanded="false"
+        aria-expanded={expanded}
         aria-label={`Expand ${product.name}`}
         onClick={() => onOpen(product)}
       >
@@ -204,7 +204,7 @@ const ProductBrowserCard = memo(function ProductBrowserCard({
         className={`product-image product-expand-trigger${isProductCutoutAsset(product.image) ? ' product-image--cutout' : ' product-image--photo'}`}
         type="button"
         data-product-expand={product.id}
-        aria-expanded="false"
+        aria-expanded={expanded}
         aria-label={`Expand ${product.name}`}
         onClick={() => onOpen(product)}
       >
@@ -239,10 +239,37 @@ export function ExpandableProductGrid({
   variant = 'standard',
   eagerCount = 0,
 }: ExpandableProductGridProps) {
+  const gridRef = useRef<HTMLElement>(null);
+  const [columns, setColumns] = useState(1);
+  useProductRowScroll(gridRef);
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const measure = () => setColumns(getComputedStyle(grid).gridTemplateColumns.split(' ').length);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, []);
   const [anchorId, setAnchorId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProduct = products.find(product => product.id === selectedId)
     || allProducts.find(product => product.id === selectedId);
+
+  const alignDetails = useCallback(() => {
+    const details = gridRef.current?.querySelector('.product-browser-details');
+    if (!details) return;
+    window.scrollTo({
+      top: details.getBoundingClientRect().top + scrollY - productViewportTop() - 16,
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+    });
+  }, []);
+  useLayoutEffect(() => {
+    if (!anchorId) return;
+    // Column measurement and browser scroll anchoring must settle before alignment.
+    let frame = requestAnimationFrame(() => { frame = requestAnimationFrame(alignDetails); });
+    return () => cancelAnimationFrame(frame);
+  }, [anchorId, selectedId, columns, alignDetails]);
 
   useEffect(() => {
     if (anchorId && !products.some(product => product.id === anchorId)) {
@@ -254,23 +281,34 @@ export function ExpandableProductGrid({
   const openProduct = useCallback((product: Product) => {
     setAnchorId(product.id);
     setSelectedId(product.id);
-  }, []);
+    // Also bring an already-open product back into view when its card is clicked again.
+    requestAnimationFrame(() => requestAnimationFrame(alignDetails));
+  }, [alignDetails]);
 
-  const closeProduct = () => {
+  const closeProduct = useCallback(() => {
     const focusId = anchorId;
     setAnchorId(null);
     setSelectedId(null);
     window.requestAnimationFrame(() => {
       document.querySelector<HTMLButtonElement>(`[data-product-expand="${CSS.escape(focusId || '')}"]`)?.focus({preventScroll: true});
     });
-  };
+  }, [anchorId]);
 
   const gridClass = variant === 'catalogue' ? 'catalogue-product-grid' : 'product-grid';
 
-  return <section className={`${gridClass} product-browser-grid section`} aria-live="polite">
+  const anchorIndex = products.findIndex(product => product.id === anchorId);
+  const expandedRowEnd = Math.min(products.length - 1, Math.floor(anchorIndex / columns) * columns + columns - 1);
+
+  return <section ref={gridRef} className={`${gridClass} product-browser-grid section`} aria-live="polite">
     {products.map((product, index) => {
-      const expanded = anchorId === product.id && selectedProduct;
-      if (expanded) return <div className="product-browser-card-shell is-expanded" key={product.id}>
+      return <Fragment key={product.id}><ProductBrowserCard
+        product={product}
+        variant={variant}
+        eager={index < eagerCount}
+        onOpen={openProduct}
+        expanded={anchorId === product.id}
+      />
+      {anchorId && selectedProduct && index === expandedRowEnd && <div className="product-browser-details is-expanded">
         <ExpandedProductModule
           product={selectedProduct}
           collection={navigationProducts}
@@ -278,15 +316,7 @@ export function ExpandableProductGrid({
           onSelect={item => setSelectedId(item.id)}
           onClose={closeProduct}
         />
-      </div>;
-
-      return <ProductBrowserCard
-        product={product}
-        variant={variant}
-        eager={index < eagerCount}
-        onOpen={openProduct}
-        key={product.id}
-      />;
+      </div>}</Fragment>;
     })}
   </section>;
 }
