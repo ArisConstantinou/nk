@@ -82,6 +82,8 @@ try {
     assert.notEqual(await page.getByRole('link', {name: /Product page/}).getAttribute('href'), currentProduct);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.product-browser-details').count(), 0);
+    await page.waitForFunction(id => document.activeElement?.getAttribute('data-product-expand') === id,
+      await page.locator('[data-product-expand]').nth(5).getAttribute('data-product-expand'));
     assert.equal(await page.locator('[data-product-expand]').nth(5).evaluate(e => e === document.activeElement), true);
     report.checks.push(`${width}: open first/middle/end-of-row, full width, header clearance, next/previous/similar, Escape/focus`);
   }
@@ -95,6 +97,11 @@ try {
   for (const name of ['Hide highlights', 'Show highlights']) {
     await page.getByRole('button', {name, exact:true}).click();
     await wait();
+    await page.waitForFunction(() => {
+      const panel = document.querySelector('.product-expanded-module')?.getBoundingClientRect();
+      const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-height'));
+      return panel && Math.abs(panel.top - header - 16) < 3 && panel.bottom <= innerHeight - 13;
+    }, undefined, {timeout:5000});
     const result = await geometry();
     assert.ok(Math.abs(result.panel.top - result.header - 16) < 3 && result.panel.bottom <= 1018 - 13,
       'An open panel must remain fully visible when Highlights is toggled');
