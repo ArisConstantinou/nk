@@ -1,4 +1,5 @@
-import {Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 import {ArrowLeft, ArrowRight, ArrowUpRight, ExternalLink, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Product} from '../types';
@@ -6,7 +7,6 @@ import {isProductCutoutAsset} from '../utils/assets';
 import {ProductShareActions} from './ProductShareActions';
 import {ResponsiveImage} from './ResponsiveImage';
 import {useProductRowScroll} from './useProductRowScroll';
-import {productViewportTop} from '../utils/productViewport';
 
 type ProductGridVariant = 'standard' | 'catalogue';
 
@@ -240,79 +240,12 @@ export function ExpandableProductGrid({
   eagerCount = 0,
 }: ExpandableProductGridProps) {
   const gridRef = useRef<HTMLElement>(null);
-  const [columns, setColumns] = useState(1);
+  const panelRef = useRef<HTMLDivElement>(null);
   useProductRowScroll(gridRef);
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const measure = () => setColumns(getComputedStyle(grid).gridTemplateColumns.split(' ').length);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(grid);
-    return () => observer.disconnect();
-  }, []);
   const [anchorId, setAnchorId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProduct = products.find(product => product.id === selectedId)
     || allProducts.find(product => product.id === selectedId);
-  const alignmentFrame = useRef(0);
-
-  const alignDetails = useCallback(() => {
-    const details = gridRef.current?.querySelector('.product-browser-details');
-    if (!details) return;
-    cancelAnimationFrame(alignmentFrame.current);
-    const initialY = scrollY;
-    const start = performance.now();
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let settledFrames = 0;
-    const align = (now: number) => {
-      if (!details.isConnected) return;
-      // Offscreen cards reveal their actual heights while a distant row comes into view.
-      const destination = details.getBoundingClientRect().top + scrollY - productViewportTop() - 16;
-      const progress = reduced ? 1 : Math.min(1, (now - start) / 480);
-      const eased = progress < .5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
-      window.scrollTo({top:initialY + (destination - initialY) * eased, behavior:'instant'});
-      if (progress === 1) settledFrames += 1;
-      if (settledFrames < 4) alignmentFrame.current = requestAnimationFrame(align);
-      else alignmentFrame.current = 0;
-    };
-    alignmentFrame.current = requestAnimationFrame(align);
-  }, []);
-  useEffect(() => {
-    const cancel = () => cancelAnimationFrame(alignmentFrame.current);
-    const events = ['wheel', 'pointerdown', 'touchstart', 'keydown', 'resize'] as const;
-    for (const event of events) window.addEventListener(event, cancel, {passive:true});
-    return () => {
-      cancel();
-      for (const event of events) window.removeEventListener(event, cancel);
-    };
-  }, []);
-  useLayoutEffect(() => {
-    if (!anchorId) return;
-    // Column measurement and browser scroll anchoring must settle before alignment.
-    let frame = requestAnimationFrame(() => { frame = requestAnimationFrame(alignDetails); });
-    return () => cancelAnimationFrame(frame);
-  }, [anchorId, selectedId, columns, alignDetails]);
-
-  useEffect(() => {
-    if (!anchorId) return;
-    let previousTop = productViewportTop();
-    let timer = 0;
-    let keepAligned = false;
-    const observer = new ResizeObserver(() => {
-      const top = productViewportTop();
-      const details = gridRef.current?.querySelector('.product-browser-details');
-      if (!details || Math.abs(top - previousTop) < 1) return;
-      const panelTop = details.getBoundingClientRect().top;
-      keepAligned ||= Math.abs(panelTop - previousTop - 16) < 32;
-      previousTop = top;
-      if (!keepAligned) return;
-      clearTimeout(timer);
-      timer = window.setTimeout(() => { alignDetails(); keepAligned = false; }, 120);
-    });
-    for (const element of document.querySelectorAll('.ia-header, .ia-header-bar')) observer.observe(element);
-    return () => { observer.disconnect(); clearTimeout(timer); };
-  }, [anchorId, alignDetails]);
 
   useEffect(() => {
     if (anchorId && !products.some(product => product.id === anchorId)) {
@@ -324,9 +257,7 @@ export function ExpandableProductGrid({
   const openProduct = useCallback((product: Product) => {
     setAnchorId(product.id);
     setSelectedId(product.id);
-    // Also bring an already-open product back into view when its card is clicked again.
-    requestAnimationFrame(() => requestAnimationFrame(alignDetails));
-  }, [alignDetails]);
+  }, []);
 
   const closeProduct = useCallback(() => {
     const focusId = anchorId;
@@ -337,21 +268,29 @@ export function ExpandableProductGrid({
     });
   }, [anchorId]);
 
+  useEffect(() => {
+    if (!anchorId) return;
+    const closeOutside = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!panelRef.current?.contains(target) && !gridRef.current?.contains(target)) closeProduct();
+    };
+    document.addEventListener('pointerdown', closeOutside);
+    return () => document.removeEventListener('pointerdown', closeOutside);
+  }, [anchorId, closeProduct]);
+
   const gridClass = variant === 'catalogue' ? 'catalogue-product-grid' : 'product-grid';
 
-  const anchorIndex = products.findIndex(product => product.id === anchorId);
-  const expandedRowEnd = Math.min(products.length - 1, Math.floor(anchorIndex / columns) * columns + columns - 1);
-
-  return <section ref={gridRef} className={`${gridClass} product-browser-grid section`} aria-live="polite">
-    {products.map((product, index) => {
-      return <Fragment key={product.id}><ProductBrowserCard
+  return <><section ref={gridRef} className={`${gridClass} product-browser-grid section`}>
+    {products.map((product, index) => <ProductBrowserCard
+        key={product.id}
         product={product}
         variant={variant}
         eager={index < eagerCount}
         onOpen={openProduct}
         expanded={anchorId === product.id}
-      />
-      {anchorId && selectedProduct && index === expandedRowEnd && <div className="product-browser-details is-expanded">
+      />)}
+  </section>
+    {anchorId && selectedProduct && createPortal(<div ref={panelRef} className="product-browser-details is-expanded" role="dialog" aria-modal="false" aria-label="Product preview">
         <ExpandedProductModule
           product={selectedProduct}
           collection={navigationProducts}
@@ -359,7 +298,6 @@ export function ExpandableProductGrid({
           onSelect={item => setSelectedId(item.id)}
           onClose={closeProduct}
         />
-      </div>}</Fragment>;
-    })}
-  </section>;
+      </div>, document.body)}
+  </>;
 }
