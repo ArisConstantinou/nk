@@ -1,5 +1,4 @@
 import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
 import {ArrowLeft, ArrowRight, ArrowUpRight, ExternalLink, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import type {Product} from '../types';
@@ -240,12 +239,22 @@ export function ExpandableProductGrid({
   eagerCount = 0,
 }: ExpandableProductGridProps) {
   const gridRef = useRef<HTMLElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   useProductRowScroll(gridRef);
+  const [columns, setColumns] = useState(5);
   const [anchorId, setAnchorId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProduct = products.find(product => product.id === selectedId)
     || allProducts.find(product => product.id === selectedId);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const measure = () => setColumns(getComputedStyle(grid).gridTemplateColumns.split(' ').length);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (anchorId && !products.some(product => product.id === anchorId)) {
@@ -268,29 +277,23 @@ export function ExpandableProductGrid({
     });
   }, [anchorId]);
 
-  useEffect(() => {
-    if (!anchorId) return;
-    const closeOutside = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!panelRef.current?.contains(target) && !gridRef.current?.contains(target)) closeProduct();
-    };
-    document.addEventListener('pointerdown', closeOutside);
-    return () => document.removeEventListener('pointerdown', closeOutside);
-  }, [anchorId, closeProduct]);
-
   const gridClass = variant === 'catalogue' ? 'catalogue-product-grid' : 'product-grid';
+  const arrangedProducts = [...products];
+  const anchorIndex = products.findIndex(product => product.id === anchorId);
+  if (anchorIndex >= 0) {
+    // At the right edge, expand left within the clicked row. Moving this one
+    // entry lets the other cards fill the remaining cells in normal grid flow.
+    const rowStart = anchorIndex - anchorIndex % columns;
+    const panelIndex = Math.min(anchorIndex, rowStart + columns - Math.min(3, columns));
+    if (panelIndex < anchorIndex) {
+      arrangedProducts.splice(anchorIndex, 1);
+      arrangedProducts.splice(panelIndex, 0, products[anchorIndex]);
+    }
+  }
 
-  return <><section ref={gridRef} className={`${gridClass} product-browser-grid section`}>
-    {products.map((product, index) => <ProductBrowserCard
-        key={product.id}
-        product={product}
-        variant={variant}
-        eager={index < eagerCount}
-        onOpen={openProduct}
-        expanded={anchorId === product.id}
-      />)}
-  </section>
-    {anchorId && selectedProduct && createPortal(<div ref={panelRef} className="product-browser-details is-expanded" role="dialog" aria-modal="false" aria-label="Product preview">
+  return <section ref={gridRef} className={`${gridClass} product-browser-grid section`}>
+    {arrangedProducts.map((product, index) => anchorId === product.id && selectedProduct
+      ? <div key={product.id} className="product-browser-details is-expanded" role="region" aria-label="Product preview">
         <ExpandedProductModule
           product={selectedProduct}
           collection={navigationProducts}
@@ -298,6 +301,14 @@ export function ExpandableProductGrid({
           onSelect={item => setSelectedId(item.id)}
           onClose={closeProduct}
         />
-      </div>, document.body)}
-  </>;
+      </div>
+      : <ProductBrowserCard
+        key={product.id}
+        product={product}
+        variant={variant}
+        eager={index < eagerCount}
+        onOpen={openProduct}
+        expanded={anchorId === product.id}
+      />)}
+  </section>;
 }

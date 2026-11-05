@@ -1,0 +1,112 @@
+/* Text accents are separate from the brighter colours used for surfaces and artwork. */
+html[data-experience='tech'], .ia-shell[data-page-theme]{
+  --readable-accent:#7d4b27;
+  --readable-pop:#a13f28;
+}
+html[data-theme='dark'][data-experience='tech'],
+html[data-theme='dark'] .ia-shell[data-page-theme]{
+  --readable-accent:#e4b675;
+  --readable-pop:#ff977c;
+}
+.ia-shell .compact-filter-panel>header span{color:var(--system-ink)}
+.ia-shell :is(
+  .product-expanded-module__content>header small,
+  .product-expanded-module__similar>div:first-child small,
+  .catalogue-product-card__copy>small,
+  .project-archive-copy small,
+  .about-story__copy>span,
+  .contact-router>header small
+){color:var(--readable-pop)!important}
+html[data-theme='light'] .ia-shell :is(
+  .power-routing>header>span,
+  .power-section-id>span,
+  .power-project-lead a,
+  .project-archive-copy>div>span,
+  .about-story__index,
+  .contact-open-signal small,
+  .contact-router h2 em
+){color:var(--readable-accent)!important}
+.ia-shell :is(.contact-route-message,.contact-open-signal>small){color:#43575c!important}
+
+/* These controls keep warm surfaces in both themes and need dark text. */
+html[data-experience='tech'] .ia-shell[data-interaction-profile] .ia-main :is(
+  .button.copper,
+  .catalogue-load-more button:not(.secondary),
+  .ia-shop-gateway>a,
+  .ia-boundary>a,
+  .ia-conversion-band>a,
+  .contact-route-actions button,
+  .contact-router-next,.contact-router-submit,.quote-builder-next,.quote-builder-submit,
+  .ia-service-action
+){background:#d8a467!important;color:#11191c!important}
+html[data-experience='tech'] .ia-shell[data-interaction-profile] .ia-main :is(.ia-boundary,.ia-conversion-band,.ia-service-next)>div>small{color:var(--system-ink)!important}
+html[data-experience='tech'] .ia-shell[data-page-theme][data-interaction-profile] .system-page-intro[data-hero-composition] .system-page-index__serial{
+  color:#11191c!important;background:#d8a467!important;font-size:12px!important;
+}
+/* Photo captions have their own backing rather than relying on the photograph. */
+.ia-shell .system-page-art figcaption{
+  background:#17343a;
+  padding:10px 12px;
+}
+.ia-shell .power-service-stage__readout{
+  padding:16px;
+  background:rgba(12,20,22,.94);
+  border-radius:12px;
+}
+.ia-shell .power-service-stage__readout small{color:#e4b675!important}
+.ia-shell .power-service-stage__readout strong{color:#fff!important}
+.ia-shell .power-service-stage__readout span{color:#e6ece9!important}
+.ia-shell .power-service-option.is-active{background:#d8a467;color:#11191c}
+.ia-shell :is(.power-service-option__index,.power-service-option__title small){opacity:1}
+html[data-theme='light'] .ia-shell :is(.rgb-control-kicker,.rgb-brightness-control output){color:#086373!important}
+html[data-theme='light'] .ia-shell .rgb-live-readout small{color:#43575c!important}
+.ia-shell .rgb-remote-scenes button{background:#12262c!important}
+.ia-shell .rgb-remote-scenes button strong{color:#f3f0e8!important}
+.ia-shell .rgb-remote-scenes button small{color:#c3d0cc!important}
+.ia-shell .rgb-remote-scenes button>span{color:#e4b675!important}
+.ia-shell .contact-map-destination{background:#17343a!important;color:#fff!important}
+
+.ia-shell .ia-service-action__copy :is(small,strong){color:#11191c!important}
+html[data-theme='light'] .ia-shell[data-page-theme][data-interaction-profile] :is(
+  .contact-section-heading>div>small,.contact-section-heading h2 em,
+  .contact-direct>header>small,
+  .contact-switchboard-status small,.quote-scope-intro>div>small,
+  .quote-scope-intro h2 em,.quote-builder>header small,
+  .about-story__facts article>span
+){color:var(--readable-pop)!important}
+.ia-shell .quote-stage-copy>span{color:#11191c!important;background:#d8a467!important}
+.ia-shell .quote-builder>header li:not(.active) button span{color:var(--system-ink)!important}
+html[data-experience='tech'] .ia-shell[data-page-theme][data-interaction-profile] .ia-main .quote-builder .quote-choice-grid button>span{color:inherit!important}
+.ia-shell .quote-choice-fieldset legend{color:var(--system-ink)!important}
+.ia-shell .quote-dossier-ticket dt{color:#bacbc8!important}
+.ia-shell .contact-switchboard-status small{color:var(--system-muted)!important}
+.ia-shell .catalogue-hero--appliances .catalogue-hero__word{color:#f5d7a6!important}
+
+html[data-experience='tech'] .ia-shell[data-page-theme][data-interaction-profile] .ia-main :is(.ia-boundary,.ia-conversion-band)>div>small{color:#11191c!important}
+html[data-experience='tech'] .ia-shell[data-page-theme][data-interaction-profile] .ia-main .ia-service-summary .ia-service-action .ia-service-action__copy :is(small,strong),
+html[data-experience='tech'] .ia-shell[data-page-theme][data-interaction-profile] .ia-main .ia-conversion-band>a.ia-route-band-action>span :is(small,strong){color:#11191c!important}
+/* The visit planner retains a dark surface in light mode too. */
+html[data-experience='tech'] .ia-shell[data-page-theme][data-interaction-profile] .ia-main .contact-visit-planner .contact-section-heading :is(small,em){color:#e4b675!important}
+
+@media(min-width:901px){
+  .ia-shell .nk-main-header-preview :is(.nk-unified-story__copy>p,.nk-unified-story__board b){color:#8a4329!important}
+  .ia-shell .nk-main-header-preview .nk-unified-story__board small{color:#43575c!important}
+  .ia-shell .nk-main-header-preview .nk-campaign-action.is-primary{background:#a13f28!important;color:#fff!important}
+  .ia-shell .nk-campaign-picker__name small{color:#7d4b27!important}
+}
+
+/* Compact metadata must remain at least 12px after route-specific overrides. */
+.ia-shell :is(
+  .system-page-art figcaption strong,.system-page-ornament span,
+  .contact-router-field>span,.contact-router-review span,
+  .quote-choice-grid button>span,.quote-field>span,.quote-builder>footer button,
+  .catalogue-product-card__copy>span,.about-story__index,.about-story__copy>span,
+  .about-story__facts article>span,.about-team__heading span,
+  .about-team__portrait figcaption,.about-team__filters button span,
+  .about-team__signal,.about-team__detail li span,.about-team__member-rail span,
+  .about-team__member-rail small,.about-history__header,.about-history__title>span,
+  .about-history__era-card small,.about-history__era-card>span,
+  .about-history__era-nav button>span,.lighting-temperature button,
+  .lighting-study__legend span,.automation-readout small,.security-plan__room,
+  .security-status small,.diagnostic-meter small,.installation-route small
+){font-size:12px!important;line-height:1.4!important}

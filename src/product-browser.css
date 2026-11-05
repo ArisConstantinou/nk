@@ -1,7 +1,7 @@
-/* Product grid with a compact preview that does not reflow the cards. */
+/* Expanded products participate in the grid; dense placement fills spare cells. */
 .product-browser-grid{
   align-items:start;
-  grid-auto-flow:row;
+  grid-auto-flow:row dense;
   overflow-anchor:none;
 }
 .electrical-main .product-browser-grid.product-grid{
@@ -20,16 +20,9 @@
   contain-intrinsic-size:auto 560px;
 }
 .product-browser-details{
-  position:fixed;
-  z-index:210;
-  top:calc(var(--site-header-height, var(--command-height, 90px)) + 16px);
-  right:clamp(16px,6vw,96px);
-  width:clamp(760px,56vw,960px);
-  max-height:calc(100dvh - var(--site-header-height,90px) - 32px);
-  overflow-y:auto;
-  overscroll-behavior:contain;
+  position:static;
+  grid-column:span 3;
   min-width:0;
-  box-shadow:0 18px 60px rgba(2,8,17,.3);
 }
 .product-browser-details.is-expanded{
   content-visibility:visible;
@@ -395,7 +388,7 @@
   border-bottom:1px solid rgba(242,189,115,.28);
 }
 .compact-filter-panel>header span{
-  color:#f2bd73;
+  color:var(--system-ink);
   font:800 12px/1.2 var(--mono);
   letter-spacing:.1em;
   text-transform:uppercase;
@@ -535,12 +528,12 @@
   .electrical-main .product-browser-grid.catalogue-product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media(max-width:980px){
-  .product-browser-details{width:min(760px,calc(100vw - 24px));right:12px}
   .electrical-main .product-browser-grid.product-grid,
   .electrical-main .product-browser-grid.catalogue-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .compact-filter-options{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:760px){
+  .product-browser-details{grid-column:span 2}
   .electrical-main .product-browser-grid.product-grid,
   .electrical-main .product-browser-grid.catalogue-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 9px}
   .product-expanded-module,
@@ -593,13 +586,14 @@
   .product-expanded-module__similar{margin-top:8px;padding-top:10px}
   .product-expanded-module__similar img{height:64px}
 }
-/* A compact preview leaves the product grid and page scroll position unchanged. */
+/* Keep image, specifications and actions together below the measured header. */
 @media(min-width:981px){
   .product-browser-details .product-expanded-module{
     height:min(560px,calc(100dvh - var(--site-header-height,90px) - 32px));
     padding:10px;gap:6px 12px;box-sizing:border-box;
     grid-template-columns:minmax(180px,.7fr) minmax(0,1.3fr);
-    grid-template-rows:auto auto auto auto minmax(80px,100px);
+    grid-template-rows:auto auto auto auto minmax(80px,1fr);
+    align-content:start;
   }
   .product-browser-details .product-expanded-module__media{grid-column:1;grid-row:1/5;min-height:0}
   .product-browser-details .product-expanded-module__visual{min-height:0}
@@ -619,7 +613,7 @@
   .product-browser-details .product-expanded-module dl{grid-column:2;grid-row:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
   .product-browser-details .product-expanded-module dl>div{display:flex;flex-direction:column;gap:4px;padding:4px 0;font-size:14px;line-height:1.3}
   .product-browser-details .product-expanded-module dt{font-size:12px}
-  .product-browser-details .product-expanded-module__actions{grid-column:2;grid-row:4;margin:0;gap:6px}
+  .product-browser-details .product-expanded-module__actions{grid-column:2;grid-row:4;margin:0;gap:6px;align-items:flex-start}
   .product-browser-details .product-expanded-module__similar{
     grid-column:1/-1;grid-row:5;min-height:0;margin:0;padding:6px 0 0;border-top:1px solid var(--system-line);
     display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px;
